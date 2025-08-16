@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</title>
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+<style>
+  body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
+  header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:25px;text-align:center;font-size:28px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:25px;padding:25px}
+  section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,.1)}
+  h2{margin-top:0;color:#4e73df;font-size:26px}
+  h2, header, label {
+      font-family: "Kanit", sans-serif;
+    }
+  /* ช่องเลือก 14 ช่อง: 2 คอลัมน์ x 7 แถว */
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .ts-wrapper.single .ts-control{min-height:40px;padding:6px 8px}
+  .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size: 16px !important}
+  .ts-wrapper .ts-control{border:1px solid #ccc;border-radius:6px}
+  .ts-dropdown{z-index:10} .option {font-size: 14px !important;}
+
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+  .row label{font-size:14px;color:#555}
+  .row input.simple{padding:10px 12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:140px;font-size:16px}
+
+  /* ปุ่มแอ็กชัน 2 ปุ่มในบรรทัดเดียวกัน */
+  .row-actions{display:flex;gap:12px;align-items:center;margin-top:6px}
+  .btn{
+    font-family: "Kanit", sans-serif; font-weight: 600;
+    display:inline-block; flex:1; text-align:center;
+    border:none; padding:16px 20px; border-radius:12px; cursor:pointer;
+    font-weight:800; font-size:18px; letter-spacing:.3px; transition:.15s; color:#fff
+  }
+  .btn--primary{background:#2e59d9; font-weight: 500;box-shadow:0 6px 16px rgba(46,89,217,.35)}
+  .btn--primary:hover{background:#1f4ac5; box-shadow:0 8px 18px rgba(31,74,197,.4)}
+  .btn--danger{background:#e74a3b;font-weight: 500; box-shadow:0 6px 16px rgba(231,74,59,.35)}
+  .btn--danger:hover{background:#c0392b; box-shadow:0 8px 18px rgba(192,57,43,.4)}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
+
+  .grid-results{display:flex;flex-direction:column;gap:16px;margin-top:10px}
+  @keyframes fadeSlideIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+
+  .result-card{
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px;
+    background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn .5s forwards
+  }
+  .result-card h3{margin:0 0 0px;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
+  .rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
+  .rank-2 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
+  .rank-3 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
+  .rank-4 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
+  .rank-5 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
+  .rank-6 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
+  .rank-7 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
+  .rank-8 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
+  .rank-9 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
+  .rank-10 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
+  .rank-11 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
+  .rank-12 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
+  .rank-13 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
+  .rank-14 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
+  .rank-15 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
+  .rank-16 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
+  .rank-17 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
+  .rank-18 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
+  .rank-19 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
+  .rank-20 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
+
+  .jewel-wrap{grid-column:1 / -1}
+  .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .jewel-column{
+    background:#f1f3f5;border-radius:10px;padding:4px;text-align:center;font-weight:600;font-size:16px;
+    line-height:1.0;min-height:32px;display:flex;align-items:center;justify-content:center;position:relative;cursor:default
+  }
+
+  .card-info{grid-column:1 / -1;background:#f7f7f8;border-radius:10px;padding:8px;font-size:14px}
+  .card-info p{margin:2px 0}
+  .not-matched-title{color:#e74a3b;font-weight:600;font-size:14px}
+  .extra-title{color:#1cc88a;font-weight:600;font-size:14px}
+
+  .jewel-column:hover::after{
+    content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight: 400;
+    background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;white-space:pre-line;font-size:12.5px;z-index:10;opacity:1;width:70%;line-height:1.4
+  }
+  .jewel-column::after{opacity:0;transition:.2s}
+
+  /* Loading overlay */
+  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999}
+  .overlay.show{display:flex}
+  .loader{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:18px 22px;min-width:260px;text-align:center}
+  .bar{height:8px;background:#e9ecef;border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4e73df,#1cc88a)}
+  .note{font-size:12px;color:#666;margin-top:6px}
+
+  /* Toast */
+  .toast{
+    position:fixed;left:50%;top:47%;transform:translateX(-50%);
+    background:#ffffff;color:#000000;padding:20px 28px;border-radius:10px;
+    box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:.25s ease;
+    z-index:1000;font-weight:700
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
+
+  @media (max-width:900px){
+    main{grid-template-columns:1fr}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+</style>
+</head>
+<body>
+<header>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</header>
+
+<div id="overlay" class="overlay">
+  <div class="loader">
+    <div><strong>กำลังคำนวณ/ดึงข้อมูล…</strong></div>
+    <div id="progressText" style="margin-top:6px">เตรียมข้อมูล…</div>
+    <div class="bar"><span id="progressBar"></span></div>
+  </div>
+</div>
+
+<!-- Toast (auto-dismiss) -->
+<div id="toast" class="toast">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มเลย!</div>
+
+<main>
+  <section>
+    <h2 style="margin-top:0;">🎯 เลือกความสามารถสูงสุด 14 อย่าง</h2>
+    <div id="desiredSelects" class="grid"></div>
+
+    <div class="row">
+      <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
+      <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" value="5">
+    </div>
+
+    <!-- ปุ่มคำนวณ (น้ำเงิน) + ปุ่มรีเซ็ต (แดง) ในบรรทัดเดียวกัน -->
+    <div class="row-actions">
+      <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
+      <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="resultTitle">💖 เซ็ตจี้ที่ดีที่สุด</h2>
+    <div id="result" class="grid-results"></div>
+  </section>
+</main>
+
+<script>
+/* ====== CONFIG (GViz only) ====== */
+const SHEET_ID = "1QYMUnTbalZ2gIGdVJiCwxLucc-e7d_nUustjy-7Ody4";
+const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
+/* ====== Constants ====== */
+const MAX_SELECTS = 14;
+
+/* ====== State/UI ====== */
+let jewels = [];
+let tomSelects = [];
+const overlay = document.getElementById('overlay');
+const progressText = document.getElementById('progressText');
+const progressBar = document.getElementById('progressBar');
+const calcBtn = document.getElementById('calcBtn');
+const topKInput = document.getElementById('topK');
+const toast = document.getElementById('toast');
+const resultTitle = document.getElementById('resultTitle');
+
+/* ====== Loading / Toast ====== */
+function showLoading(msg){ overlay.classList.add('show'); setProgress(10,msg||''); calcBtn.disabled=true; }
+function hideLoading(){ overlay.classList.remove('show'); calcBtn.disabled=false; }
+function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.textContent=msg; }
+function showToast(text, ms=3000){
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.add('hide'), ms-250);
+  setTimeout(()=> { toast.classList.remove('show','hide'); }, ms);
+}
+
+/* ====== Dropdowns (TomSelect + fallback) ====== */
+async function waitForTomSelect(maxMs=3000){
+  const t0 = performance.now();
+  while (typeof window.TomSelect !== 'function'){
+    if (performance.now()-t0 > maxMs) return false;
+    await new Promise(r=>setTimeout(r,50));
+  }
+  return true;
+}
+
+function makeNativeSelects(options=[]){
+  const wrap=document.getElementById('desiredSelects'); wrap.innerHTML='';
+  for(let i=0;i<MAX_SELECTS;i++){
+    const sel=document.createElement('select');
+    sel.id=`desired${i}`;
+    sel.style.minHeight='40px';
+    sel.style.border='1px solid #ccc';
+    sel.style.borderRadius='8px';
+    sel.style.padding='6px 8px';
+    const blank = document.createElement('option'); blank.value=''; blank.textContent='';
+    sel.appendChild(blank);
+    options.forEach(op=>{
+      const opt=document.createElement('option'); opt.value=op; opt.textContent=op; sel.appendChild(opt);
+    });
+    wrap.appendChild(sel);
+  }
+  tomSelects = []; // native mode
+}
+
+async function makeTomSelects(options=[]){
+  const ready = await waitForTomSelect();
+  const wrap=document.getElementById('desiredSelects'); wrap.innerHTML='';
+  for(let i=0;i<MAX_SELECTS;i++){
+    const sel=document.createElement('select');
+    sel.id=`desired${i}`;
+    sel.innerHTML = `<option value=""></option>` + options.map(s=>`<option value="${s}">${s}</option>`).join('');
+    wrap.appendChild(sel);
+  }
+  if(!ready){ makeNativeSelects(options); return; }
+  tomSelects = [];
+  for(let i=0;i<MAX_SELECTS;i++){
+    const sel = document.getElementById(`desired${i}`);
+    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true,placeholder:"--- เลือกความสามารถ ---"});
+    ts.on('change',val=>{
+      if(!val) return;
+      const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
+      if(others.includes(val)){ alert(`⚠️ "${val}" เลือกไปแล้ว กรุณาเลือกใหม่`); ts.clear(); }
+    });
+    tomSelects.push(ts);
+  }
+}
+
+function getDesired(){
+  if (tomSelects.length){
+    return tomSelects.map(ts=>ts.getValue()).filter(Boolean);
+  }else{
+    const wrap=document.getElementById('desiredSelects');
+    return [...wrap.querySelectorAll('select')].map(s=>s.value).filter(Boolean);
+  }
+}
+
+/* ====== Helpers ====== */
+function toNumber(val){
+  if(typeof val === 'number') return val;
+  const s = String(val ?? '').replace(/[, ]+/g,'').replace('%','');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+function normalizeByHeaders(rows){
+  // หัวคอลัมน์: ID, Substat1, Value1, Substat2, Value2, Substat3, Value3
+  return rows.map((r,i)=>{
+    const id = r["ID"] || `Jewel${i+1}`;
+    const substats=[];
+    if(r["Substat1"]) substats.push({name:String(r["Substat1"]).trim(), value: toNumber(r["Value1"])});
+    if(r["Substat2"]) substats.push({name:String(r["Substat2"]).trim(), value: toNumber(r["Value2"])});
+    if(r["Substat3"]) substats.push({name:String(r["Substat3"]).trim(), value: toNumber(r["Value3"])});
+    return { id, substats };
+  }).filter(j=>j.substats.length>0);
+}
+
+/* ====== GViz JSONP ====== */
+function fetchGVizJSONP(){
+  return new Promise((resolve, reject)=>{
+    const oldGoogle = window.google;
+    window.google = window.google || {};
+    window.google.visualization = window.google.visualization || {};
+    let done = false;
+
+    window.google.visualization.Query = {
+      setResponse: (payload)=>{
+        try{
+          if(!payload || !payload.table) throw new Error('GViz payload ว่าง');
+          const table = payload.table;
+          const cols = (table.cols||[]).map(c=> (c.label||c.id||'').toString().trim());
+          const rows = (table.rows||[]).map(r=>{
+            const obj={};
+            cols.forEach((label,idx)=>{
+              const cell = r.c[idx];
+              obj[label] = cell ? (cell.v ?? cell.f ?? '') : '';
+            });
+            return obj;
+          });
+          const data = normalizeByHeaders(rows);
+          done = true;
+          resolve(data);
+        }catch(err){
+          done = true;
+          reject(err);
+        }finally{
+          cleanup();
+        }
+      }
+    };
+
+    function cleanup(){
+      if(script && script.parentNode) script.parentNode.removeChild(script);
+      if(oldGoogle !== undefined) window.google = oldGoogle;
+    }
+
+    const script = document.createElement('script');
+    script.src = GVIZ_JSONP_URL + '&rand=' + Date.now();
+    script.onerror = ()=>{ if(!done){ done=true; cleanup(); reject(new Error('โหลดสคริปต์ GViz ไม่ได้')); } };
+    document.head.appendChild(script);
+
+    setTimeout(()=>{ if(!done){ done=true; cleanup(); reject(new Error('GViz timeout')); } }, 15000);
+  });
+}
+
+/* ====== Candidate / Worker ====== */
+const SPEED_CFG = { CANDIDATE_LIMIT: 4000000 };
+function buildCandidates(desired){
+  const bitIndex = new Map(desired.map((n,i)=>[n,i]));
+  return jewels.map(j=>{
+    let mask=0, score=0, otherNames=[];
+    for(const s of j.substats){
+      const idx=bitIndex.get(s.name);
+      if(idx!==undefined){ mask|=(1<<idx); score+=toNumber(s.value); }
+      else{ otherNames.push(s.name); }
+    }
+    return { id:j.id, mask, score, otherNames };
+  }).filter(m=>m.mask!==0)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0, SPEED_CFG.CANDIDATE_LIMIT);
+}
+
+const workerURL = URL.createObjectURL(new Blob([`
+self.onmessage = (e)=>{
+  const {desired, cand, topK} = e.data;
+  const desiredMaskAll = (1<<desired.length) - 1;
+  const n = cand.length;
+  const totalCombos = n*(n-1)*(n-2)*(n-3)/24;
+  let done=0, lastEmit=0;
+  const best=[];
+  const pushTop = (item)=>{
+    best.push(item);
+    best.sort((a,b)=> (a.notMiss-b.notMiss) || (b.extraCount-a.extraCount) || (b.totalValue-a.totalValue) );
+    if(best.length>topK) best.pop();
+  };
+  for(let a=0;a<n-3;a++){
+    for(let b=a+1;b<n-2;b++){
+      const maskAB=cand[a].mask|cand[b].mask; const scoreAB=cand[a].score+cand[b].score;
+      for(let c=b+1;c<n-1;c++){
+        const maskABC=maskAB|cand[c].mask; const scoreABC=scoreAB+cand[c].score;
+        for(let d=c+1; d<n; d++){
+          const mask=maskABC|cand[d].mask; const totalValue=scoreABC+cand[d].score;
+          const notMask = desiredMaskAll & (~mask);
+          let notMiss=0, notIdx=[];
+          for(let i=0;i<desired.length;i++){ if((notMask>>i)&1){ notMiss++; notIdx.push(i);} }
+          const setExtra = new Set();
+          cand[a].otherNames.forEach(x=>setExtra.add(x));
+          cand[b].otherNames.forEach(x=>setExtra.add(x));
+          cand[c].otherNames.forEach(x=>setExtra.add(x));
+          cand[d].otherNames.forEach(x=>setExtra.add(x));
+          const extraCount = setExtra.size;
+          pushTop({ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id],notMiss,notIdx,totalValue,extraCount});
+          done++; if(done-lastEmit>5000){ lastEmit=done; self.postMessage({type:'progress', p:Math.round(done/totalCombos*100) }); }
+        }
+      }
+    }
+  }
+  self.postMessage({type:'result', best});
+};
+`], {type:'application/javascript'}));
+const worker = new Worker(workerURL);
+
+/* ====== คำนวณ ====== */
+async function calculate(){
+  try{
+    showLoading('กำลังอัปเดตข้อมูลล่าสุด...');
+    jewels = await fetchGVizJSONP();
+
+    const desired=getDesired();
+    if(!desired || !desired.length){ hideLoading(); alert("⚠️ กรุณาเลือกความสามารถก่อน"); return; }
+    if(jewels.length<4){ hideLoading(); alert("ต้องมีจี้อย่างน้อย 4 ชิ้น"); return; }
+
+    let topK = parseInt((topKInput.value||'').trim(),10);
+    if(isNaN(topK)) topK = 5;
+    if(topK < 3) topK = 3;
+    if(topK > 20) topK = 20;
+    topKInput.value = String(topK);
+
+    const cand = buildCandidates(desired);
+    if(cand.length<4){ hideLoading(); alert("จี้ที่เข้าข่ายน้อยเกินไป"); return; }
+
+    resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK} อันดับ`;
+    setProgress(60,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
+    worker.postMessage({ desired, cand, topK });
+  }catch(err){
+    hideLoading();
+    alert("เกิดข้อผิดพลาดในการดึง/ประมวลผลข้อมูล:\n\n" + err.message);
+  }
+}
+
+worker.onmessage = (e)=>{
+  const msg=e.data;
+  if(msg.type==='progress'){
+    setProgress(60 + Math.round(msg.p*0.35), `กำลังประมวลผล… ${msg.p}%`);
+  }else if(msg.type==='result'){
+    renderResults(msg.best);
+    hideLoading();
+  }
+};
+
+/* ====== แสดงผล ====== */
+function renderResults(best){
+  const container=document.getElementById('result'); container.innerHTML='';
+  best.forEach((r,i)=>{
+    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.12}s`;
+    const group = r.ids.map(id => jewels.find(j=>j.id===id));
+    const desired = getDesired()||[];
+    const jewelCols = group.map(j=>{
+      const tooltip = j.substats.map(s=>{
+        const icon = desired.includes(s.name)?'✅':'✨';
+        return `${icon} ${s.name}: ${s.value}%`;
+      }).join('\n');
+      return `<div class="jewel-column" data-tooltip="${tooltip}">${j.id}</div>`;
+    }).join('');
+    const notList = desired.filter((_,idx)=> r.notIdx.includes(idx));
+    const allNames = new Set(); group.forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
+    const extra = [...allNames].filter(nm => !desired.includes(nm));
+    const notMatchHTML = notList.length ? `<span class="not-matched-title">🔴 ความสามารถที่หายไป:</span> ${notList.join(', ')}` : '';
+    const extraHTML = extra.length ? `<span class="extra-title">🟢 ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
+    card.innerHTML = `
+      <div style="grid-column:1 / -1"><h3>อันดับ ${i+1}</h3></div>
+      <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
+      <div class="card-info">
+        <p>${notMatchHTML}</p>
+        <p>${extraHTML}</p>
+        <p><strong>▸ คะแนนความเทพ = </strong> ${r.totalValue} คะแนน</p>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+/* ====== รีเซ็ตค่าทั้งหมด (ความสามารถ + ผลลัพธ์) ====== */
+function resetAll(){
+  // ล้างตัวเลือกความสามารถ
+  if (tomSelects.length){
+    tomSelects.forEach(ts=> ts.clear(true));
+  }else{
+    document.querySelectorAll('#desiredSelects select').forEach(s=> s.value='');
+  }
+  // ล้างผลลัพธ์
+  document.getElementById('result').innerHTML='';
+  resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
+  showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
+}
+
+/* ====== Bootstrap ====== */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
+  try{
+    const data = await fetchGVizJSONP();
+    jewels = data;
+    const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
+    await makeTomSelects(substats);
+    hideLoading();
+    showToast('✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มเลย!', 2000);
+  }catch(err){
+    hideLoading();
+    alert('ไม่สามารถโหลดข้อมูล ได้: ' + err.message + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
+    await makeTomSelects([]);
+  }
+});
+</script>
+</body>
+</html>
