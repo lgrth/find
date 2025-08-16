@@ -11,13 +11,12 @@
 
 <style>
   body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
-  header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:25px;text-align:center;font-size:28px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
+  header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:20px;text-align:center;font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
   main{display:grid;grid-template-columns:1fr 1fr;gap:25px;padding:25px}
   section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,.1)}
   h2{margin-top:0;color:#4e73df;font-size:26px}
-  h2, header, label {
-      font-family: "Kanit", sans-serif;
-    }
+  h2, header, label { font-family: "Kanit", sans-serif; }
+
   /* ช่องเลือก 14 ช่อง: 2 คอลัมน์ x 7 แถว */
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .ts-wrapper.single .ts-control{min-height:40px;padding:6px 8px}
@@ -48,7 +47,7 @@
 
   .result-card{
     display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px;
-    background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn .5s forwards
+    background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn 1s forwards
   }
   .result-card h3{margin:0 0 0px;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
   .rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
@@ -108,6 +107,18 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
 
+  /* Hint text */
+  .hint{
+    margin:8px 0 4px 0;
+    font-size:13.5px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
+  .hint--error{color:#b71c1c}
+  .hint--error .dot{background:#e74a3b}
+  .hint--ok{color:#166534}
+  .hint--ok .dot{background:#22c55e}
+
   @media (max-width:900px){
     main{grid-template-columns:1fr}
     .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -119,23 +130,29 @@
 
 <div id="overlay" class="overlay">
   <div class="loader">
-    <div><strong>กำลังคำนวณ/ดึงข้อมูล…</strong></div>
-    <div id="progressText" style="margin-top:6px">เตรียมข้อมูล…</div>
+    <div id="progressText" style="margin-top:6px">กำลังโหลดข้อมูล…</div>
     <div class="bar"><span id="progressBar"></span></div>
   </div>
 </div>
 
 <!-- Toast (auto-dismiss) -->
-<div id="toast" class="toast">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มเลย!</div>
+<div id="toast" class="toast">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!</div>
 
 <main>
   <section>
     <h2 style="margin-top:0;">🎯 เลือกความสามารถสูงสุด 14 อย่าง</h2>
+
+    <!-- ข้อความช่วยเตือนขั้นต่ำ -->
+    <div id="minHint" class="hint hint--error">
+      <span class="dot"></span>
+      <span>ต้องเลือกอย่างน้อย 4 อย่างก่อน (เลือกแล้ว 0/4)</span>
+    </div>
+
     <div id="desiredSelects" class="grid"></div>
 
     <div class="row">
       <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-      <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" value="5">
+      <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" value="">
     </div>
 
     <!-- ปุ่มคำนวณ (น้ำเงิน) + ปุ่มรีเซ็ต (แดง) ในบรรทัดเดียวกัน -->
@@ -158,6 +175,7 @@ const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/
 
 /* ====== Constants ====== */
 const MAX_SELECTS = 14;
+const MIN_SELECTS = 4; // ✅ บังคับขั้นต่ำ
 
 /* ====== State/UI ====== */
 let jewels = [];
@@ -169,10 +187,11 @@ const calcBtn = document.getElementById('calcBtn');
 const topKInput = document.getElementById('topK');
 const toast = document.getElementById('toast');
 const resultTitle = document.getElementById('resultTitle');
+const minHint = document.getElementById('minHint');
 
 /* ====== Loading / Toast ====== */
 function showLoading(msg){ overlay.classList.add('show'); setProgress(10,msg||''); calcBtn.disabled=true; }
-function hideLoading(){ overlay.classList.remove('show'); calcBtn.disabled=false; }
+function hideLoading(){ overlay.classList.remove('show'); updateCalcAvailability(); }
 function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.textContent=msg; }
 function showToast(text, ms=3000){
   toast.textContent = text;
@@ -191,6 +210,23 @@ async function waitForTomSelect(maxMs=3000){
   return true;
 }
 
+/* อัปเดตปุ่ม/ข้อความเตือนตามจำนวนที่เลือก */
+function updateCalcAvailability(){
+  const count = getDesired().length;
+  const need = Math.max(0, MIN_SELECTS - count);
+  if (count < MIN_SELECTS){
+    calcBtn.disabled = true;
+    minHint.classList.remove('hint--ok');
+    minHint.classList.add('hint--error');
+    minHint.innerHTML = `<span class="dot"></span><span>ต้องเลือกอย่างน้อย ${MIN_SELECTS} อย่างก่อน (เลือกแล้ว ${count}/${MIN_SELECTS})</span>`;
+  }else{
+    calcBtn.disabled = false;
+    minHint.classList.remove('hint--error');
+    minHint.classList.add('hint--ok');
+    minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาเซ็ตจี้แล้ว (เลือกแล้ว ${count} อย่าง)</span>`;
+  }
+}
+
 function makeNativeSelects(options=[]){
   const wrap=document.getElementById('desiredSelects'); wrap.innerHTML='';
   for(let i=0;i<MAX_SELECTS;i++){
@@ -205,9 +241,11 @@ function makeNativeSelects(options=[]){
     options.forEach(op=>{
       const opt=document.createElement('option'); opt.value=op; opt.textContent=op; sel.appendChild(opt);
     });
+    sel.addEventListener('change', updateCalcAvailability); // ผูกอีเวนต์
     wrap.appendChild(sel);
   }
   tomSelects = []; // native mode
+  updateCalcAvailability();
 }
 
 async function makeTomSelects(options=[]){
@@ -223,14 +261,16 @@ async function makeTomSelects(options=[]){
   tomSelects = [];
   for(let i=0;i<MAX_SELECTS;i++){
     const sel = document.getElementById(`desired${i}`);
-    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true,placeholder:"--- เลือกความสามารถ ---"});
+    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true});
     ts.on('change',val=>{
-      if(!val) return;
+      if(!val) { updateCalcAvailability(); return; }
       const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
       if(others.includes(val)){ alert(`⚠️ "${val}" เลือกไปแล้ว กรุณาเลือกใหม่`); ts.clear(); }
+      updateCalcAvailability();
     });
     tomSelects.push(ts);
   }
+  updateCalcAvailability();
 }
 
 function getDesired(){
@@ -368,13 +408,22 @@ const worker = new Worker(workerURL);
 
 /* ====== คำนวณ ====== */
 async function calculate(){
-  try{
-    showLoading('กำลังอัปเดตข้อมูลล่าสุด...');
-    jewels = await fetchGVizJSONP();
+  // ตรวจขั้นต่ำ: ไม่ดึงข้อมูล/ไม่คำนวณถ้าต่ำกว่า 4
+  const desired = getDesired();
+  if(!desired || desired.length < MIN_SELECTS){
+    alert(`⚠️ กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`);
+    return;
+  }
 
-    const desired=getDesired();
-    if(!desired || !desired.length){ hideLoading(); alert("⚠️ กรุณาเลือกความสามารถก่อน"); return; }
-    if(jewels.length<4){ hideLoading(); alert("ต้องมีจี้อย่างน้อย 4 ชิ้น"); return; }
+  try{
+    // ดึงข้อมูลเฉพาะเมื่อจำเป็น
+    if (!jewels || jewels.length === 0){
+      showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
+      jewels = await fetchGVizJSONP();
+      hideLoading();
+    }
+
+    if(jewels.length<4){ alert("ต้องมีจี้อย่างน้อย 4 ชิ้น"); return; }
 
     let topK = parseInt((topKInput.value||'').trim(),10);
     if(isNaN(topK)) topK = 5;
@@ -383,9 +432,10 @@ async function calculate(){
     topKInput.value = String(topK);
 
     const cand = buildCandidates(desired);
-    if(cand.length<4){ hideLoading(); alert("จี้ที่เข้าข่ายน้อยเกินไป"); return; }
+    if(cand.length<4){ alert("จี้ที่เข้าข่ายน้อยเกินไป"); return; }
 
     resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK} อันดับ`;
+    showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     setProgress(60,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
     worker.postMessage({ desired, cand, topK });
   }catch(err){
@@ -408,7 +458,7 @@ worker.onmessage = (e)=>{
 function renderResults(best){
   const container=document.getElementById('result'); container.innerHTML='';
   best.forEach((r,i)=>{
-    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.12}s`;
+    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.25}s`;
     const group = r.ids.map(id => jewels.find(j=>j.id===id));
     const desired = getDesired()||[];
     const jewelCols = group.map(j=>{
@@ -438,15 +488,14 @@ function renderResults(best){
 
 /* ====== รีเซ็ตค่าทั้งหมด (ความสามารถ + ผลลัพธ์) ====== */
 function resetAll(){
-  // ล้างตัวเลือกความสามารถ
   if (tomSelects.length){
     tomSelects.forEach(ts=> ts.clear(true));
   }else{
     document.querySelectorAll('#desiredSelects select').forEach(s=> s.value='');
   }
-  // ล้างผลลัพธ์
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
+  updateCalcAvailability(); // อัปเดตปุ่ม/ข้อความเตือน
   showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
 }
 
@@ -459,12 +508,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
     await makeTomSelects(substats);
     hideLoading();
-    showToast('✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มเลย!', 2000);
+    showToast('✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!', 2000);
   }catch(err){
     hideLoading();
     alert('ไม่สามารถโหลดข้อมูล ได้: ' + err.message + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
     await makeTomSelects([]);
   }
+  updateCalcAvailability(); // เช็กครั้งแรก
 });
 </script>
 </body>
