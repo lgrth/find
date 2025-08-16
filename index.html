@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
   body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
@@ -17,39 +17,41 @@
   h2{margin-top:0;color:#4e73df;font-size:26px}
   h2, header, label { font-family: "Kanit", sans-serif; }
 
-  /* ช่องเลือก 14 ช่อง: 2 คอลัมน์ x 7 แถว */
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .ts-wrapper.single .ts-control{min-height:40px;padding:6px 8px}
-  .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size: 16px !important}
+  .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size:16px !important}
   .ts-wrapper .ts-control{border:1px solid #ccc;border-radius:6px}
-  .ts-dropdown{z-index:10} .option {font-size: 14px !important;}
+  .ts-dropdown{z-index:10}
+  .option {font-size:14px !important;}
 
   .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
   .row label{font-size:14px;color:#555}
   .row input.simple{padding:10px 12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:140px;font-size:16px}
 
-  /* ปุ่มแอ็กชัน 2 ปุ่มในบรรทัดเดียวกัน */
+  .row-two-col{display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom: 10px;padding-top: 10px;}
+  .row-two-col > .col{flex:1;min-width:0}
+  .checkbox-lg{width:22px;height:22px;vertical-align:middle}
+
   .row-actions{display:flex;gap:12px;align-items:center;margin-top:6px}
   .btn{
-    font-family: "Kanit", sans-serif; font-weight: 600;
-    display:inline-block; flex:1; text-align:center;
-    border:none; padding:16px 20px; border-radius:12px; cursor:pointer;
-    font-weight:800; font-size:18px; letter-spacing:.3px; transition:.15s; color:#fff
+    font-family:"Kanit",sans-serif;font-weight:600;
+    display:inline-block;flex:1;text-align:center;
+    border:none;padding:16px 20px;border-radius:12px;cursor:pointer;
+    font-weight:800;font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff
   }
-  .btn--primary{background:#2e59d9; font-weight: 500;box-shadow:0 6px 16px rgba(46,89,217,.35)}
-  .btn--primary:hover{background:#1f4ac5; box-shadow:0 8px 18px rgba(31,74,197,.4)}
-  .btn--danger{background:#e74a3b;font-weight: 500; box-shadow:0 6px 16px rgba(231,74,59,.35)}
-  .btn--danger:hover{background:#c0392b; box-shadow:0 8px 18px rgba(192,57,43,.4)}
+  .btn--primary{background:#2e59d9;font-weight:500;box-shadow:0 6px 16px rgba(46,89,217,.35);font-size: 24px}
+  .btn--primary:hover{background:#1f4ac5;box-shadow:0 8px 18px rgba(31,74,197,.4)}
+  .btn--danger{background:#e74a3b;font-weight:500;box-shadow:0 6px 16px rgba(231,74,59,.35);font-size: 24px}
+  .btn--danger:hover{background:#c0392b;box-shadow:0 8px 18px rgba(192,57,43,.4)}
   .btn[disabled]{opacity:.6;cursor:not-allowed}
 
   .grid-results{display:flex;flex-direction:column;gap:16px;margin-top:10px}
   @keyframes fadeSlideIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
-
   .result-card{
     display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px;
     background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn 1s forwards
   }
-  .result-card h3{margin:0 0 0px;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
+  .result-card h3{margin:0;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
   .rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
   .rank-2 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
   .rank-3 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
@@ -84,12 +86,11 @@
   .extra-title{color:#1cc88a;font-weight:600;font-size:14px}
 
   .jewel-column:hover::after{
-    content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight: 400;
+    content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight:400;
     background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;white-space:pre-line;font-size:12.5px;z-index:10;opacity:1;width:70%;line-height:1.4
   }
   .jewel-column::after{opacity:0;transition:.2s}
 
-  /* Loading overlay */
   .overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999}
   .overlay.show{display:flex}
   .loader{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:18px 22px;min-width:260px;text-align:center}
@@ -97,7 +98,6 @@
   .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4e73df,#1cc88a)}
   .note{font-size:12px;color:#666;margin-top:6px}
 
-  /* Toast */
   .toast{
     position:fixed;left:50%;top:47%;transform:translateX(-50%);
     background:#ffffff;color:#000000;padding:20px 28px;border-radius:10px;
@@ -107,12 +107,7 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
 
-  /* Hint text */
-  .hint{
-    margin:8px 0 4px 0;
-    font-size:13.5px;
-    display:flex; align-items:center; gap:8px;
-  }
+  .hint{margin:8px 0 4px 0;font-size:13.5px;display:flex;align-items:center;gap:8px}
   .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
   .hint--error{color:#b71c1c}
   .hint--error .dot{background:#e74a3b}
@@ -122,6 +117,7 @@
   @media (max-width:900px){
     main{grid-template-columns:1fr}
     .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .row-two-col{flex-direction:column;align-items:flex-start}
   }
 </style>
 </head>
@@ -135,14 +131,12 @@
   </div>
 </div>
 
-<!-- Toast (auto-dismiss) -->
 <div id="toast" class="toast">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!</div>
 
 <main>
   <section>
     <h2 style="margin-top:0;">🎯 เลือกความสามารถสูงสุด 14 อย่าง</h2>
 
-    <!-- ข้อความช่วยเตือนขั้นต่ำ -->
     <div id="minHint" class="hint hint--error">
       <span class="dot"></span>
       <span>ต้องเลือกอย่างน้อย 4 อย่างก่อน (เลือกแล้ว 0/4)</span>
@@ -150,12 +144,20 @@
 
     <div id="desiredSelects" class="grid"></div>
 
-    <div class="row">
-      <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-      <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" value="">
+    <!-- 2 columns 1 row: จำนวนเซ็ต + เฉพาะ [ดาร์ค] -->
+    <div class="row-two-col">
+      <div class="col">
+        <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
+        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size:16px">
+      </div>
+      <div class="col">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" id="darkOnly" class="checkbox-lg">
+          แสดงผลเฉพาะจี้ <code style="background:#000000;color:white;border-radius:6px;padding:2px 6px;font-family: Kanit;font-size: 14px;">[ดาร์ค]</code>
+        </label>
+      </div>
     </div>
 
-    <!-- ปุ่มคำนวณ (น้ำเงิน) + ปุ่มรีเซ็ต (แดง) ในบรรทัดเดียวกัน -->
     <div class="row-actions">
       <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
       <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
@@ -169,17 +171,18 @@
 </main>
 
 <script>
-/* ====== CONFIG (GViz only) ====== */
 const SHEET_ID = "1QYMUnTbalZ2gIGdVJiCwxLucc-e7d_nUustjy-7Ody4";
 const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
-/* ====== Constants ====== */
 const MAX_SELECTS = 14;
-const MIN_SELECTS = 4; // ✅ บังคับขั้นต่ำ
+const MIN_SELECTS = 4;
+const DARK_PREFIX = "[ดาร์ค]";
 
-/* ====== State/UI ====== */
 let jewels = [];
+let jewelPool = [];
 let tomSelects = [];
+let worker = null; // ← จะสร้างหลัง DOMContentLoaded
+
 const overlay = document.getElementById('overlay');
 const progressText = document.getElementById('progressText');
 const progressBar = document.getElementById('progressBar');
@@ -188,8 +191,8 @@ const topKInput = document.getElementById('topK');
 const toast = document.getElementById('toast');
 const resultTitle = document.getElementById('resultTitle');
 const minHint = document.getElementById('minHint');
+const darkOnly = document.getElementById('darkOnly');
 
-/* ====== Loading / Toast ====== */
 function showLoading(msg){ overlay.classList.add('show'); setProgress(10,msg||''); calcBtn.disabled=true; }
 function hideLoading(){ overlay.classList.remove('show'); updateCalcAvailability(); }
 function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.textContent=msg; }
@@ -200,7 +203,6 @@ function showToast(text, ms=3000){
   setTimeout(()=> { toast.classList.remove('show','hide'); }, ms);
 }
 
-/* ====== Dropdowns (TomSelect + fallback) ====== */
 async function waitForTomSelect(maxMs=3000){
   const t0 = performance.now();
   while (typeof window.TomSelect !== 'function'){
@@ -210,10 +212,8 @@ async function waitForTomSelect(maxMs=3000){
   return true;
 }
 
-/* อัปเดตปุ่ม/ข้อความเตือนตามจำนวนที่เลือก */
 function updateCalcAvailability(){
   const count = getDesired().length;
-  const need = Math.max(0, MIN_SELECTS - count);
   if (count < MIN_SELECTS){
     calcBtn.disabled = true;
     minHint.classList.remove('hint--ok');
@@ -241,10 +241,10 @@ function makeNativeSelects(options=[]){
     options.forEach(op=>{
       const opt=document.createElement('option'); opt.value=op; opt.textContent=op; sel.appendChild(opt);
     });
-    sel.addEventListener('change', updateCalcAvailability); // ผูกอีเวนต์
+    sel.addEventListener('change', updateCalcAvailability);
     wrap.appendChild(sel);
   }
-  tomSelects = []; // native mode
+  tomSelects = [];
   updateCalcAvailability();
 }
 
@@ -282,17 +282,18 @@ function getDesired(){
   }
 }
 
-/* ====== Helpers ====== */
 function toNumber(val){
   if(typeof val === 'number') return val;
   const s = String(val ?? '').replace(/[, ]+/g,'').replace('%','');
   const n = parseFloat(s);
   return isNaN(n) ? 0 : n;
 }
+
+// Trim ID ตั้งแต่ต้น
 function normalizeByHeaders(rows){
-  // หัวคอลัมน์: ID, Substat1, Value1, Substat2, Value2, Substat3, Value3
   return rows.map((r,i)=>{
-    const id = r["ID"] || `Jewel${i+1}`;
+    const rawId = r["ID"];
+    const id = (rawId != null ? String(rawId) : `Jewel${i+1}`).trim();
     const substats=[];
     if(r["Substat1"]) substats.push({name:String(r["Substat1"]).trim(), value: toNumber(r["Value1"])});
     if(r["Substat2"]) substats.push({name:String(r["Substat2"]).trim(), value: toNumber(r["Value2"])});
@@ -301,7 +302,6 @@ function normalizeByHeaders(rows){
   }).filter(j=>j.substats.length>0);
 }
 
-/* ====== GViz JSONP ====== */
 function fetchGVizJSONP(){
   return new Promise((resolve, reject)=>{
     const oldGoogle = window.google;
@@ -349,11 +349,23 @@ function fetchGVizJSONP(){
   });
 }
 
-/* ====== Candidate / Worker ====== */
+// prefix checker
+function isDarkId(id){
+  return typeof id === 'string' && id.trim().startsWith(DARK_PREFIX);
+}
+
+function computeJewelPool(){
+  const useDarkOnly = !!darkOnly?.checked;
+  if(useDarkOnly){
+    return jewels.filter(j => isDarkId(j.id));
+  }
+  return jewels.slice();
+}
+
 const SPEED_CFG = { CANDIDATE_LIMIT: 4000000 };
-function buildCandidates(desired){
+function buildCandidates(desired, sourceJewels){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
-  return jewels.map(j=>{
+  return sourceJewels.map(j=>{
     let mask=0, score=0, otherNames=[];
     for(const s of j.substats){
       const idx=bitIndex.get(s.name);
@@ -366,49 +378,52 @@ function buildCandidates(desired){
     .slice(0, SPEED_CFG.CANDIDATE_LIMIT);
 }
 
-const workerURL = URL.createObjectURL(new Blob([`
-self.onmessage = (e)=>{
-  const {desired, cand, topK} = e.data;
-  const desiredMaskAll = (1<<desired.length) - 1;
-  const n = cand.length;
-  const totalCombos = n*(n-1)*(n-2)*(n-3)/24;
-  let done=0, lastEmit=0;
-  const best=[];
-  const pushTop = (item)=>{
-    best.push(item);
-    best.sort((a,b)=> (a.notMiss-b.notMiss) || (b.extraCount-a.extraCount) || (b.totalValue-a.totalValue) );
-    if(best.length>topK) best.pop();
-  };
-  for(let a=0;a<n-3;a++){
-    for(let b=a+1;b<n-2;b++){
-      const maskAB=cand[a].mask|cand[b].mask; const scoreAB=cand[a].score+cand[b].score;
-      for(let c=b+1;c<n-1;c++){
-        const maskABC=maskAB|cand[c].mask; const scoreABC=scoreAB+cand[c].score;
-        for(let d=c+1; d<n; d++){
-          const mask=maskABC|cand[d].mask; const totalValue=scoreABC+cand[d].score;
-          const notMask = desiredMaskAll & (~mask);
-          let notMiss=0, notIdx=[];
-          for(let i=0;i<desired.length;i++){ if((notMask>>i)&1){ notMiss++; notIdx.push(i);} }
-          const setExtra = new Set();
-          cand[a].otherNames.forEach(x=>setExtra.add(x));
-          cand[b].otherNames.forEach(x=>setExtra.add(x));
-          cand[c].otherNames.forEach(x=>setExtra.add(x));
-          cand[d].otherNames.forEach(x=>setExtra.add(x));
-          const extraCount = setExtra.size;
-          pushTop({ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id],notMiss,notIdx,totalValue,extraCount});
-          done++; if(done-lastEmit>5000){ lastEmit=done; self.postMessage({type:'progress', p:Math.round(done/totalCombos*100) }); }
+// ← สร้าง Worker หลัง DOMContentLoaded และใช้ ASCII ล้วน
+function createWorker(){
+  const workerCode = `
+    self.onmessage = (e) => {
+      const { desired, cand, topK } = e.data;
+      const desiredMaskAll = (1 << desired.length) - 1;
+      const n = cand.length;
+      const totalCombos = n * (n - 1) * (n - 2) * (n - 3) / 24;
+      let done = 0, lastEmit = 0;
+      const best = [];
+      const pushTop = (item) => {
+        best.push(item);
+        best.sort((a,b)=> (a.notMiss - b.notMiss) || (b.extraCount - a.extraCount) || (b.totalValue - a.totalValue) );
+        if (best.length > topK) best.pop();
+      };
+      for (let a = 0; a < n - 3; a++) {
+        for (let b = a + 1; b < n - 2; b++) {
+          const maskAB = cand[a].mask | cand[b].mask; const scoreAB = cand[a].score + cand[b].score;
+          for (let c = b + 1; c < n - 1; c++) {
+            const maskABC = maskAB | cand[c].mask; const scoreABC = scoreAB + cand[c].score;
+            for (let d = c + 1; d < n; d++) {
+              const mask = maskABC | cand[d].mask; const totalValue = scoreABC + cand[d].score;
+              const notMask = desiredMaskAll & (~mask);
+              let notMiss = 0, notIdx = [];
+              for (let i = 0; i < desired.length; i++) { if ((notMask >> i) & 1) { notMiss++; notIdx.push(i); } }
+              const setExtra = new Set();
+              cand[a].otherNames.forEach(x=>setExtra.add(x));
+              cand[b].otherNames.forEach(x=>setExtra.add(x));
+              cand[c].otherNames.forEach(x=>setExtra.add(x));
+              cand[d].otherNames.forEach(x=>setExtra.add(x));
+              const extraCount = setExtra.size;
+              pushTop({ ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id], notMiss, notIdx, totalValue, extraCount });
+              done++; if (done - lastEmit > 5000) { lastEmit = done; self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) }); }
+            }
+          }
         }
       }
-    }
-  }
-  self.postMessage({type:'result', best});
-};
-`], {type:'application/javascript'}));
-const worker = new Worker(workerURL);
+      self.postMessage({ type:'result', best });
+    };
+  `;
+  const url = URL.createObjectURL(new Blob([workerCode], {type:'application/javascript'}));
+  return new Worker(url);
+}
 
 /* ====== คำนวณ ====== */
 async function calculate(){
-  // ตรวจขั้นต่ำ: ไม่ดึงข้อมูล/ไม่คำนวณถ้าต่ำกว่า 4
   const desired = getDesired();
   if(!desired || desired.length < MIN_SELECTS){
     alert(`⚠️ กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`);
@@ -416,50 +431,50 @@ async function calculate(){
   }
 
   try{
-    // ดึงข้อมูลเฉพาะเมื่อจำเป็น
     if (!jewels || jewels.length === 0){
       showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
       jewels = await fetchGVizJSONP();
       hideLoading();
     }
 
-    if(jewels.length<4){ alert("ต้องมีจี้อย่างน้อย 4 ชิ้น"); return; }
+    jewelPool = computeJewelPool();
 
-    let topK = parseInt((topKInput.value||'').trim(),10);
+    if(jewelPool.length < 4){
+      const filterMsg = darkOnly.checked ? `ภายใต้การกรองชื่อขึ้นต้น "${DARK_PREFIX}"` : '';
+      alert(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`);
+      return;
+    }
+
+    let topK = parseInt((topKInput?.value || '').trim(),10);
     if(isNaN(topK)) topK = 5;
     if(topK < 3) topK = 3;
     if(topK > 20) topK = 20;
-    topKInput.value = String(topK);
+    if(topKInput) topKInput.value = String(topK);
 
-    const cand = buildCandidates(desired);
-    if(cand.length<4){ alert("จี้ที่เข้าข่ายน้อยเกินไป"); return; }
+    const cand = buildCandidates(desired, jewelPool);
+    if(cand.length<4){
+      alert("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้");
+      return;
+    }
 
     resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK} อันดับ`;
     showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     setProgress(60,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
+
+    // ส่งงานให้ worker
     worker.postMessage({ desired, cand, topK });
   }catch(err){
     hideLoading();
-    alert("เกิดข้อผิดพลาดในการดึง/ประมวลผลข้อมูล:\n\n" + err.message);
+    alert("เกิดข้อผิดพลาดในการดึง/ประมวลผลข้อมูล:\n\n" + (err?.message || err));
   }
 }
 
-worker.onmessage = (e)=>{
-  const msg=e.data;
-  if(msg.type==='progress'){
-    setProgress(60 + Math.round(msg.p*0.35), `กำลังประมวลผล… ${msg.p}%`);
-  }else if(msg.type==='result'){
-    renderResults(msg.best);
-    hideLoading();
-  }
-};
-
-/* ====== แสดงผล ====== */
 function renderResults(best){
   const container=document.getElementById('result'); container.innerHTML='';
+  const pool = (jewelPool && jewelPool.length) ? jewelPool : jewels;
   best.forEach((r,i)=>{
     const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.25}s`;
-    const group = r.ids.map(id => jewels.find(j=>j.id===id));
+    const group = r.ids.map(id => pool.find(j=>j.id===id));
     const desired = getDesired()||[];
     const jewelCols = group.map(j=>{
       const tooltip = j.substats.map(s=>{
@@ -467,54 +482,77 @@ function renderResults(best){
         return `${icon} ${s.name}: ${s.value}%`;
       }).join('\n');
       return `<div class="jewel-column" data-tooltip="${tooltip}">${j.id}</div>`;
-    }).join('');
+    }).filter(Boolean).join('');
     const notList = desired.filter((_,idx)=> r.notIdx.includes(idx));
-    const allNames = new Set(); group.forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
+    const allNames = new Set(); group.filter(Boolean).forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
     const extra = [...allNames].filter(nm => !desired.includes(nm));
     const notMatchHTML = notList.length ? `<span class="not-matched-title">🔴 ความสามารถที่หายไป:</span> ${notList.join(', ')}` : '';
     const extraHTML = extra.length ? `<span class="extra-title">🟢 ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
+    const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
     card.innerHTML = `
       <div style="grid-column:1 / -1"><h3>อันดับ ${i+1}</h3></div>
       <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
       <div class="card-info">
         <p>${notMatchHTML}</p>
         <p>${extraHTML}</p>
-        <p><strong>▸ คะแนนความเทพ = </strong> ${r.totalValue} คะแนน</p>
+        <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-/* ====== รีเซ็ตค่าทั้งหมด (ความสามารถ + ผลลัพธ์) ====== */
 function resetAll(){
   if (tomSelects.length){
     tomSelects.forEach(ts=> ts.clear(true));
   }else{
     document.querySelectorAll('#desiredSelects select').forEach(s=> s.value='');
   }
+  if (darkOnly) darkOnly.checked = false;
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
-  updateCalcAvailability(); // อัปเดตปุ่ม/ข้อความเตือน
+  updateCalcAvailability();
   showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
 }
 
-/* ====== Bootstrap ====== */
+darkOnly?.addEventListener('change', ()=>{
+  document.getElementById('result').innerHTML='';
+  resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
+});
+
 document.addEventListener('DOMContentLoaded', async ()=>{
-  showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
   try{
-    const data = await fetchGVizJSONP();
-    jewels = data;
+    showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
+    jewels = await fetchGVizJSONP();
     const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
+
+    // ✅ ถ้าไม่มี substats ก็ยังสร้าง dropdown ว่างไว้ ไม่ให้ "หาย"
     await makeTomSelects(substats);
     hideLoading();
-    showToast('✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!', 2000);
+    showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
+                               'ℹ️ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+
   }catch(err){
     hideLoading();
-    alert('ไม่สามารถโหลดข้อมูล ได้: ' + err.message + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
+    console.warn('Fetch error:', err);
+    alert('ไม่สามารถโหลดข้อมูล ได้: ' + (err?.message || err) + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
+    // ✅ อย่างน้อยสร้าง dropdown ว่างเพื่อไม่ให้ผู้ใช้เห็นว่า "หาย"
     await makeTomSelects([]);
   }
-  updateCalcAvailability(); // เช็กครั้งแรก
+
+  // ✅ สร้าง worker ตอนนี้ (หลีกเลี่ยง parse-time issues)
+  worker = createWorker();
+  worker.onmessage = (e)=>{
+    const msg=e.data;
+    if(msg.type==='progress'){
+      setProgress(60 + Math.round(msg.p*0.35), `กำลังประมวลผล… ${msg.p}%`);
+    }else if(msg.type==='result'){
+      renderResults(msg.best);
+      hideLoading();
+    }
+  };
+
+  updateCalcAvailability();
 });
 </script>
 </body>
