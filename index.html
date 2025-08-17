@@ -18,7 +18,7 @@
     line-height: 1.5;
   }
   body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
-  header{background:linear-gradient(180deg,#1b3ca0,#1b3ca0);color:#fff;padding:20px;text-align:center;font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
+  header{background:linear-gradient(180deg,#1b3ca0,#0f245b);color:#fff;padding:20px;text-align:center;font-size:32px;font-weight:700;line-height:1.25;box-shadow:0 6px 14px rgba(0,0,0,.16);position:fixed;left:0;right:0;top:0;z-index:1200;}
 
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
@@ -175,20 +175,13 @@
 
   .jewel-wrap{grid-column:1 / -1}
   .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .jewel-column{
-    background:#f1f3f5;border-radius:10px;padding:4px;text-align:center;font-weight:600;font-size:16px;
-    line-height:1.0;min-height:32px;display:flex;align-items:center;justify-content:center;position:relative;cursor:default
-  }
 
   .card-info{grid-column:1 / -1;background:#f7f7f8;border-radius:10px;padding:8px;font-size:14px}
   .card-info p{margin:2px 0}
   .not-matched-title{color:#e74a3b;font-weight:600;font-size:14px}
   .extra-title{color:#3730a3;font-weight:600;font-size:14px}
 
-  .jewel-column:hover::after{
-    content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight:400;
-    background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;white-space:pre-line;font-size:12.5px;z-index:10;opacity:1;width:70%;line-height:1.4
-  }
+  
   .jewel-column::after{opacity:0;transition:.2s}
 
   .overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999}
@@ -202,7 +195,7 @@
     position:fixed;left:50%;top:47%;transform:translateX(-50%);
     background:#ffffff;color:#000000;padding:20px 28px;border-radius:10px;
     box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:.25s ease;
-    z-index:1000;font-weight:700
+    z-index: 1200;font-weight:700
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
@@ -224,7 +217,7 @@
     .result-card{grid-template-columns:1fr}
   }
   @media (max-width:768px){
-    header{font-size:clamp(20px,5.5vw,28px);padding:16px}
+    header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
     h2{font-size:clamp(18px,4.5vw,22px)}
     .grid{grid-template-columns:1fr}
     .jewel-columns{grid-template-columns:1fr 1fr;gap:6px}
@@ -240,7 +233,7 @@
 
   /* ปิด hover-tooltip บนอุปกรณ์สัมผัส */
   @media (hover:none){
-    .jewel-column:hover::after{display:none}
+    
   }
 
   /* Reduce Motion => ต้องเห็นการ์ดแน่ ๆ */
@@ -254,10 +247,178 @@
     select.mobile-hidden,
     .ts-wrapper.mobile-hidden{ display:none !important; }
   }
+
+/* ==== UX/UI Enhancements (Aug 2025) ==== */
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
+.brand-title{font-size:32px;font-weight:700}
+.brand-subtitle{font-size:14px;opacity:.9}
+
+.steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
+.steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:4px 10px;font-size:13px;color:#fff;}
+.steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1f4ac5;color:#fff;font-weight:700;font-size:12px}
+
+.input-help{font-size:12px;color:#475569;margin-top:6px}
+#topK.simple{width:100px !important}
+.is-valid{border-color:#16a34a!important; box-shadow:0 0 0 3px rgba(22,163,74,.15)!important}
+.is-invalid{border-color:#dc2626!important; box-shadow:0 0 0 3px rgba(220,38,38,.12)!important}
+
+.badge-neutral{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;font-weight:600}
+
+.btn{font-weight:700} /* ลดจาก 800 -> 700 */
+.btn:focus-visible{outline:3px solid #7aa2ff; outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+}
+
+.spinner{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;animation:spin .8s linear infinite;margin-right:8px;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.overlay .bar span{transition:width .45s cubic-bezier(.22,.61,.36,1)} /* ease-out */
+
+.result-card{border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 6px rgba(0,0,0,.08), 0 12px 20px rgba(0,0,0,.08)}
+.result-card h3{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);background-image:linear-gradient(0deg, rgba(255,255,255,.06), rgba(255,255,255,0))}
+
+.row-ability{margin:.25rem 0;padding:.25rem .5rem;border-radius:8px}
+.row-ability.row-miss{background:#fff1f2;border:1px solid #fecdd3}
+.row-ability.row-extra{background:#ecfeff;border:1px solid #bae6fd}
+
+.btn-copy{margin-top:8px;display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"Kanit",sans-serif;font-weight:600}
+.btn-copy:hover{background:#eef2f7}
+
+.result-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+/* lighten badge contrasts a bit */
+.badge{border-radius:999px;padding:4px 10px;font-weight:600}
+.badge--match{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.badge--not{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
+.badge--extra{background:#fdf4ff;color:#4a044e;border:1px solid #f5d0fe}
+
+/* Tooltips stay readable */
+[data-tooltip]{position:relative}
+
+
+
+
+/* Icon copy button (small/ghost) */
+.btn-copy{
+  background:transparent;border:1px solid transparent;border-radius:10px;
+  padding:6px;line-height:0;color:#334155;cursor:pointer;
+}
+.btn-copy:hover{background:#f1f5f9;border-color:#e2e8f0}
+.btn-copy:focus-visible{outline:2px solid #7aa2ff; outline-offset:2px}
+
+/* --- Fixed header & steps in header --- */
+:root{ --header-h: 0px; }
+body{ padding-top: var(--header-h); }
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+header .brand{ padding-top:6px; }
+.steps-in-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+@media (max-width:640px){
+  .steps-in-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+  .steps-in-header li{ font-size:12px; padding:6px 8px }
+  .brand-title{ font-size:26px }
+}
+
+
+/* Improve readability of steps in fixed header */
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+.steps-in-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+.steps-inline li{margin:0 6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
+.steps-inline .step-index{
+  background:#ffffff !important;
+  color:#1f4ac5 !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.18);
+}
+@media (max-width:640px){
+  .steps-inline li{margin:0 6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
+}
+
+
+
+
+
+
+
+
+/* Body-level tooltip to avoid stacking/overflow issues */
+.jewel-tooltip{
+  position: fixed;
+  top: 0; left: 0;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  background: #0b1020;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 360px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.32);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .12s ease;
+  white-space: pre-line;
+}
+.jewel-tooltip.show{ opacity: 1; }
+
+
+/* Brand title in header */
+.brand{display:flex;flex-direction:column;gap:4px;align-items:center}
+.brand-title{font-size:32px;font-weight:700;color:#fff}
+.steps-in-header{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:8px}
+.steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 10px;font-size:13px;color:#fff}
+.steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#fff;color:#1f4ac5;font-weight:700;font-size:12px}
+
+
+/* Ensure brand title shows above steps inside header */
+.brand-title{margin:0 0 8px 0; font-size:32px; font-weight:700; color:#fff}
+.steps-in-header{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:0}
+.steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#fff;color:#1f4ac5;font-weight:700;font-size:12px}
+.steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 10px;font-size:13px;color:#fff}
+
+
+/* Non-sticky steps bar under header */
+.steps-bar{display:flex;justify-content:center;padding:8px 0 0 0;background:transparent;box-shadow:none;}
+.steps-bar .steps-inline{
+  display:flex; flex-wrap:wrap; gap:10px; margin:0; padding:0; list-style:none;
+}
+/* Reuse capsule style already defined for .steps-inline li & .step-index */
+
+
+/* Steps-bar on light background: softer capsules */
+.steps-bar .steps-inline{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0;list-style:none}
+.steps-bar .steps-inline li{
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+  color:#334155;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+  display:flex;align-items:center;gap:8px;
+}
+.steps-bar .step-index{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;
+  background:#1f4ac5;color:#fff;font-weight:700;font-size:12px;
+}
+
 </style>
+
 </head>
 <body>
-<header>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</header>
+<header>
+  <div class="brand">
+    <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
+  </div>
+  </header>
+<div class="steps-bar" role="navigation" aria-label="ขั้นตอนการใช้งาน">
+  <ol class="steps-inline">
+    <li><span class="step-index">1</span> เลือกความสามารถที่ต้องการ (สูงสุด 14)</li>
+    <li><span class="step-index">2</span> ใส่จำนวนอันดับที่ต้องการ (3–20)</li>
+    <li><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
+  </ol>
+</div>
 
 <div id="overlay" class="overlay" aria-hidden="true" aria-busy="false">
   <div class="loader">
@@ -275,9 +436,10 @@
       <span id="selectedCounter" class="sel-counter">เลือกแล้ว 0/14</span>
     </h2>
 
+    
+    
     <div id="minHint" class="hint hint--error">
-      <span class="dot"></span>
-      <span>ต้องเลือกอย่างน้อย 4 อย่างก่อน</span>
+
     </div>
 
     <div id="desiredSelects" class="grid"></div>
@@ -287,11 +449,12 @@
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
         <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size: 18px;font-family: Kanit;">
+    
       </div>
       <div class="col">
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;min-height:44px">
           <input type="checkbox" id="darkOnly" class="checkbox-lg" aria-label="แสดงเฉพาะจี้ดาร์ค">
-          <span>แสดงผลเฉพาะจี้ <code style="background:#000000;color:white;border-radius:6px;padding:2px 6px;font-family: Kanit;font-size: 14px;">[ดาร์ค]</code></span>
+          <span>แสดงผลเฉพาะจี้ <span class="badge-neutral" title="แสดงเฉพาะจี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค]</span></span>
         </label>
       </div>
     </div>
@@ -339,20 +502,40 @@ const minHint = document.getElementById('minHint');
 const darkOnly = document.getElementById('darkOnly');
 const selectedCounter = document.getElementById('selectedCounter');
 
+
 function showLoading(msg){
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
   overlay.setAttribute('aria-busy','true');
   setProgress(10,msg||'');
-  calcBtn.disabled=true;
-  calcBtn2.disabled=true;
+
+  const setBusy = (btn)=>{
+    if(!btn) return;
+    if(!btn.dataset.original){ btn.dataset.original = btn.innerHTML; }
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> กำลังคำนวณ…';
+    btn.setAttribute('aria-live','assertive');
+  };
+  setBusy(calcBtn);
+  setBusy(calcBtn2);
 }
+    
+
 function hideLoading(){
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden','true');
   overlay.setAttribute('aria-busy','false');
+  const unsetBusy = (btn)=>{
+    if(!btn) return;
+    btn.disabled = false;
+    if(btn.dataset.original){ btn.innerHTML = btn.dataset.original; }
+    btn.removeAttribute('aria-live');
+  };
+  unsetBusy(calcBtn);
+  unsetBusy(calcBtn2);
   updateCalcAvailability();
 }
+    
 function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.textContent=msg; }
 function showToast(text, ms=3000){
   toast.textContent = text;
@@ -378,7 +561,7 @@ function updateCalcAvailability(){
     calcBtn2.disabled = true;
     minHint.classList.remove('hint--ok');
     minHint.classList.add('hint--error');
-    minHint.innerHTML = `<span class="dot"></span><span>ต้องเลือกอย่างน้อย ${MIN_SELECTS} อย่างก่อน</span>`;
+    minHint.innerHTML = `<span class="dot"></span><span>เลือกอีก ${MIN_SELECTS - count} อย่างเพื่อเริ่มค้นหา (ขั้นต่ำ ${MIN_SELECTS} ความสามารถ)</span>`;
   }else{
     calcBtn.disabled = false;
     calcBtn2.disabled = false;
@@ -430,7 +613,7 @@ async function makeTomSelects(options=[]){
   tomSelects = [];
   for(let i=0;i<MAX_SELECTS;i++){
     const sel = document.getElementById(`desired${i}`);
-    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true});
+    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true,placeholder:'พิมพ์เพื่อค้นหา…',plugins:{clear_button:{title:'ลบค่า'}}});
     ts.on('change',val=>{
       if(!val) { updateCalcAvailability(); ensureMobileCascade(); return; }
       const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
@@ -716,22 +899,16 @@ function renderResults(best){
     const extra = [...allNames].filter(nm => !desired.includes(nm));
     const matchedCount = desired.length - notList.length;
 
+    
     const badgesHTML = `
       <div class="badges" aria-label="สรุปความตรงใจ">
-        <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">
-          ✅ ตรงเป๊ะ ${matchedCount}
-        </span>
-        <span class="badge badge--miss" title="ความสามารถที่เลือกไว้แต่ยังไม่ครอบคลุม">
-          🔴 ไม่ตรง ${notList.length}
-        </span>
-        <span class="badge badge--extra" title="ความสามารถอื่น ๆ ที่ติดมาด้วย">
-          ✨ เพิ่มเข้ามา ${extra.length}
-        </span>
-      </div>
-    `;
-
-    const notMatchHTML = notList.length ? `<span class="not-matched-title">🔴 ความสามารถที่หายไป:</span> ${notList.join(', ')}` : '';
-    const extraHTML = extra.length ? `<span class="extra-title">✨ ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
+        <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">✅ ตรงใจ ${matchedCount}</span>
+        <span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 ไม่ตรงใจ ${notList.length}</span>
+        <span class="badge badge--extra" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">✨ ส่วนเกิน ${extra.length}</span>
+      </div>`;
+    
+    const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong>ขาด:</strong> ${notList.join(', ')}</div>` : '';
+    const extraHTML = extra.length ? `<div class="row-ability row-extra"><strong>ได้เพิ่ม:</strong> ${extra.join(', ')}</div>` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
 
     const headerHTML = `
@@ -751,6 +928,21 @@ card.innerHTML = `
   </div>
 `;
 
+    // เพิ่มปุ่มคัดลอกชื่อจี้ 4 ชิ้น (ไอคอนเล็ก)
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn-copy';
+    const names = group.map(j=>j?.id).filter(Boolean);
+    copyBtn.setAttribute('type','button');
+    copyBtn.setAttribute('title','คัดลอกชื่อจี้ทั้ง 4');
+    copyBtn.setAttribute('aria-label','คัดลอกชื่อจี้ทั้ง 4');
+    copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
+    copyBtn.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(names.join(', ')).then(()=>{
+        showToast('✅ คัดลอกชื่อจี้แล้ว');
+      });
+    });
+    const head = card.querySelector('.card-head');
+    if(head){ head.appendChild(copyBtn); } else { card.appendChild(copyBtn); }
     container.appendChild(card);
   });
 
@@ -838,5 +1030,124 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   updateCalcAvailability();
 });
 </script>
+
+<script>
+// Inline validation for topK (3-20)
+(function(){
+  const inp = document.getElementById('topK');
+  const help = document.getElementById('topKHelp');
+  if(!inp || !help) return;
+  const validate = ()=>{
+    const v = Number(inp.value);
+    if(!inp.value){
+      inp.classList.remove('is-valid','is-invalid');
+      return;
+    }
+    if(v>=3 && v<=20){
+      inp.classList.add('is-valid');
+      inp.classList.remove('is-invalid');
+      help.textContent = 'อยู่ในช่วง 3–20 พร้อมคำนวณ';
+    }else{
+      inp.classList.add('is-invalid');
+      inp.classList.remove('is-valid');
+      help.textContent = 'ใส่ค่าระหว่าง 3–20 เท่านั้น';
+    }
+  };
+  inp.addEventListener('input', validate);
+  validate();
+})();
+</script>
+<script>
+// Inline validation for topK (3-20)
+(function(){
+  const inp = document.getElementById('topK');
+  const help = document.getElementById('topKHelp');
+  if(!inp || !help) return;
+  const validate = ()=>{
+    const v = Number(inp.value);
+    if(!inp.value){
+      inp.classList.remove('is-valid','is-invalid');
+      return;
+    }
+    if(v>=3 && v<=20){
+      inp.classList.add('is-valid');
+      inp.classList.remove('is-invalid');
+      help.textContent = 'อยู่ในช่วง 3–20 พร้อมคำนวณ';
+    } else {
+      inp.classList.add('is-invalid');
+      inp.classList.remove('is-valid');
+      help.textContent = 'ใส่ค่าระหว่าง 3–20 เท่านั้น';
+    }
+  };
+  inp.addEventListener('input', validate);
+  validate();
+})();
+</script>
+<script>
+(function(){
+  function setHeaderOffset(){
+    const h = document.querySelector('header');
+    if(!h) return;
+    const px = Math.round(h.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--header-h', px + 'px');
+  }
+  window.addEventListener('load', setHeaderOffset, {once:true});
+  window.addEventListener('resize', setHeaderOffset);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(setHeaderOffset); }
+  setTimeout(setHeaderOffset, 250);
+})();
+</script>
+
+<script>
+(function(){
+  const tip = document.createElement('div');
+  tip.className = 'jewel-tooltip';
+  document.body.appendChild(tip);
+
+  function showTip(el){
+    const txt = el.getAttribute('data-tooltip');
+    if(!txt) return;
+    tip.textContent = txt;
+    tip.classList.add('show');
+    positionTip(el);
+  }
+  function hideTip(){ tip.classList.remove('show'); }
+  function positionTip(el){
+    const r = el.getBoundingClientRect();
+    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    const tipRect = tip.getBoundingClientRect();
+    let cx = r.left + r.width/2;
+    let x = Math.min(Math.max(cx, 8 + tipRect.width/2), vw - 8 - tipRect.width/2);
+    let y = r.top - 8; // show above element
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function bind(el){
+    el.addEventListener('mouseenter', ()=>showTip(el));
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('mousemove', ()=>positionTip(el));
+    el.addEventListener('touchstart', ()=>showTip(el), {passive:true});
+    el.addEventListener('touchend', hideTip, {passive:true});
+  }
+  function init(){
+    document.querySelectorAll('.jewel-column[data-tooltip]').forEach(bind);
+  }
+  if(document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+
+  // Observe future renders
+  const obs = new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      m.addedNodes && m.addedNodes.forEach(n=>{
+        if(n.nodeType!==1) return;
+        if(n.matches && n.matches('.jewel-column[data-tooltip]')) bind(n);
+        n.querySelectorAll && n.querySelectorAll('.jewel-column[data-tooltip]').forEach(bind);
+      });
+    });
+  });
+  obs.observe(document.body, {childList:true, subtree:true});
+})();
+</script>
+
 </body>
 </html>
