@@ -194,6 +194,11 @@ h2, header, label { font-family:"Kanit",sans-serif }
   .toast{ transition:none }
 }
 
+/* Progressive reveal: ซ่อนเฉพาะบนมือถือ */
+@media (max-width: 768px){
+  select.mobile-hidden { display: none; }
+}
+
 </style>
 </head>
 
@@ -313,17 +318,30 @@ function makeNativeSelects(options=[]){
     sel.style.border='1px solid #ccc';
     sel.style.borderRadius='8px';
     sel.style.padding='6px 8px';
+
     const blank = document.createElement('option'); blank.value=''; blank.textContent='';
     sel.appendChild(blank);
     options.forEach(op=>{
       const opt=document.createElement('option'); opt.value=op; opt.textContent=op; sel.appendChild(opt);
     });
-    sel.addEventListener('change', updateCalcAvailability);
+
+    // เมื่อเปลี่ยนค่า ให้ปลดล็อกช่องถัดไป (มือถือ)
+    sel.addEventListener('change', ()=>{
+      updateCalcAvailability();
+      const idx = i;
+      maybeRevealNext(idx);
+    });
+
     wrap.appendChild(sel);
   }
   tomSelects = [];
+
+  // Progressive mobile visibility
+  applyMobileProgressiveVisibility();
+
   updateCalcAvailability();
 }
+
 
 async function makeTomSelects(options=[]){
   const ready = await waitForTomSelect();
@@ -344,11 +362,17 @@ async function makeTomSelects(options=[]){
       const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
       if(others.includes(val)){ alert(`⚠️ "${val}" เลือกไปแล้ว กรุณาเลือกใหม่`); ts.clear(); }
       updateCalcAvailability();
+      maybeRevealNext(i); // ← ปลดล็อกช่องถัดไปบนมือถือเมื่อเลือกแล้ว
     });
     tomSelects.push(ts);
   }
+
+  // Progressive mobile visibility
+  applyMobileProgressiveVisibility();
+
   updateCalcAvailability();
 }
+
 
 function getDesired(){
   if (tomSelects.length){
@@ -582,7 +606,6 @@ function renderResults(best){
   });
 }
 
-/* ✅ resetAll แบบใหม่: ล้างช่องจำนวนเซ็ตกลับเป็น placeholder 3-20 */
 function resetAll(){
   if (tomSelects.length){
     tomSelects.forEach(ts=> ts.clear(true));
@@ -592,15 +615,18 @@ function resetAll(){
   if (darkOnly) darkOnly.checked = false;
 
   // ล้างค่าช่องจำนวนเซ็ต -> ให้แสดง placeholder
-  if (topKInput){
-    topKInput.value = '';
-  }
+  if (topKInput){ topKInput.value = ''; }
 
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
+
+  // 👇 ทำให้มือถือกลับไปเริ่มต้นที่ 4 ช่องแรก
+  applyMobileProgressiveVisibility();
+
   updateCalcAvailability();
   showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
 }
+
 
 /* ✅ แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
 function enableTouchTooltips(){
@@ -619,6 +645,52 @@ darkOnly?.addEventListener('change', ()=>{
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
 });
+
+// ===== Progressive selects on mobile =====
+const START_VISIBLE_MOBILE = 4;
+function isMobileProgressive(){
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+
+/** ซ่อน/แสดงช่องตามโหมด progressive สำหรับมือถือ */
+function applyMobileProgressiveVisibility(){
+  const mobile = isMobileProgressive();
+  for (let i = 0; i < MAX_SELECTS; i++){
+    const el = document.getElementById(`desired${i}`);
+    if (!el) continue;
+    if (mobile){
+      // มือถือ: แสดง 0..3 (รวม 4 ช่องแรก), ที่เหลือซ่อนไว้ก่อน
+      if (i >= START_VISIBLE_MOBILE) el.classList.add('mobile-hidden');
+      else el.classList.remove('mobile-hidden');
+    }else{
+      // เดสก์ท็อป/แท็บเล็ตใหญ่: แสดงทั้งหมด
+      el.classList.remove('mobile-hidden');
+    }
+  }
+}
+
+/** ถ้าช่อง index นี้ถูกเลือกค่าแล้ว ให้ "ปลดล็อก" ช่องถัดไปบนมือถือ */
+function maybeRevealNext(index){
+  if (!isMobileProgressive()) return;
+
+  // อ่านค่าตามประเภท select (TomSelect หรือ native)
+  let val = '';
+  if (tomSelects.length){
+    const ts = tomSelects[index];
+    if (ts) val = ts.getValue();
+  }else{
+    const el = document.getElementById(`desired${index}`);
+    if (el) val = el.value;
+  }
+
+  if (val){
+    const next = document.getElementById(`desired${index+1}`);
+    if (next){
+      next.classList.remove('mobile-hidden');
+    }
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   try{
