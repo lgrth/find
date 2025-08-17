@@ -11,7 +11,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-  /* ===== Base ===== */
+  /* ===== Base & Typography ===== */
+  html{
+    word-break: break-word;        /* ตัดคำไทยดีขึ้น */
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
   body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
   header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:20px;text-align:center;font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
 
@@ -19,7 +24,7 @@
   main{
     display:grid;grid-template-columns:1fr 1fr;gap:25px;
     padding:25px;margin:0 auto;
-    max-width:1200px;           /* เดสก์ท็อปทั่วไป */
+    max-width:1200px;
   }
   @media (min-width:1440px){ main{max-width:1400px} }
   @media (min-width:1680px){ main{max-width:1560px} }
@@ -34,34 +39,66 @@
   h2{margin-top:0;color:#4e73df;font-size:26px}
   h2, header, label { font-family: "Kanit", sans-serif; }
 
+  /* หัวข้อ + counter */
+  .head-with-counter{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap
+  }
+  .sel-counter{
+    color:#64748b;font-weight:600;font-size:14px;
+    background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px
+  }
+
   /* ===== Controls ===== */
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .ts-wrapper.single .ts-control{min-height:40px;padding:6px 8px}
+  .ts-wrapper.single .ts-control{min-height:44px;padding:8px 10px} /* ≥ 44px */
   .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size:16px !important}
-  .ts-wrapper .ts-control{border:1px solid #ccc;border-radius:6px}
+  .ts-wrapper .ts-control{border:1px solid #cbd5e1;border-radius:8px}
   .ts-dropdown{z-index:9999}
   .option {font-size:14px !important;}
 
   .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
   .row label{font-size:14px;color:#555}
-  .row input.simple{padding:10px 12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:140px;font-size:16px}
+  .row input.simple{
+    padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;width:160px;font-size:16px;min-height:44px
+  }
+  /* กัน iOS ซูม */
+  @media (max-width:768px){
+    input, select, textarea, .ts-wrapper .ts-control{ font-size:16px }
+  }
 
-  .row-two-col{display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom: 10px;padding-top: 10px;}
+  .row-two-col{display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom:10px;padding-top:10px;}
   .row-two-col > .col{flex:1;min-width:0}
-  .checkbox-lg{width:22px;height:22px;vertical-align:middle}
+  .checkbox-lg{width:24px;height:24px;vertical-align:middle} /* ≥ 44px โดยรวม label */
 
+  /* ปุ่มใหญ่แตะง่าย + โฟกัสชัด */
   .row-actions{display:flex;gap:12px;align-items:center;margin-top:6px}
   .btn{
     font-family:"Kanit",sans-serif;font-weight:800;
-    display:inline-block;flex:1;text-align:center;
-    border:none;padding:16px 20px;border-radius:12px;cursor:pointer;
-    font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff
+    display:inline-block;flex:1;text-align:center;border:none;
+    padding:16px 20px;border-radius:12px;cursor:pointer;
+    font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff;min-height:44px
   }
-  .btn--primary{background:#2e59d9;font-weight:500;box-shadow:0 6px 16px rgba(46,89,217,.35);font-size: 24px}
+  .btn--primary{background:#2e59d9;font-weight:700;box-shadow:0 6px 16px rgba(46,89,217,.35)}
   .btn--primary:hover{background:#1f4ac5;box-shadow:0 8px 18px rgba(31,74,197,.4)}
-  .btn--danger{background:#e74a3b;font-weight:500;box-shadow:0 6px 16px rgba(231,74,59,.35);font-size: 24px}
+  .btn--danger{background:#e74a3b;font-weight:700;box-shadow:0 6px 16px rgba(231,74,59,.35)}
   .btn--danger:hover{background:#c0392b;box-shadow:0 8px 18px rgba(192,57,43,.4)}
   .btn[disabled]{opacity:.6;cursor:not-allowed}
+  .btn:focus-visible,
+  select:focus-visible,
+  input:focus-visible,
+  .ts-wrapper .ts-control:focus-within{
+    outline:3px solid #7aa2ff; outline-offset:2px
+  }
+
+  /* ===== Sticky CTA (มือถือ/แท็บเล็ต) ===== */
+  .cta-bar{
+    position:sticky;bottom:0;left:0;right:0;
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
+    border-top:1px solid #e5e7eb;display:none;gap:10px;
+    padding:10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    z-index:100;
+  }
+  @media (max-width:1024px){ .cta-bar{display:flex} }
 
   /* ===== Results ===== */
   .grid-results{display:flex;flex-direction:column;gap:16px;margin-top:10px}
@@ -71,6 +108,16 @@
     background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn 1s forwards
   }
   .result-card h3{margin:0;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
+
+  /* badges */
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent
+  }
+  .badge--match{background:#e8faf0;color:#166534;border-color:#bbf7d0}
+  .badge--miss {background:#fff1f2;color:#9f1239;border-color:#fecdd3}
+  .badge--extra{background:#eef2ff;color:#3730a3;border-color:#c7d2fe}
 
   /* rank colors */
   .rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
@@ -147,7 +194,7 @@
   @media (max-width:768px){
     header{font-size:clamp(20px,5.5vw,28px);padding:16px}
     h2{font-size:clamp(18px,4.5vw,22px)}
-    .grid{grid-template-columns:1fr} /* dropdown ต่อบรรทัดเดียว */
+    .grid{grid-template-columns:1fr}
     .jewel-columns{grid-template-columns:1fr 1fr;gap:6px}
     .card-info{font-size:clamp(13px,2.8vw,15px)}
     .ts-wrapper.single .ts-control .item,
@@ -170,34 +217,35 @@
     .toast{transition:none}
   }
 
-  /* Progressive reveal on mobile: ซ่อนทั้ง select และ ts-wrapper */
+  /* Progressive reveal บนมือถือ: ซ่อนทั้ง select และ ts-wrapper */
   @media (max-width:768px){
     select.mobile-hidden,
-    .ts-wrapper.mobile-hidden{
-      display:none !important;
-    }
+    .ts-wrapper.mobile-hidden{ display:none !important; }
   }
 </style>
 </head>
 <body>
 <header>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</header>
 
-<div id="overlay" class="overlay">
+<div id="overlay" class="overlay" aria-hidden="true" aria-busy="false">
   <div class="loader">
-    <div id="progressText" style="margin-top:6px">กำลังโหลดข้อมูล…</div>
+    <div id="progressText" style="margin-top:6px" role="status" aria-live="polite">กำลังโหลดข้อมูล…</div>
     <div class="bar"><span id="progressBar"></span></div>
   </div>
 </div>
 
-<div id="toast" class="toast">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!</div>
+<div id="toast" class="toast" role="status" aria-live="polite">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!</div>
 
 <main>
   <section>
-    <h2 style="margin-top:0;">🎯 เลือกความสามารถสูงสุด 14 อย่าง</h2>
+    <h2 class="head-with-counter">
+      <span>🎯 เลือกความสามารถสูงสุด 14 อย่าง</span>
+      <span id="selectedCounter" class="sel-counter">เลือกแล้ว 0/14</span>
+    </h2>
 
     <div id="minHint" class="hint hint--error">
       <span class="dot"></span>
-      <span>ต้องเลือกอย่างน้อย 4 อย่างก่อน (เลือกแล้ว 0/4)</span>
+      <span>ต้องเลือกอย่างน้อย 4 อย่างก่อน</span>
     </div>
 
     <div id="desiredSelects" class="grid"></div>
@@ -206,12 +254,12 @@
     <div class="row-two-col">
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size:16px">
+        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size: 16px;">
       </div>
       <div class="col">
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
-          <input type="checkbox" id="darkOnly" class="checkbox-lg">
-          แสดงผลเฉพาะจี้ <code style="background:#000000;color:white;border-radius:6px;padding:2px 6px;font-family: Kanit;font-size: 14px;">[ดาร์ค]</code> เท่านั้น
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;min-height:44px">
+          <input type="checkbox" id="darkOnly" class="checkbox-lg" aria-label="แสดงเฉพาะจี้ดาร์ค">
+          <span>แสดงผลเฉพาะจี้ <code style="background:#000000;color:white;border-radius:6px;padding:2px 6px;font-family: Kanit;font-size: 14px;">[ดาร์ค]</code></span>
         </label>
       </div>
     </div>
@@ -219,6 +267,12 @@
     <div class="row-actions">
       <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
       <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+    </div>
+
+    <!-- Sticky CTA (mobile/tablet only) -->
+    <div class="cta-bar" aria-label="ตัวเลือกด่วน">
+      <button class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
+      <button class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
     </div>
   </section>
 
@@ -250,9 +304,21 @@ const toast = document.getElementById('toast');
 const resultTitle = document.getElementById('resultTitle');
 const minHint = document.getElementById('minHint');
 const darkOnly = document.getElementById('darkOnly');
+const selectedCounter = document.getElementById('selectedCounter');
 
-function showLoading(msg){ overlay.classList.add('show'); setProgress(10,msg||''); calcBtn.disabled=true; }
-function hideLoading(){ overlay.classList.remove('show'); updateCalcAvailability(); }
+function showLoading(msg){
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
+  overlay.setAttribute('aria-busy','true');
+  setProgress(10,msg||'');
+  calcBtn.disabled=true;
+}
+function hideLoading(){
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  overlay.setAttribute('aria-busy','false');
+  updateCalcAvailability();
+}
 function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.textContent=msg; }
 function showToast(text, ms=3000){
   toast.textContent = text;
@@ -272,16 +338,21 @@ async function waitForTomSelect(maxMs=3000){
 
 function updateCalcAvailability(){
   const count = getDesired().length;
+  // ปุ่มพร้อม/ไม่พร้อม + ข้อความแนะนำ
   if (count < MIN_SELECTS){
     calcBtn.disabled = true;
     minHint.classList.remove('hint--ok');
     minHint.classList.add('hint--error');
-    minHint.innerHTML = `<span class="dot"></span><span>ต้องเลือกอย่างน้อย ${MIN_SELECTS} อย่างก่อน (เลือกแล้ว ${count}/${MIN_SELECTS})</span>`;
+    minHint.innerHTML = `<span class="dot"></span><span>ต้องเลือกอย่างน้อย ${MIN_SELECTS} อย่างก่อน</span>`;
   }else{
     calcBtn.disabled = false;
     minHint.classList.remove('hint--error');
     minHint.classList.add('hint--ok');
-    minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาเซ็ตจี้แล้ว (เลือกแล้ว ${count} อย่าง)</span>`;
+    minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาเซ็ตจี้แล้ว</span>`;
+  }
+  // ตัวนับหัวข้อ
+  if (selectedCounter){
+    selectedCounter.textContent = `เลือกแล้ว ${count}/${MAX_SELECTS}`;
   }
 }
 
@@ -290,10 +361,10 @@ function makeNativeSelects(options=[]){
   for(let i=0;i<MAX_SELECTS;i++){
     const sel=document.createElement('select');
     sel.id=`desired${i}`;
-    sel.style.minHeight='40px';
-    sel.style.border='1px solid #ccc';
+    sel.style.minHeight='44px';
+    sel.style.border='1px solid #cbd5e1';
     sel.style.borderRadius='8px';
-    sel.style.padding='6px 8px';
+    sel.style.padding='8px 10px';
     const blank = document.createElement('option'); blank.value=''; blank.textContent='';
     sel.appendChild(blank);
     options.forEach(op=>{
@@ -301,12 +372,12 @@ function makeNativeSelects(options=[]){
     });
     sel.addEventListener('change', ()=>{
       updateCalcAvailability();
-      ensureMobileCascade(); // ← progressive บนมือถือ
+      ensureMobileCascade(); // progressive
     });
     wrap.appendChild(sel);
   }
   tomSelects = [];
-  ensureMobileCascade();  // ← เริ่มต้นซ่อนให้เหลือ 4 ช่องบนมือถือ
+  ensureMobileCascade();
   updateCalcAvailability();
 }
 
@@ -329,11 +400,11 @@ async function makeTomSelects(options=[]){
       const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
       if(others.includes(val)){ alert(`⚠️ "${val}" เลือกไปแล้ว กรุณาเลือกใหม่`); ts.clear(); }
       updateCalcAvailability();
-      ensureMobileCascade(); // ← progressive บนมือถือ
+      ensureMobileCascade();
     });
     tomSelects.push(ts);
   }
-  ensureMobileCascade(); // ← เริ่มต้นซ่อนให้เหลือ 4 ช่องบนมือถือ
+  ensureMobileCascade();
   updateCalcAvailability();
 }
 
@@ -375,23 +446,22 @@ function showSelectAt(i){
   }
 }
 
-/* ===== Progressive reveal (mobile): เริ่ม 4 ช่อง แล้วขยายเมื่อกรอกครบต่อเนื่อง ===== */
+/* ===== Progressive reveal (mobile) ===== */
 const START_VISIBLE_MOBILE = 4;
 function isMobileProgressive(){
   return window.matchMedia('(max-width: 768px)').matches;
 }
 function ensureMobileCascade(){
   if (!isMobileProgressive()){
-    // จอใหญ่: โชว์ครบ
     for (let i=0;i<MAX_SELECTS;i++) showSelectAt(i);
     return;
   }
-  let visible = START_VISIBLE_MOBILE; // เริ่มโชว์ 4 ช่องแรก
+  let visible = START_VISIBLE_MOBILE;
   for (let i=0;i<MAX_SELECTS;i++){
     if (i < visible){
       const val = getSelectValueAt(i);
       if (val && i === visible - 1){
-        visible++; // ถ้าช่องสุดท้ายที่เห็นอยู่ถูกกรอก ให้ขยายเห็นช่องถัดไป
+        visible++;
       }
     }
   }
@@ -591,10 +661,12 @@ async function calculate(){
 function renderResults(best){
   const container=document.getElementById('result'); container.innerHTML='';
   const pool = (jewelPool && jewelPool.length) ? jewelPool : jewels;
+
+  const desired = getDesired()||[];
   best.forEach((r,i)=>{
     const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.25}s`;
     const group = r.ids.map(id => pool.find(j=>j.id===id));
-    const desired = getDesired()||[];
+
     const jewelCols = group.map(j=>{
       const tooltip = j.substats.map(s=>{
         const icon = desired.includes(s.name)?'✅':'✨';
@@ -602,15 +674,34 @@ function renderResults(best){
       }).join('\n');
       return `<div class="jewel-column" data-tooltip="${tooltip}">${j.id}</div>`;
     }).filter(Boolean).join('');
+
     const notList = desired.filter((_,idx)=> r.notIdx.includes(idx));
     const allNames = new Set(); group.filter(Boolean).forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
     const extra = [...allNames].filter(nm => !desired.includes(nm));
+    const matchedCount = desired.length - notList.length;
+
+    const badgesHTML = `
+      <div class="badges" aria-label="สรุปความตรงใจ">
+        <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">
+          ✅ ตรงใจ ${matchedCount}
+        </span>
+        <span class="badge badge--miss" title="ความสามารถที่เลือกไว้แต่ยังไม่ครอบคลุม">
+          🔴 ไม่ตรงใจ ${notList.length}
+        </span>
+        <span class="badge badge--extra" title="ความสามารถอื่น ๆ ที่ติดมาด้วย">
+          ✨ ส่วนเกิน ${extra.length}
+        </span>
+      </div>
+    `;
+
     const notMatchHTML = notList.length ? `<span class="not-matched-title">🔴 ความสามารถที่หายไป:</span> ${notList.join(', ')}` : '';
     const extraHTML = extra.length ? `<span class="extra-title">🟢 ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
+
     card.innerHTML = `
       <div style="grid-column:1 / -1"><h3>อันดับ ${i+1}</h3></div>
       <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
+      ${badgesHTML}
       <div class="card-info">
         <p>${notMatchHTML}</p>
         <p>${extraHTML}</p>
@@ -626,7 +717,7 @@ function renderResults(best){
   }
 }
 
-/* ✅ resetAll แบบใหม่: ล้างช่องจำนวนเซ็ตกลับเป็น placeholder 3-20 + progressive mobile */
+/* resetAll: ล้างช่องจำนวนเซ็ตกลับ placeholder + progressive mobile */
 function resetAll(){
   if (tomSelects.length){
     tomSelects.forEach(ts=> ts.clear(true));
@@ -635,7 +726,6 @@ function resetAll(){
   }
   if (darkOnly) darkOnly.checked = false;
 
-  // ล้างค่าช่องจำนวนเซ็ต -> ให้แสดง placeholder
   if (topKInput){
     topKInput.value = '';
   }
@@ -643,14 +733,12 @@ function resetAll(){
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
 
-  // Progressive: กลับไปเริ่ม 4 ช่องบนมือถือ (และโชว์ครบถ้าเป็นจอใหญ่)
   ensureMobileCascade();
-
   updateCalcAvailability();
   showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
 }
 
-/* ✅ แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
+/* แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
 function enableTouchTooltips(){
   if (window.matchMedia('(hover: none)').matches){
     document.body.addEventListener('click', (e)=>{
@@ -674,7 +762,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     jewels = await fetchGVizJSONP();
     const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
 
-    // ✅ ถ้าไม่มี substats ก็ยังสร้าง dropdown ว่างไว้ ไม่ให้ "หาย"
     await makeTomSelects(substats);
     hideLoading();
     showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
@@ -684,11 +771,10 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     hideLoading();
     console.warn('Fetch error:', err);
     alert('ไม่สามารถโหลดข้อมูล ได้: ' + (err?.message || err) + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
-    // ✅ อย่างน้อยสร้าง dropdown ว่างเพื่อไม่ให้ผู้ใช้เห็นว่า "หาย"
     await makeTomSelects([]);
   }
 
-  // ✅ สร้าง worker ตอนนี้ (หลีกเลี่ยง parse-time issues)
+  // สร้าง worker
   worker = createWorker();
   worker.onmessage = (e)=>{
     const msg=e.data;
@@ -700,15 +786,10 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
   };
 
-  // ✅ เปิดโหมด tooltip สำหรับจอสัมผัส
   enableTouchTooltips();
-
-  // ✅ Progressive เริ่มต้นตามขนาดหน้าจอ
   ensureMobileCascade();
 
-  // ✅ อัปเดตเมื่อมีการปรับขนาดหน้าจอ/หมุนจอ
   window.addEventListener('resize', ensureMobileCascade);
-  // Safari iOS เก่าๆ อาจไม่ยิง 'resize' ตอนเปลี่ยน orientation; กันไว้:
   window.matchMedia && window.matchMedia('(max-width: 768px)').addEventListener?.('change', ensureMobileCascade);
 
   updateCalcAvailability();
