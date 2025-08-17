@@ -871,7 +871,7 @@ function computeJewelPool(){
   return jewels.slice();
 }
 
-const SPEED_CFG = { CANDIDATE_LIMIT: 400000 };
+const SPEED_CFG = { CANDIDATE_LIMIT: 100000 };
 function buildCandidates(desired, sourceJewels){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
   return sourceJewels.map(j=>{
