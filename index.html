@@ -501,6 +501,11 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   .ts-wrapper.single .ts-control input{font-size:clamp(14px,3.2vw,16px)!important}
   .ts-wrapper .ts-control{min-height:44px}
 }
+.hint-text{
+  font-size:13.5px;
+  color:#555;
+  margin:6px 0 12px 0;
+}
 
 </style>
 
@@ -515,7 +520,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   <ol class="steps-inline">
     <li><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
     <li><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
-    <li><span class="step-index">3</span> กดปุ่ม “ค้นหา”</li>
+    <li><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
   </ol>
 </div>
 
@@ -572,6 +577,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 
   <section>
     <h2 id="resultTitle">💖 เซ็ตจี้ที่ดีที่สุด</h2>
+    <p id="tooltipHint" class="hint-text"></p>
     <div id="result" class="grid-results"></div>
   </section>
 </main>
@@ -1269,6 +1275,21 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     });
   });
   obs.observe(document.body, {childList:true, subtree:true});
+})();
+</script>
+<script>
+(function(){
+  const hintEl = document.getElementById('tooltipHint');
+  function updateHint(){
+    if(window.matchMedia('(max-width:768px)').matches){
+      hintEl.textContent = "ⓘ กดที่ชื่อจี้ค้างไว้ เพื่อดูความสามารถของจี้)";
+    } else {
+      hintEl.textContent = "ⓘ ลากเม้าส์ไปชี้ที่ชื่อจี้ เพื่อดูความสามารถของจี้";
+    }
+  }
+  window.addEventListener('resize', updateHint);
+  document.addEventListener('DOMContentLoaded', updateHint);
+  updateHint();
 })();
 </script>
 
