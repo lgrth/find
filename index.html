@@ -190,7 +190,7 @@ h2, header, label { font-family:"Kanit",sans-serif }
 
 /* ลด motion หากผู้ใช้ตั้งค่า */
 @media (prefers-reduced-motion:reduce){
-  .result-card{ animation:none }
+  .result-card{ animation:none;opacity: 1}
   .toast{ transition:none }
 }
 
@@ -575,6 +575,9 @@ function renderResults(best){
         <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
       </div>
     `;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('.result-card').forEach(el => el.style.opacity = '1');
+}
     container.appendChild(card);
   });
 }
