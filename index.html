@@ -183,7 +183,7 @@
   .card-info{grid-column:1 / -1;background:#f7f7f8;border-radius:10px;padding:8px;font-size:14px}
   .card-info p{margin:2px 0}
   .not-matched-title{color:#e74a3b;font-weight:600;font-size:14px}
-  .extra-title{color:#1cc88a;font-weight:600;font-size:14px}
+  .extra-title{color:#3730a3;font-weight:600;font-size:14px}
 
   .jewel-column:hover::after{
     content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight:400;
@@ -682,7 +682,7 @@ async function calculate(){
       return;
     }
 
-    resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK} อันดับ`;
+    resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
     showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     setProgress(60,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
 
@@ -731,7 +731,7 @@ function renderResults(best){
     `;
 
     const notMatchHTML = notList.length ? `<span class="not-matched-title">🔴 ความสามารถที่หายไป:</span> ${notList.join(', ')}` : '';
-    const extraHTML = extra.length ? `<span class="extra-title">🟢 ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
+    const extraHTML = extra.length ? `<span class="extra-title">✨ ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
 
     const headerHTML = `
