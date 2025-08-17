@@ -515,7 +515,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   <ol class="steps-inline">
     <li><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
     <li><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
-    <li><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
+    <li><span class="step-index">3</span> กดปุ่ม “ค้นหา”</li>
   </ol>
 </div>
 
@@ -871,7 +871,7 @@ function computeJewelPool(){
   return jewels.slice();
 }
 
-const SPEED_CFG = { CANDIDATE_LIMIT: 4000000 };
+const SPEED_CFG = { CANDIDATE_LIMIT: 400000 };
 function buildCandidates(desired, sourceJewels){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
   return sourceJewels.map(j=>{
@@ -895,67 +895,31 @@ function createWorker(){
       const desiredMaskAll = (1 << desired.length) - 1;
       const n = cand.length;
       const totalCombos = n * (n - 1) * (n - 2) * (n - 3) / 24;
-
       let done = 0, lastEmit = 0;
       const best = [];
       const pushTop = (item) => {
         best.push(item);
-        // เรียง: หายไปน้อย -> ได้เพิ่มมาก -> คะแนนรวมสูง
         best.sort((a,b)=> (a.notMiss - b.notMiss) || (b.extraCount - a.extraCount) || (b.totalValue - a.totalValue) );
         if (best.length > topK) best.pop();
       };
-
       for (let a = 0; a < n - 3; a++) {
-        const ma = cand[a].mask, sa = cand[a].score;
         for (let b = a + 1; b < n - 2; b++) {
-          const mb = cand[b].mask, sb = cand[b].score;
-
-          // ❗ห้ามซ้ำความสามารถข้ามจี้: บิตชนกัน = ซ้ำ -> ข้าม
-          if ((ma & mb) !== 0) { done++; continue; }
-
-          const maskAB = ma | mb;
-          const scoreAB = sa + sb;
-
+          const maskAB = cand[a].mask | cand[b].mask; const scoreAB = cand[a].score + cand[b].score;
           for (let c = b + 1; c < n - 1; c++) {
-            const mc = cand[c].mask, sc = cand[c].score;
-
-            if ((maskAB & mc) !== 0) { done++; continue; } // ชนกับ A/B -> ข้าม
-
-            const maskABC = maskAB | mc;
-            const scoreABC = scoreAB + sc;
-
+            const maskABC = maskAB | cand[c].mask; const scoreABC = scoreAB + cand[c].score;
             for (let d = c + 1; d < n; d++) {
-              const md = cand[d].mask, sd = cand[d].score;
-
-              if ((maskABC & md) !== 0) { done++; continue; } // ชนกับ A/B/C -> ข้าม
-
-              const mask = maskABC | md;
-              const totalValue = scoreABC + sd;
-
-              // สร้างตัวชี้วัด miss/extra
+              const mask = maskABC | cand[d].mask; const totalValue = scoreABC + cand[d].score;
               const notMask = desiredMaskAll & (~mask);
               let notMiss = 0, notIdx = [];
-              for (let i = 0; i < desired.length; i++) {
-                if ((notMask >> i) & 1) { notMiss++; notIdx.push(i); }
-              }
-
+              for (let i = 0; i < desired.length; i++) { if ((notMask >> i) & 1) { notMiss++; notIdx.push(i); } }
               const setExtra = new Set();
               cand[a].otherNames.forEach(x=>setExtra.add(x));
               cand[b].otherNames.forEach(x=>setExtra.add(x));
               cand[c].otherNames.forEach(x=>setExtra.add(x));
               cand[d].otherNames.forEach(x=>setExtra.add(x));
               const extraCount = setExtra.size;
-
-              pushTop({
-                ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id],
-                notMiss, notIdx, totalValue, extraCount
-              });
-
-              done++;
-              if (done - lastEmit > 5000) {
-                lastEmit = done;
-                self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) });
-              }
+              pushTop({ ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id], notMiss, notIdx, totalValue, extraCount });
+              done++; if (done - lastEmit > 5000) { lastEmit = done; self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) }); }
             }
           }
         }
@@ -1141,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   worker.onmessage = (e)=>{
     const msg=e.data;
     if(msg.type==='progress'){
-      setProgress(0 + Math.round(msg.p*0.35), `กำลังประมวลผล… ${msg.p}%`);
+      setProgress(1 + Math.round(msg.p*1), `กำลังประมวลผล… ${msg.p}%`);
     }else if(msg.type==='result'){
       renderResults(msg.best);
       hideLoading();
