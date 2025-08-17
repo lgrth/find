@@ -63,9 +63,7 @@
   }
   /* กัน iOS ซูม */
   @media (max-width:768px){
-    input, select, textarea, .ts-wrapper .ts-control{ font-size:16px }body {
-    font-size: 85%;
-  }
+    input, select, textarea, .ts-wrapper .ts-control{ font-size:16px }
   }
 
   .row-two-col{display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom:10px;padding-top:10px;}
@@ -101,9 +99,7 @@
       z-index:100;
     }
     @media (max-width:768px){ .cta-bar{display:flex} 
-  .row-actions{ display:none !important; }body {
-    font-size: 85%;
-  }
+  .row-actions{ display:none !important; }
 }
 
   /* ===== Results ===== */
@@ -228,9 +224,6 @@
     .ts-wrapper.single .ts-control .item,
     .ts-wrapper.single .ts-control input{font-size:clamp(14px,3.2vw,16px)!important}
     .ts-wrapper .ts-control{min-height:44px}
-    body {
-    font-size: 85%;
-  }
   }
   @media (max-width:480px){
     .jewel-columns{grid-template-columns:1fr}
@@ -507,6 +500,15 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 .jewel-tooltip.show{ opacity:1; }
 @media (max-width:1024px){
   .result-card{ grid-template-columns:1fr; }
+}
+
+
+/* === Custom Font Size Adjustments for Mobile === */
+@media (max-width: 768px){
+  .btn { font-size: 15px !important; } /* ปุ่มค้นหา + รีเซ็ต */
+  .result-card { font-size: 13px !important; } /* ลดขนาดข้อความบนการ์ด */
+  .result-card h3 { font-size: 15px !important; }
+  .card-info { font-size: 12.5px !important; }
 }
 
 </style>
