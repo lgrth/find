@@ -966,7 +966,7 @@ async function calculate(){
 
     resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
     showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
-    setProgress(60,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
+    setProgress(10,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
 
     // ส่งงานให้ worker
     worker.postMessage({ desired, cand, topK });
@@ -1103,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   worker.onmessage = (e)=>{
     const msg=e.data;
     if(msg.type==='progress'){
-      setProgress(60 + Math.round(msg.p*0.35), `กำลังประมวลผล… ${msg.p}%`);
+      setProgress(0 + Math.round(msg.p*0.35), `กำลังประมวลผล… ${msg.p}%`);
     }else if(msg.type==='result'){
       renderResults(msg.best);
       hideLoading();
