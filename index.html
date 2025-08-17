@@ -303,8 +303,8 @@
 
     <!-- Sticky CTA (mobile/tablet only) -->
     <div class="cta-bar" aria-label="ตัวเลือกด่วน">
-      <button id="calcBtn" button class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
-      <button id="resetBtn" button class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+      <button id="calcBtn2" button class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
+      <button id="resetBtn2" button class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
     </div>
   </section>
 
@@ -331,6 +331,7 @@ const overlay = document.getElementById('overlay');
 const progressText = document.getElementById('progressText');
 const progressBar = document.getElementById('progressBar');
 const calcBtn = document.getElementById('calcBtn');
+const calcBtn2 = document.getElementById('calcBtn2');
 const topKInput = document.getElementById('topK');
 const toast = document.getElementById('toast');
 const resultTitle = document.getElementById('resultTitle');
@@ -344,6 +345,7 @@ function showLoading(msg){
   overlay.setAttribute('aria-busy','true');
   setProgress(10,msg||'');
   calcBtn.disabled=true;
+  calcBtn2.disabled=true;
 }
 function hideLoading(){
   overlay.classList.remove('show');
@@ -373,11 +375,13 @@ function updateCalcAvailability(){
   // ปุ่มพร้อม/ไม่พร้อม + ข้อความแนะนำ
   if (count < MIN_SELECTS){
     calcBtn.disabled = true;
+    calcBtn2.disabled = true;
     minHint.classList.remove('hint--ok');
     minHint.classList.add('hint--error');
     minHint.innerHTML = `<span class="dot"></span><span>ต้องเลือกอย่างน้อย ${MIN_SELECTS} อย่างก่อน</span>`;
   }else{
     calcBtn.disabled = false;
+    calcBtn2.disabled = false;
     minHint.classList.remove('hint--error');
     minHint.classList.add('hint--ok');
     minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาเซ็ตจี้แล้ว</span>`;
