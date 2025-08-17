@@ -142,11 +142,11 @@
   .badges{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0}
   .badge{
     display:inline-flex;align-items:center;gap:6px;
-    padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent
+    padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid transparent
   }
-  .badge--match{background:#e8faf0;color:#166534;border-color:#bbf7d0;font-weight:500}
-  .badge--miss {background:#fff1f2;color:#9f1239;border-color:#fecdd3;font-weight:500}
-  .badge--extra{background:#eef2ff;color:#3730a3;border-color:#c7d2fe;font-weight:500}
+  .badge--match{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+  .badge--not{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
+  .badge--extra{background:#eef2ff;color:#0b289e;border:1px solid #c7d2fe} 
 
   /* rank colors */
   .rank-1  h3{ background:#B91C1C; } /* red 700 */
@@ -182,7 +182,7 @@
   .extra-title{color:#3730a3;font-weight:600;font-size:14px}
 
   
-  .jewel-column::after{opacity:0;transition:.2s}
+  .jewel-column::after{opacity:0}
 
   .overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999}
   .overlay.show{display:flex}
@@ -263,7 +263,7 @@ header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
 .is-valid{border-color:#16a34a!important; box-shadow:0 0 0 3px rgba(22,163,74,.15)!important}
 .is-invalid{border-color:#dc2626!important; box-shadow:0 0 0 3px rgba(220,38,38,.12)!important}
 
-.badge-neutral{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;font-weight:600}
+.badge-neutral{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe}
 
 .btn{font-weight:700} /* ลดจาก 800 -> 700 */
 .btn:focus-visible{outline:3px solid #7aa2ff; outline-offset:2px}
@@ -282,17 +282,13 @@ header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
 
 .row-ability{margin:.25rem 0;padding:.25rem .5rem;border-radius:8px}
 .row-ability.row-miss{background:#fff1f2;border:1px solid #fecdd3}
-.row-ability.row-extra{background:#ecfeff;border:1px solid #bae6fd}
+.row-ability.row-extra{background:#eef2ff;border:1px solid #c7d2fe}
 
 .btn-copy{margin-top:8px;display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"Kanit",sans-serif;font-weight:600}
 .btn-copy:hover{background:#eef2f7}
 
 .result-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 /* lighten badge contrasts a bit */
-.badge{border-radius:999px;padding:4px 10px;font-weight:600}
-.badge--match{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
-.badge--not{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
-.badge--extra{background:#fdf4ff;color:#4a044e;border:1px solid #f5d0fe}
 
 /* Tooltips stay readable */
 [data-tooltip]{position:relative}
@@ -345,7 +341,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 .jewel-tooltip{
   position: fixed;
   top: 0; left: 0;
-  transform: translate(-50%, -100%);
+  transform: translateX(-50%);
   pointer-events: none;
   background: #0b1020;
   color: #fff;
@@ -401,6 +397,110 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   display:inline-flex;align-items:center;justify-content:center;
   width:18px;height:18px;border-radius:50%;
   background:#1f4ac5;color:#fff;font-weight:700;font-size:12px;
+}
+
+
+/* --- Jewel item presentation (center + bold + gray background) --- */
+.jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.jewel-column{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-weight:700;
+  background:#f1f5f9;
+  color:#111827;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  min-height:52px;
+  padding:8px 10px;
+  box-sizing:border-box;
+}
+
+
+/* === Adopt result-card + tooltip look from index.html === */
+/* result-card box + grid */
+.result-card{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto auto;
+  gap:10px;
+  background:#fff;
+  border-radius:15px;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
+  padding:14px;
+}
+.result-card h3{ margin:0; color:#fff; padding:6px 18px; border-radius:8px; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+
+/* head layout */
+.result-card .card-head{
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.result-card .card-head .badges{ margin-left:auto; display:flex; flex-wrap:wrap; gap:8px; }
+
+/* jewel list */
+.jewel-wrap{ grid-column:1 / -1; }
+.jewel-columns{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.jewel-column{
+  background:#f1f3f5; border-radius:10px; padding:4px;
+  text-align:center; font-weight:700; font-size:16px; line-height:1.0;
+  min-height:32px; display:flex; align-items:center; justify-content:center;
+  position:relative; cursor:default;
+}
+
+/* info block */
+.card-info{ grid-column:1 / -1; background:#f7f7f8; border-radius:10px; padding:8px; font-size:14px; }
+.card-info p{ margin:2px 0; }
+
+/* rank color chips */
+.rank-1  h3{ background:#B91C1C; } /* red 700 */
+.rank-2  h3{ background:#E11D48; } /* rose 600 */
+.rank-3  h3{ background:#A21CAF; } /* fuchsia 700 */
+.rank-4  h3{ background:#6D28D9; } /* violet 700 */
+.rank-5  h3{ background:#3730A3; } /* indigo 800 */
+.rank-6  h3{ background:#1D4ED8; }
+.rank-7  h3{ background:#0369A1; }
+.rank-8  h3{ background:#0F766E; }
+.rank-9  h3{ background:#047857; }
+.rank-10 h3{ background:#15803D; }
+.rank-11 h3{ background:#3F6212; }
+.rank-12 h3{ background:#B45309; }
+.rank-13 h3{ background:#C2410C; }
+.rank-14 h3{ background:#EA580C; }
+.rank-15 h3{ background:#8B4513; }
+.rank-16 h3{ background:#A15C2F; }
+.rank-17 h3{ background:#7A6A58; }
+.rank-18 h3{ background:#475569; }
+.rank-19 h3{ background:#334155; }
+.rank-20 h3{ background:#0B0F14; }
+
+/* Body-level tooltip styled like index.html bubble */
+.jewel-tooltip{
+  position: fixed;
+  top: 0; left: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: rgba(0,0,0,.85);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  max-width: 360px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .12s ease;
+  white-space: pre-line;
+}
+.jewel-tooltip.show{ opacity:1; }
+@media (max-width:1024px){
+  .result-card{ grid-template-columns:1fr; }
 }
 
 </style>
@@ -613,7 +713,7 @@ async function makeTomSelects(options=[]){
   tomSelects = [];
   for(let i=0;i<MAX_SELECTS;i++){
     const sel = document.getElementById(`desired${i}`);
-    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true,placeholder:'พิมพ์เพื่อค้นหา…',plugins:{clear_button:{title:'ลบค่า'}}});
+    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true,placeholder:'',plugins:{clear_button:{title:'ลบค่า'}}});
     ts.on('change',val=>{
       if(!val) { updateCalcAvailability(); ensureMobileCascade(); return; }
       const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
@@ -902,12 +1002,12 @@ function renderResults(best){
     
     const badgesHTML = `
       <div class="badges" aria-label="สรุปความตรงใจ">
-        <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">✅ ตรงใจ ${matchedCount}</span>
-        <span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 ไม่ตรงใจ ${notList.length}</span>
-        <span class="badge badge--extra" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">✨ ส่วนเกิน ${extra.length}</span>
+        <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">✅ ตรงเป๊ะ ${matchedCount}</span>
+        <span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 หายไป ${notList.length}</span>
+        <span class="badge badge--extra" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">✨ ได้เพิ่ม ${extra.length}</span>
       </div>`;
     
-    const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong>ขาด:</strong> ${notList.join(', ')}</div>` : '';
+    const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong>หายไป:</strong> ${notList.join(', ')}</div>` : '';
     const extraHTML = extra.length ? `<div class="row-ability row-extra"><strong>ได้เพิ่ม:</strong> ${extra.join(', ')}</div>` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
 
@@ -974,17 +1074,7 @@ function resetAll(){
 }
 
 /* แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
-function enableTouchTooltips(){
-  if (window.matchMedia('(hover: none)').matches){
-    document.body.addEventListener('click', (e)=>{
-      const el = e.target.closest('.jewel-column');
-      if (el && el.dataset.tooltip){
-        const msg = el.dataset.tooltip.replace(/\n/g, ' · ');
-        showToast(msg, 2500);
-      }
-    });
-  }
-}
+function enableTouchTooltips(){ /* mobile toast disabled by request */ }
 
 darkOnly?.addEventListener('change', ()=>{
   document.getElementById('result').innerHTML='';
@@ -1112,30 +1202,62 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     positionTip(el);
   }
   function hideTip(){ tip.classList.remove('show'); }
+
   function positionTip(el){
     const r = el.getBoundingClientRect();
     const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const tipRect = tip.getBoundingClientRect();
     let cx = r.left + r.width/2;
     let x = Math.min(Math.max(cx, 8 + tipRect.width/2), vw - 8 - tipRect.width/2);
-    let y = r.top - 8; // show above element
+    let yAbove = r.top - tipRect.height - 8;
+    let y = yAbove >= 8 ? yAbove : (r.bottom + 8);
     tip.style.left = x + 'px';
     tip.style.top = y + 'px';
   }
+
   function bind(el){
     el.addEventListener('mouseenter', ()=>showTip(el));
     el.addEventListener('mouseleave', hideTip);
     el.addEventListener('mousemove', ()=>positionTip(el));
-    el.addEventListener('touchstart', ()=>showTip(el), {passive:true});
-    el.addEventListener('touchend', hideTip, {passive:true});
+
+    let lpTimer = null;
+    let longPressed = false;
+    let startX = 0, startY = 0;
+    const MOVE_TOL = 10;
+    const LONG_PRESS_MS = 450;
+    function clearLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } }
+
+    el.addEventListener('touchstart', (ev)=>{
+      if(ev.touches.length !== 1) return;
+      const t = ev.touches[0];
+      startX = t.clientX; startY = t.clientY;
+      longPressed = false;
+      clearLP();
+      lpTimer = setTimeout(()=>{ longPressed = true; showTip(el); positionTip(el); }, LONG_PRESS_MS);
+    }, {passive:true});
+
+    el.addEventListener('touchmove', (ev)=>{
+      if(!lpTimer) return;
+      const t = ev.touches[0];
+      const dx = Math.abs(t.clientX - startX);
+      const dy = Math.abs(t.clientY - startY);
+      if(dx>MOVE_TOL || dy>MOVE_TOL){ clearLP(); }
+    }, {passive:true});
+
+    el.addEventListener('touchend', ()=>{
+      if(longPressed){ setTimeout(hideTip, 1200); }
+      clearLP();
+    }, {passive:true});
+
+    el.addEventListener('touchcancel', ()=>{ clearLP(); hideTip(); }, {passive:true});
   }
+
   function init(){
     document.querySelectorAll('.jewel-column[data-tooltip]').forEach(bind);
   }
   if(document.readyState !== 'loading') init();
   else document.addEventListener('DOMContentLoaded', init);
 
-  // Observe future renders
   const obs = new MutationObserver(muts=>{
     muts.forEach(m=>{
       m.addedNodes && m.addedNodes.forEach(n=>{
