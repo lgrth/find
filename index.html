@@ -98,7 +98,7 @@
       padding:10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
       z-index:100;
     }
-    @media (max-width:768px){ .cta-bar{display:flex} 
+  @media (max-width:768px){ .cta-bar{display:flex} 
   .row-actions{ display:none !important; }
 }
 
@@ -173,7 +173,7 @@
   .rank-20 h3{ background:#0B0F14; } /* near black */
 
   .jewel-wrap{grid-column:1 / -1}
-  .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:14px}
 
   .card-info{grid-column:1 / -1;background:#f7f7f8;border-radius:10px;padding:8px;font-size:14px}
   .card-info p{margin:2px 0}
@@ -320,13 +320,6 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   .steps-inline li{margin:0 6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
 }
 
-
-
-
-
-
-
-
 /* Body-level tooltip to avoid stacking/overflow issues */
 .jewel-tooltip{
   position: fixed;
@@ -397,7 +390,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   align-items:center;
   justify-content:center;
   text-align:center;
-  font-weight:700;
+  font-weight:600;
   background:#f1f5f9;
   color:#111827;
   border:1px solid #e2e8f0;
@@ -405,6 +398,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   min-height:52px;
   padding:8px 10px;
   box-sizing:border-box;
+  font-size:14px
 }
 
 
@@ -438,7 +432,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 .jewel-columns{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .jewel-column{
   background:#f1f3f5; border-radius:10px; padding:4px;
-  text-align:center; font-weight:700; font-size:16px; line-height:1.0;
+  text-align:center; font-weight:600; font-size:14px; line-height:1.0;
   min-height:32px; display:flex; align-items:center; justify-content:center;
   position:relative; cursor:default;
 }
@@ -519,9 +513,9 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   </header>
 <div class="steps-bar" role="navigation" aria-label="ขั้นตอนการใช้งาน">
   <ol class="steps-inline">
-    <li><span class="step-index">1</span> เลือกความสามารถที่ต้องการ (สูงสุด 14)</li>
-    <li><span class="step-index">2</span> ใส่จำนวนอันดับที่ต้องการ (3–20)</li>
-    <li><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
+    <li><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
+    <li><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
+    <li><span class="step-index">3</span> กดปุ่ม “ค้นหา”</li>
   </ol>
 </div>
 
