@@ -11,198 +11,174 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* ===== Base ===== */
-body{
-  font-family:"Kanit",sans-serif;
-  margin:0;background:#f4f6f8;color:#333
-}
-header{
-  background:linear-gradient(180deg,#4e73df,#0a1d55);
-  color:#fff;padding:20px;text-align:center;
-  font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)
-}
+  /* ===== Base ===== */
+  body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
+  header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:20px;text-align:center;font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
 
-/* Layout หลัก: เดสก์ท็อป 2 คอลัมน์, จอเล็ก 1 คอลัมน์ */
-main{
-  display:grid;
-  grid-template-columns:1fr 1fr; /* desktop: 2 คอลัมน์ */
-  gap:25px;
-  padding:25px;
-  margin:0 auto;
-  max-width:1200px;              /* เดสก์ท็อปทั่วไป */
-}
-@media (min-width:1440px){ main{ max-width:1400px } }
-@media (min-width:1680px){ main{ max-width:1560px } }
-@media (min-width:1920px){ main{ max-width:1720px } }
+  /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
+  main{
+    display:grid;grid-template-columns:1fr 1fr;gap:25px;
+    padding:25px;margin:0 auto;
+    max-width:1200px;           /* เดสก์ท็อปทั่วไป */
+  }
+  @media (min-width:1440px){ main{max-width:1400px} }
+  @media (min-width:1680px){ main{max-width:1560px} }
+  @media (min-width:1920px){ main{max-width:1720px} }
 
-/* Tablet/มือถือ -> 1 คอลัมน์ */
-@media (max-width:1024px){
-  main{ grid-template-columns:1fr; gap:18px; padding:20px }
-}
+  /* Tablet/มือถือ -> 1 คอลัมน์ */
+  @media (max-width:1024px){
+    main{ grid-template-columns:1fr; gap:18px; padding:20px }
+  }
 
-section{
-  background:#fff;padding:25px;border-radius:15px;
-  box-shadow:0 6px 15px rgba(0,0,0,.1)
-}
-h2{ margin-top:0;color:#4e73df;font-size:26px }
-h2, header, label { font-family:"Kanit",sans-serif }
+  section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,.1)}
+  h2{margin-top:0;color:#4e73df;font-size:26px}
+  h2, header, label { font-family: "Kanit", sans-serif; }
 
-/* ===== Controls ===== */
-.grid{ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px }
-.ts-wrapper.single .ts-control{ min-height:40px;padding:6px 8px }
-.ts-wrapper.single .ts-control .item,
-.ts-wrapper.single .ts-control input{ line-height:26px;font-size:16px !important }
-.ts-wrapper .ts-control{ border:1px solid #ccc;border-radius:6px }
-.ts-dropdown{ z-index:9999 }
-.option { font-size:14px !important; }
+  /* ===== Controls ===== */
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .ts-wrapper.single .ts-control{min-height:40px;padding:6px 8px}
+  .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size:16px !important}
+  .ts-wrapper .ts-control{border:1px solid #ccc;border-radius:6px}
+  .ts-dropdown{z-index:9999}
+  .option {font-size:14px !important;}
 
-.row{ display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 }
-.row label{ font-size:14px;color:#555 }
-.row input.simple{
-  padding:10px 12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:140px;font-size:16px
-}
-.row-two-col{
-  display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom:10px;padding-top:10px;
-}
-.row-two-col > .col{ flex:1;min-width:0 }
-.checkbox-lg{ width:22px;height:22px;vertical-align:middle }
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+  .row label{font-size:14px;color:#555}
+  .row input.simple{padding:10px 12px;border:1px solid #ccc;border-radius:10px;background:#fff;width:140px;font-size:16px}
 
-/* ปุ่ม */
-.row-actions{ display:flex;gap:12px;align-items:center;margin-top:6px }
-.btn{
-  font-family:"Kanit",sans-serif;font-weight:800;
-  display:inline-block;flex:1;text-align:center;border:none;
-  padding:16px 20px;border-radius:12px;cursor:pointer;
-  font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff
-}
-.btn--primary{ background:#2e59d9;font-weight:500;box-shadow:0 6px 16px rgba(46,89,217,.35);font-size:24px }
-.btn--primary:hover{ background:#1f4ac5;box-shadow:0 8px 18px rgba(31,74,197,.4) }
-.btn--danger{ background:#e74a3b;font-weight:500;box-shadow:0 6px 16px rgba(231,74,59,.35);font-size:24px }
-.btn--danger:hover{ background:#c0392b;box-shadow:0 8px 18px rgba(192,57,43,.4) }
-.btn[disabled]{ opacity:.6;cursor:not-allowed }
+  .row-two-col{display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom: 10px;padding-top: 10px;}
+  .row-two-col > .col{flex:1;min-width:0}
+  .checkbox-lg{width:22px;height:22px;vertical-align:middle}
 
-/* ===== Results ===== */
-.grid-results{ display:flex;flex-direction:column;gap:16px;margin-top:10px }
-@keyframes fadeSlideIn{ 0%{opacity:0;transform:translateY(20px)} 100%{opacity:1;transform:translateY(0)} }
-.result-card{
-  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px;
-  background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);
-  padding:14px;opacity:0;animation:fadeSlideIn 1s forwards
-}
-.result-card h3{ margin:0;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block }
+  .row-actions{display:flex;gap:12px;align-items:center;margin-top:6px}
+  .btn{
+    font-family:"Kanit",sans-serif;font-weight:800;
+    display:inline-block;flex:1;text-align:center;
+    border:none;padding:16px 20px;border-radius:12px;cursor:pointer;
+    font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff
+  }
+  .btn--primary{background:#2e59d9;font-weight:500;box-shadow:0 6px 16px rgba(46,89,217,.35);font-size: 24px}
+  .btn--primary:hover{background:#1f4ac5;box-shadow:0 8px 18px rgba(31,74,197,.4)}
+  .btn--danger{background:#e74a3b;font-weight:500;box-shadow:0 6px 16px rgba(231,74,59,.35);font-size: 24px}
+  .btn--danger:hover{background:#c0392b;box-shadow:0 8px 18px rgba(192,57,43,.4)}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
 
-/* rank colors */
-.rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
-.rank-2 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
-.rank-3 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
-.rank-4 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
-.rank-5 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
-.rank-6 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
-.rank-7 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
-.rank-8 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
-.rank-9 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
-.rank-10 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
-.rank-11 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
-.rank-12 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
-.rank-13 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
-.rank-14 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
-.rank-15 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
-.rank-16 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
-.rank-17 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
-.rank-18 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
-.rank-19 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
-.rank-20 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
+  /* ===== Results ===== */
+  .grid-results{display:flex;flex-direction:column;gap:16px;margin-top:10px}
+  @keyframes fadeSlideIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+  .result-card{
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px;
+    background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn 1s forwards
+  }
+  .result-card h3{margin:0;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
 
-.jewel-wrap{ grid-column:1 / -1 }
-.jewel-columns{ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px }
-.jewel-column{
-  background:#f1f3f5;border-radius:10px;padding:4px;text-align:center;font-weight:600;font-size:16px;
-  line-height:1.0;min-height:32px;display:flex;align-items:center;justify-content:center;position:relative;cursor:default
-}
+  /* rank colors */
+  .rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
+  .rank-2 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
+  .rank-3 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
+  .rank-4 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
+  .rank-5 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
+  .rank-6 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
+  .rank-7 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
+  .rank-8 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
+  .rank-9 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
+  .rank-10 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
+  .rank-11 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
+  .rank-12 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
+  .rank-13 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
+  .rank-14 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
+  .rank-15 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
+  .rank-16 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
+  .rank-17 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
+  .rank-18 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
+  .rank-19 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
+  .rank-20 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
 
-.card-info{ grid-column:1 / -1;background:#f7f7f8;border-radius:10px;padding:8px;font-size:14px }
-.card-info p{ margin:2px 0 }
-.not-matched-title{ color:#e74a3b;font-weight:600;font-size:14px }
-.extra-title{ color:#1cc88a;font-weight:600;font-size:14px }
+  .jewel-wrap{grid-column:1 / -1}
+  .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .jewel-column{
+    background:#f1f3f5;border-radius:10px;padding:4px;text-align:center;font-weight:600;font-size:16px;
+    line-height:1.0;min-height:32px;display:flex;align-items:center;justify-content:center;position:relative;cursor:default
+  }
 
-.jewel-column:hover::after{
-  content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight:400;
-  background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;white-space:pre-line;font-size:12.5px;z-index:10;opacity:1;width:70%;line-height:1.4
-}
-.jewel-column::after{ opacity:0;transition:.2s }
+  .card-info{grid-column:1 / -1;background:#f7f7f8;border-radius:10px;padding:8px;font-size:14px}
+  .card-info p{margin:2px 0}
+  .not-matched-title{color:#e74a3b;font-weight:600;font-size:14px}
+  .extra-title{color:#1cc88a;font-weight:600;font-size:14px}
 
-/* ===== Overlay / Toast / Hints ===== */
-.overlay{ position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999 }
-.overlay.show{ display:flex }
-.loader{ background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:18px 22px;min-width:260px;text-align:center }
-.bar{ height:8px;background:#e9ecef;border-radius:999px;overflow:hidden;margin-top:10px }
-.bar>span{ display:block;height:100%;width:0;background:linear-gradient(90deg,#4e73df,#1cc88a) }
-.note{ font-size:12px;color:#666;margin-top:6px }
+  .jewel-column:hover::after{
+    content:attr(data-tooltip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);font-weight:400;
+    background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;white-space:pre-line;font-size:12.5px;z-index:10;opacity:1;width:70%;line-height:1.4
+  }
+  .jewel-column::after{opacity:0;transition:.2s}
 
-.toast{
-  position:fixed;left:50%;top:47%;transform:translateX(-50%);
-  background:#ffffff;color:#000000;padding:20px 28px;border-radius:10px;
-  box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:.25s ease;
-  z-index:1000;font-weight:700
-}
-.toast.show{ opacity:1;transform:translateX(-50%) translateY(0) }
-.toast.hide{ opacity:0;transform:translateX(-50%) translateY(-10px) }
+  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999}
+  .overlay.show{display:flex}
+  .loader{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:18px 22px;min-width:260px;text-align:center}
+  .bar{height:8px;background:#e9ecef;border-radius:999px;overflow:hidden;margin-top:10px}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4e73df,#1cc88a)}
+  .note{font-size:12px;color:#666;margin-top:6px}
 
-.hint{ margin:8px 0 4px 0;font-size:13.5px;display:flex;align-items:center;gap:8px }
-.hint .dot{ width:8px;height:8px;border-radius:999px;display:inline-block }
-.hint--error{ color:#b71c1c }
-.hint--error .dot{ background:#e74a3b }
-.hint--ok{ color:#166534 }
-.hint--ok .dot{ background:#22c55e }
+  .toast{
+    position:fixed;left:50%;top:47%;transform:translateX(-50%);
+    background:#ffffff;color:#000000;padding:20px 28px;border-radius:10px;
+    box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:.25s ease;
+    z-index:1000;font-weight:700
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
 
-/* ===== Responsive: จูนจอเล็กเพิ่มเติม ===== */
+  .hint{margin:8px 0 4px 0;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
+  .hint--error{color:#b71c1c}
+  .hint--error .dot{background:#e74a3b}
+  .hint--ok{color:#166534}
+  .hint--ok .dot{background:#22c55e}
 
-/* Tablet แนวตั้ง/มือถือ */
-@media (max-width:1024px){
-  .row-two-col{ flex-direction:column;align-items:stretch;gap:12px }
-  .row-two-col > .col{ width:100% }
-  .row input.simple{ width:100% }
-  .row-actions{ flex-direction:column;align-items:stretch;gap:10px }
-  .btn{ width:100% }
-  .result-card{ grid-template-columns:1fr } /* การ์ดผลลัพธ์เป็น 1 คอลัมน์ */
-}
+  /* ===== Mobile-first ปรับให้อ่านง่าย ===== */
+  @media (max-width:1024px){
+    .row-two-col{flex-direction:column;align-items:stretch;gap:12px}
+    .row-two-col > .col{width:100%}
+    .row input.simple{width:100%}
+    .row-actions{flex-direction:column;align-items:stretch;gap:10px}
+    .btn{width:100%}
+    .result-card{grid-template-columns:1fr}
+  }
+  @media (max-width:768px){
+    header{font-size:clamp(20px,5.5vw,28px);padding:16px}
+    h2{font-size:clamp(18px,4.5vw,22px)}
+    .grid{grid-template-columns:1fr} /* dropdown ต่อบรรทัดเดียว */
+    .jewel-columns{grid-template-columns:1fr 1fr;gap:6px}
+    .card-info{font-size:clamp(13px,2.8vw,15px)}
+    .ts-wrapper.single .ts-control .item,
+    .ts-wrapper.single .ts-control input{font-size:clamp(14px,3.2vw,16px)!important}
+    .ts-wrapper .ts-control{min-height:44px}
+  }
+  @media (max-width:480px){
+    .jewel-columns{grid-template-columns:1fr}
+    .btn{padding:16px 20px}
+  }
 
-/* มือถือทั่วไป */
-@media (max-width:768px){
-  header{ font-size:clamp(20px,5.5vw,28px);padding:16px }
-  h2{ font-size:clamp(18px,4.5vw,22px) }
-  .grid{ grid-template-columns:1fr }             /* ช่องเลือกความสามารถแถวเดียวต่อบรรทัด */
-  .jewel-columns{ grid-template-columns:1fr 1fr; gap:6px }
-  .card-info{ font-size:clamp(13px,2.8vw,15px) }
-  .ts-wrapper.single .ts-control .item,
-  .ts-wrapper.single .ts-control input{ font-size:clamp(14px,3.2vw,16px)!important }
-  .ts-wrapper .ts-control{ min-height:44px }
-}
+  /* ปิด hover-tooltip บนอุปกรณ์สัมผัส */
+  @media (hover:none){
+    .jewel-column:hover::after{display:none}
+  }
 
-/* มือถือจอเล็กมาก */
-@media (max-width:480px){
-  .jewel-columns{ grid-template-columns:1fr }    /* คอลเดียวให้อ่านง่าย */
-  .btn{ padding:16px 20px }
-}
+  /* Reduce Motion => ต้องเห็นการ์ดแน่ ๆ */
+  @media (prefers-reduced-motion:reduce){
+    .result-card{animation:none;opacity:1}
+    .toast{transition:none}
+  }
 
-/* ปิด hover-tooltip บนอุปกรณ์สัมผัส */
-@media (hover:none){ .jewel-column:hover::after{ display:none } }
-
-/* ลด motion หากผู้ใช้ตั้งค่า */
-@media (prefers-reduced-motion:reduce){
-  .result-card{ animation:none;opacity: 1}
-  .toast{ transition:none }
-}
-
-/* Progressive reveal: ซ่อนเฉพาะบนมือถือ */
-@media (max-width: 768px){
-  select.mobile-hidden { display: none; }
-}
-
+  /* Progressive reveal on mobile: ซ่อนทั้ง select และ ts-wrapper */
+  @media (max-width:768px){
+    select.mobile-hidden,
+    .ts-wrapper.mobile-hidden{
+      display:none !important;
+    }
+  }
 </style>
 </head>
-
-
 <body>
 <header>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</header>
 
@@ -235,7 +211,7 @@ h2, header, label { font-family:"Kanit",sans-serif }
       <div class="col">
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
           <input type="checkbox" id="darkOnly" class="checkbox-lg">
-          เฉพาะจี้ <code style="background:#000000;color:white;border-radius:6px;padding:2px 6px;font-family: Kanit;font-size: 14px;">[ดาร์ค]</code>
+          แสดงผลเฉพาะจี้ <code style="background:#000000;color:white;border-radius:6px;padding:2px 6px;font-family: Kanit;font-size: 14px;">[ดาร์ค]</code> เท่านั้น
         </label>
       </div>
     </div>
@@ -318,30 +294,21 @@ function makeNativeSelects(options=[]){
     sel.style.border='1px solid #ccc';
     sel.style.borderRadius='8px';
     sel.style.padding='6px 8px';
-
     const blank = document.createElement('option'); blank.value=''; blank.textContent='';
     sel.appendChild(blank);
     options.forEach(op=>{
       const opt=document.createElement('option'); opt.value=op; opt.textContent=op; sel.appendChild(opt);
     });
-
-    // เมื่อเปลี่ยนค่า ให้ปลดล็อกช่องถัดไป (มือถือ)
     sel.addEventListener('change', ()=>{
       updateCalcAvailability();
-      const idx = i;
-      maybeRevealNext(idx);
+      ensureMobileCascade(); // ← progressive บนมือถือ
     });
-
     wrap.appendChild(sel);
   }
   tomSelects = [];
-
-  // Progressive mobile visibility
-  applyMobileProgressiveVisibility();
-
+  ensureMobileCascade();  // ← เริ่มต้นซ่อนให้เหลือ 4 ช่องบนมือถือ
   updateCalcAvailability();
 }
-
 
 async function makeTomSelects(options=[]){
   const ready = await waitForTomSelect();
@@ -358,21 +325,17 @@ async function makeTomSelects(options=[]){
     const sel = document.getElementById(`desired${i}`);
     const ts = new TomSelect(sel,{create:false,allowEmptyOption:true});
     ts.on('change',val=>{
-      if(!val) { updateCalcAvailability(); return; }
+      if(!val) { updateCalcAvailability(); ensureMobileCascade(); return; }
       const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
       if(others.includes(val)){ alert(`⚠️ "${val}" เลือกไปแล้ว กรุณาเลือกใหม่`); ts.clear(); }
       updateCalcAvailability();
-      maybeRevealNext(i); // ← ปลดล็อกช่องถัดไปบนมือถือเมื่อเลือกแล้ว
+      ensureMobileCascade(); // ← progressive บนมือถือ
     });
     tomSelects.push(ts);
   }
-
-  // Progressive mobile visibility
-  applyMobileProgressiveVisibility();
-
+  ensureMobileCascade(); // ← เริ่มต้นซ่อนให้เหลือ 4 ช่องบนมือถือ
   updateCalcAvailability();
 }
-
 
 function getDesired(){
   if (tomSelects.length){
@@ -380,6 +343,61 @@ function getDesired(){
   }else{
     const wrap=document.getElementById('desiredSelects');
     return [...wrap.querySelectorAll('select')].map(s=>s.value).filter(Boolean);
+  }
+}
+
+function getSelectValueAt(i){
+  if (tomSelects.length){
+    const ts = tomSelects[i];
+    return ts ? ts.getValue() : '';
+  }else{
+    const el = document.getElementById(`desired${i}`);
+    return el ? el.value : '';
+  }
+}
+
+function hideSelectAt(i){
+  if (tomSelects.length){
+    const ts = tomSelects[i];
+    if (ts && ts.wrapper) ts.wrapper.classList.add('mobile-hidden');
+  }else{
+    const el = document.getElementById(`desired${i}`);
+    if (el) el.classList.add('mobile-hidden');
+  }
+}
+function showSelectAt(i){
+  if (tomSelects.length){
+    const ts = tomSelects[i];
+    if (ts && ts.wrapper) ts.wrapper.classList.remove('mobile-hidden');
+  }else{
+    const el = document.getElementById(`desired${i}`);
+    if (el) el.classList.remove('mobile-hidden');
+  }
+}
+
+/* ===== Progressive reveal (mobile): เริ่ม 4 ช่อง แล้วขยายเมื่อกรอกครบต่อเนื่อง ===== */
+const START_VISIBLE_MOBILE = 4;
+function isMobileProgressive(){
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+function ensureMobileCascade(){
+  if (!isMobileProgressive()){
+    // จอใหญ่: โชว์ครบ
+    for (let i=0;i<MAX_SELECTS;i++) showSelectAt(i);
+    return;
+  }
+  let visible = START_VISIBLE_MOBILE; // เริ่มโชว์ 4 ช่องแรก
+  for (let i=0;i<MAX_SELECTS;i++){
+    if (i < visible){
+      const val = getSelectValueAt(i);
+      if (val && i === visible - 1){
+        visible++; // ถ้าช่องสุดท้ายที่เห็นอยู่ถูกกรอก ให้ขยายเห็นช่องถัดไป
+      }
+    }
+  }
+  if (visible > MAX_SELECTS) visible = MAX_SELECTS;
+  for (let i=0;i<MAX_SELECTS;i++){
+    if (i < visible) showSelectAt(i); else hideSelectAt(i);
   }
 }
 
@@ -599,13 +617,16 @@ function renderResults(best){
         <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
       </div>
     `;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  document.querySelectorAll('.result-card').forEach(el => el.style.opacity = '1');
-}
     container.appendChild(card);
   });
+
+  // ถ้า Reduce Motion เปิดอยู่ ให้แน่ใจว่าการ์ดมองเห็น
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('.result-card').forEach(el => el.style.opacity = '1');
+  }
 }
 
+/* ✅ resetAll แบบใหม่: ล้างช่องจำนวนเซ็ตกลับเป็น placeholder 3-20 + progressive mobile */
 function resetAll(){
   if (tomSelects.length){
     tomSelects.forEach(ts=> ts.clear(true));
@@ -615,18 +636,19 @@ function resetAll(){
   if (darkOnly) darkOnly.checked = false;
 
   // ล้างค่าช่องจำนวนเซ็ต -> ให้แสดง placeholder
-  if (topKInput){ topKInput.value = ''; }
+  if (topKInput){
+    topKInput.value = '';
+  }
 
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
 
-  // 👇 ทำให้มือถือกลับไปเริ่มต้นที่ 4 ช่องแรก
-  applyMobileProgressiveVisibility();
+  // Progressive: กลับไปเริ่ม 4 ช่องบนมือถือ (และโชว์ครบถ้าเป็นจอใหญ่)
+  ensureMobileCascade();
 
   updateCalcAvailability();
   showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
 }
-
 
 /* ✅ แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
 function enableTouchTooltips(){
@@ -645,52 +667,6 @@ darkOnly?.addEventListener('change', ()=>{
   document.getElementById('result').innerHTML='';
   resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
 });
-
-// ===== Progressive selects on mobile =====
-const START_VISIBLE_MOBILE = 4;
-function isMobileProgressive(){
-  return window.matchMedia('(max-width: 768px)').matches;
-}
-
-/** ซ่อน/แสดงช่องตามโหมด progressive สำหรับมือถือ */
-function applyMobileProgressiveVisibility(){
-  const mobile = isMobileProgressive();
-  for (let i = 0; i < MAX_SELECTS; i++){
-    const el = document.getElementById(`desired${i}`);
-    if (!el) continue;
-    if (mobile){
-      // มือถือ: แสดง 0..3 (รวม 4 ช่องแรก), ที่เหลือซ่อนไว้ก่อน
-      if (i >= START_VISIBLE_MOBILE) el.classList.add('mobile-hidden');
-      else el.classList.remove('mobile-hidden');
-    }else{
-      // เดสก์ท็อป/แท็บเล็ตใหญ่: แสดงทั้งหมด
-      el.classList.remove('mobile-hidden');
-    }
-  }
-}
-
-/** ถ้าช่อง index นี้ถูกเลือกค่าแล้ว ให้ "ปลดล็อก" ช่องถัดไปบนมือถือ */
-function maybeRevealNext(index){
-  if (!isMobileProgressive()) return;
-
-  // อ่านค่าตามประเภท select (TomSelect หรือ native)
-  let val = '';
-  if (tomSelects.length){
-    const ts = tomSelects[index];
-    if (ts) val = ts.getValue();
-  }else{
-    const el = document.getElementById(`desired${index}`);
-    if (el) val = el.value;
-  }
-
-  if (val){
-    const next = document.getElementById(`desired${index+1}`);
-    if (next){
-      next.classList.remove('mobile-hidden');
-    }
-  }
-}
-
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   try{
@@ -726,6 +702,14 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // ✅ เปิดโหมด tooltip สำหรับจอสัมผัส
   enableTouchTooltips();
+
+  // ✅ Progressive เริ่มต้นตามขนาดหน้าจอ
+  ensureMobileCascade();
+
+  // ✅ อัปเดตเมื่อมีการปรับขนาดหน้าจอ/หมุนจอ
+  window.addEventListener('resize', ensureMobileCascade);
+  // Safari iOS เก่าๆ อาจไม่ยิง 'resize' ตอนเปลี่ยน orientation; กันไว้:
+  window.matchMedia && window.matchMedia('(max-width: 768px)').addEventListener?.('change', ensureMobileCascade);
 
   updateCalcAvailability();
 });
