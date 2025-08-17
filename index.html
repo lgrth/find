@@ -18,7 +18,7 @@
     line-height: 1.5;
   }
   body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
-  header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:20px;text-align:center;font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
+  header{background:linear-gradient(180deg,#1b3ca0,#1b3ca0);color:#fff;padding:20px;text-align:center;font-size:36px;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,.15)}
 
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
@@ -44,7 +44,7 @@
     display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap
   }
   .sel-counter{
-    color:#64748b;font-weight:600;font-size:14px;
+    color:#385b8c;font-weight:600;font-size:14px;
     background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px
   }
 
@@ -90,15 +90,18 @@
     outline:3px solid #7aa2ff; outline-offset:2px
   }
 
-  /* ===== Sticky CTA (มือถือ/แท็บเล็ต) ===== */
-  .cta-bar{
-    position:sticky;bottom:0;left:0;right:0;
-    background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
-    border-top:1px solid #e5e7eb;display:none;gap:10px;
-    padding:10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
-    z-index:100;
-  }
-  @media (max-width:1024px){ .cta-bar{display:flex} }
+    /* ===== Sticky CTA (มือถือ/แท็บเล็ต) ===== */
+    .cta-bar{
+      position:sticky;bottom:0;left:0;right:0;
+      background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
+      border-top:1px solid #e5e7eb;display:none;gap:10px;
+      padding:10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+      z-index:100;
+    }
+    @media (max-width:767px){ .cta-bar{display:flex} }
+    @media (max-width: 767px){
+  .row-actions{ display:none !important; }
+}
 
   /* ===== Results ===== */
   .grid-results{display:flex;flex-direction:column;gap:16px;margin-top:10px}
@@ -107,7 +110,33 @@
     display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px;
     background:#fff;border-radius:15px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:14px;opacity:0;animation:fadeSlideIn 1s forwards
   }
-  .result-card h3{margin:0;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block}
+  .result-card h3{margin:0;color:#fff;padding:6px 18px;border-radius:8px;display:inline-block;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+
+  /* หัวการ์ด: อันดับซ้าย + badges ขวา */
+.result-card .card-head{
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap; /* จอแคบให้ตกล้นลงบรรทัดถัดไปได้ */
+}
+.result-card .card-head h3{
+  margin: 0; /* กันโดน margin ดันเลย์เอาต์ */
+}
+.result-card .card-head .badges{
+  margin-left: auto;  /* ดันไปชิดขวา */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* จอเล็ก จูนระยะห่างนิดหน่อย */
+@media (max-width: 480px){
+  .result-card .card-head{ gap: 8px; }
+  .result-card .card-head .badges{ row-gap: 6px; }
+}
+
 
   /* badges */
   .badges{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0}
@@ -120,26 +149,29 @@
   .badge--extra{background:#eef2ff;color:#3730a3;border-color:#c7d2fe}
 
   /* rank colors */
-  .rank-1 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
-  .rank-2 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
-  .rank-3 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
-  .rank-4 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
-  .rank-5 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
-  .rank-6 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
-  .rank-7 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
-  .rank-8 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
-  .rank-9 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
-  .rank-10 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
-  .rank-11 h3{background:linear-gradient(90deg,#f6c23e,#f8b14c)}
-  .rank-12 h3{background:linear-gradient(90deg,#36b9cc,#1cc88a)}
-  .rank-13 h3{background:linear-gradient(90deg,#e74a3b,#f54e4e)}
-  .rank-14 h3{background:linear-gradient(90deg,#7a7eff,#5a6bff)}
-  .rank-15 h3{background:linear-gradient(90deg,#8e8e8e,#b0b0b0)}
-  .rank-16 h3{background:linear-gradient(90deg,#c471ed,#f64f59)}
-  .rank-17 h3{background:linear-gradient(90deg,#00c6ff,#0072ff)}
-  .rank-18 h3{background:linear-gradient(90deg,#f7971e,#ffd200)}
-  .rank-19 h3{background:linear-gradient(90deg,#56ab2f,#a8e063)}
-  .rank-20 h3{background:linear-gradient(90deg,#bdc3c7,#2c3e50)}
+  .rank-1  h3{ background:#B91C1C; } /* red 700 */
+  .rank-2  h3{ background:#E11D48; } /* rose 600 */
+  .rank-3  h3{ background:#A21CAF; } /* fuchsia 700 */
+  .rank-4  h3{ background:#6D28D9; } /* violet 700 */
+  .rank-5  h3{ background:#3730A3; } /* indigo 800 */
+
+  .rank-6  h3{ background:#1D4ED8; } /* blue 700 */
+  .rank-7  h3{ background:#0369A1; } /* sky 700 */
+  .rank-8  h3{ background:#0F766E; } /* teal 700 */
+  .rank-9  h3{ background:#047857; } /* emerald 700 */
+  .rank-10 h3{ background:#15803D; } /* green 700 */
+
+  .rank-11 h3{ background:#3F6212; } /* olive (lime 700 โทนเข้ม) */
+  .rank-12 h3{ background:#B45309; } /* amber 700 เข้ม (อ่านกับขาวได้) */
+  .rank-13 h3{ background:#C2410C; } /* orange 700 */
+  .rank-14 h3{ background:#EA580C; } /* coral 600 เข้มพอ */
+  .rank-15 h3{ background:#8B4513; } /* saddle brown */
+
+  .rank-16 h3{ background:#A15C2F; } /* copper */
+  .rank-17 h3{ background:#7A6A58; } /* taupe */
+  .rank-18 h3{ background:#475569; } /* slate gray 600 */
+  .rank-19 h3{ background:#334155; } /* charcoal (slate 700) */
+  .rank-20 h3{ background:#0B0F14; } /* near black */
 
   .jewel-wrap{grid-column:1 / -1}
   .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -254,7 +286,7 @@
     <div class="row-two-col">
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size: 16px;">
+        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size: 18px;font-family: Kanit;">
       </div>
       <div class="col">
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;min-height:44px">
@@ -271,8 +303,8 @@
 
     <!-- Sticky CTA (mobile/tablet only) -->
     <div class="cta-bar" aria-label="ตัวเลือกด่วน">
-      <button class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
-      <button class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+      <button id="calcBtn" button class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
+      <button id="resetBtn" button class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
     </div>
   </section>
 
@@ -683,13 +715,13 @@ function renderResults(best){
     const badgesHTML = `
       <div class="badges" aria-label="สรุปความตรงใจ">
         <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">
-          ✅ ตรงใจ ${matchedCount}
+          ✅ ตรงเป๊ะ ${matchedCount}
         </span>
         <span class="badge badge--miss" title="ความสามารถที่เลือกไว้แต่ยังไม่ครอบคลุม">
-          🔴 ไม่ตรงใจ ${notList.length}
+          🔴 ไม่ตรง ${notList.length}
         </span>
         <span class="badge badge--extra" title="ความสามารถอื่น ๆ ที่ติดมาด้วย">
-          ✨ ส่วนเกิน ${extra.length}
+          ✨ เพิ่มเข้ามา ${extra.length}
         </span>
       </div>
     `;
@@ -698,16 +730,23 @@ function renderResults(best){
     const extraHTML = extra.length ? `<span class="extra-title">🟢 ความสามารถที่เพิ่มเข้ามา:</span> ${extra.join(', ')}` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
 
-    card.innerHTML = `
-      <div style="grid-column:1 / -1"><h3>อันดับ ${i+1}</h3></div>
-      <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
-      ${badgesHTML}
-      <div class="card-info">
-        <p>${notMatchHTML}</p>
-        <p>${extraHTML}</p>
-        <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
-      </div>
-    `;
+    const headerHTML = `
+  <div class="card-head">
+    <h3>อันดับ ${i+1}</h3>
+    ${badgesHTML}
+  </div>
+`;
+
+card.innerHTML = `
+  ${headerHTML}
+  <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
+  <div class="card-info">
+    <p>${notMatchHTML}</p>
+    <p>${extraHTML}</p>
+    <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
+  </div>
+`;
+
     container.appendChild(card);
   });
 
