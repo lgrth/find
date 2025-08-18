@@ -246,6 +246,7 @@ header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
 
 .steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
 .steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:4px 10px;font-size:13px;color:#fff;}
+.steps-inline li2{display:flex;align-items:center;gap:8px;background:rgba(31,74,197,.14);border:1px solid rgba(16,39,71,.28);border-radius:12px;padding:4px 10px;font-size:13px;color:#fff;}
 .steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1f4ac5;color:#fff;font-weight:700;font-size:12px}
 
 .input-help{font-size:12px;color:#475569;margin-top:6px}
@@ -371,6 +372,15 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   background:#f1f5f9;
   border:1px solid #e2e8f0;
   color:#334155;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+  display:flex;align-items:center;gap:8px;
+}
+  .steps-bar .steps-inline li2{
+  background:#1f4ac5;
+  border:1px solid #102747;
+  color:#ffffff;
   border-radius:999px;
   padding:6px 10px;
   font-size:13px;
@@ -551,8 +561,8 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   </div>
   </header>
 <div class="steps-bar" role="navigation" aria-label="ขั้นตอนการใช้งาน">
-  <ol class="steps-topic">ขั้นตอนการใช้งาน</ol>
   <ol class="steps-inline">
+    <li2>ขั้นตอนการใช้งาน</li>
     <li><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
     <li><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
     <li><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
