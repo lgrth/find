@@ -23,7 +23,7 @@
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
     display:grid;grid-template-columns:1fr 1fr;gap:25px;
-    padding:10px;margin:0 auto;
+    padding:25px;margin:0 auto;
     max-width:1200px;
   }
   @media (min-width:1440px){ main{max-width:1400px} }
@@ -32,7 +32,7 @@
 
   /* Tablet/มือถือ -> 1 คอลัมน์ */
   @media (max-width:1024px){
-    main{ grid-template-columns:1fr; gap:18px; padding:0px }
+    main{ grid-template-columns:1fr; gap:18px; padding:20px }
   }
 
   section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,.1)}
@@ -359,7 +359,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 
 
 /* Non-sticky steps bar under header */
-.steps-bar{display:flex;flex-direction: column;align-items: center;text-align: center;justify-content:center;padding:0 0 0 0;background:transparent;box-shadow:none;}
+.steps-bar{display:flex;flex-direction: column;align-items: center;text-align: center;justify-content:center;padding:8px 0 0 0;background:transparent;box-shadow:none;}
 .steps-bar .steps-inline{
   display:flex; flex-wrap:wrap; gap:4px; margin:5px; padding: 6px; list-style:none;
 }
@@ -1812,12 +1812,100 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       });
     }
 
-    if (count >= 5){
+    if (count >= 3){
       // ถ้าเคยกดครบแล้ว 3 ครั้ง → ซ่อน toast ตลอด
       if (panel){ panel.classList.add('hidden'); }
       window.fetchGVizJSONP = __origFetchGVizJSONP;
     }
   }
+})();
+</script>
+
+<!-- TEST ล้างการจดจำ-->
+ <!-- 
+<button id="resetConsent" style="position:fixed;bottom:10px;right:10px;z-index:2100;">
+  ล้างการจดจำ
+</button>
+<script>
+  const resetBtn = document.getElementById('resetConsent');
+if (resetBtn) {
+  resetBtn.addEventListener('click', ()=>{
+    localStorage.removeItem('consent_ack_v1'); // ลบค่าออกไป
+    alert("ล้างการจดจำเรียบร้อยแล้ว!");
+  });
+}
+</script>
+-->
+
+
+<script>
+(() => {
+  // Persist values of common form controls with an id.
+  // Scope-minimized: no globals, runs once after DOMContentLoaded.
+  const KEY_PREFIX = "persist:";
+
+  const persistRadioGroup = (name, value) => {
+    try { localStorage.setItem(KEY_PREFIX + "radio:" + name, value); } catch(e) {}
+  };
+  const getPersistedRadio = (name) => {
+    try { return localStorage.getItem(KEY_PREFIX + "radio:" + name); } catch(e) { return null; }
+  };
+  const persistValue = (id, value) => {
+    try { localStorage.setItem(KEY_PREFIX + id, value); } catch(e) {}
+  };
+  const getPersisted = (id) => {
+    try { return localStorage.getItem(KEY_PREFIX + id); } catch(e) { return null; }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const controls = Array.from(document.querySelectorAll([
+      "select[id]",
+      "textarea[id]",
+      'input[id][type="text"]',
+      'input[id][type="number"]',
+      'input[id][type="date"]',
+      'input[id][type="time"]',
+      'input[id][type="email"]',
+      'input[id][type="url"]',
+      'input[id][type="checkbox"]',
+      'input[id][type="radio"]',
+      'input[id]:not([type])' // default text input without type
+    ].join(",")));
+
+    // Restore saved values first
+    controls.forEach(el => {
+      if (el.tagName === "INPUT" && el.type === "radio") {
+        const name = el.name || el.id; // fallback to id if no name
+        const saved = getPersistedRadio(name);
+        if (saved !== null) {
+          el.checked = (el.value === saved);
+        }
+      } else if (el.tagName === "INPUT" && el.type === "checkbox") {
+        const saved = getPersisted(el.id);
+        if (saved !== null) el.checked = (saved === "true");
+      } else {
+        const saved = getPersisted(el.id);
+        if (saved !== null) el.value = saved;
+      }
+    });
+
+    // Wire up change listeners
+    controls.forEach(el => {
+      if (el.tagName === "INPUT" && el.type === "radio") {
+        const name = el.name || el.id;
+        el.addEventListener("change", () => {
+          if (el.checked) persistRadioGroup(name, el.value);
+        });
+      } else if (el.tagName === "INPUT" && el.type === "checkbox") {
+        el.addEventListener("change", () => persistValue(el.id, String(el.checked)));
+      } else {
+        const handler = () => persistValue(el.id, el.value);
+        el.addEventListener("change", handler);
+        // Also persist on input for text-like fields
+        if (el.tagName !== "SELECT") el.addEventListener("input", handler);
+      }
+    });
+  }, { once: true });
 })();
 </script>
 </body>
