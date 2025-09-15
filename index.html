@@ -23,7 +23,7 @@
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
     display:grid;grid-template-columns:1fr 1fr;gap:25px;
-    padding:25px;margin:0 auto;
+    padding:5px;margin:0 auto;
     max-width:1200px;
   }
   @media (min-width:1440px){ main{max-width:1400px} }
@@ -32,7 +32,7 @@
 
   /* Tablet/มือถือ -> 1 คอลัมน์ */
   @media (max-width:1024px){
-    main{ grid-template-columns:1fr; gap:18px; padding:20px }
+    main{ grid-template-columns:1fr; gap:18px; padding:5px }
   }
 
   section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,.1)}
@@ -80,6 +80,15 @@
   }
   .btn--primary{background:#2e59d9;font-weight:700;box-shadow:0 6px 16px rgba(46,89,217,.35)}
   .btn--primary:hover{background:#1f4ac5;box-shadow:0 8px 18px rgba(31,74,197,.4)}
+  .btn--secondary{
+  background:#6b7280; /* gray-500 */
+  box-shadow:0 6px 16px rgba(107,114,128,.35);
+}
+.btn--secondary:hover{
+  background:#4b5563; /* gray-600 */
+  box-shadow:0 8px 18px rgba(75,85,99,.4);
+}
+
   .btn--danger{background:#e74a3b;font-weight:700;box-shadow:0 6px 16px rgba(231,74,59,.35)}
   .btn--danger:hover{background:#c0392b;box-shadow:0 8px 18px rgba(192,57,43,.4)}
   .btn[disabled]{opacity:.6;cursor:not-allowed}
@@ -359,15 +368,12 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 
 
 /* Non-sticky steps bar under header */
-.steps-bar{display:flex;flex-direction: column;align-items: center;text-align: center;justify-content:center;padding:8px 0 0 0;background:transparent;box-shadow:none;}
-.steps-bar .steps-inline{
-  display:flex; flex-wrap:wrap; gap:4px; margin:5px; padding: 6px; list-style:none;
-}
+.steps-bar{display:flex;flex-direction: column;align-items: center;text-align: center;justify-content:center;padding:4px 0 0 0;background:transparent;box-shadow:none;}
 /* Reuse capsule style already defined for .steps-inline li & .step-index */
 
 
 /* Steps-bar on light background: softer capsules */
-.steps-bar .steps-inline{display:flex;flex-wrap:wrap;gap:4px;margin:10px;padding:10px;list-style:none}
+.steps-bar .steps-inline{display:flex;flex-wrap:wrap;gap:4px;margin:5px;padding:5px;list-style:none}
 .steps-bar .steps-inline li{
   background:#f1f5f9;
   border:1px solid #668aee;
@@ -643,15 +649,19 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
     </div>
 
     <div class="row-actions">
-      <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
-      <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
-    </div>
+  <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
+  <button id="shareBtn" type="button" class="btn btn--secondary">แชร์</button>
+  <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+</div>
+
 
     <!-- Sticky CTA (mobile/tablet only) -->
-    <div class="cta-bar" aria-label="ตัวเลือกด่วน">
-      <button id="calcBtn2" button class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้ที่ดีที่สุด</button>
-      <button id="resetBtn2" button class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
-    </div>
+   <div class="cta-bar" aria-label="ตัวเลือกด่วน">
+  <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
+  <button id="shareBtn2" type="button" class="btn btn--secondary">แชร์</button>
+  <button id="resetBtn2" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+</div>
+
   </section>
 
   <section>
@@ -1191,6 +1201,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     hideLoading();
     showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
                                'ℹ️ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+    bindShareButtons();       // ผูกอีเวนต์ปุ่มแชร์
+    applyStateFromURL(); 
 
   }catch(err){
     hideLoading();
@@ -1228,6 +1240,118 @@ setProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>
   updateCalcAvailability();
 });
 </script>
+
+<script>
+/** --- แชร์สถานะผ่าน URL ---
+ * โครงสร้างพารามิเตอร์:
+ *   ?sel=ชื่อความสามารถ&sel=ชื่อความสามารถ...  (มีได้หลายค่า)
+ *   &k=จำนวนTopK
+ *   &dark=1      (ถ้าติ๊กเฉพาะ [ดาร์ค])
+ *   &auto=1      (เปิดแล้วรันอัตโนมัติ)
+ */
+function buildShareURL(){
+  const url = new URL(location.href);
+  // เคลียร์ query เดิมแล้วเติมใหม่
+  url.search = '';
+  const params = url.searchParams;
+
+  // ใส่ความสามารถที่เลือก (ซ้ำหลายพารามิเตอร์ sel=)
+  const desired = getDesired();
+  desired.forEach(v => params.append('sel', v));
+
+  // จำนวนเซ็ต (TopK)
+  const rawK = (topKInput?.value || '').trim();
+  if (rawK) params.set('k', rawK);
+
+  // เฉพาะ [ดาร์ค]
+  if (darkOnly?.checked) params.set('dark', '1');
+
+  // ให้รัน auto ตอนเปิด
+  params.set('auto', '1');
+
+  url.search = params.toString();
+  return url.toString();
+}
+
+async function applyStateFromURL(){
+  const params = new URLSearchParams(location.search);
+  const sels = params.getAll('sel');    // ความสามารถหลายค่า
+  const k    = params.get('k');         // topK
+  const dark = params.get('dark');      // '1' แปลว่าติ๊ก
+  const auto = params.get('auto');      // '1' ให้รันทันที
+
+  // ถ้าไม่มีค่าอะไร ไม่ต้องทำอะไร
+  if (sels.length === 0 && !k && !dark) return;
+
+  // ตั้งค่า darkOnly / topK ก่อน
+  if (darkOnly) darkOnly.checked = (dark === '1');
+  if (topKInput && k) topKInput.value = k;
+
+  // ใส่ค่าความสามารถลง TomSelect / Native selects
+  // - สร้างชุด option (ชื่อความสามารถทั้งหมด) จาก selects ชุดแรก
+  const allOptions = [];
+  for (let i = 0; i < MAX_SELECTS; i++){
+    const val = getSelectValueAt(i); // แค่เรียกให้แน่ใจว่ามี select
+  }
+
+  // ใส่ค่าเรียงลงไปตามลำดับ
+  // หมายเหตุ: ถ้าชื่อความสามารถใน URL ไม่มีในชุด options จะถูกข้าม
+  if (tomSelects.length){
+    tomSelects.forEach(ts => ts.clear(true));
+    let idx = 0;
+    for (const name of sels){
+      const ts = tomSelects[idx++];
+      if (!ts) break;
+      // ตรวจว่ามี option นี้ไหม
+      const has = ts.options[name] || ts.options?.[name] !== undefined;
+      if (has || true){ // TomSelect สามารถ setValue ได้ถ้ามี option ใน <select> เดิมอยู่แล้ว
+        ts.setValue(name, true);
+      }
+    }
+  }else{
+    // โหมด native select
+    const wrap = document.getElementById('desiredSelects');
+    const selects = [...wrap.querySelectorAll('select')];
+    selects.forEach(s => s.value = '');
+    for (let i=0; i<sels.length && i<selects.length; i++){
+      const el = selects[i];
+      const target = sels[i];
+      // ตั้งค่า ถ้ามี option
+      const opt = [...el.options].find(o => o.value === target);
+      if (opt) el.value = target;
+    }
+  }
+
+  ensureMobileCascade();
+  updateCalcAvailability();
+
+  // มีค่า MIN_SELECTS แล้ว และขอ auto รัน -> คำนวณเลย
+  const hasMin = (getDesired().length >= MIN_SELECTS);
+  if (auto === '1' && hasMin){
+    // ให้แน่ใจว่ามี jewels โหลดแล้ว (ใน onload หลักจะเรียก fetch แล้ว)
+    await new Promise(r => setTimeout(r, 50));
+    calculate();
+  }
+}
+
+// --- ผูกปุ่มแชร์ ---
+function bindShareButtons(){
+  const onShare = ()=>{
+    const link = buildShareURL();
+    history.replaceState(null, '', link); // อัปเดต URL ปัจจุบันให้แชร์จากแอดเดรสบาร์ได้ด้วย
+    navigator.clipboard.writeText(link).then(()=>{
+      showToast('✅ คัดลอกลิงก์แชร์แล้ว');
+    }).catch(()=>{
+      // fallback: สร้าง prompt
+      window.prompt('คัดลอกลิงก์ด้านล่าง', link);
+    });
+  };
+  document.getElementById('shareBtn')?.addEventListener('click', onShare);
+  document.getElementById('shareBtn2')?.addEventListener('click', onShare);
+}
+</script>
+
+
 
 <script>
 // Inline validation for topK (3-20)
