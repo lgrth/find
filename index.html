@@ -1925,177 +1925,191 @@ if (resetBtn) {
 </script>
 
 <script>
-/* ===== v1.4 Share-by-Index (robust & compact) =====
-   Encodes selected abilities as indices from the option list to avoid label mismatch.
-   Query params:
-     s=idx-idx-...  (zero-based indices of selected abilities)
-     k=<topK>       (3-20)
-     d=1            (dark only)
-     a=1            (auto run)
-   Backward compatible with sel=... (reads as fallback)
+/* ===== v1.7 Share & Restore (Base64 JSON in #hash) =====
+   - Short, robust link: #p=<base64(JSON of selected values)>&k=10&d=1&a=1
+   - Works regardless of slashes/spaces/Thai text (value preserved 1:1)
+   - Fallback reads sel=... if p= is missing
+   - MutationObserver waits until options/tomSelects ready before restore
+   - Exposes safe globals: bindShareButtons/applyStateFromURL
 */
+(function(){
+  const MAX_SELECTS = window.MAX_SELECTS || 14;
 
-function getSubstatIndexList(){
-  if (Array.isArray(window.__SUBSTAT_INDEX) && window.__SUBSTAT_INDEX.length) {
-    return window.__SUBSTAT_INDEX.slice();
-  }
-  // Infer from options of the first select
-  const s0 = document.getElementById('desired0');
-  if (s0 && s0.options && s0.options.length){
-    const arr = Array.from(s0.options).map(o=>o.value).filter(Boolean);
-    window.__SUBSTAT_INDEX = arr.slice();
-    return arr;
-  }
-  // TomSelect path: read from ts.options of first TomSelect
-  if (window.tomSelects && tomSelects.length){
-    const ts0 = tomSelects[0];
-    const arr = Object.values(ts0.options || {}).map(o => o.value).filter(Boolean);
-    window.__SUBSTAT_INDEX = arr.slice();
-    return arr;
-  }
-  return [];
-}
+  // --- helpers ---
+  const encB64 = (obj)=>{
+    try {
+      const s = JSON.stringify(obj || []);
+      return btoa(unescape(encodeURIComponent(s)));
+    } catch(e){ return ''; }
+  };
+  const decB64 = (b64)=>{
+    try {
+      const s = decodeURIComponent(escape(atob(b64)));
+      return JSON.parse(s);
+    } catch(e){ return []; }
+  };
+  const getHashParams = ()=>{
+    const h = (location.hash || '').replace(/^#/, '');
+    return new URLSearchParams(h);
+  };
+  const getQueryParams = ()=> new URLSearchParams(location.search || '');
+  const getParams = ()=>{
+    const hp = getHashParams();
+    return (hp && hp.toString().length>0) ? hp : getQueryParams();
+  };
 
-function getDesiredValuesRaw(){
-  const out = [];
-  if (window.tomSelects && tomSelects.length){
-    for (const ts of tomSelects){
-      try{
-        const v = (typeof ts.getValue === 'function') ? ts.getValue() : null;
-        if (v) out.push(v);
-      }catch(e){}
+  function getSelectedValues(){
+    const out = [];
+    if (window.tomSelects && tomSelects.length){
+      for (const ts of tomSelects){
+        try{
+          const v = (typeof ts.getValue === 'function') ? ts.getValue() : null;
+          if (v) out.push(v);
+        }catch(e){}
+      }
+    } else {
+      const wrap = document.getElementById('desiredSelects');
+      const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
+      for (const el of selects){ if (el && el.value) out.push(el.value); }
     }
-  } else {
-    const wrap = document.getElementById('desiredSelects');
-    const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
-    for (const el of selects){
-      if (el && el.value) out.push(el.value);
+    return out.filter(Boolean);
+  }
+
+  function setSelectedValues(vals){
+    if (!Array.isArray(vals) || !vals.length) return;
+    if (window.tomSelects && tomSelects.length){
+      tomSelects.forEach(ts => { try{ ts.clear(true);}catch(e){} });
+      vals.forEach((v,i)=>{
+        const ts = tomSelects[i];
+        if (!ts) return;
+        // ensure option exists then add
+        try{
+          if (!ts.options || !ts.options[v]) ts.addOption({ value:v, text:v });
+          ts.addItem(v, true);
+        }catch(e){}
+      });
+    } else {
+      const wrap = document.getElementById('desiredSelects');
+      const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
+      vals.forEach((v,i)=>{
+        const el = selects[i];
+        if (!el) return;
+        let opt = Array.from(el.options).find(o => o.value === v);
+        if (!opt){
+          // create a temp option if not found
+          opt = new Option(v, v, true, true);
+          el.add(opt);
+        } else {
+          el.value = v;
+        }
+      });
     }
   }
-  return out.filter(Boolean);
-}
 
-function buildShareURL(){
-  const url = new URL(location.href);
-  url.search = '';
-  const params = url.searchParams;
+  function buildShareURL(){
+    const url = new URL(location.href);
+    url.search = '';
+    url.hash = '';
 
-  const list = getSubstatIndexList();
-  const vals = getDesiredValuesRaw();
+    const params = new URLSearchParams();
+    const vals = getSelectedValues();
+    if (vals.length){
+      params.set('p', encB64(vals));
+    }
+    if (window.topKInput && topKInput.value) params.set('k', String(topKInput.value).trim());
+    if (window.darkOnly && darkOnly.checked) params.set('d', '1');
+    params.set('a', '1');
 
-  const idxs = [];
-  const fallback = [];
-  vals.forEach(v => {
-    const i = list.indexOf(v);
-    if (i >= 0) idxs.push(i);
-    else fallback.push(v); // keep for backward-compat
-  });
-
-  if (idxs.length) params.set('s', idxs.join('-'));
-  // keep old sel as backup in case list changed in the future
-  fallback.forEach(v => params.append('sel', v));
-
-  if (window.topKInput && topKInput.value) params.set('k', String(topKInput.value).trim());
-  if (window.darkOnly && darkOnly.checked) params.set('d','1');
-  params.set('a','1');
-
-  url.search = params.toString();
-  return url.toString();
-}
-
-function applyStateFromURL(){
-  const params = new URLSearchParams(location.search);
-  const list = getSubstatIndexList();
-
-  const s = params.get('s');          // e.g. "1-5-12-77"
-  const k = params.get('k');
-  const d = params.get('d');
-  const a = params.get('a');
-
-  const selsFallback = params.getAll('sel'); // old format
-
-  if (window.darkOnly) darkOnly.checked = (d === '1');
-  if (window.topKInput && k) topKInput.value = k;
-
-  const namesFromIndex = [];
-  if (s){
-    const ints = s.split(/[^0-9]+/).filter(Boolean).map(x=>parseInt(x,10)).filter(n=>!isNaN(n));
-    ints.forEach(i => { if (i >= 0 && i < list.length) namesFromIndex.push(list[i]); });
+    url.hash = params.toString();
+    return url.toString();
   }
 
-  let names = namesFromIndex.slice();
-  // fill with fallback sel= if provided
-  if (selsFallback && selsFallback.length){
-    const left = Math.max(0, (window.MAX_SELECTS || 14) - names.length);
-    if (left > 0){
-      for (let i=0; i<selsFallback.length && names.length < (window.MAX_SELECTS || 14); i++){
-        const v = selsFallback[i];
-        if (v && !names.includes(v)) names.push(v);
+  function applyFromURL(){
+    const p = getParams();
+    if (!p || p.toString().length === 0) return;
+
+    const a = p.get('a');
+    const k = p.get('k');
+    const d = p.get('d');
+    const b64 = p.get('p');
+    const fall = p.getAll('sel');
+
+    if (window.topKInput && k) topKInput.value = k;
+    if (window.darkOnly) darkOnly.checked = (d === '1');
+
+    let vals = [];
+    if (b64) vals = decB64(b64);
+    if ((!vals || !vals.length) && fall && fall.length) vals = fall;
+
+    if (vals && vals.length){
+      setSelectedValues(vals.slice(0, MAX_SELECTS));
+      if (typeof ensureMobileCascade === 'function') ensureMobileCascade();
+      if (typeof updateCalcAvailability === 'function') updateCalcAvailability();
+      if (a === '1' && typeof getDesired === 'function' && getDesired().length >= (window.MIN_SELECTS||1)){
+        setTimeout(()=>{ try{ calculate && calculate(); }catch(e){} }, 60);
       }
     }
   }
 
-  // Set values into selects
-  if (window.tomSelects && tomSelects.length){
-    tomSelects.forEach(ts => { try{ ts.clear(true); }catch(e){} });
-    names.forEach((name, i)=>{
-      const ts = tomSelects[i];
-      if (!ts) return;
-      try { ts.addItem(name, true); } catch(e){}
-    });
-  } else {
-    const wrap = document.getElementById('desiredSelects');
-    const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
-    names.forEach((name, i)=>{
-      const el = selects[i];
-      if (!el) return;
-      const opt = Array.from(el.options).find(o => o.value === name || (o.textContent||'') === name);
-      if (opt) el.value = opt.value;
-    });
+  function bindShareButtonsInternal(){
+    const onShare = ()=>{
+      const link = buildShareURL();
+      try{ history.replaceState(null, '', link); }catch(e){}
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(link)
+          .then(()=>{ try{ showToast && showToast('✅ คัดลอกลิงก์แชร์แล้ว'); }catch(e){} })
+          .catch(()=>{ window.prompt('คัดลอกลิงก์', link); });
+      } else {
+        window.prompt('คัดลอกลิงก์', link);
+      }
+    };
+    const b1 = document.getElementById('shareBtn');
+    const b2 = document.getElementById('shareBtn2');
+    if (b1) b1.addEventListener('click', onShare);
+    if (b2) b2.addEventListener('click', onShare);
   }
 
-  if (typeof ensureMobileCascade === 'function') ensureMobileCascade();
-  if (typeof updateCalcAvailability === 'function') updateCalcAvailability();
+  // Expose safe globals for legacy calls (avoid "Can't find variable")
+  window.bindShareButtons = window.bindShareButtons || function(){ try{ bindShareButtonsInternal(); }catch(e){} };
+  window.applyStateFromURL = window.applyStateFromURL || function(){ try{ applyFromURL(); }catch(e){} };
 
-  const hasMin = (typeof getDesired === 'function') ? (getDesired().length >= (window.MIN_SELECTS || 1)) : true;
-  if (a === '1' && hasMin && typeof calculate === 'function'){
-    setTimeout(()=>calculate(), 60);
+  // Wait until options/tomSelects exist, then apply
+  function waitOptionsThenApply(){
+    const readyCheck = ()=>{
+      // ready if tomSelects initialized or at least one select has >1 option
+      if (window.tomSelects && tomSelects.length){
+        const ts0 = tomSelects[0];
+        if (ts0 && ts0.options && Object.keys(ts0.options).length) return true;
+      }
+      const wrap = document.getElementById('desiredSelects');
+      if (wrap){
+        const any = Array.from(wrap.querySelectorAll('select')).some(s => (s.options||[]).length > 1);
+        if (any) return true;
+      }
+      return false;
+    };
+    if (readyCheck()){
+      applyFromURL();
+      return;
+    }
+    const wrap = document.getElementById('desiredSelects') || document.body;
+    const mo = new MutationObserver(()=>{
+      if (readyCheck()){
+        mo.disconnect();
+        applyFromURL();
+      }
+    });
+    mo.observe(wrap, { childList: true, subtree: true });
+    // hard fallback
+    setTimeout(()=>{ applyFromURL(); }, 15000);
   }
-}
 
-function bindShareButtons(){
-  const onShare = ()=>{
-    const link = buildShareURL();
-    try{ history.replaceState(null, '', link); }catch(e){}
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(link)
-        .then(()=>{ try{ showToast && showToast('✅ คัดลอกลิงก์แชร์แล้ว'); }catch(e){} })
-        .catch(()=>{ window.prompt('คัดลอกลิงก์ด้านล่าง', link); });
-    } else {
-      window.prompt('คัดลอกลิงก์ด้านล่าง', link);
-    }
-  };
-  const b1 = document.getElementById('shareBtn');
-  const b2 = document.getElementById('shareBtn2');
-  if (b1) b1.addEventListener('click', onShare);
-  if (b2) b2.addEventListener('click', onShare);
-}
-
-// Wire-up after selects/options are ready
-document.addEventListener('DOMContentLoaded', ()=>{
-  // If your existing code already calls bindShareButtons/applyStateFromURL, this will override with the new ones.
-  try{ bindShareButtons(); }catch(e){}
-  // Try apply after TomSelects get built
-  let tries = 0;
-  const iv = setInterval(()=>{
-    tries++;
-    const hasOptions = !!getSubstatIndexList().length;
-    if (hasOptions || tries > 200){
-      clearInterval(iv);
-      try{ applyStateFromURL(); }catch(e){}
-    }
-  }, 50);
-});
+  document.addEventListener('DOMContentLoaded', ()=>{
+    try{ bindShareButtonsInternal(); }catch(e){}  // attach buttons now
+    waitOptionsThenApply();                        // apply when ready
+    window.addEventListener('hashchange', applyFromURL);
+  });
+})();
 </script>
 
 </body>
