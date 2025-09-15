@@ -650,7 +650,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 
     <div class="row-actions">
   <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-  <button id="shareBtn" type="button" class="btn btn--secondary">แชร์</button>
+  <button id="shareBtn" type="button" class="btn btn--secondary">แชร์ให้เพื่อน</button>
   <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
 </div>
 
@@ -658,7 +658,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
     <!-- Sticky CTA (mobile/tablet only) -->
    <div class="cta-bar" aria-label="ตัวเลือกด่วน">
   <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-  <button id="shareBtn2" type="button" class="btn btn--secondary">แชร์</button>
+  <button id="shareBtn2" type="button" class="btn btn--secondary">แชร์ให้เพื่อน</button>
   <button id="resetBtn2" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
 </div>
 
@@ -1241,115 +1241,6 @@ setProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>
 });
 </script>
 
-<script>
-/** --- แชร์สถานะผ่าน URL ---
- * โครงสร้างพารามิเตอร์:
- *   ?sel=ชื่อความสามารถ&sel=ชื่อความสามารถ...  (มีได้หลายค่า)
- *   &k=จำนวนTopK
- *   &dark=1      (ถ้าติ๊กเฉพาะ [ดาร์ค])
- *   &auto=1      (เปิดแล้วรันอัตโนมัติ)
- */
-function buildShareURL(){
-  const url = new URL(location.href);
-  // เคลียร์ query เดิมแล้วเติมใหม่
-  url.search = '';
-  const params = url.searchParams;
-
-  // ใส่ความสามารถที่เลือก (ซ้ำหลายพารามิเตอร์ sel=)
-  const desired = getDesired();
-  desired.forEach(v => params.append('sel', v));
-
-  // จำนวนเซ็ต (TopK)
-  const rawK = (topKInput?.value || '').trim();
-  if (rawK) params.set('k', rawK);
-
-  // เฉพาะ [ดาร์ค]
-  if (darkOnly?.checked) params.set('dark', '1');
-
-  // ให้รัน auto ตอนเปิด
-  params.set('auto', '1');
-
-  url.search = params.toString();
-  return url.toString();
-}
-
-async function applyStateFromURL(){
-  const params = new URLSearchParams(location.search);
-  const sels = params.getAll('sel');    // ความสามารถหลายค่า
-  const k    = params.get('k');         // topK
-  const dark = params.get('dark');      // '1' แปลว่าติ๊ก
-  const auto = params.get('auto');      // '1' ให้รันทันที
-
-  // ถ้าไม่มีค่าอะไร ไม่ต้องทำอะไร
-  if (sels.length === 0 && !k && !dark) return;
-
-  // ตั้งค่า darkOnly / topK ก่อน
-  if (darkOnly) darkOnly.checked = (dark === '1');
-  if (topKInput && k) topKInput.value = k;
-
-  // ใส่ค่าความสามารถลง TomSelect / Native selects
-  // - สร้างชุด option (ชื่อความสามารถทั้งหมด) จาก selects ชุดแรก
-  const allOptions = [];
-  for (let i = 0; i < MAX_SELECTS; i++){
-    const val = getSelectValueAt(i); // แค่เรียกให้แน่ใจว่ามี select
-  }
-
-  // ใส่ค่าเรียงลงไปตามลำดับ
-  // หมายเหตุ: ถ้าชื่อความสามารถใน URL ไม่มีในชุด options จะถูกข้าม
-  if (tomSelects.length){
-    tomSelects.forEach(ts => ts.clear(true));
-    let idx = 0;
-    for (const name of sels){
-      const ts = tomSelects[idx++];
-      if (!ts) break;
-      // ตรวจว่ามี option นี้ไหม
-      const has = ts.options[name] || ts.options?.[name] !== undefined;
-      if (has || true){ // TomSelect สามารถ setValue ได้ถ้ามี option ใน <select> เดิมอยู่แล้ว
-        ts.setValue(name, true);
-      }
-    }
-  }else{
-    // โหมด native select
-    const wrap = document.getElementById('desiredSelects');
-    const selects = [...wrap.querySelectorAll('select')];
-    selects.forEach(s => s.value = '');
-    for (let i=0; i<sels.length && i<selects.length; i++){
-      const el = selects[i];
-      const target = sels[i];
-      // ตั้งค่า ถ้ามี option
-      const opt = [...el.options].find(o => o.value === target);
-      if (opt) el.value = target;
-    }
-  }
-
-  ensureMobileCascade();
-  updateCalcAvailability();
-
-  // มีค่า MIN_SELECTS แล้ว และขอ auto รัน -> คำนวณเลย
-  const hasMin = (getDesired().length >= MIN_SELECTS);
-  if (auto === '1' && hasMin){
-    // ให้แน่ใจว่ามี jewels โหลดแล้ว (ใน onload หลักจะเรียก fetch แล้ว)
-    await new Promise(r => setTimeout(r, 50));
-    calculate();
-  }
-}
-
-// --- ผูกปุ่มแชร์ ---
-function bindShareButtons(){
-  const onShare = ()=>{
-    const link = buildShareURL();
-    history.replaceState(null, '', link); // อัปเดต URL ปัจจุบันให้แชร์จากแอดเดรสบาร์ได้ด้วย
-    navigator.clipboard.writeText(link).then(()=>{
-      showToast('✅ คัดลอกลิงก์แชร์แล้ว');
-    }).catch(()=>{
-      // fallback: สร้าง prompt
-      window.prompt('คัดลอกลิงก์ด้านล่าง', link);
-    });
-  };
-  document.getElementById('shareBtn')?.addEventListener('click', onShare);
-  document.getElementById('shareBtn2')?.addEventListener('click', onShare);
-}
-</script>
 
 
 
@@ -2032,5 +1923,180 @@ if (resetBtn) {
   }, { once: true });
 })();
 </script>
+
+<script>
+/* ===== v1.4 Share-by-Index (robust & compact) =====
+   Encodes selected abilities as indices from the option list to avoid label mismatch.
+   Query params:
+     s=idx-idx-...  (zero-based indices of selected abilities)
+     k=<topK>       (3-20)
+     d=1            (dark only)
+     a=1            (auto run)
+   Backward compatible with sel=... (reads as fallback)
+*/
+
+function getSubstatIndexList(){
+  if (Array.isArray(window.__SUBSTAT_INDEX) && window.__SUBSTAT_INDEX.length) {
+    return window.__SUBSTAT_INDEX.slice();
+  }
+  // Infer from options of the first select
+  const s0 = document.getElementById('desired0');
+  if (s0 && s0.options && s0.options.length){
+    const arr = Array.from(s0.options).map(o=>o.value).filter(Boolean);
+    window.__SUBSTAT_INDEX = arr.slice();
+    return arr;
+  }
+  // TomSelect path: read from ts.options of first TomSelect
+  if (window.tomSelects && tomSelects.length){
+    const ts0 = tomSelects[0];
+    const arr = Object.values(ts0.options || {}).map(o => o.value).filter(Boolean);
+    window.__SUBSTAT_INDEX = arr.slice();
+    return arr;
+  }
+  return [];
+}
+
+function getDesiredValuesRaw(){
+  const out = [];
+  if (window.tomSelects && tomSelects.length){
+    for (const ts of tomSelects){
+      try{
+        const v = (typeof ts.getValue === 'function') ? ts.getValue() : null;
+        if (v) out.push(v);
+      }catch(e){}
+    }
+  } else {
+    const wrap = document.getElementById('desiredSelects');
+    const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
+    for (const el of selects){
+      if (el && el.value) out.push(el.value);
+    }
+  }
+  return out.filter(Boolean);
+}
+
+function buildShareURL(){
+  const url = new URL(location.href);
+  url.search = '';
+  const params = url.searchParams;
+
+  const list = getSubstatIndexList();
+  const vals = getDesiredValuesRaw();
+
+  const idxs = [];
+  const fallback = [];
+  vals.forEach(v => {
+    const i = list.indexOf(v);
+    if (i >= 0) idxs.push(i);
+    else fallback.push(v); // keep for backward-compat
+  });
+
+  if (idxs.length) params.set('s', idxs.join('-'));
+  // keep old sel as backup in case list changed in the future
+  fallback.forEach(v => params.append('sel', v));
+
+  if (window.topKInput && topKInput.value) params.set('k', String(topKInput.value).trim());
+  if (window.darkOnly && darkOnly.checked) params.set('d','1');
+  params.set('a','1');
+
+  url.search = params.toString();
+  return url.toString();
+}
+
+function applyStateFromURL(){
+  const params = new URLSearchParams(location.search);
+  const list = getSubstatIndexList();
+
+  const s = params.get('s');          // e.g. "1-5-12-77"
+  const k = params.get('k');
+  const d = params.get('d');
+  const a = params.get('a');
+
+  const selsFallback = params.getAll('sel'); // old format
+
+  if (window.darkOnly) darkOnly.checked = (d === '1');
+  if (window.topKInput && k) topKInput.value = k;
+
+  const namesFromIndex = [];
+  if (s){
+    const ints = s.split(/[^0-9]+/).filter(Boolean).map(x=>parseInt(x,10)).filter(n=>!isNaN(n));
+    ints.forEach(i => { if (i >= 0 && i < list.length) namesFromIndex.push(list[i]); });
+  }
+
+  let names = namesFromIndex.slice();
+  // fill with fallback sel= if provided
+  if (selsFallback && selsFallback.length){
+    const left = Math.max(0, (window.MAX_SELECTS || 14) - names.length);
+    if (left > 0){
+      for (let i=0; i<selsFallback.length && names.length < (window.MAX_SELECTS || 14); i++){
+        const v = selsFallback[i];
+        if (v && !names.includes(v)) names.push(v);
+      }
+    }
+  }
+
+  // Set values into selects
+  if (window.tomSelects && tomSelects.length){
+    tomSelects.forEach(ts => { try{ ts.clear(true); }catch(e){} });
+    names.forEach((name, i)=>{
+      const ts = tomSelects[i];
+      if (!ts) return;
+      try { ts.addItem(name, true); } catch(e){}
+    });
+  } else {
+    const wrap = document.getElementById('desiredSelects');
+    const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
+    names.forEach((name, i)=>{
+      const el = selects[i];
+      if (!el) return;
+      const opt = Array.from(el.options).find(o => o.value === name || (o.textContent||'') === name);
+      if (opt) el.value = opt.value;
+    });
+  }
+
+  if (typeof ensureMobileCascade === 'function') ensureMobileCascade();
+  if (typeof updateCalcAvailability === 'function') updateCalcAvailability();
+
+  const hasMin = (typeof getDesired === 'function') ? (getDesired().length >= (window.MIN_SELECTS || 1)) : true;
+  if (a === '1' && hasMin && typeof calculate === 'function'){
+    setTimeout(()=>calculate(), 60);
+  }
+}
+
+function bindShareButtons(){
+  const onShare = ()=>{
+    const link = buildShareURL();
+    try{ history.replaceState(null, '', link); }catch(e){}
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link)
+        .then(()=>{ try{ showToast && showToast('✅ คัดลอกลิงก์แชร์แล้ว'); }catch(e){} })
+        .catch(()=>{ window.prompt('คัดลอกลิงก์ด้านล่าง', link); });
+    } else {
+      window.prompt('คัดลอกลิงก์ด้านล่าง', link);
+    }
+  };
+  const b1 = document.getElementById('shareBtn');
+  const b2 = document.getElementById('shareBtn2');
+  if (b1) b1.addEventListener('click', onShare);
+  if (b2) b2.addEventListener('click', onShare);
+}
+
+// Wire-up after selects/options are ready
+document.addEventListener('DOMContentLoaded', ()=>{
+  // If your existing code already calls bindShareButtons/applyStateFromURL, this will override with the new ones.
+  try{ bindShareButtons(); }catch(e){}
+  // Try apply after TomSelects get built
+  let tries = 0;
+  const iv = setInterval(()=>{
+    tries++;
+    const hasOptions = !!getSubstatIndexList().length;
+    if (hasOptions || tries > 200){
+      clearInterval(iv);
+      try{ applyStateFromURL(); }catch(e){}
+    }
+  }, 50);
+});
+</script>
+
 </body>
 </html>
