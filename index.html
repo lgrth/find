@@ -634,7 +634,17 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
     <div id="desiredSelects" class="grid"></div>
 
     <!-- 2 columns 1 row: จำนวนเซ็ต + เฉพาะ [ดาร์ค] -->
-    <div class="row-two-col">
+    <!-- เลือกตัวละคร (ล็อกจี้ [ลิงก์]) -->
+<div class="row-two-col" id="charRow">
+  <div class="col">
+    <label for="charSelect"><strong>เลือกตัวละคร (เพื่อบังคับจี้ [ลิงก์])</strong></label>
+    <select id="charSelect" class="mobile-hidden" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
+      <option value="">— ไม่ระบุ —</option>
+    </select>
+    <div class="input-help">ถ้าเลือก ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-neutral">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
+  </div>
+</div>
+<div class="row-two-col">
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
         <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size: 18px;font-family: Kanit;">
@@ -1241,7 +1251,78 @@ setProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>
 });
 </script>
 
+<script>
+function buildShareURL(){
+  const url = new URL(location.href);
+  url.search = '';
+  const params = url.searchParams;
 
+  getDesired().forEach(v => params.append('sel', v));
+  if(topKInput?.value) params.set('k', topKInput.value);
+  if(darkOnly?.checked) params.set('dark','1');
+  params.set('auto','1');
+
+  url.search = params.toString();
+  return url.toString();
+}
+
+async function applyStateFromURL(){
+  const params = new URLSearchParams(location.search);
+  const sels = params.getAll('sel');
+  const k = params.get('k');
+  const dark = params.get('dark');
+  const auto = params.get('auto');
+
+  if(darkOnly) darkOnly.checked = (dark === '1');
+  if(topKInput && k) topKInput.value = k;
+
+  // normalize string
+  const normalize = s => (s || '').trim();
+
+  if(tomSelects.length){
+    tomSelects.forEach(ts => ts.clear(true));
+    let idx = 0;
+    for(const raw of sels){
+      const target = normalize(raw);
+      const ts = tomSelects[idx++];
+      if(!ts) break;
+
+      // หา option ที่ตรง (ทั้ง value และ text)
+      const option = Object.values(ts.options).find(opt =>
+        normalize(opt.value) === target || normalize(opt.text) === target
+      );
+
+      if(option){
+        ts.addItem(option.value, true); // ใส่ค่าแบบ silent
+      }
+    }
+  }
+
+  ensureMobileCascade();
+  updateCalcAvailability();
+
+  if(auto === '1' && getDesired().length >= MIN_SELECTS){
+    await new Promise(r => setTimeout(r,100));
+    calculate();
+  }
+}
+
+
+function bindShareButtons(){
+  const onShare = ()=>{
+    const link = buildShareURL();
+    navigator.clipboard.writeText(link).then(()=>{
+      showToast('✅ คัดลอกลิงก์แชร์แล้ว');
+    }).catch(()=>window.prompt('คัดลอกลิงก์นี้:', link));
+  };
+  document.getElementById('shareBtn')?.addEventListener('click', onShare);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  bindShareButtons();
+  applyStateFromURL();
+});
+</script>
 
 
 <script>
@@ -1923,194 +2004,793 @@ if (resetBtn) {
   }, { once: true });
 })();
 </script>
-
 <script>
-/* ===== v1.7 Share & Restore (Base64 JSON in #hash) =====
-   - Short, robust link: #p=<base64(JSON of selected values)>&k=10&d=1&a=1
-   - Works regardless of slashes/spaces/Thai text (value preserved 1:1)
-   - Fallback reads sel=... if p= is missing
-   - MutationObserver waits until options/tomSelects ready before restore
-   - Exposes safe globals: bindShareButtons/applyStateFromURL
-*/
 (function(){
-  const MAX_SELECTS = window.MAX_SELECTS || 14;
+  // Guard to avoid double-apply
+  if (window.__charLinkPatched) return;
+  window.__charLinkPatched = true;
 
-  // --- helpers ---
-  const encB64 = (obj)=>{
-    try {
-      const s = JSON.stringify(obj || []);
-      return btoa(unescape(encodeURIComponent(s)));
-    } catch(e){ return ''; }
-  };
-  const decB64 = (b64)=>{
-    try {
-      const s = decodeURIComponent(escape(atob(b64)));
-      return JSON.parse(s);
-    } catch(e){ return []; }
-  };
-  const getHashParams = ()=>{
-    const h = (location.hash || '').replace(/^#/, '');
-    return new URLSearchParams(h);
-  };
-  const getQueryParams = ()=> new URLSearchParams(location.search || '');
-  const getParams = ()=>{
-    const hp = getHashParams();
-    return (hp && hp.toString().length>0) ? hp : getQueryParams();
-  };
+  const LINK_PREFIX = "[ลิงก์]";
+  function isLinkId(id){
+    return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX);
+  }
+  window.isLinkId = window.isLinkId || isLinkId;
 
-  function getSelectedValues(){
-    const out = [];
-    if (window.tomSelects && tomSelects.length){
-      for (const ts of tomSelects){
+  // Wait helper
+  function waitFor(condFn, timeoutMs=8000, step=100){
+    return new Promise((resolve, reject)=>{
+      const t0 = Date.now();
+      (function tick(){
         try{
-          const v = (typeof ts.getValue === 'function') ? ts.getValue() : null;
-          if (v) out.push(v);
+          if(condFn()){ resolve(true); return; }
         }catch(e){}
-      }
-    } else {
-      const wrap = document.getElementById('desiredSelects');
-      const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
-      for (const el of selects){ if (el && el.value) out.push(el.value); }
-    }
-    return out.filter(Boolean);
-  }
-
-  function setSelectedValues(vals){
-    if (!Array.isArray(vals) || !vals.length) return;
-    if (window.tomSelects && tomSelects.length){
-      tomSelects.forEach(ts => { try{ ts.clear(true);}catch(e){} });
-      vals.forEach((v,i)=>{
-        const ts = tomSelects[i];
-        if (!ts) return;
-        // ensure option exists then add
-        try{
-          if (!ts.options || !ts.options[v]) ts.addOption({ value:v, text:v });
-          ts.addItem(v, true);
-        }catch(e){}
-      });
-    } else {
-      const wrap = document.getElementById('desiredSelects');
-      const selects = wrap ? Array.from(wrap.querySelectorAll('select')) : [];
-      vals.forEach((v,i)=>{
-        const el = selects[i];
-        if (!el) return;
-        let opt = Array.from(el.options).find(o => o.value === v);
-        if (!opt){
-          // create a temp option if not found
-          opt = new Option(v, v, true, true);
-          el.add(opt);
-        } else {
-          el.value = v;
-        }
-      });
-    }
-  }
-
-  function buildShareURL(){
-    const url = new URL(location.href);
-    url.search = '';
-    url.hash = '';
-
-    const params = new URLSearchParams();
-    const vals = getSelectedValues();
-    if (vals.length){
-      params.set('p', encB64(vals));
-    }
-    if (window.topKInput && topKInput.value) params.set('k', String(topKInput.value).trim());
-    if (window.darkOnly && darkOnly.checked) params.set('d', '1');
-    params.set('a', '1');
-
-    url.hash = params.toString();
-    return url.toString();
-  }
-
-  function applyFromURL(){
-    const p = getParams();
-    if (!p || p.toString().length === 0) return;
-
-    const a = p.get('a');
-    const k = p.get('k');
-    const d = p.get('d');
-    const b64 = p.get('p');
-    const fall = p.getAll('sel');
-
-    if (window.topKInput && k) topKInput.value = k;
-    if (window.darkOnly) darkOnly.checked = (d === '1');
-
-    let vals = [];
-    if (b64) vals = decB64(b64);
-    if ((!vals || !vals.length) && fall && fall.length) vals = fall;
-
-    if (vals && vals.length){
-      setSelectedValues(vals.slice(0, MAX_SELECTS));
-      if (typeof ensureMobileCascade === 'function') ensureMobileCascade();
-      if (typeof updateCalcAvailability === 'function') updateCalcAvailability();
-      if (a === '1' && typeof getDesired === 'function' && getDesired().length >= (window.MIN_SELECTS||1)){
-        setTimeout(()=>{ try{ calculate && calculate(); }catch(e){} }, 60);
-      }
-    }
-  }
-
-  function bindShareButtonsInternal(){
-    const onShare = ()=>{
-      const link = buildShareURL();
-      try{ history.replaceState(null, '', link); }catch(e){}
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(link)
-          .then(()=>{ try{ showToast && showToast('✅ คัดลอกลิงก์แชร์แล้ว'); }catch(e){} })
-          .catch(()=>{ window.prompt('คัดลอกลิงก์', link); });
-      } else {
-        window.prompt('คัดลอกลิงก์', link);
-      }
-    };
-    const b1 = document.getElementById('shareBtn');
-    const b2 = document.getElementById('shareBtn2');
-    if (b1) b1.addEventListener('click', onShare);
-    if (b2) b2.addEventListener('click', onShare);
-  }
-
-  // Expose safe globals for legacy calls (avoid "Can't find variable")
-  window.bindShareButtons = window.bindShareButtons || function(){ try{ bindShareButtonsInternal(); }catch(e){} };
-  window.applyStateFromURL = window.applyStateFromURL || function(){ try{ applyFromURL(); }catch(e){} };
-
-  // Wait until options/tomSelects exist, then apply
-  function waitOptionsThenApply(){
-    const readyCheck = ()=>{
-      // ready if tomSelects initialized or at least one select has >1 option
-      if (window.tomSelects && tomSelects.length){
-        const ts0 = tomSelects[0];
-        if (ts0 && ts0.options && Object.keys(ts0.options).length) return true;
-      }
-      const wrap = document.getElementById('desiredSelects');
-      if (wrap){
-        const any = Array.from(wrap.querySelectorAll('select')).some(s => (s.options||[]).length > 1);
-        if (any) return true;
-      }
-      return false;
-    };
-    if (readyCheck()){
-      applyFromURL();
-      return;
-    }
-    const wrap = document.getElementById('desiredSelects') || document.body;
-    const mo = new MutationObserver(()=>{
-      if (readyCheck()){
-        mo.disconnect();
-        applyFromURL();
-      }
+        if(Date.now()-t0>timeoutMs){ resolve(false); return; }
+        setTimeout(tick, step);
+      })();
     });
-    mo.observe(wrap, { childList: true, subtree: true });
-    // hard fallback
-    setTimeout(()=>{ applyFromURL(); }, 15000);
   }
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    try{ bindShareButtonsInternal(); }catch(e){}  // attach buttons now
-    waitOptionsThenApply();                        // apply when ready
-    window.addEventListener('hashchange', applyFromURL);
+  async function waitForTomSelect(){
+    return !!(window.TomSelect);
+  }
+
+  // 1) Build character list from jewels (rows with [ลิงก์], using AllowedChars)
+  async function buildCharacterSelect(){
+    const el = document.getElementById('charSelect');
+    if(!el) return;
+
+    // Ensure jewels is loaded; some apps set it globally after fetch
+    let maxWait = 50;
+    while (!window.jewels && maxWait-- > 0){
+      await new Promise(r=>setTimeout(r, 100));
+    }
+    const js = window.jewels || [];
+    const linkJewels = js.filter(j => j && j.id && isLinkId(j.id));
+    const charNames = Array.from(new Set(
+      linkJewels.map(j => (j.allowedChars || j.AllowedChars || '').toString().trim()).filter(Boolean)
+    )).sort();
+    // Fill options
+    if (charNames.length){
+      // Clear existing options except first
+      while (el.options.length > 1) el.remove(1);
+      charNames.forEach(name=>{
+        const opt = document.createElement('option');
+        opt.value = name; opt.textContent = name;
+        el.appendChild(opt);
+      });
+    }
+
+    // Upgrade to TomSelect if available
+    if (await waitForTomSelect()){
+      try{
+        new TomSelect(el, {
+          create: false,
+          allowEmptyOption: true,
+          placeholder: 'พิมพ์ชื่อตัวละคร...',
+          maxOptions: 500,
+          searchField: ['text', 'value'],
+          score: function(search){
+            const base = this.getScoreFunction(search);
+            return (item)=>{
+              let s = base(item);
+              const q = (search||'').toLowerCase().trim();
+              const t = (item.text||'').toLowerCase();
+              if (q && t.startsWith(q)) s += 1.0;
+              return s;
+            };
+          },
+          maxItems: 1,
+          render: {
+            option: (data, escape) => `<div class="px-2 py-1">${escape(data.text)}</div>`,
+            item:   (data, escape) => `<div class="px-1">${escape(data.text)}</div>`
+          }
+        });
+      }catch(e){ console.warn('TomSelect init failed for #charSelect', e); }
+    }
+  }
+
+  // Hook normalizeByHeaders to ensure allowedChars is captured
+  if (typeof window.normalizeByHeaders === 'function'){
+    const _origNorm = window.normalizeByHeaders;
+    window.normalizeByHeaders = function(rows){
+      const out = _origNorm(rows) || [];
+      // backfill allowedChars if missing by reading source rows when id starts with [ลิงก์]
+      try{
+        rows.forEach((r, i)=>{
+          const j = out[i];
+          if (!j) return;
+          if ((j.allowedChars==null || j.allowedChars===undefined) && isLinkId(j.id)){
+            const ac = (r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").toString().trim();
+            j.allowedChars = ac;
+          }
+        });
+      }catch(e){}
+      return out;
+    };
+  }
+
+  // 2) Share URL add & apply ?char=
+  function addCharToShareURL(){
+    if (!window.buildShareURL) return;
+    const _orig = window.buildShareURL;
+    window.buildShareURL = function(){
+      const u = new URL(_orig(), location.href);
+      const el = document.getElementById('charSelect');
+      let val = '';
+      if (el){
+        if (el.tomselect) val = el.tomselect.getValue();
+        else val = el.value || '';
+      }
+      if (val) u.searchParams.set('char', val);
+      else u.searchParams.delete('char');
+      return u.toString();
+    };
+  }
+
+  async function applyCharFromURL(){
+    const el = document.getElementById('charSelect');
+    if (!el) return;
+    const params = new URLSearchParams(location.search);
+    const char = params.get('char');
+    if (char){
+      if (el.tomselect){ el.tomselect.setValue(char, true); }
+      else el.value = char;
+    }
+  }
+
+  // 3) Patch calculate to enforce fixed [ลิงก์]
+  function patchCalculate(){
+    if (typeof window.calculate !== 'function' || window.__calcPatched) return;
+    window.__calcPatched = true;
+    const _origCalc = window.calculate;
+
+    window.calculate = async function(){
+      // Try get desired early to show same alerts if not selected
+      try{
+        if (typeof window.getDesired === 'function'){
+          const desired = window.getDesired();
+          if(!desired || (Array.isArray(desired) && desired.length===0)){
+            return _origCalc.apply(this, arguments);
+          }
+        }
+      }catch(e){}
+
+      // Ensure jewels loaded to find [ลิงก์]
+      if (!window.jewels || !Array.isArray(window.jewels)) {
+        return _origCalc.apply(this, arguments);
+      }
+
+      const charEl = document.getElementById('charSelect');
+      let charName = '';
+      if (charEl){
+        charName = (charEl.tomselect ? charEl.tomselect.getValue() : charEl.value) || '';
+      }
+      if (!charName){
+        return _origCalc.apply(this, arguments);
+      }
+
+      // Find specific [ลิงก์] for the character
+      const fixedLink = window.jewels.find(j => isLinkId(j.id) && String(j.allowedChars||j.AllowedChars||'').trim() === String(charName).trim());
+      if (!fixedLink){
+        alert(`ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}\nกรุณาเช็กคอลัมน์ AllowedChars ในชีต`);
+        return; // abort
+      }
+
+      // We need to arrange so worker always includes fixedLink.
+      // Strategy: temporarily wrap createWorker to a version that accepts {fixed}
+      // If app already supports, great. If not, we intercept cand and desired then compute on main thread with 3-combo fallback
+      // For reliability, we create a small facade that, if worker.postMessage doesn't support fixed, we pre-filter candidates to ensure fixedLink always included by adding it later in render.
+      try{
+        // Mark globally so renderResults can sort [ลิงก์] first
+        window.__forcedLinkId = fixedLink.id;
+      }catch(e){}
+      // Let the original calculate run; then at render time we sort and ensure [ลิงก์] presence by replacing one item if missing.
+      return _origCalc.apply(this, arguments);
+    };
+  }
+
+  // 4) Patch renderResults: ensure [ลิงก์] first & forced insert if missing
+  function patchRenderResults(){
+    if (typeof window.renderResults !== 'function' || window.__renderPatched) return;
+    window.__renderPatched = true;
+    const _orig = window.renderResults;
+    window.renderResults = function(best){
+      try{
+        // Attempt to enforce [ลิงก์] inclusion on each result if __forcedLinkId exists
+        if (Array.isArray(best) && window.__forcedLinkId){
+          best = best.map(r=>{
+            if (!r || !Array.isArray(r.ids)) return r;
+            if (!r.ids.some(id=>id===window.__forcedLinkId)){
+              // replace last id with forced link to guarantee presence (keeps count 4)
+              const ids = r.ids.slice();
+              ids[ids.length-1] = window.__forcedLinkId;
+              return Object.assign({}, r, { ids });
+            }
+            return r;
+          });
+        }
+      }catch(e){}
+      const res = _orig.call(this, best);
+
+      // After original rendering, re-order each displayed group so [ลิงก์] appears first.
+      try{
+        // If cards are rendered with a known container, we rely on data order. The original call likely keeps order of r.ids.
+        // We already modified r.ids ordering above; if not, we still try to reorder in DOM.
+        // Light DOM attempt: find any result-group rows and sort their child cards if data-id attribute exists.
+        document.querySelectorAll('[data-result-group], .result-group').forEach(group=>{
+          const cards = Array.from(group.children||[]);
+          cards.sort((a,b)=>{
+            const ai = (a.getAttribute('data-id')||'');
+            const bi = (b.getAttribute('data-id')||'');
+            return (isLinkId(bi) - isLinkId(ai));
+          });
+          cards.forEach(c=>group.appendChild(c));
+        });
+      }catch(e){}
+
+      return res;
+    };
+  }
+
+  // 5) Try to sort inside render pipeline when creating group array (fallback if we have access)
+  // Not always possible without direct source, so we rely on r.ids ordering above.
+
+  // 6) Init on DOM ready
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    // After jewels available, build character select
+    await buildCharacterSelect();
+    addCharToShareURL();
+    await applyCharFromURL();
+    patchCalculate();
+    patchRenderResults();
   });
 })();
 </script>
+<script>
+/* === Robust char-select population v1.2.1 === */
+(function(){
+  const LINK_PREFIX = "[ลิงก์]";
+  const MAX_WAIT_MS = 20000; // wait longer for data
+  function isLinkId(id){ return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX); }
 
+  // Capture raw rows if available by wrapping fetchGVizJSONP (best-effort, non-breaking)
+  if (typeof window.fetchGVizJSONP === 'function' && !window.__fetchWrapped){
+    window.__fetchWrapped = true;
+    const __origFetch = window.fetchGVizJSONP;
+    window.fetchGVizJSONP = async function(){
+      const res = await __origFetch.apply(this, arguments);
+      try{ window.__afterFetchJewels = true; populateCharSelect(true); }catch(e){}
+      return res;
+    };
+  }
+
+  function getCharNames(){
+    const names = new Set();
+    const js = Array.isArray(window.jewels) ? window.jewels : [];
+    for (const j of js){
+      if (!j || !isLinkId(j.id)) continue;
+      const ac = (j.allowedChars || j.AllowedChars || '').toString().trim();
+      if (ac) names.add(ac);
+    }
+    return Array.from(names).sort();
+  }
+
+  function populateIntoSelect(el, names){
+    if (!el) return;
+    // If TomSelect instance exists, use its API
+    if (el.tomselect){
+      const ts = el.tomselect;
+      const options = names.map(n=>({value:n, text:n}));
+      ts.clearOptions();
+      ts.addOptions(options);
+      ts.refreshOptions(false);
+      return;
+    }
+    // Native <select>
+    while (el.options.length > 1) el.remove(1);
+    for (const n of names){
+      const opt = document.createElement('option');
+      opt.value = n; opt.textContent = n;
+      el.appendChild(opt);
+    }
+  }
+
+  async function waitForJewels(){
+    const t0 = Date.now();
+    while (Date.now() - t0 < MAX_WAIT_MS){
+      if (Array.isArray(window.jewels) && window.jewels.some(j=>isLinkId(j?.id))) return true;
+      await new Promise(r=>setTimeout(r, 200));
+    }
+    return false;
+  }
+
+  async function ensureTomSelect(el){
+    const t0 = Date.now();
+    while (Date.now() - t0 < MAX_WAIT_MS){
+      if (window.TomSelect){
+        try{
+          if (!el.tomselect){
+            new TomSelect(el, {
+              create:false, allowEmptyOption:true, placeholder:'พิมพ์ชื่อตัวละคร...',
+              maxOptions: 500, searchField:['text','value'],
+              score: function(search){ const base=this.getScoreFunction(search); return item=>{ let s=base(item); const q=(search||'').toLowerCase().trim(); const t=(item.text||'').toLowerCase(); if(q && t.startsWith(q)) s+=1.0; return s; }; },
+              maxItems:1,
+              render:{ option:(d,e)=>`<div class="px-2 py-1">${e(d.text)}</div>`, item:(d,e)=>`<div class="px-1">${e(d.text)}</div>` }
+            });
+          }
+        }catch(e){}
+        return true;
+      }
+      await new Promise(r=>setTimeout(r, 200));
+    }
+    return false;
+  }
+
+  async function populateCharSelect(force=false){
+    const el = document.getElementById('charSelect');
+    if (!el) return;
+
+    if (!force){
+      // Avoid doing work if we already have options
+      const hasOptions = el.tomselect ? Object.keys(el.tomselect.options||{}).length>0 : (el.options.length>1);
+      if (hasOptions) return;
+    }
+
+    await waitForJewels();
+    const names = getCharNames();
+    // proceed even if empty; we'll try again later via interval
+    await ensureTomSelect(el);
+    populateIntoSelect(el, names);
+  }
+
+  // Keep trying a few times in case data loads late
+  document.addEventListener('DOMContentLoaded', ()=>{
+    populateCharSelect(false);
+    let tries = 0;
+    const iv = setInterval(()=>{
+      tries++;
+      populateCharSelect(false);
+      const el = document.getElementById('charSelect');
+      const has = el && (el.tomselect ? Object.keys(el.tomselect.options||{}).length>0 : (el.options.length>1));
+      if (has || tries>120){ clearInterval(iv); }
+    }, 250);
+  });
+
+})();
+</script>
+<script>
+/* === AllowedChars by-ID patch & watcher v1.2.2 === */
+(function(){
+  const LINK_PREFIX = "[ลิงก์]";
+  function isLinkId(id){ return typeof id === 'string' && typeof id === 'string' || (id && String(id).trim().startsWith(LINK_PREFIX)); }
+
+  function applyNormPatch(){
+    if (typeof window.normalizeByHeaders !== 'function' || window.__normPatched) return false;
+    window.__normPatched = true;
+    const _origNorm = window.normalizeByHeaders;
+    window.normalizeByHeaders = function(rows){
+      const out = _origNorm(rows) || [];
+      try{
+        // Build map by ID from normalized jewels
+        const map = new Map();
+        for (const j of out){
+          if (j && j.id) map.set(String(j.id).trim(), j);
+        }
+        // Walk original rows, set allowedChars on the matching normalized record by ID
+        for (const r of rows){
+          const rawId = (r["ID"] ?? r["Id"] ?? r["id"] ?? "").toString().trim();
+          if (!rawId) continue;
+          if (!rawId.startsWith("[ลิงก์]")) continue;
+          const ac = (r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").toString().trim();
+          const j = map.get(rawId);
+          if (j && !j.allowedChars){
+            j.allowedChars = ac;
+          }
+        }
+      }catch(e){ console.warn("AllowedChars map patch error:", e); }
+      return out;
+    };
+    return true;
+  }
+
+  // Watcher: in case normalizeByHeaders is defined later
+  if (!window.__normWatch){
+    window.__normWatch = true;
+    let tries = 0;
+    const iv = setInterval(()=>{
+      tries++;
+      if (applyNormPatch() || tries>120){
+        clearInterval(iv);
+      }
+    }, 200);
+  }
+
+  // After jewels load, if char list empty, repopulate
+  document.addEventListener('DOMContentLoaded', ()=>{
+    let tries = 0;
+    const iv = setInterval(()=>{
+      tries++;
+      const el = document.getElementById('charSelect');
+      const hasOptions = el && (el.tomselect ? Object.keys(el.tomselect.options||{}).length>0 : (el && el.options && el.options.length>1));
+      if (hasOptions){ clearInterval(iv); return; }
+      if (Array.isArray(window.jewels) && window.jewels.some(j=>j && j.allowedChars)){
+        // Force repopulate via function from v1.2.1 if present
+        if (typeof populateCharSelect === 'function'){
+          try{ populateCharSelect(true); }catch(e){}
+        }else{
+          // fallback: manual fill
+          try{
+            const names = Array.from(new Set(window.jewels.filter(j=>j && j.allowedChars && String(j.id||'').startsWith("[ลิงก์]")).map(j=>String(j.allowedChars).trim()).filter(Boolean))).sort();
+            if (el){
+              if (el.tomselect){
+                const ts = el.tomselect;
+                ts.clearOptions();
+                ts.addOptions(names.map(n=>({value:n, text:n})));
+                ts.refreshOptions(false);
+              }else{
+                while (el.options.length>1) el.remove(1);
+                names.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
+              }
+            }
+          }catch(e){}
+        }
+        clearInterval(iv);
+      }
+      if (tries>200) clearInterval(iv);
+    }, 250);
+  });
+})();
+</script>
+<script>
+/* === GViz tap & side-load for AllowedChars v1.2.3 === */
+(function(){
+  const LINK_PREFIX = "[ลิงก์]";
+  function isLinkId(id){ return typeof id === 'string' && String(id).trim().startsWith(LINK_PREFIX); }
+
+  // Build char list directly from GViz response
+  function extractCharNamesFromGViz(resp){
+    try{
+      const table = resp.table;
+      if (!table || !Array.isArray(table.rows)) return [];
+      const cols = (table.cols||[]).map(c=>c.label);
+      const idxId = cols.findIndex(c=>/^\s*ID\s*$/i.test(c));
+      const idxAllowed = cols.findIndex(c=>/^\s*AllowedChars?\s*$/i.test(c));
+      if (idxId<0 || idxAllowed<0) return [];
+      const names = new Set();
+      for (const row of table.rows){
+        const c = row.c || [];
+        const id = (c[idxId]?.v ?? '').toString();
+        const ac = (c[idxAllowed]?.v ?? '').toString();
+        if (isLinkId(id) && ac.trim()) names.add(ac.trim());
+      }
+      return Array.from(names).sort();
+    }catch(e){ return []; }
+  }
+
+  function populateSelectNames(names){
+    const el = document.getElementById('charSelect');
+    if (!el || !names || !names.length) return;
+    if (el.tomselect){
+      const ts = el.tomselect;
+      ts.clearOptions();
+      ts.addOptions(names.map(n=>({value:n, text:n})));
+      ts.refreshOptions(false);
+    }else{
+      while (el.options.length>1) el.remove(1);
+      names.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
+    }
+  }
+
+  // Create a side-request using GViz JSONP with responseHandler
+  function sideLoadGViz(baseUrl){
+    // Ensure we only add once
+    if (window.__charSideLoaded) return;
+    window.__charSideLoaded = true;
+    const url = new URL(baseUrl);
+    // enforce jsonp response with our handler
+    const tqx = "out:json;responseHandler=__CharGVizCB";
+    url.searchParams.set('tqx', tqx);
+    // add a small random to bust cache
+    url.searchParams.set('rand', String(Math.random()).slice(2));
+    window.__CharGVizCB = function(resp){
+      try{
+        const names = extractCharNamesFromGViz(resp);
+        if (names.length) populateSelectNames(names);
+      }catch(e){}
+    };
+    const s = document.createElement('script');
+    s.src = url.toString();
+    document.head.appendChild(s);
+  }
+
+  function detectGVizUrlAndLoad(){
+    // Try to find existing script src used by the app (contains /gviz/tq?)
+    const scripts = Array.from(document.scripts||[]);
+    const gviz = scripts.map(s=>s.src).find(src => src && src.includes('/gviz/tq?'));
+    if (gviz){
+      // Use it but strip existing tqx so we can set our handler
+      const u = new URL(gviz);
+      u.searchParams.delete('tqx'); // we'll set our own
+      sideLoadGViz(u.toString());
+      return true;
+    }
+    return false;
+  }
+
+  // If not found immediately, watch for future <script> inserts
+  function watchForGViz(){
+    if (detectGVizUrlAndLoad()) return;
+    const mo = new MutationObserver((muts)=>{
+      for (const m of muts){
+        const added = Array.from(m.addedNodes||[]).filter(n=>n.tagName==='SCRIPT');
+        for (const sc of added){
+          const src = sc.src || '';
+          if (src.includes('/gviz/tq?')){
+            try{
+              const u = new URL(src);
+              u.searchParams.delete('tqx');
+              sideLoadGViz(u.toString());
+              mo.disconnect();
+              return;
+            }catch(e){}
+          }
+        }
+      }
+    });
+    mo.observe(document.documentElement || document.body, { childList:true, subtree:true });
+    // safety timeout
+    setTimeout(()=>mo.disconnect(), 20000);
+  }
+
+  document.addEventListener('DOMContentLoaded', watchForGViz);
+})();
+</script>
+
+<script>
+/* === v1.2.5: Auto character list via interceptors (fetch/XHR) + GViz/CSV + fallback ID-tail === */
+(function(){
+  const LINK_PREFIX = "[ลิงก์]";
+  const norm = s => (s==null ? "" : String(s)).trim();
+  const uniqSorted = arr => Array.from(new Set(arr.filter(Boolean).map(norm))).sort((a,b)=> a.localeCompare(b));
+
+  // Config override (optional): publish CSV with headers ID,AllowedChars
+  window.CHARLIST_FORCE_CSV_URL = window.CHARLIST_FORCE_CSV_URL || "";
+
+  function isLinkId(id){ return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX); }
+
+  function fillIntoSelect(charNames){
+    const el = document.getElementById('charSelect');
+    if (!el || !charNames.length) return false;
+    if (el.tomselect){
+      const ts = el.tomselect;
+      ts.clearOptions();
+      ts.addOptions(charNames.map(n=>({value:n, text:n})));
+      ts.refreshOptions(false);
+    }else{
+      while (el.options.length>1) el.remove(1);
+      charNames.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
+    }
+    return true;
+  }
+
+  function fromJewelsAllowedChars(){
+    try{
+      const js = Array.isArray(window.jewels) ? window.jewels : [];
+      return uniqSorted(js.filter(j=>j && isLinkId(j.id)).map(j=>norm(j.allowedChars || j.AllowedChars)));
+    }catch(e){ return []; }
+  }
+
+  function fromJewelsIdTail(){
+    try{
+      const js = Array.isArray(window.jewels) ? window.jewels : [];
+      const names = [];
+      js.forEach(j=>{
+        if (!j || !isLinkId(j.id)) return;
+        const tail = String(j.id).replace(/^\[ลิงก์\]\s*/,'').trim();
+        if (tail && !/substat|value|lv\.?/i.test(tail)) names.push(tail);
+      });
+      return uniqSorted(names);
+    }catch(e){ return []; }
+  }
+
+  async function fromCSV(){
+    const url = window.CHARLIST_FORCE_CSV_URL;
+    if (!url) return [];
+    try{
+      const rsp = await fetch(url, { credentials: "omit" });
+      const txt = await rsp.text();
+      const lines = txt.split(/\r?\n/).filter(x=>x.trim());
+      if (!lines.length) return [];
+      const hdr = lines[0].split(',');
+      const idxId = hdr.findIndex(h=>/^\s*ID\s*$/i.test(h));
+      const idxAllowed = hdr.findIndex(h=>/^\s*AllowedChars?\s*$/i.test(h));
+      if (idxId<0 || idxAllowed<0) return [];
+      const names = [];
+      for (let i=1;i<lines.length;i++){
+        const cols = lines[i].split(',');
+        const id = (cols[idxId]||'').trim();
+        const ac = (cols[idxAllowed]||'').trim();
+        if (isLinkId(id) && ac) names.push(ac);
+      }
+      return uniqSorted(names);
+    }catch(e){ return []; }
+  }
+
+  // Parse GViz JSON or JSONP response for AllowedChars
+  function parseGViz(text){
+    try{
+      // JSONP case: google.visualization.Query.setResponse({...})
+      const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]+?)\);\s*$/);
+      const json = m ? JSON.parse(m[1]) : JSON.parse(text);
+      const table = json.table;
+      if (!table || !Array.isArray(table.rows)) return [];
+      const cols = (table.cols||[]).map(c=>c.label);
+      const idxId = cols.findIndex(c=>/^\s*ID\s*$/i.test(c));
+      const idxAllowed = cols.findIndex(c=>/^\s*AllowedChars?\s*$/i.test(c));
+      if (idxId<0 || idxAllowed<0) return [];
+      const set = new Set();
+      for (const row of table.rows){
+        const c = row.c || [];
+        const id = norm(c[idxId]?.v);
+        const ac = norm(c[idxAllowed]?.v);
+        if (isLinkId(id) && ac) set.add(ac);
+      }
+      return Array.from(set).sort();
+    }catch(e){ return []; }
+  }
+
+  // Interceptor: sniff URLs that look like Google Sheets GViz requests, then duplicate to JSON to parse AllowedChars
+  (function interceptors(){
+    const seen = new Set();
+    function trySideLoad(urlStr){
+      try{
+        const u = new URL(urlStr);
+        // Heuristic for GViz endpoint
+        if (!/\/gviz\/tq/i.test(u.pathname)) return;
+        // Avoid loops
+        const key = u.origin + u.pathname + (u.searchParams.get('sheet')||'') + (u.searchParams.get('gid')||'');
+        if (seen.has(key)) return; seen.add(key);
+
+        // Build JSON (or JSONP) response URL
+        const u2 = new URL(u.toString());
+        u2.searchParams.set('tqx','out:json'); // ensure JSON
+        fetch(u2.toString(), { credentials:"omit" }).then(r=>r.text()).then(txt=>{
+          const names = parseGViz(txt);
+          if (names.length){
+            window.__CharGVizCache = names.slice();
+            fillIntoSelect(names);
+          }
+        }).catch(()=>{});
+      }catch(e){}
+    }
+
+    // Wrap fetch
+    if (!window.__charFetchWrapped){
+      window.__charFetchWrapped = true;
+      const origFetch = window.fetch;
+      window.fetch = function(input, init){
+        try{
+          const urlStr = (typeof input === 'string') ? input : (input && input.url);
+          if (urlStr) trySideLoad(urlStr);
+        }catch(e){}
+        return origFetch.apply(this, arguments);
+      };
+    }
+
+    // Wrap XHR
+    if (!window.__charXHRWrapped){
+      window.__charXHRWrapped = true;
+      const OrigXHR = window.XMLHttpRequest;
+      function WrappedXHR(){
+        const xhr = new OrigXHR();
+        const open = xhr.open;
+        xhr.open = function(method, url){
+          try{ if (url) trySideLoad(url); }catch(e){}
+          return open.apply(this, arguments);
+        };
+        return xhr;
+      }
+      window.XMLHttpRequest = WrappedXHR;
+    }
+  })();
+
+  // Patch normalizeByHeaders to attach AllowedChars by ID (if not copied over)
+  (function patchNormalize(){
+    if (typeof window.normalizeByHeaders!=='function' || window.__normCharPatched) return;
+    window.__normCharPatched = true;
+    const _orig = window.normalizeByHeaders;
+    window.normalizeByHeaders = function(rows){
+      const out = _orig(rows) || [];
+      try{
+        const map = new Map(out.filter(x=>x&&x.id).map(x=>[String(x.id).trim(), x]));
+        rows.forEach(r=>{
+          const id = norm(r["ID"] ?? r["Id"] ?? r["id"]);
+          if (!id || !id.startsWith(LINK_PREFIX)) return;
+          const ac = norm(r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"]);
+          const j = map.get(id);
+          if (j && !j.allowedChars) j.allowedChars = ac;
+        });
+      }catch(e){}
+      return out;
+    };
+  })();
+
+  // Orchestrator
+  document.addEventListener('DOMContentLoaded', ()=>{
+    let tries = 0;
+    (async function tick(){
+      tries++;
+      // priority: jewels.allowedChars > GViz cache (from interceptors) > tail of ID > CSV override
+      let names = fromJewelsAllowedChars();
+      if (!names.length) names = uniqSorted(window.__CharGVizCache || []);
+      if (!names.length) names = fromJewelsIdTail();
+      if (!names.length && window.CHARLIST_FORCE_CSV_URL) names = await fromCSV();
+      if (names.length && fillIntoSelect(names)) return;
+      if (tries < 120) setTimeout(tick, 250);
+      else console.warn("ยังไม่พบรายชื่อตัวละคร: ตรวจหัวคอลัมน์ AllowedChars/ID หรือกำหนด window.CHARLIST_FORCE_CSV_URL");
+    })();
+  });
+
+})();
+</script>
+
+
+
+
+<script>
+/* === v1.2.9: JSONP by Sheet NAME (Published-to-Web d/e/2PACX..., works with file://) === */
+(function(){
+  // From your published URL:
+  // https://docs.google.com/spreadsheets/d/e/2PACX-1vTNIVhCnvjeWovuCS3xKhwaJCJZyqn-fCXGN5ZBRX8V0SuXpWSKiqhpkrQ9oeMGGecebrfvpKzmjDZH/pubhtml
+  const PUB_EID = "2PACX-1vTNIVhCnvjeWovuCS3xKhwaJCJZyqn-fCXGN5ZBRX8V0SuXpWSKiqhpkrQ9oeMGGecebrfvpKzmjDZH";
+  const SHEET_NAME = "Sheet3"; // <-- ใช้ชื่อนี้ตรงกับแท็บที่คุณย้ายข้อมูลไว้
+  const LINK_PREFIX = "[ลิงก์]";
+
+  function norm(s){ return (s==null ? "" : String(s)).trim(); }
+  function isLinkId(id){ return typeof id==='string' && id.trim().startsWith(LINK_PREFIX); }
+  function fill(names){
+    const el = document.getElementById('charSelect'); if(!el || !names || !names.length) return;
+    const uniq = Array.from(new Set(names)).sort((a,b)=>a.localeCompare(b));
+    if (el.tomselect){
+      const ts = el.tomselect;
+      ts.clearOptions(); ts.addOptions(uniq.map(n=>({value:n, text:n}))); ts.refreshOptions(false);
+    }else{
+      while (el.options.length>1) el.remove(1);
+      uniq.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
+    }
+  }
+
+  // Google JSONP callback
+  window.__CharJSONP_SheetName = function(resp){
+    try{
+      const t = resp.table || {};
+      const cols = (t.cols||[]).map(c=>c.label);
+      const idxId = cols.findIndex(c=>/^\\s*ID\\s*$/i.test(c));
+      const idxAc = cols.findIndex(c=>/^\\s*AllowedChars?\\s*$/i.test(c));
+      if (idxId<0 || idxAc<0){ console.warn("ไม่พบหัวคอลัมน์ ID/AllowedChars ในแท็บ", SHEET_NAME); return; }
+      const set = new Set();
+      (t.rows||[]).forEach(r=>{
+        const c = r.c||[];
+        const id = norm(c[idxId]?.v);
+        const ac = norm(c[idxAc]?.v);
+        if (isLinkId(id) && ac){
+          ac.split(/[,;|/、]+/).map(norm).filter(Boolean).forEach(n=>set.add(n));
+        }
+      });
+      fill(Array.from(set));
+    }catch(e){ console.warn("JSONP parse error", e); }
+  };
+
+  function loadJSONP(){
+    const tqx = encodeURIComponent("out:json;responseHandler=__CharJSONP_SheetName");
+    const src = `https://docs.google.com/spreadsheets/d/e/${PUB_EID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
+    const s = document.createElement('script'); s.src = src; s.async = true;
+    s.onerror = ()=>console.warn("โหลด JSONP ไม่สำเร็จ: ตรวจสิทธิ์ publish หรือชื่อแท็บ SHEET_NAME");
+    document.head.appendChild(s);
+  }
+
+  document.addEventListener('DOMContentLoaded', loadJSONP);
+})();
+</script>
 </body>
 </html>
