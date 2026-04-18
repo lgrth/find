@@ -638,7 +638,7 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 <div class="row-two-col" id="charRow">
   <div class="col">
     <label for="charSelect"><strong>เลือกตัวละคร (เพื่อบังคับจี้ [ลิงก์])</strong></label>
-    <select id="charSelect" class="mobile-hidden" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
+    <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
       <option value="">— ไม่ระบุ —</option>
     </select>
     <div class="input-help">ถ้าเลือก ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-neutral">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
@@ -2094,15 +2094,15 @@ if (resetBtn) {
     const _origNorm = window.normalizeByHeaders;
     window.normalizeByHeaders = function(rows){
       const out = _origNorm(rows) || [];
-      // backfill allowedChars if missing by reading source rows when id starts with [ลิงก์]
+      // backfill allowedChars — ใช้ Map by ID แทน index เพราะ out ถูก .filter() มาแล้ว
       try{
-        rows.forEach((r, i)=>{
-          const j = out[i];
-          if (!j) return;
-          if ((j.allowedChars==null || j.allowedChars===undefined) && isLinkId(j.id)){
-            const ac = (r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").toString().trim();
-            j.allowedChars = ac;
-          }
+        const idMap = new Map(out.map(j => [j.id, j]));
+        rows.forEach(r => {
+          const rawId = (r["ID"] ?? '').toString().trim();
+          if (!rawId.startsWith(LINK_PREFIX)) return;
+          const j = idMap.get(rawId);
+          if (!j || j.allowedChars != null) return;
+          j.allowedChars = (r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").toString().trim();
         });
       }catch(e){}
       return out;
@@ -2138,98 +2138,152 @@ if (resetBtn) {
     }
   }
 
-  // 3) Patch calculate to enforce fixed [ลิงก์]
+  // 3) Patch calculate to enforce fixed [ลิงก์] — ส่ง fixedCand เข้า Worker จริงๆ (3-combo)
   function patchCalculate(){
     if (typeof window.calculate !== 'function' || window.__calcPatched) return;
     window.__calcPatched = true;
     const _origCalc = window.calculate;
 
     window.calculate = async function(){
-      // Try get desired early to show same alerts if not selected
-      try{
-        if (typeof window.getDesired === 'function'){
-          const desired = window.getDesired();
-          if(!desired || (Array.isArray(desired) && desired.length===0)){
-            return _origCalc.apply(this, arguments);
-          }
-        }
-      }catch(e){}
-
-      // Ensure jewels loaded to find [ลิงก์]
+      // ถ้า jewels ยังไม่โหลด ให้ original จัดการ (จะ fetch เอง)
       if (!window.jewels || !Array.isArray(window.jewels)) {
         return _origCalc.apply(this, arguments);
       }
 
       const charEl = document.getElementById('charSelect');
-      let charName = '';
-      if (charEl){
-        charName = (charEl.tomselect ? charEl.tomselect.getValue() : charEl.value) || '';
-      }
-      if (!charName){
+      const charName = charEl
+        ? ((charEl.tomselect ? charEl.tomselect.getValue() : charEl.value) || '').trim()
+        : '';
+
+      // ไม่ได้เลือกตัวละคร → ใช้ original calculate ปกติ
+      if (!charName) return _origCalc.apply(this, arguments);
+
+      // validate desired ขั้นต่ำก่อน
+      const desired = (typeof window.getDesired === 'function') ? window.getDesired() : [];
+      if (!desired || desired.length < (window.MIN_SELECTS || 4)){
         return _origCalc.apply(this, arguments);
       }
 
-      // Find specific [ลิงก์] for the character
-      const fixedLink = window.jewels.find(j => isLinkId(j.id) && String(j.allowedChars||j.AllowedChars||'').trim() === String(charName).trim());
+      // หาจี้ลิงก์ที่ตรงกับตัวละคร
+      const fixedLink = window.jewels.find(j =>
+        isLinkId(j.id) &&
+        String(j.allowedChars || j.AllowedChars || '').trim() === charName
+      );
       if (!fixedLink){
         alert(`ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}\nกรุณาเช็กคอลัมน์ AllowedChars ในชีต`);
-        return; // abort
+        return;
       }
 
-      // We need to arrange so worker always includes fixedLink.
-      // Strategy: temporarily wrap createWorker to a version that accepts {fixed}
-      // If app already supports, great. If not, we intercept cand and desired then compute on main thread with 3-combo fallback
-      // For reliability, we create a small facade that, if worker.postMessage doesn't support fixed, we pre-filter candidates to ensure fixedLink always included by adding it later in render.
-      try{
-        // Mark globally so renderResults can sort [ลิงก์] first
-        window.__forcedLinkId = fixedLink.id;
-      }catch(e){}
-      // Let the original calculate run; then at render time we sort and ensure [ลิงก์] presence by replacing one item if missing.
-      return _origCalc.apply(this, arguments);
+      // Build candidate pool (เหมือน original แต่กรอง fixedLink ออก)
+      if (typeof window.computeJewelPool === 'function') window.jewelPool = window.computeJewelPool();
+      const pool = (window.jewelPool && window.jewelPool.length) ? window.jewelPool : window.jewels;
+
+      const bitIndex = new Map(desired.map((n,i) => [n, i]));
+      function toCand(j){
+        let mask = 0, score = 0, otherNames = [];
+        for (const s of j.substats){
+          const idx = bitIndex.get(s.name);
+          if (idx !== undefined){ mask |= (1 << idx); score += (typeof window.toNumber === 'function' ? window.toNumber(s.value) : parseFloat(s.value)||0); }
+          else otherNames.push(s.name);
+        }
+        return { id: j.id, mask, score, otherNames };
+      }
+
+      const fixedCand = toCand(fixedLink);
+      // 3-combo pool: กรอง fixedLink ออก และเอาเฉพาะที่ match desired อย่างน้อย 1 bit
+      const otherCand = pool
+        .filter(j => j && j.id !== fixedLink.id)
+        .map(toCand)
+        .filter(c => c.mask !== 0)
+        .sort((a,b) => b.score - a.score)
+        .slice(0, 100000);
+
+      if (otherCand.length < 3){
+        alert('จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น');
+        return;
+      }
+
+      let topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10);
+      if (isNaN(topK)) topK = 5;
+      if (topK < 3) topK = 3;
+      if (topK > 20) topK = 20;
+
+      window.resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
+      if (typeof window.showLoading === 'function') window.showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด (ล็อกจี้ลิงก์)...');
+      if (typeof window.setProgress === 'function') window.setProgress(10, 'เริ่มค้นหา (3-combo + จี้ลิงก์ที่ล็อก)');
+
+      // Worker ที่คำนวณ 3-combination จากนั้น + fixedCand = เซ็ต 4 ชิ้นที่แม่นยำ
+      const workerCode = `
+        self.onmessage = function(e){
+          var desired = e.data.desired;
+          var cand    = e.data.cand;
+          var fixed   = e.data.fixed;
+          var topK    = e.data.topK;
+          var desiredMaskAll = (1 << desired.length) - 1;
+          var n = cand.length;
+          var totalCombos = n * (n-1) * (n-2) / 6;
+          var done = 0, lastEmit = 0;
+          var best = [];
+          function pushTop(item){
+            best.push(item);
+            best.sort(function(a,b){ return (a.notMiss-b.notMiss)||(b.extraCount-a.extraCount)||(b.totalValue-a.totalValue); });
+            if (best.length > topK) best.pop();
+          }
+          for (var a = 0; a < n-2; a++){
+            for (var b = a+1; b < n-1; b++){
+              var maskAB   = fixed.mask | cand[a].mask | cand[b].mask;
+              var scoreAB  = fixed.score + cand[a].score + cand[b].score;
+              for (var c = b+1; c < n; c++){
+                var mask       = maskAB | cand[c].mask;
+                var totalValue = scoreAB + cand[c].score;
+                var notMask = desiredMaskAll & (~mask);
+                var notMiss = 0, notIdx = [];
+                for (var i = 0; i < desired.length; i++){ if((notMask>>i)&1){ notMiss++; notIdx.push(i); } }
+                var extraSet = {};
+                var addOther = function(arr){ for(var k=0;k<arr.length;k++) extraSet[arr[k]]=1; };
+                addOther(fixed.otherNames);
+                addOther(cand[a].otherNames);
+                addOther(cand[b].otherNames);
+                addOther(cand[c].otherNames);
+                var extraCount = Object.keys(extraSet).length;
+                pushTop({ ids:[fixed.id, cand[a].id, cand[b].id, cand[c].id], notMiss:notMiss, notIdx:notIdx, totalValue:totalValue, extraCount:extraCount });
+                done++;
+                if (done - lastEmit > 5000){ lastEmit = done; self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) }); }
+              }
+            }
+          }
+          self.postMessage({ type:'result', best:best });
+        };
+      `;
+      const blobUrl = URL.createObjectURL(new Blob([workerCode], {type:'application/javascript'}));
+      const fixedWorker = new Worker(blobUrl);
+
+      window.__etaState = { start: performance.now(), smoothSec: null };
+      fixedWorker.onmessage = function(e){
+        if (e.data.type === 'progress'){
+          const p = Math.max(0, Math.min(100, e.data.p));
+          const now = performance.now();
+          const elapsed = Math.max(0, (now - window.__etaState.start) / 1000);
+          const f = p / 100;
+          let etaSec = f > 0 ? Math.max(0, elapsed/f - elapsed) : 0;
+          if (window.__etaState.smoothSec == null) window.__etaState.smoothSec = etaSec;
+          else window.__etaState.smoothSec = window.__etaState.smoothSec * 0.7 + etaSec * 0.3;
+          const etaStr = (typeof window.__formatETA === 'function') ? window.__formatETA(window.__etaState.smoothSec) : '';
+          if (typeof window.setProgress === 'function') window.setProgress(1 + p, `กำลังประมวลผล (ล็อก ${fixedLink.id})…<br>เสร็จภายใน ${etaStr}`);
+        } else if (e.data.type === 'result'){
+          if (typeof window.renderResults === 'function') window.renderResults(e.data.best);
+          if (typeof window.hideLoading === 'function') window.hideLoading();
+          fixedWorker.terminate();
+          URL.revokeObjectURL(blobUrl);
+        }
+      };
+      fixedWorker.postMessage({ desired, cand: otherCand, fixed: fixedCand, topK });
     };
   }
 
-  // 4) Patch renderResults: ensure [ลิงก์] first & forced insert if missing
+  // 4) patchRenderResults: ไม่ต้องยัดจี้ลิงก์หลัง render แล้ว (Worker จัดการถูกต้องแล้ว)
   function patchRenderResults(){
-    if (typeof window.renderResults !== 'function' || window.__renderPatched) return;
-    window.__renderPatched = true;
-    const _orig = window.renderResults;
-    window.renderResults = function(best){
-      try{
-        // Attempt to enforce [ลิงก์] inclusion on each result if __forcedLinkId exists
-        if (Array.isArray(best) && window.__forcedLinkId){
-          best = best.map(r=>{
-            if (!r || !Array.isArray(r.ids)) return r;
-            if (!r.ids.some(id=>id===window.__forcedLinkId)){
-              // replace last id with forced link to guarantee presence (keeps count 4)
-              const ids = r.ids.slice();
-              ids[ids.length-1] = window.__forcedLinkId;
-              return Object.assign({}, r, { ids });
-            }
-            return r;
-          });
-        }
-      }catch(e){}
-      const res = _orig.call(this, best);
-
-      // After original rendering, re-order each displayed group so [ลิงก์] appears first.
-      try{
-        // If cards are rendered with a known container, we rely on data order. The original call likely keeps order of r.ids.
-        // We already modified r.ids ordering above; if not, we still try to reorder in DOM.
-        // Light DOM attempt: find any result-group rows and sort their child cards if data-id attribute exists.
-        document.querySelectorAll('[data-result-group], .result-group').forEach(group=>{
-          const cards = Array.from(group.children||[]);
-          cards.sort((a,b)=>{
-            const ai = (a.getAttribute('data-id')||'');
-            const bi = (b.getAttribute('data-id')||'');
-            return (isLinkId(bi) - isLinkId(ai));
-          });
-          cards.forEach(c=>group.appendChild(c));
-        });
-      }catch(e){}
-
-      return res;
-    };
+    // ไม่ต้องทำอะไร — Worker ส่ง ids ที่มี fixedLink.id อยู่แล้วเป็นตัวแรก
   }
 
   // 5) Try to sort inside render pipeline when creating group array (fallback if we have access)
@@ -2362,7 +2416,7 @@ if (resetBtn) {
 /* === AllowedChars by-ID patch & watcher v1.2.2 === */
 (function(){
   const LINK_PREFIX = "[ลิงก์]";
-  function isLinkId(id){ return typeof id === 'string' && typeof id === 'string' || (id && String(id).trim().startsWith(LINK_PREFIX)); }
+  function isLinkId(id){ return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX); }
 
   function applyNormPatch(){
     if (typeof window.normalizeByHeaders !== 'function' || window.__normPatched) return false;
@@ -2738,58 +2792,116 @@ if (resetBtn) {
 
 
 <script>
-/* === v1.2.9: JSONP by Sheet NAME (Published-to-Web d/e/2PACX..., works with file://) === */
+/* === v2.0: Character select — ดึงจาก gid=513976173 ของ SHEET_ID เดิม === */
 (function(){
-  // From your published URL:
-  // https://docs.google.com/spreadsheets/d/e/2PACX-1vTNIVhCnvjeWovuCS3xKhwaJCJZyqn-fCXGN5ZBRX8V0SuXpWSKiqhpkrQ9oeMGGecebrfvpKzmjDZH/pubhtml
-  const PUB_EID = "2PACX-1vTNIVhCnvjeWovuCS3xKhwaJCJZyqn-fCXGN5ZBRX8V0SuXpWSKiqhpkrQ9oeMGGecebrfvpKzmjDZH";
-  const SHEET_NAME = "Sheet3"; // <-- ใช้ชื่อนี้ตรงกับแท็บที่คุณย้ายข้อมูลไว้
-  const LINK_PREFIX = "[ลิงก์]";
+  const CHAR_SHEET_ID = "1QYMUnTbalZ2gIGdVJiCwxLucc-e7d_nUustjy-7Ody4";
+  const CHAR_GID      = "513976173";
+  const LINK_PREFIX   = "[ลิงก์]";
+  const norm = s => (s == null ? "" : String(s)).trim();
 
-  function norm(s){ return (s==null ? "" : String(s)).trim(); }
-  function isLinkId(id){ return typeof id==='string' && id.trim().startsWith(LINK_PREFIX); }
-  function fill(names){
-    const el = document.getElementById('charSelect'); if(!el || !names || !names.length) return;
-    const uniq = Array.from(new Set(names)).sort((a,b)=>a.localeCompare(b));
+  // เติมรายชื่อลง charSelect (รองรับทั้ง TomSelect และ native <select>)
+  function fillCharSelect(names){
+    const el = document.getElementById('charSelect');
+    if (!el || !names.length) return;
+    const uniq = Array.from(new Set(names.map(norm).filter(Boolean)))
+                       .sort((a, b) => a.localeCompare(b, 'th'));
+
     if (el.tomselect){
       const ts = el.tomselect;
-      ts.clearOptions(); ts.addOptions(uniq.map(n=>({value:n, text:n}))); ts.refreshOptions(false);
-    }else{
-      while (el.options.length>1) el.remove(1);
-      uniq.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
+      const prev = ts.getValue();
+      ts.clearOptions();
+      ts.addOptions([{value:'', text:'— ไม่ระบุ —'}, ...uniq.map(n => ({value:n, text:n}))]);
+      ts.refreshOptions(false);
+      if (prev) ts.setValue(prev, true);
+    } else {
+      while (el.options.length > 1) el.remove(1);
+      uniq.forEach(n => {
+        const o = document.createElement('option');
+        o.value = n; o.textContent = n;
+        el.appendChild(o);
+      });
+      // init TomSelect หลังเติม option แล้ว
+      initTomSelectOnChar(el);
     }
   }
 
-  // Google JSONP callback
-  window.__CharJSONP_SheetName = function(resp){
-    try{
-      const t = resp.table || {};
-      const cols = (t.cols||[]).map(c=>c.label);
-      const idxId = cols.findIndex(c=>/^\\s*ID\\s*$/i.test(c));
-      const idxAc = cols.findIndex(c=>/^\\s*AllowedChars?\\s*$/i.test(c));
-      if (idxId<0 || idxAc<0){ console.warn("ไม่พบหัวคอลัมน์ ID/AllowedChars ในแท็บ", SHEET_NAME); return; }
-      const set = new Set();
-      (t.rows||[]).forEach(r=>{
-        const c = r.c||[];
-        const id = norm(c[idxId]?.v);
-        const ac = norm(c[idxAc]?.v);
-        if (isLinkId(id) && ac){
-          ac.split(/[,;|/、]+/).map(norm).filter(Boolean).forEach(n=>set.add(n));
+  // Init TomSelect บน charSelect ให้ค้นหาได้เหมือน ability select
+  async function initTomSelectOnChar(el){
+    const t0 = Date.now();
+    while (!window.TomSelect && Date.now() - t0 < 6000){
+      await new Promise(r => setTimeout(r, 100));
+    }
+    if (!window.TomSelect || el.tomselect) return;
+    try {
+      new TomSelect(el, {
+        create: false,
+        allowEmptyOption: true,
+        placeholder: 'พิมพ์ชื่อตัวละคร...',
+        maxItems: 1,
+        plugins: { clear_button: { title: 'ลบค่า' } },
+        searchField: ['text', 'value'],
+        score: function(search){
+          const base = this.getScoreFunction(search);
+          return item => {
+            let s = base(item);
+            const q = (search || '').toLowerCase().trim();
+            const t = (item.text || '').toLowerCase();
+            if (q && t.startsWith(q)) s += 1.0;
+            return s;
+          };
         }
       });
-      fill(Array.from(set));
-    }catch(e){ console.warn("JSONP parse error", e); }
+    } catch(e){ console.warn('[CharSelect] TomSelect init failed', e); }
+  }
+
+  // JSONP callback — GViz ส่งข้อมูลกลับมา
+  window.__CharGViz_v2 = function(resp){
+    try {
+      const t = resp.table || {};
+      const cols = (t.cols || []).map(c => norm(c.label));
+
+      // หา index ของคอลัมน์ ID และ AllowedChars
+      let idxId = cols.findIndex(c => /^ID$/i.test(c));
+      let idxAc = cols.findIndex(c => /^AllowedChars?$/i.test(c));
+      // fallback: ถ้า headers ไม่ถูก detect ให้ใช้ col 0 = ID, col 1 = AllowedChars
+      if (idxId < 0) idxId = 0;
+      if (idxAc < 0) idxAc = 1;
+
+      const set = new Set();
+      (t.rows || []).forEach(r => {
+        const c   = r.c || [];
+        const id  = norm(c[idxId]?.v);
+        const ac  = norm(c[idxAc]?.v);
+        // ข้ามแถว header ที่อาจถูก return มาเป็น data row
+        if (id === 'ID' || !id.startsWith(LINK_PREFIX)) return;
+        if (ac) ac.split(/[,;|/、]+/).map(norm).filter(Boolean).forEach(n => set.add(n));
+      });
+
+      if (set.size > 0){
+        fillCharSelect(Array.from(set));
+      } else {
+        console.warn('[CharGViz] ไม่พบข้อมูลตัวละคร — ตรวจสอบว่า gid=513976173 มีข้อมูลและเปิดแชร์ให้ Anyone');
+      }
+    } catch(e){ console.warn('[CharGViz] parse error', e); }
   };
 
-  function loadJSONP(){
-    const tqx = encodeURIComponent("out:json;responseHandler=__CharJSONP_SheetName");
-    const src = `https://docs.google.com/spreadsheets/d/e/${PUB_EID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
-    const s = document.createElement('script'); s.src = src; s.async = true;
-    s.onerror = ()=>console.warn("โหลด JSONP ไม่สำเร็จ: ตรวจสิทธิ์ publish หรือชื่อแท็บ SHEET_NAME");
+  function loadCharGViz(){
+    const tqx = encodeURIComponent('out:json;responseHandler=__CharGViz_v2');
+    const src  = `https://docs.google.com/spreadsheets/d/${CHAR_SHEET_ID}/gviz/tq?gid=${CHAR_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.onerror = () => console.warn('[CharGViz] โหลดไม่สำเร็จ: ตรวจสิทธิ์แชร์ sheet ให้ Anyone with the link – Viewer');
     document.head.appendChild(s);
   }
 
-  document.addEventListener('DOMContentLoaded', loadJSONP);
+  // รอให้ TomSelect พร้อมก่อน แล้วค่อย load
+  document.addEventListener('DOMContentLoaded', async () => {
+    // pre-init TomSelect บน charSelect (ก่อนมีข้อมูล) เพื่อให้ UI พร้อม
+    const el = document.getElementById('charSelect');
+    if (el) await initTomSelectOnChar(el);
+    loadCharGViz();
+  });
 })();
 </script>
 </body>
