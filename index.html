@@ -18,7 +18,6 @@
     line-height: 1.5;
   }
   body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
-  header{background:linear-gradient(180deg,#1b3ca0,#0f245b);color:#fff;padding:20px;text-align:center;font-size:32px;font-weight:700;line-height:1.25;box-shadow:0 6px 14px rgba(0,0,0,.16);position:fixed;left:0;right:0;top:0;z-index:1200;}
 
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
@@ -304,23 +303,15 @@ header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
 .btn-copy:hover{background:#f1f5f9;border-color:#e2e8f0}
 .btn-copy:focus-visible{outline:2px solid #7aa2ff; outline-offset:2px}
 
-/* --- Fixed header & steps in header --- */
+/* --- Fixed header offset & step-index overrides --- */
 :root{ --header-h: 0px; }
 body{ padding-top: var(--header-h); }
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
 header .brand{ padding-top:6px; }
-.steps-in-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
 @media (max-width:640px){
-  .steps-in-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
   .steps-in-header li{ font-size:12px; padding:6px 8px }
   .brand-title{ font-size:26px }
 }
-
-
-/* Improve readability of steps in fixed header */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
-.steps-in-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
-.steps-inline li{margin:6 6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
+.steps-inline li{margin:6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
 .steps-inline .step-index{
   background:#ffffff !important;
   color:#1f4ac5 !important;
@@ -518,7 +509,6 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
   .result-card { font-size: 13px !important; } /* ลดขนาดข้อความบนการ์ด */
   .result-card h3 { font-size: 15px !important; }
   .card-info { font-size: 12.5px !important; }
-  header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
   h2{font-size:clamp(18px,4.5vw,22px)}
   .grid{grid-template-columns:1fr}
   .jewel-columns{grid-template-columns:1fr 1fr;gap:6px;font-size: 14px;font-weight:600!important}
@@ -588,8 +578,8 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 
 <!-- Consent toast shown on first visit -->
 <div id="consentToast" class="toast-consent hidden" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
-  <h3 id="consentTitle" class="toast-consent__title" style="font-size: 32px;color: #2e59d9;">โปรดทราบ</h3>
-  <p class="toast-consent__msg" style="font-size: 20px;">เว็บไซต์นี้จัดทำขึ้นโดย <strong>บุคคลทั่วไป</strong> <br> ทาง LINE เกมเศรษฐี ไม่มีส่วนเกี่ยวข้องใด ๆ กับเว็บไซต์นี้</p>
+  <h3 id="consentTitle" class="toast-consent__title consent-title-lg">โปรดทราบ</h3>
+  <p class="toast-consent__msg consent-msg-lg">เว็บไซต์นี้จัดทำขึ้นโดย <strong>บุคคลทั่วไป</strong> <br> ทาง LINE เกมเศรษฐี ไม่มีส่วนเกี่ยวข้องใด ๆ กับเว็บไซต์นี้</p>
   <div class="toast-consent__actions">
     <button id="consentOk" type="button" class="btn btn--primary">รับทราบ</button>
   </div>
@@ -603,9 +593,9 @@ header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px
 <div class="steps-bar" role="navigation" aria-label="ขั้นตอนการใช้งาน">
   <ol class="steps-inline">
     <li2>ขั้นตอนการใช้งาน >></li2>
-    <li style="margin-left: 0px !important; margin-right: 0px !important;"><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
-    <li style="margin-left: 0px !important; margin-right: 0px !important;"><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
-    <li style="margin-left: 0px !important; margin-right: 0px !important;"><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
+    <li class="no-indent"><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
+    <li class="no-indent"><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
+    <li class="no-indent"><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
   </ol>
 </div>
 
@@ -929,6 +919,15 @@ function normalizeByHeaders(rows){
 }
 
 function fetchGVizJSONP(){
+  const MAX_ATTEMPTS = 3;
+  const attempt = (n)=> _fetchGVizJSONPOnce().catch(err=>{
+    if(n >= MAX_ATTEMPTS) throw err;
+    const delay = 400 * Math.pow(2, n-1);
+    return new Promise(r=> setTimeout(r, delay)).then(()=> attempt(n+1));
+  });
+  return attempt(1);
+}
+function _fetchGVizJSONPOnce(){
   return new Promise((resolve, reject)=>{
     const oldGoogle = window.google;
     window.google = window.google || {};
@@ -988,7 +987,7 @@ function computeJewelPool(){
   return jewels.slice();
 }
 
-const SPEED_CFG = { CANDIDATE_LIMIT: 100000 };
+const SPEED_CFG = { CANDIDATE_LIMIT: 1500 };
 function buildCandidates(desired, sourceJewels){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
   return sourceJewels.map(j=>{
@@ -1012,6 +1011,10 @@ function createWorker(){
       const desiredMaskAll = (1 << desired.length) - 1;
       const n = cand.length;
       const totalCombos = n * (n - 1) * (n - 2) * (n - 3) / 24;
+      // Precompute suffixOr[i] = OR of cand[i..n-1].mask — used to prune branches
+      // that can never cover desired bits better than current best.
+      const suffixOr = new Array(n + 1); suffixOr[n] = 0;
+      for (let i = n - 1; i >= 0; i--) suffixOr[i] = suffixOr[i+1] | cand[i].mask;
       let done = 0, lastEmit = 0;
       const best = [];
       const pushTop = (item) => {
@@ -1019,11 +1022,29 @@ function createWorker(){
         best.sort((a,b)=> (a.notMiss - b.notMiss) || (b.extraCount - a.extraCount) || (b.totalValue - a.totalValue) );
         if (best.length > topK) best.pop();
       };
+      // popcount helper for prune
+      const popcount = (x) => { let c = 0; while (x) { c += x & 1; x >>>= 1; } return c; };
       for (let a = 0; a < n - 3; a++) {
+        // prune: best-case remaining coverage at depth a
+        if (best.length === topK){
+          const maxCoverA = cand[a].mask | suffixOr[a+1];
+          const minNotMissA = popcount(desiredMaskAll & (~maxCoverA));
+          if (minNotMissA > best[best.length-1].notMiss) continue;
+        }
         for (let b = a + 1; b < n - 2; b++) {
           const maskAB = cand[a].mask | cand[b].mask; const scoreAB = cand[a].score + cand[b].score;
+          if (best.length === topK){
+            const maxCoverAB = maskAB | suffixOr[b+1];
+            const minNotMissAB = popcount(desiredMaskAll & (~maxCoverAB));
+            if (minNotMissAB > best[best.length-1].notMiss) continue;
+          }
           for (let c = b + 1; c < n - 1; c++) {
             const maskABC = maskAB | cand[c].mask; const scoreABC = scoreAB + cand[c].score;
+            if (best.length === topK){
+              const maxCoverABC = maskABC | suffixOr[c+1];
+              const minNotMissABC = popcount(desiredMaskAll & (~maxCoverABC));
+              if (minNotMissABC > best[best.length-1].notMiss) continue;
+            }
             for (let d = c + 1; d < n; d++) {
               const mask = maskABC | cand[d].mask; const totalValue = scoreABC + cand[d].score;
               const notMask = desiredMaskAll & (~mask);
@@ -1352,32 +1373,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 })();
 </script>
 <script>
-// Inline validation for topK (3-20)
-(function(){
-  const inp = document.getElementById('topK');
-  const help = document.getElementById('topKHelp');
-  if(!inp || !help) return;
-  const validate = ()=>{
-    const v = Number(inp.value);
-    if(!inp.value){
-      inp.classList.remove('is-valid','is-invalid');
-      return;
-    }
-    if(v>=3 && v<=20){
-      inp.classList.add('is-valid');
-      inp.classList.remove('is-invalid');
-      help.textContent = 'อยู่ในช่วง 3–20 พร้อมคำนวณ';
-    } else {
-      inp.classList.add('is-invalid');
-      inp.classList.remove('is-valid');
-      help.textContent = 'ใส่ค่าระหว่าง 3–20 เท่านั้น';
-    }
-  };
-  inp.addEventListener('input', validate);
-  validate();
-})();
-</script>
-<script>
 (function(){
   function setHeaderOffset(){
     const h = document.querySelector('header');
@@ -1454,6 +1449,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }, {passive:true});
 
     el.addEventListener('touchcancel', ()=>{ clearLP(); hideTip(); }, {passive:true});
+
+    if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+    el.addEventListener('focus', ()=>showTip(el));
+    el.addEventListener('blur', hideTip);
+    el.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') hideTip(); });
   }
 
   function init(){
@@ -1505,17 +1505,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
     </div>
     <form id="fbForm" class="fb-form">
       <label class="fb-label">ประเภท
-        <select name="category" class="fb-input"  style="font-family: Kanit;">
+        <select name="category" class="fb-input" >
           <option value="bug">Bug / ปัญหา</option>
           <option value="idea">ข้อเสนอแนะ</option>
           <option value="other">อื่น ๆ</option>
         </select>
       </label>
       <label class="fb-label">ข้อความ
-        <textarea name="message" class="fb-input" rows="4" placeholder="เล่าให้ฟังว่าเกิดอะไรขึ้น/อยากให้ปรับอะไร" style="font-family: Kanit;"></textarea>
+        <textarea name="message" class="fb-input" rows="4" placeholder="เล่าให้ฟังว่าเกิดอะไรขึ้น/อยากให้ปรับอะไร"></textarea>
       </label>
       <label class="fb-label">ช่องทางติดต่อกลับ
-        <input name="contact" class="fb-input" type="text" placeholder="เช่น facebook/LINE/E-mail" style="font-family: Kanit;">
+        <input name="contact" class="fb-input" type="text" placeholder="เช่น facebook/LINE/E-mail">
       </label>
 
       <div class="fb-actions">
@@ -1589,7 +1589,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-label{ display:block; font-weight:600; margin:8px 0 6px; color:#334155; }
 .fb-input{
   display:block; width:90%; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; font-size:15px; background:#fff;
+  font-family: inherit;
 }
+.steps-inline li.no-indent{ margin-left:0 !important; margin-right:0 !important; }
+.consent-title-lg{ font-size:32px; color:#2e59d9; }
+.consent-msg-lg{ font-size:20px; }
 .fb-input:focus-visible{ outline:3px solid #7aa2ff; outline-offset:2px; }
 
 .fb-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
@@ -1873,7 +1877,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
     // Replace with gated version
     window.fetchGVizJSONP = function(){
-      if (localStorage.getItem(STORAGE_KEY) >= '3'){
+      if (parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10) >= 3){
         return __origFetchGVizJSONP();
       }
       // Show consent toast only once
@@ -2060,7 +2064,17 @@ if (resetBtn) {
       });
     }
 
-    // Upgrade to TomSelect if available
+    // If v2.0 already initialized TomSelect, let it own the options — don't overwrite.
+    // Only merge if we have new names AND v2.0 has nothing yet.
+    if (el.tomselect){
+      const ts = el.tomselect;
+      const existing = Object.keys(ts.options || {}).filter(k => k !== '').length;
+      if (existing === 0 && charNames.length){
+        ts.addOptions(charNames.map(n => ({value:n, text:n})));
+        ts.refreshOptions(false);
+      }
+      return;
+    }
     if (await waitForTomSelect()){
       try{
         new TomSelect(el, {
@@ -2300,497 +2314,6 @@ if (resetBtn) {
   });
 })();
 </script>
-<script>
-/* === Robust char-select population v1.2.1 === */
-(function(){
-  const LINK_PREFIX = "[ลิงก์]";
-  const MAX_WAIT_MS = 20000; // wait longer for data
-  function isLinkId(id){ return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX); }
-
-  // Capture raw rows if available by wrapping fetchGVizJSONP (best-effort, non-breaking)
-  if (typeof window.fetchGVizJSONP === 'function' && !window.__fetchWrapped){
-    window.__fetchWrapped = true;
-    const __origFetch = window.fetchGVizJSONP;
-    window.fetchGVizJSONP = async function(){
-      const res = await __origFetch.apply(this, arguments);
-      try{ window.__afterFetchJewels = true; populateCharSelect(true); }catch(e){}
-      return res;
-    };
-  }
-
-  function getCharNames(){
-    const names = new Set();
-    const js = Array.isArray(window.jewels) ? window.jewels : [];
-    for (const j of js){
-      if (!j || !isLinkId(j.id)) continue;
-      const ac = (j.allowedChars || j.AllowedChars || '').toString().trim();
-      if (ac) names.add(ac);
-    }
-    return Array.from(names).sort();
-  }
-
-  function populateIntoSelect(el, names){
-    if (!el) return;
-    // If TomSelect instance exists, use its API
-    if (el.tomselect){
-      const ts = el.tomselect;
-      const options = names.map(n=>({value:n, text:n}));
-      ts.clearOptions();
-      ts.addOptions(options);
-      ts.refreshOptions(false);
-      return;
-    }
-    // Native <select>
-    while (el.options.length > 1) el.remove(1);
-    for (const n of names){
-      const opt = document.createElement('option');
-      opt.value = n; opt.textContent = n;
-      el.appendChild(opt);
-    }
-  }
-
-  async function waitForJewels(){
-    const t0 = Date.now();
-    while (Date.now() - t0 < MAX_WAIT_MS){
-      if (Array.isArray(window.jewels) && window.jewels.some(j=>isLinkId(j?.id))) return true;
-      await new Promise(r=>setTimeout(r, 200));
-    }
-    return false;
-  }
-
-  async function ensureTomSelect(el){
-    const t0 = Date.now();
-    while (Date.now() - t0 < MAX_WAIT_MS){
-      if (window.TomSelect){
-        try{
-          if (!el.tomselect){
-            new TomSelect(el, {
-              create:false, allowEmptyOption:true, placeholder:'พิมพ์ชื่อตัวละคร...',
-              maxOptions: 500, searchField:['text','value'],
-              score: function(search){ const base=this.getScoreFunction(search); return item=>{ let s=base(item); const q=(search||'').toLowerCase().trim(); const t=(item.text||'').toLowerCase(); if(q && t.startsWith(q)) s+=1.0; return s; }; },
-              maxItems:1,
-              render:{ option:(d,e)=>`<div class="px-2 py-1">${e(d.text)}</div>`, item:(d,e)=>`<div class="px-1">${e(d.text)}</div>` }
-            });
-          }
-        }catch(e){}
-        return true;
-      }
-      await new Promise(r=>setTimeout(r, 200));
-    }
-    return false;
-  }
-
-  async function populateCharSelect(force=false){
-    const el = document.getElementById('charSelect');
-    if (!el) return;
-
-    if (!force){
-      // Avoid doing work if we already have options
-      const hasOptions = el.tomselect ? Object.keys(el.tomselect.options||{}).length>0 : (el.options.length>1);
-      if (hasOptions) return;
-    }
-
-    await waitForJewels();
-    const names = getCharNames();
-    // proceed even if empty; we'll try again later via interval
-    await ensureTomSelect(el);
-    populateIntoSelect(el, names);
-  }
-
-  // Keep trying a few times in case data loads late
-  document.addEventListener('DOMContentLoaded', ()=>{
-    populateCharSelect(false);
-    let tries = 0;
-    const iv = setInterval(()=>{
-      tries++;
-      populateCharSelect(false);
-      const el = document.getElementById('charSelect');
-      const has = el && (el.tomselect ? Object.keys(el.tomselect.options||{}).length>0 : (el.options.length>1));
-      if (has || tries>120){ clearInterval(iv); }
-    }, 250);
-  });
-
-})();
-</script>
-<script>
-/* === AllowedChars by-ID patch & watcher v1.2.2 === */
-(function(){
-  const LINK_PREFIX = "[ลิงก์]";
-  function isLinkId(id){ return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX); }
-
-  function applyNormPatch(){
-    if (typeof window.normalizeByHeaders !== 'function' || window.__normPatched) return false;
-    window.__normPatched = true;
-    const _origNorm = window.normalizeByHeaders;
-    window.normalizeByHeaders = function(rows){
-      const out = _origNorm(rows) || [];
-      try{
-        // Build map by ID from normalized jewels
-        const map = new Map();
-        for (const j of out){
-          if (j && j.id) map.set(String(j.id).trim(), j);
-        }
-        // Walk original rows, set allowedChars on the matching normalized record by ID
-        for (const r of rows){
-          const rawId = (r["ID"] ?? r["Id"] ?? r["id"] ?? "").toString().trim();
-          if (!rawId) continue;
-          if (!rawId.startsWith("[ลิงก์]")) continue;
-          const ac = (r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").toString().trim();
-          const j = map.get(rawId);
-          if (j && !j.allowedChars){
-            j.allowedChars = ac;
-          }
-        }
-      }catch(e){ console.warn("AllowedChars map patch error:", e); }
-      return out;
-    };
-    return true;
-  }
-
-  // Watcher: in case normalizeByHeaders is defined later
-  if (!window.__normWatch){
-    window.__normWatch = true;
-    let tries = 0;
-    const iv = setInterval(()=>{
-      tries++;
-      if (applyNormPatch() || tries>120){
-        clearInterval(iv);
-      }
-    }, 200);
-  }
-
-  // After jewels load, if char list empty, repopulate
-  document.addEventListener('DOMContentLoaded', ()=>{
-    let tries = 0;
-    const iv = setInterval(()=>{
-      tries++;
-      const el = document.getElementById('charSelect');
-      const hasOptions = el && (el.tomselect ? Object.keys(el.tomselect.options||{}).length>0 : (el && el.options && el.options.length>1));
-      if (hasOptions){ clearInterval(iv); return; }
-      if (Array.isArray(window.jewels) && window.jewels.some(j=>j && j.allowedChars)){
-        // Force repopulate via function from v1.2.1 if present
-        if (typeof populateCharSelect === 'function'){
-          try{ populateCharSelect(true); }catch(e){}
-        }else{
-          // fallback: manual fill
-          try{
-            const names = Array.from(new Set(window.jewels.filter(j=>j && j.allowedChars && String(j.id||'').startsWith("[ลิงก์]")).map(j=>String(j.allowedChars).trim()).filter(Boolean))).sort();
-            if (el){
-              if (el.tomselect){
-                const ts = el.tomselect;
-                ts.clearOptions();
-                ts.addOptions(names.map(n=>({value:n, text:n})));
-                ts.refreshOptions(false);
-              }else{
-                while (el.options.length>1) el.remove(1);
-                names.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
-              }
-            }
-          }catch(e){}
-        }
-        clearInterval(iv);
-      }
-      if (tries>200) clearInterval(iv);
-    }, 250);
-  });
-})();
-</script>
-<script>
-/* === GViz tap & side-load for AllowedChars v1.2.3 === */
-(function(){
-  const LINK_PREFIX = "[ลิงก์]";
-  function isLinkId(id){ return typeof id === 'string' && String(id).trim().startsWith(LINK_PREFIX); }
-
-  // Build char list directly from GViz response
-  function extractCharNamesFromGViz(resp){
-    try{
-      const table = resp.table;
-      if (!table || !Array.isArray(table.rows)) return [];
-      const cols = (table.cols||[]).map(c=>c.label);
-      const idxId = cols.findIndex(c=>/^\s*ID\s*$/i.test(c));
-      const idxAllowed = cols.findIndex(c=>/^\s*AllowedChars?\s*$/i.test(c));
-      if (idxId<0 || idxAllowed<0) return [];
-      const names = new Set();
-      for (const row of table.rows){
-        const c = row.c || [];
-        const id = (c[idxId]?.v ?? '').toString();
-        const ac = (c[idxAllowed]?.v ?? '').toString();
-        if (isLinkId(id) && ac.trim()) names.add(ac.trim());
-      }
-      return Array.from(names).sort();
-    }catch(e){ return []; }
-  }
-
-  function populateSelectNames(names){
-    const el = document.getElementById('charSelect');
-    if (!el || !names || !names.length) return;
-    if (el.tomselect){
-      const ts = el.tomselect;
-      ts.clearOptions();
-      ts.addOptions(names.map(n=>({value:n, text:n})));
-      ts.refreshOptions(false);
-    }else{
-      while (el.options.length>1) el.remove(1);
-      names.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
-    }
-  }
-
-  // Create a side-request using GViz JSONP with responseHandler
-  function sideLoadGViz(baseUrl){
-    // Ensure we only add once
-    if (window.__charSideLoaded) return;
-    window.__charSideLoaded = true;
-    const url = new URL(baseUrl);
-    // enforce jsonp response with our handler
-    const tqx = "out:json;responseHandler=__CharGVizCB";
-    url.searchParams.set('tqx', tqx);
-    // add a small random to bust cache
-    url.searchParams.set('rand', String(Math.random()).slice(2));
-    window.__CharGVizCB = function(resp){
-      try{
-        const names = extractCharNamesFromGViz(resp);
-        if (names.length) populateSelectNames(names);
-      }catch(e){}
-    };
-    const s = document.createElement('script');
-    s.src = url.toString();
-    document.head.appendChild(s);
-  }
-
-  function detectGVizUrlAndLoad(){
-    // Try to find existing script src used by the app (contains /gviz/tq?)
-    const scripts = Array.from(document.scripts||[]);
-    const gviz = scripts.map(s=>s.src).find(src => src && src.includes('/gviz/tq?'));
-    if (gviz){
-      // Use it but strip existing tqx so we can set our handler
-      const u = new URL(gviz);
-      u.searchParams.delete('tqx'); // we'll set our own
-      sideLoadGViz(u.toString());
-      return true;
-    }
-    return false;
-  }
-
-  // If not found immediately, watch for future <script> inserts
-  function watchForGViz(){
-    if (detectGVizUrlAndLoad()) return;
-    const mo = new MutationObserver((muts)=>{
-      for (const m of muts){
-        const added = Array.from(m.addedNodes||[]).filter(n=>n.tagName==='SCRIPT');
-        for (const sc of added){
-          const src = sc.src || '';
-          if (src.includes('/gviz/tq?')){
-            try{
-              const u = new URL(src);
-              u.searchParams.delete('tqx');
-              sideLoadGViz(u.toString());
-              mo.disconnect();
-              return;
-            }catch(e){}
-          }
-        }
-      }
-    });
-    mo.observe(document.documentElement || document.body, { childList:true, subtree:true });
-    // safety timeout
-    setTimeout(()=>mo.disconnect(), 20000);
-  }
-
-  document.addEventListener('DOMContentLoaded', watchForGViz);
-})();
-</script>
-
-<script>
-/* === v1.2.5: Auto character list via interceptors (fetch/XHR) + GViz/CSV + fallback ID-tail === */
-(function(){
-  const LINK_PREFIX = "[ลิงก์]";
-  const norm = s => (s==null ? "" : String(s)).trim();
-  const uniqSorted = arr => Array.from(new Set(arr.filter(Boolean).map(norm))).sort((a,b)=> a.localeCompare(b));
-
-  // Config override (optional): publish CSV with headers ID,AllowedChars
-  window.CHARLIST_FORCE_CSV_URL = window.CHARLIST_FORCE_CSV_URL || "";
-
-  function isLinkId(id){ return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX); }
-
-  function fillIntoSelect(charNames){
-    const el = document.getElementById('charSelect');
-    if (!el || !charNames.length) return false;
-    if (el.tomselect){
-      const ts = el.tomselect;
-      ts.clearOptions();
-      ts.addOptions(charNames.map(n=>({value:n, text:n})));
-      ts.refreshOptions(false);
-    }else{
-      while (el.options.length>1) el.remove(1);
-      charNames.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
-    }
-    return true;
-  }
-
-  function fromJewelsAllowedChars(){
-    try{
-      const js = Array.isArray(window.jewels) ? window.jewels : [];
-      return uniqSorted(js.filter(j=>j && isLinkId(j.id)).map(j=>norm(j.allowedChars || j.AllowedChars)));
-    }catch(e){ return []; }
-  }
-
-  function fromJewelsIdTail(){
-    try{
-      const js = Array.isArray(window.jewels) ? window.jewels : [];
-      const names = [];
-      js.forEach(j=>{
-        if (!j || !isLinkId(j.id)) return;
-        const tail = String(j.id).replace(/^\[ลิงก์\]\s*/,'').trim();
-        if (tail && !/substat|value|lv\.?/i.test(tail)) names.push(tail);
-      });
-      return uniqSorted(names);
-    }catch(e){ return []; }
-  }
-
-  async function fromCSV(){
-    const url = window.CHARLIST_FORCE_CSV_URL;
-    if (!url) return [];
-    try{
-      const rsp = await fetch(url, { credentials: "omit" });
-      const txt = await rsp.text();
-      const lines = txt.split(/\r?\n/).filter(x=>x.trim());
-      if (!lines.length) return [];
-      const hdr = lines[0].split(',');
-      const idxId = hdr.findIndex(h=>/^\s*ID\s*$/i.test(h));
-      const idxAllowed = hdr.findIndex(h=>/^\s*AllowedChars?\s*$/i.test(h));
-      if (idxId<0 || idxAllowed<0) return [];
-      const names = [];
-      for (let i=1;i<lines.length;i++){
-        const cols = lines[i].split(',');
-        const id = (cols[idxId]||'').trim();
-        const ac = (cols[idxAllowed]||'').trim();
-        if (isLinkId(id) && ac) names.push(ac);
-      }
-      return uniqSorted(names);
-    }catch(e){ return []; }
-  }
-
-  // Parse GViz JSON or JSONP response for AllowedChars
-  function parseGViz(text){
-    try{
-      // JSONP case: google.visualization.Query.setResponse({...})
-      const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]+?)\);\s*$/);
-      const json = m ? JSON.parse(m[1]) : JSON.parse(text);
-      const table = json.table;
-      if (!table || !Array.isArray(table.rows)) return [];
-      const cols = (table.cols||[]).map(c=>c.label);
-      const idxId = cols.findIndex(c=>/^\s*ID\s*$/i.test(c));
-      const idxAllowed = cols.findIndex(c=>/^\s*AllowedChars?\s*$/i.test(c));
-      if (idxId<0 || idxAllowed<0) return [];
-      const set = new Set();
-      for (const row of table.rows){
-        const c = row.c || [];
-        const id = norm(c[idxId]?.v);
-        const ac = norm(c[idxAllowed]?.v);
-        if (isLinkId(id) && ac) set.add(ac);
-      }
-      return Array.from(set).sort();
-    }catch(e){ return []; }
-  }
-
-  // Interceptor: sniff URLs that look like Google Sheets GViz requests, then duplicate to JSON to parse AllowedChars
-  (function interceptors(){
-    const seen = new Set();
-    function trySideLoad(urlStr){
-      try{
-        const u = new URL(urlStr);
-        // Heuristic for GViz endpoint
-        if (!/\/gviz\/tq/i.test(u.pathname)) return;
-        // Avoid loops
-        const key = u.origin + u.pathname + (u.searchParams.get('sheet')||'') + (u.searchParams.get('gid')||'');
-        if (seen.has(key)) return; seen.add(key);
-
-        // Build JSON (or JSONP) response URL
-        const u2 = new URL(u.toString());
-        u2.searchParams.set('tqx','out:json'); // ensure JSON
-        fetch(u2.toString(), { credentials:"omit" }).then(r=>r.text()).then(txt=>{
-          const names = parseGViz(txt);
-          if (names.length){
-            window.__CharGVizCache = names.slice();
-            fillIntoSelect(names);
-          }
-        }).catch(()=>{});
-      }catch(e){}
-    }
-
-    // Wrap fetch
-    if (!window.__charFetchWrapped){
-      window.__charFetchWrapped = true;
-      const origFetch = window.fetch;
-      window.fetch = function(input, init){
-        try{
-          const urlStr = (typeof input === 'string') ? input : (input && input.url);
-          if (urlStr) trySideLoad(urlStr);
-        }catch(e){}
-        return origFetch.apply(this, arguments);
-      };
-    }
-
-    // Wrap XHR
-    if (!window.__charXHRWrapped){
-      window.__charXHRWrapped = true;
-      const OrigXHR = window.XMLHttpRequest;
-      function WrappedXHR(){
-        const xhr = new OrigXHR();
-        const open = xhr.open;
-        xhr.open = function(method, url){
-          try{ if (url) trySideLoad(url); }catch(e){}
-          return open.apply(this, arguments);
-        };
-        return xhr;
-      }
-      window.XMLHttpRequest = WrappedXHR;
-    }
-  })();
-
-  // Patch normalizeByHeaders to attach AllowedChars by ID (if not copied over)
-  (function patchNormalize(){
-    if (typeof window.normalizeByHeaders!=='function' || window.__normCharPatched) return;
-    window.__normCharPatched = true;
-    const _orig = window.normalizeByHeaders;
-    window.normalizeByHeaders = function(rows){
-      const out = _orig(rows) || [];
-      try{
-        const map = new Map(out.filter(x=>x&&x.id).map(x=>[String(x.id).trim(), x]));
-        rows.forEach(r=>{
-          const id = norm(r["ID"] ?? r["Id"] ?? r["id"]);
-          if (!id || !id.startsWith(LINK_PREFIX)) return;
-          const ac = norm(r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"]);
-          const j = map.get(id);
-          if (j && !j.allowedChars) j.allowedChars = ac;
-        });
-      }catch(e){}
-      return out;
-    };
-  })();
-
-  // Orchestrator
-  document.addEventListener('DOMContentLoaded', ()=>{
-    let tries = 0;
-    (async function tick(){
-      tries++;
-      // priority: jewels.allowedChars > GViz cache (from interceptors) > tail of ID > CSV override
-      let names = fromJewelsAllowedChars();
-      if (!names.length) names = uniqSorted(window.__CharGVizCache || []);
-      if (!names.length) names = fromJewelsIdTail();
-      if (!names.length && window.CHARLIST_FORCE_CSV_URL) names = await fromCSV();
-      if (names.length && fillIntoSelect(names)) return;
-      if (tries < 120) setTimeout(tick, 250);
-      else console.warn("ยังไม่พบรายชื่อตัวละคร: ตรวจหัวคอลัมน์ AllowedChars/ID หรือกำหนด window.CHARLIST_FORCE_CSV_URL");
-    })();
-  });
-
-})();
-</script>
-
-
-
-
 <script>
 /* === v2.0: Character select — ดึงจาก gid=513976173 ของ SHEET_ID เดิม === */
 (function(){
