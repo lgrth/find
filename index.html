@@ -19,17 +19,10 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <script>
-/* Theme toggle — in <head> so it runs before first paint (no FOUC) */
+/* Force light mode before first paint (no FOUC) */
 (function(){
   document.documentElement.setAttribute('data-theme', 'light');
 })();
-window._toggleTheme = function(btn){
-  var html = document.documentElement;
-  var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  localStorage.setItem('theme_pref_v1', next);
-  if(btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
-};
 </script>
 <style>
   @font-face {
@@ -288,11 +281,6 @@ window._toggleTheme = function(btn){
     .btn{padding:16px 20px}
   }
 
-  /* ปิด hover-tooltip บนอุปกรณ์สัมผัส */
-  @media (hover:none){
-    
-  }
-
   /* Reduce Motion => ต้องเห็นการ์ดแน่ ๆ */
   @media (prefers-reduced-motion:reduce){
     .result-card{animation:none;opacity:1}
@@ -346,14 +334,8 @@ header .brand{text-align:center;padding-top:0!important}
 .btn-copy{margin-top:0;display:inline-flex;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-weight:600}
 .btn-copy:hover{background:#eef2f7}
 
-.result-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-/* lighten badge contrasts a bit */
-
 /* Tooltips stay readable */
 [data-tooltip]{position:relative}
-
-
-
 
 /* Icon copy button (small/ghost) */
 .btn-copy{
@@ -368,7 +350,6 @@ header .brand{text-align:center;padding-top:0!important}
 body{ padding-top: var(--header-h); }
 header .brand{ padding-top:6px; }
 @media (max-width:640px){
-  .steps-in-header li{ font-size:12px; padding:6px 8px }
   .brand-title{ font-size:26px }
 }
 .steps-inline li{margin:6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
@@ -380,28 +361,6 @@ header .brand{ padding-top:6px; }
 @media (max-width:640px){
   .steps-inline li{margin:0 6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
 }
-
-/* Body-level tooltip to avoid stacking/overflow issues */
-.jewel-tooltip{
-  position: fixed;
-  top: 0; left: 0;
-  transform: translateX(-50%);
-  pointer-events: none;
-  background: #0b1020;
-  color: #fff;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 14px;
-  line-height: 1.5;
-  max-width: 360px;
-  box-shadow: 0 12px 28px rgba(0,0,0,.32);
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity .12s ease;
-  white-space: pre-line;
-}
-.jewel-tooltip.show{ opacity: 1; }
-
 
 /* Brand title in header */
 .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
@@ -479,33 +438,7 @@ header .brand{ padding-top:6px; }
 }
 
 
-/* === Adopt result-card + tooltip look from index.html === */
-/* result-card box + grid */
-.result-card{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:auto auto;
-  gap:10px;
-  background:#fff;
-  border-radius:15px;
-  box-shadow:0 6px 18px rgba(0,0,0,.15);
-  padding:14px;
-}
-.result-card h3{ margin:0; color:#fff; padding:6px 18px; border-radius:8px; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-
-/* head layout */
-.result-card .card-head{
-  grid-column:1 / -1;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.result-card .card-head .badges{ margin-left:auto; display:flex; flex-wrap:wrap; gap:8px; }
-
 /* jewel list */
-.jewel-wrap{ grid-column:1 / -1; }
 .jewel-columns{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .jewel-column{
   background:#f1f3f5; border-radius:10px; padding:4px;
@@ -519,33 +452,7 @@ header .brand{ padding-top:6px; }
 .jewel-info{ position:absolute; top:2px; right:4px; font-size:10px; opacity:.55; pointer-events:none; }
 .jewel-column:hover .jewel-info, .jewel-column:focus .jewel-info{ opacity:1; }
 
-/* info block */
-.card-info{ grid-column:1 / -1; background:#f7f7f8; border-radius:10px; padding:8px; font-size:14px; }
-.card-info p{ margin:2px 0; }
-
-/* rank color chips */
-.rank-1  h3{ background:#B91C1C; } /* red 700 */
-.rank-2  h3{ background:#E11D48; } /* rose 600 */
-.rank-3  h3{ background:#A21CAF; } /* fuchsia 700 */
-.rank-4  h3{ background:#6D28D9; } /* violet 700 */
-.rank-5  h3{ background:#3730A3; } /* indigo 800 */
-.rank-6  h3{ background:#1D4ED8; }
-.rank-7  h3{ background:#0369A1; }
-.rank-8  h3{ background:#0F766E; }
-.rank-9  h3{ background:#047857; }
-.rank-10 h3{ background:#15803D; }
-.rank-11 h3{ background:#3F6212; }
-.rank-12 h3{ background:#B45309; }
-.rank-13 h3{ background:#C2410C; }
-.rank-14 h3{ background:#EA580C; }
-.rank-15 h3{ background:#8B4513; }
-.rank-16 h3{ background:#A15C2F; }
-.rank-17 h3{ background:#7A6A58; }
-.rank-18 h3{ background:#475569; }
-.rank-19 h3{ background:#334155; }
-.rank-20 h3{ background:#0B0F14; }
-
-/* Body-level tooltip styled like index.html bubble */
+/* Body-level tooltip */
 .jewel-tooltip{
   position: fixed;
   top: 0; left: 0;
@@ -596,24 +503,6 @@ header .brand{ padding-top:6px; }
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
 }
-.credit-floating {
-  position: fixed;
-  bottom: 8px;
-  right: 12px;
-  font-size: 10px;
-  color: rgba(255,255,255,0.8);   /* สีขาวโปร่งเล็กน้อย */
-  background: rgba(0,0,0,0.5);   /* พื้นหลังดำใส */
-  padding: 4px 8px;
-  border-radius: 6px;
-  z-index: 2000;                  /* ให้อยู่เหนือ element อื่นๆ */
-  font-family: "LINE Seed Sans TH", "Kanit", sans-serif;
-}
-.credit-floating:hover {
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-}
-
-
 /* === Consent Toast (blocking) === */
 .toast-consent{
   position: fixed;
@@ -765,7 +654,6 @@ html[data-theme="dark"] .chip{background:var(--surface); color:var(--text); bord
 html[data-theme="dark"] .chip:hover{background:#1e3a8a; border-color:#3b82f6}
 html[data-theme="dark"] .chip.is-selected{background:#3b82f6; color:#fff; border-color:#60a5fa}
 html[data-theme="dark"] .chip.is-selected:hover{background:#60a5fa}
-/* html[data-theme="dark"] .chip-search{background:var(--surface); color:var(--text); border-color:var(--border-strong)} */
 
 /* ===== UX v3: Character preview ===== */
 .char-preview{
@@ -802,16 +690,6 @@ html[data-theme="dark"] .empty-state__title{color:#cbd5e1}
 }
 html[data-theme="dark"] .row-actions{background:var(--surface);border-top-color:#334155}
 
-/* ===== UX v3: Dark mode + QR toolbar ===== */
-.top-toolbar{display:flex;gap:8px;flex-shrink:0}
-.tb-btn{
-  border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:999px;
-  width:36px;height:36px;cursor:pointer;font-size:16px;display:inline-flex;
-  align-items:center;justify-content:center;transition:.15s;
-}
-.tb-btn:hover{background:rgba(255,255,255,.28)}
-.tb-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
-
 /* ===== UX v3: QR Modal ===== */
 .qr-modal{position:fixed;inset:0;z-index:2500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)}
 .qr-modal.show{display:flex}
@@ -823,9 +701,6 @@ html[data-theme="dark"] .row-actions{background:var(--surface);border-top-color:
 html[data-theme="dark"] .qr-modal__dialog{background:#111827;color:#e5e7eb}
 html[data-theme="dark"] .qr-modal__title{color:#60a5fa}
 html[data-theme="dark"] .qr-modal__url{background:#1e293b;color:#cbd5e1}
-
-/* ===== UX v3: Credit moved to bottom-left to not overlap fb-fab ===== */
-.credit-floating{left:12px !important; right:auto !important; bottom:10px !important;}
 
 /* ===== UX v3: Emoji-minimal section headers ===== */
 .head-icon{font-size:16px;opacity:.8;margin-right:4px}
@@ -886,11 +761,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 @media (max-width:768px){
   .chip{ padding:10px 14px; height:32px; }
 }
-/* Fix 4: credit badge above sticky CTA bar */
-@media (max-width:768px){
-  .credit-floating{ bottom:calc(68px + env(safe-area-inset-bottom)) !important; }
-}
-/* Fix 5: jewel ⓘ indicator always visible on touch devices */
+/* Fix 4: jewel ⓘ indicator always visible on touch devices */
 @media (hover:none){
   .jewel-info{ opacity:0.7 !important; }
 }
@@ -996,7 +867,6 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
         <div id="charPreview" class="char-preview" aria-live="polite">
           <span class="cp-icon">🔒</span>
           <div>
-            <!-- <div>ตัวละคร: <span class="cp-name"></span></div> -->
             <div>จี้ลิงก์ที่จะล็อก: <span class="cp-jewel"></span></div>
           </div>
         </div>
@@ -1581,7 +1451,8 @@ function renderResults(best){
       }).join('\n');
       const isLink = j.id.startsWith('[ลิงก์]');
       const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
-      const badge = isLink ? '<span class="jewel-lock-badge">🔒 เฉพาะตัวละคร</span>' : '';
+      const charLabel = isLink ? (j.allowedChars || j.AllowedChars || '').toString().trim() : '';
+      const badge = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + charLabel : 'ตัวละคร'}</span>` : '';
       return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
@@ -2612,9 +2483,6 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 })();
 </script>
 
- <!-- <a href="https://www.facebook.com/bosskungthnp/" target="_blank" class="credit-floating">
-  Credit: Bosskung © 2025
-</a>  -->
 
 
 <script>
@@ -2712,21 +2580,6 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 })();
 </script>
 
-<!-- TEST ล้างการจดจำ-->
- <!-- 
-<button id="resetConsent" style="position:fixed;bottom:10px;right:10px;z-index:2100;">
-  ล้างการจดจำ
-</button>
-<script>
-  const resetBtn = document.getElementById('resetConsent');
-if (resetBtn) {
-  resetBtn.addEventListener('click', ()=>{
-    localStorage.removeItem('consent_ack_v1'); // ลบค่าออกไป
-    alert("ล้างการจดจำเรียบร้อยแล้ว!");
-  });
-}
-</script>
--->
 
 
 <script>
