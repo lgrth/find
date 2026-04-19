@@ -285,8 +285,8 @@
   }
 
 /* ==== UX/UI Enhancements (Aug 2025) ==== */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:4px 12px;text-align:center;font-size:22px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
-header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 14px;font-size:22px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:1200;display:flex;align-items:center}
+header .brand{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center}
 .brand-title{font-size:22px;font-weight:700}
 .brand-subtitle{font-size:14px;opacity:.9}
 
@@ -772,10 +772,9 @@ html[data-theme="dark"] .empty-state__title{color:#cbd5e1}
   position:sticky;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);
   padding:10px 0;z-index:50;border-top:1px solid rgba(0,0,0,.06);
 }
-html[data-theme="dark"] .row-actions{background:var(--surface);border-top-color:#334155}
 
 /* ===== UX v3: Dark mode + QR toolbar ===== */
-.top-toolbar{position:fixed;top:10px;right:14px;display:flex;gap:8px;z-index:1300}
+.top-toolbar{display:flex;gap:8px;flex-shrink:0}
 .tb-btn{
   border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:999px;
   width:36px;height:36px;cursor:pointer;font-size:16px;display:inline-flex;
@@ -845,6 +844,13 @@ html[data-theme="dark"] .tutorial-sheet__title{color:#60a5fa}
 html[data-theme="dark"] .tutorial-sub{color:#94a3b8}
 html[data-theme="dark"] .tutorial-tip{background:#1e293b;color:#94a3b8}
 html[data-theme="dark"] .tutorial-sheet__handle{background:#475569}
+
+/* ===== Section divider ===== */
+.section-divider{display:flex;align-items:center;gap:10px;margin:20px 0 8px}
+.section-divider__line{flex:1;height:1px;background:#e2e8f0}
+.section-divider__text{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;letter-spacing:.4px}
+html[data-theme="dark"] .section-divider__line{background:#334155}
+html[data-theme="dark"] .section-divider__text{color:#64748b}
 
 /* ===== Mobile UX fixes ===== */
 /* Fix 3: larger chip touch targets */
@@ -916,14 +922,14 @@ html[data-theme="dark"] .tutorial-sheet__handle{background:#475569}
 </div>
 
 <header>
-  <div class="brand">
-    <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
+  <div class=”brand”>
+    <h1 class=”brand-title”>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div class=”top-toolbar” role=”toolbar” aria-label=”เครื่องมือ”>
     <button id=”tutorialBtn” class=”tb-btn” type=”button” aria-label=”วิธีใช้งาน” title=”วิธีใช้งาน”>❓</button>
     <button id=”themeToggle” class=”tb-btn” type=”button” aria-label=”สลับธีมสว่าง/มืด” title=”สลับธีม (สว่าง/มืด)”>🌙</button>
   </div>
-  </header>
+</header>
 
 <div id="overlay" class="overlay" aria-hidden="true" aria-busy="false">
   <div class="loader">
@@ -954,7 +960,13 @@ html[data-theme="dark"] .tutorial-sheet__handle{background:#475569}
       </div>
     </div>
 
-    <h2 class="head-with-counter" style="margin-top:14px">
+    <div class="section-divider" aria-hidden="true">
+      <div class="section-divider__line"></div>
+      <span class="section-divider__text">✦ ความสามารถที่ต้องการ ✦</span>
+      <div class="section-divider__line"></div>
+    </div>
+
+    <h2 class="head-with-counter" style="margin-top:4px">
       <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 14 สกิล)</span>
       <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="14" aria-valuenow="0" aria-label="จำนวนที่เลือก">
         <span class="sel-progress__track"><span class="sel-progress__fill"></span></span>
@@ -2565,36 +2577,37 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     if(remember) localStorage.setItem(TUTORIAL_KEY,'1');
   }
 
-  // Close button
-  document.getElementById('tutorialClose')?.addEventListener('click', ()=> hide(true));
-  // Tap backdrop
-  sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hide(false); });
-  // Help button in toolbar — always opens
-  document.getElementById('tutorialBtn')?.addEventListener('click', ()=> show());
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Attach all listeners after DOM is ready — consistent with theme toggle IIFE
+    document.getElementById('tutorialClose')?.addEventListener('click', ()=> hide(true));
+    sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hide(false); });
+    document.getElementById('tutorialBtn')?.addEventListener('click', ()=> show());
 
-  // Swipe down to dismiss
-  let touchStartY = 0;
-  dialog?.addEventListener('touchstart', (e)=>{ touchStartY = e.touches[0].clientY; }, {passive:true});
-  dialog?.addEventListener('touchend', (e)=>{
-    if(e.changedTouches[0].clientY - touchStartY > 80) hide(false);
-  }, {passive:true});
+    // Swipe down to dismiss
+    let touchStartY = 0;
+    dialog?.addEventListener('touchstart', (e)=>{ touchStartY = e.touches[0].clientY; }, {passive:true});
+    dialog?.addEventListener('touchend', (e)=>{
+      if(e.changedTouches[0].clientY - touchStartY > 80) hide(false);
+    }, {passive:true});
 
-  // First-visit logic: show after consent is dismissed
-  function maybeShow(){
-    if(localStorage.getItem(TUTORIAL_KEY) === '1') return;
-    setTimeout(show, 450);
-  }
+    // First-visit: show only after consent is dismissed
+    // DOMContentLoaded runs AFTER app's DOMContentLoaded (which triggers consent to show),
+    // so checking consent visibility here gives the correct state.
+    function maybeShow(){
+      if(localStorage.getItem(TUTORIAL_KEY) === '1') return;
+      setTimeout(show, 450);
+    }
 
-  const consent = document.getElementById('consentToast');
-  if(consent && !consent.classList.contains('hidden')){
-    // Consent is visible — wait for it to close first
-    const obs = new MutationObserver(()=>{
-      if(consent.classList.contains('hidden')){ obs.disconnect(); maybeShow(); }
-    });
-    obs.observe(consent, {attributes:true, attributeFilter:['class']});
-  } else {
-    maybeShow();
-  }
+    const consent = document.getElementById('consentToast');
+    if(consent && !consent.classList.contains('hidden')){
+      const obs = new MutationObserver(()=>{
+        if(consent.classList.contains('hidden')){ obs.disconnect(); maybeShow(); }
+      });
+      obs.observe(consent, {attributes:true, attributeFilter:['class']});
+    } else {
+      maybeShow();
+    }
+  });
 })();
 
 // --- Consent gate: show toast and delay data loading until acknowledged ---
