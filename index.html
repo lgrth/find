@@ -21,32 +21,27 @@
 <style>
   @font-face {
     font-family:"LINE Seed Sans TH";
-    src: url("https://cdn.jsdelivr.net/gh/lgrth/find@main/fonts/LINESeedSansTH_W_Th.woff2") format("woff2"),
-         url("fonts/LINESeedSansTH_W_Th.woff2") format("woff2");
+    src: url("fonts/LINESeedSansTH_W_Th.woff2") format("woff2");
     font-weight:300; font-display:swap;
   }
   @font-face {
     font-family:"LINE Seed Sans TH";
-    src: url("https://cdn.jsdelivr.net/gh/lgrth/find@main/fonts/LINESeedSansTH_W_Rg.woff2") format("woff2"),
-         url("fonts/LINESeedSansTH_W_Rg.woff2") format("woff2");
+    src: url("fonts/LINESeedSansTH_W_Rg.woff2") format("woff2");
     font-weight:400; font-display:swap;
   }
   @font-face {
     font-family:"LINE Seed Sans TH";
-    src: url("https://cdn.jsdelivr.net/gh/lgrth/find@main/fonts/LINESeedSansTH_W_Bd.woff2") format("woff2"),
-         url("fonts/LINESeedSansTH_W_Bd.woff2") format("woff2");
+    src: url("fonts/LINESeedSansTH_W_Bd.woff2") format("woff2");
     font-weight:700; font-display:swap;
   }
   @font-face {
     font-family:"LINE Seed Sans TH";
-    src: url("https://cdn.jsdelivr.net/gh/lgrth/find@main/fonts/LINESeedSansTH_W_XBd.woff2") format("woff2"),
-         url("fonts/LINESeedSansTH_W_XBd.woff2") format("woff2");
+    src: url("fonts/LINESeedSansTH_W_XBd.woff2") format("woff2");
     font-weight:800; font-display:swap;
   }
   @font-face {
     font-family:"LINE Seed Sans TH";
-    src: url("https://cdn.jsdelivr.net/gh/lgrth/find@main/fonts/LINESeedSansTH_W_He.woff2") format("woff2"),
-         url("fonts/LINESeedSansTH_W_He.woff2") format("woff2");
+    src: url("fonts/LINESeedSansTH_W_He.woff2") format("woff2");
     font-weight:900; font-display:swap;
   }
 </style>
@@ -661,7 +656,6 @@ html[data-theme="dark"] .card-info{background:var(--surface-2); color:var(--text
 html[data-theme="dark"] .jewel-column{background:var(--chip-bg); color:var(--text); border-color:var(--chip-border)}
 html[data-theme="dark"] .jewel-column.jewel-link{background:#3a2a14; color:#e9c893; border-color:#6b4a20}
 html[data-theme="dark"] .jewel-lock-badge{background:#6b4a20; color:#fff}
-html[data-theme="dark"] .row input.simple, html[data-theme="dark"] select{background:var(--surface-2); color:var(--text); border-color:var(--border-strong)}
 html[data-theme="dark"] .badge-neutral{background:#1e293b; color:#cbd5e1; border-color:#475569}
 html[data-theme="dark"] .badge-link{background:#3a2a14; color:#e9c893; border-color:#6b4a20}
 html[data-theme="dark"] .steps-bar .steps-inline li{background:var(--surface-2); color:var(--text-muted); border-color:#475569}
@@ -1934,6 +1928,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <button type="button" class="fb-close" data-fb-close aria-label="ปิด">×</button>
     </div>
     <form id="fbForm" class="fb-form">
+      <label class="fb-label" style="font-size:14px; color:#cd0000;">ⓘ แสดงความคิดเห็นที่เกี่ยวกับเว็บไซต์นี้เท่านั้น ไม่เกี่ยวข้องกับ LINE เกมเศรษฐี</label>
       <label class="fb-label">ประเภท
         <select name="category" class="fb-input" >
           <option value="bug">Bug / ปัญหา</option>
@@ -1945,7 +1940,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         <textarea name="message" class="fb-input" rows="4" placeholder="เล่าให้ฟังว่าเกิดอะไรขึ้น/อยากให้ปรับอะไร"></textarea>
       </label>
       <label class="fb-label">ช่องทางติดต่อกลับ
-        <input name="contact" class="fb-input" type="text" placeholder="เช่น facebook/LINE/E-mail">
+        <input name="contact" class="fb-input" type="text" placeholder="Facebook / LINE / E-mail">
       </label>
 
       <div class="fb-actions">
