@@ -5,10 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</title>
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<style>
+/* override ตรงนี้ */
+.ts-control .clear-button {
+  font-size: 20px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
+<style>
+  @font-face { font-family:"LINE Seed Sans TH"; src:url("fonts/LINESeedSansTH_W_Th.woff2") format("woff2"); font-weight:300; font-display:swap; }
+  @font-face { font-family:"LINE Seed Sans TH"; src:url("fonts/LINESeedSansTH_W_Rg.woff2") format("woff2"); font-weight:400; font-display:swap; }
+  @font-face { font-family:"LINE Seed Sans TH"; src:url("fonts/LINESeedSansTH_W_Bd.woff2") format("woff2"); font-weight:700; font-display:swap; }
+  @font-face { font-family:"LINE Seed Sans TH"; src:url("fonts/LINESeedSansTH_W_XBd.woff2") format("woff2"); font-weight:800; font-display:swap; }
+  @font-face { font-family:"LINE Seed Sans TH"; src:url("fonts/LINESeedSansTH_W_He.woff2") format("woff2"); font-weight:900; font-display:swap; }
+</style>
 
 <style>
   /* ===== Base & Typography ===== */
@@ -17,11 +33,11 @@
     overflow-wrap: anywhere;
     line-height: 1.5;
   }
-  body{font-family:"Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
+  body{font-family:"LINE Seed Sans TH","Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
 
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
-    display:grid;grid-template-columns:1fr 1fr;gap:25px;
+    display:grid;grid-template-columns:1fr 1fr;gap:16px;
     padding:5px;margin:0 auto;
     max-width:1200px;
   }
@@ -34,9 +50,9 @@
     main{ grid-template-columns:1fr; gap:18px; padding:5px }
   }
 
-  section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,.1)}
-  h2{margin-top:0;color:#4e73df;font-size:26px}
-  h2, header, label { font-family: "Kanit", sans-serif; }
+  section{background:#fff;padding:14px 16px;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+  h2{margin:0 0 8px 0;color:#4e73df;font-size:20px}
+  h2, header, label { font-family: "LINE Seed Sans TH", "Kanit", sans-serif; }
 
   /* หัวข้อ + counter */
   .head-with-counter{
@@ -48,10 +64,11 @@
   }
 
   /* ===== Controls ===== */
-  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .ts-wrapper.single .ts-control{min-height:44px;padding:8px 10px} /* ≥ 44px */
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  @media (min-width:1280px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .ts-wrapper.single .ts-control{min-height:38px;padding:4px 10px}
   .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size:16px !important}
-  .ts-wrapper .ts-control{border:1px solid #cbd5e1;border-radius:8px}
+  .ts-wrapper .ts-control{border:1.5px solid #4e73df;border-radius:8px}
   .ts-dropdown{z-index:9999}
   .option {font-size:14px !important;}
 
@@ -65,14 +82,14 @@
     input, select, textarea, .ts-wrapper .ts-control{ font-size:16px }
   }
 
-  .row-two-col{display:flex;gap:20px;align-items:center;margin:10px 0;padding-bottom:10px;padding-top:10px;}
+  .row-two-col{display:flex;gap:16px;align-items:center;margin:6px 0;padding:4px 0;}
   .row-two-col > .col{flex:1;min-width:0}
   .checkbox-lg{width:24px;height:24px;vertical-align:middle} /* ≥ 44px โดยรวม label */
 
   /* ปุ่มใหญ่แตะง่าย + โฟกัสชัด */
   .row-actions{display:flex;gap:12px;align-items:center;margin-top:6px}
   .btn{
-    font-family:"Kanit",sans-serif;font-weight:800;
+    font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-weight:800;
     display:inline-block;flex:1;text-align:center;border:none;
     padding:16px 20px;border-radius:12px;cursor:pointer;
     font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff;min-height:44px
@@ -106,6 +123,7 @@
       padding:10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
       z-index:100;
     }
+    html[data-theme="dark"] .cta-bar{background:rgba(17,24,39,.94);border-top-color:#334155}
   @media (max-width:768px){ .cta-bar{display:flex} 
   .row-actions{ display:none !important; }
 }
@@ -207,7 +225,7 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
 
-  .hint{margin:8px 0 4px 0;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .hint{margin:8px 0 4px 0;font-size:12px;display:flex;align-items:center;gap:8px}
   .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
   .hint--error{color:#b71c1c}
   .hint--error .dot{background:#e74a3b}
@@ -247,9 +265,9 @@
   }
 
 /* ==== UX/UI Enhancements (Aug 2025) ==== */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 12px;text-align:center;font-size:26px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:4px 12px;text-align:center;font-size:22px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index: 1200;}
 header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
-.brand-title{font-size:32px;font-weight:700}
+.brand-title{font-size:22px;font-weight:700}
 .brand-subtitle{font-size:14px;opacity:.9}
 
 .steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
@@ -263,6 +281,7 @@ header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
 .is-invalid{border-color:#dc2626!important; box-shadow:0 0 0 3px rgba(220,38,38,.12)!important}
 
 .badge-neutral{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe}
+.badge-link{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;background:#fdf5ea;color:#8b4513;border:1px solid #d9b382}
 
 .btn{font-weight:700} /* ลดจาก 800 -> 700 */
 .btn:focus-visible{outline:3px solid #7aa2ff; outline-offset:2px}
@@ -283,7 +302,7 @@ header .brand{display:flex;flex-direction:column;gap:4px;align-items:center}
 .row-ability.row-miss{background:#fff1f2;border:1px solid #fecdd3}
 .row-ability.row-extra{background:#eef2ff;border:1px solid #c7d2fe}
 
-.btn-copy{margin-top:8px;display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"Kanit",sans-serif;font-weight:600}
+.btn-copy{margin-top:8px;display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-weight:600}
 .btn-copy:hover{background:#eef2f7}
 
 .result-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -359,12 +378,12 @@ header .brand{ padding-top:6px; }
 
 
 /* Non-sticky steps bar under header */
-.steps-bar{display:flex;flex-direction: column;align-items: center;text-align: center;justify-content:center;padding:4px 0 0 0;background:transparent;box-shadow:none;}
+.steps-bar{display:flex;flex-direction: column;align-items: center;text-align: center;justify-content:center;padding:2px 0 0 0;background:transparent;box-shadow:none;}
 /* Reuse capsule style already defined for .steps-inline li & .step-index */
 
 
 /* Steps-bar on light background: softer capsules */
-.steps-bar .steps-inline{display:flex;flex-wrap:wrap;gap:4px;margin:5px;padding:5px;list-style:none}
+.steps-bar .steps-inline{display:flex;flex-wrap:wrap;gap:4px;margin:2px;padding:2px;list-style:none}
 .steps-bar .steps-inline li{
   background:#f1f5f9;
   border:1px solid #668aee;
@@ -452,6 +471,11 @@ header .brand{ padding-top:6px; }
   min-height:32px; display:flex; align-items:center; justify-content:center;
   position:relative; cursor:default;
 }
+.jewel-column.jewel-link{ color:#8b4513; background:#fdf5ea; border:1px solid #d9b382; flex-direction:column; gap:2px; padding:6px 4px; }
+.jewel-lock-badge{ font-size:10px; font-weight:700; color:#fff; background:#8b4513; padding:1px 6px; border-radius:999px; }
+.jewel-name{ display:inline-block; }
+.jewel-info{ position:absolute; top:2px; right:4px; font-size:10px; opacity:.55; pointer-events:none; }
+.jewel-column:hover .jewel-info, .jewel-column:focus .jewel-info{ opacity:1; }
 
 /* info block */
 .card-info{ grid-column:1 / -1; background:#f7f7f8; border-radius:10px; padding:8px; font-size:14px; }
@@ -540,7 +564,7 @@ header .brand{ padding-top:6px; }
   padding: 4px 8px;
   border-radius: 6px;
   z-index: 2000;                  /* ให้อยู่เหนือ element อื่นๆ */
-  font-family: "Kanit", sans-serif;
+  font-family: "LINE Seed Sans TH", "Kanit", sans-serif;
 }
 .credit-floating:hover {
   background: rgba(0,0,0,0.8);
@@ -566,10 +590,204 @@ header .brand{ padding-top:6px; }
 .toast-consent__title{ font-weight: 700; font-size: 18px; margin: 0 0 6px 0; }
 .toast-consent__msg{ font-size: 15px; line-height: 1.6; }
 .toast-consent__actions{ margin-top: 12px; display: flex; gap: 10px; justify-content: center; }
+.consent-remember{ display:flex; align-items:center; gap:6px; margin-top:10px; justify-content:center; font-size:14px; color:#334155; cursor:pointer; }
 .toast-consent .btn{ flex: 0 0 auto; min-width: 120px; }
 @media (max-width: 480px){
   .toast-consent{ padding: 16px; }
   .toast-consent__msg{ font-size: 14px; }
+}
+
+/* ===== UX v3: dark mode variables ===== */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --surface-2:#f7f7f8; --text:#222; --text-muted:#555;
+  --border:#e5e7eb; --border-strong:#cbd5e1; --primary:#2e59d9; --primary-2:#1f4ac5;
+  --chip-bg:#f1f5f9; --chip-border:#e2e8f0; --shadow:0 4px 12px rgba(0,0,0,.08);
+}
+html[data-theme="dark"]{
+  --bg:#0f172a; --surface:#111827; --surface-2:#1e293b; --text:#e5e7eb; --text-muted:#94a3b8;
+  --border:#334155; --border-strong:#475569; --primary:#3b82f6; --primary-2:#60a5fa;
+  --chip-bg:#1e293b; --chip-border:#334155; --shadow:0 4px 12px rgba(0,0,0,.4);
+}
+html[data-theme="dark"] body{background:var(--bg); color:var(--text)}
+html[data-theme="dark"] section{background:var(--surface); color:var(--text); box-shadow:var(--shadow)}
+html[data-theme="dark"] h2{color:var(--primary-2)}
+html[data-theme="dark"] .sel-counter{background:var(--chip-bg); color:var(--text); border-color:var(--chip-border)}
+html[data-theme="dark"] .ts-wrapper .ts-control,
+html[data-theme="dark"] .ts-wrapper .ts-control input,
+html[data-theme="dark"] .ts-wrapper .ts-control .item{color:#111827 !important; border-color:var(--border-strong)}
+html[data-theme="dark"] .ts-wrapper .ts-control input::placeholder{color:#94a3b8 !important}
+html[data-theme="dark"] .ts-dropdown,
+html[data-theme="dark"] .ts-dropdown .option,
+html[data-theme="dark"] .ts-dropdown .optgroup-header{background:var(--surface-2); color:var(--text) !important; border-color:var(--border-strong)}
+html[data-theme="dark"] .ts-dropdown .active,
+html[data-theme="dark"] .ts-dropdown .option.active{background:#334155 !important; color:#fff !important}
+html[data-theme="dark"] .ts-dropdown .no-results{color:#94a3b8 !important}
+/* Light-mode: force dark text on TomSelect to avoid white-on-white from other overrides */
+.ts-wrapper .ts-control,
+.ts-wrapper .ts-control input,
+.ts-wrapper .ts-control .item{color:#111827}
+.ts-dropdown,
+.ts-dropdown .option{color:#111827; background:#fff}
+.ts-dropdown .active,
+.ts-dropdown .option.active{background:#eef2ff; color:#1e3a8a}
+html[data-theme="dark"] .result-card{background:var(--surface); color:var(--text)}
+html[data-theme="dark"] .card-info{background:var(--surface-2); color:var(--text)}
+html[data-theme="dark"] .jewel-column{background:var(--chip-bg); color:var(--text); border-color:var(--chip-border)}
+html[data-theme="dark"] .jewel-column.jewel-link{background:#3a2a14; color:#e9c893; border-color:#6b4a20}
+html[data-theme="dark"] .jewel-lock-badge{background:#6b4a20; color:#fff}
+html[data-theme="dark"] .row input.simple, html[data-theme="dark"] select{background:var(--surface-2); color:var(--text); border-color:var(--border-strong)}
+html[data-theme="dark"] .badge-neutral{background:#1e293b; color:#cbd5e1; border-color:#475569}
+html[data-theme="dark"] .badge-link{background:#3a2a14; color:#e9c893; border-color:#6b4a20}
+html[data-theme="dark"] .steps-bar .steps-inline li{background:var(--surface-2); color:var(--text-muted); border-color:#475569}
+html[data-theme="dark"] .steps-bar .steps-inline li.steps-heading{color:var(--primary-2)}
+html[data-theme="dark"] .char-preview{background:#3a2a14; color:#e9c893; border-color:#6b4a20}
+html[data-theme="dark"] .skeleton-card{background:linear-gradient(90deg,#111827 0%,#334155 50%,#111827 100%);animation:sk-shimmer 2s infinite linear;background-size:200% 100%}
+/* ===== Dark mode: badges & ability rows ===== */
+html[data-theme="dark"] .badge--match{background:#064e3b; color:#a7f3d0; border-color:#065f46}
+html[data-theme="dark"] .badge--not{background:#4c0519; color:#fecaca; border-color:#9f1239}
+html[data-theme="dark"] .badge--extra{background:#1e1b4b; color:#c7d2fe; border-color:#3730a3}
+html[data-theme="dark"] .row-ability.row-miss{background:#3a0f14; color:#fecaca; border-color:#7f1d1d}
+html[data-theme="dark"] .row-ability.row-extra{background:#1e1b4b; color:#c7d2fe; border-color:#3730a3}
+html[data-theme="dark"] .row-ability strong{color:#fff}
+html[data-theme="dark"] .not-matched-title{color:#fca5a5}
+html[data-theme="dark"] .extra-title{color:#a5b4fc}
+html[data-theme="dark"] label,
+html[data-theme="dark"] .input-help,
+html[data-theme="dark"] .row label{color:#7da0ca}
+html[data-theme="dark"] .hint--error{color:#fca5a5}
+html[data-theme="dark"] .hint--ok{color:#86efac}
+html[data-theme="dark"] .hint-text{color:#94a3b8}
+html[data-theme="dark"] .card-info p strong,
+html[data-theme="dark"] .card-info p{color:#e5e7eb}
+html[data-theme="dark"] .toast{background:#4f5e76; color:#e5e7eb; box-shadow:0 8px 18px rgba(0,0,0,.6)}
+html[data-theme="dark"] .site-footer{background:#0b1020; color:#94a3b8; border-top-color:#334155}
+html[data-theme="dark"] .btn-copy{color:#cbd5e1}
+html[data-theme="dark"] .btn-copy:hover{background:#1e293b; border-color:#334155}
+html[data-theme="dark"] .result-card h3{color:#fff}
+html[data-theme="dark"] .jewel-tooltip{background:#000; color:#fff}
+html[data-theme="dark"] .sel-progress.is-ready .sel-progress__label{color:#86efac}
+html[data-theme="dark"] .char-preview .cp-jewel{color:#e9c893}
+
+/* ===== UX v3: Counter progress bar ===== */
+.sel-progress{
+  display:flex;align-items:center;gap:10px;flex:1;min-width:160px;
+  background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 12px 4px 12px;
+}
+.sel-progress__track{flex:1;height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden;min-width:80px;display:block}
+.sel-progress__fill{display:block;height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#f97316);transition:width .5s ease,background .25s ease;border-radius:999px}
+.sel-progress.is-ready .sel-progress__fill{background:linear-gradient(90deg,#22c55e,#16a34a)}
+.sel-progress__label{font-size:13px;font-weight:700;color:#385b8c;white-space:nowrap}
+.sel-progress.is-ready .sel-progress__label{color:#166534}
+html[data-theme="dark"] .sel-progress{background:var(--chip-bg); border-color:var(--chip-border)}
+html[data-theme="dark"] .sel-progress__track{background:#334155}
+html[data-theme="dark"] .sel-progress__label{color:var(--text)}
+
+/* ===== UX v3: Chip picker ===== */
+.chip-picker{margin:6px 0 10px 0;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px}
+.chip-selected-row{margin-bottom:8px}
+.chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:4px 0}
+.chip-list{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
+.chip-list--selected{padding:6px;background:#fff;border:1px dashed #cbd5e1;border-radius:10px}
+.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาที่ช่องด้านล่างและกดเลือกสกิลที่ต้องการค้นหา";color:#94a3b8;font-size:13px;font-style:italic}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:999px;border:1px solid #cbd5e1;
+  background:#fff;color:#334155;font-size:13px;font-weight:600;cursor:pointer;
+  transition:.12s;user-select:none;font-family:inherit;
+}
+.chip:hover{background:#eef2ff;border-color:#93a7e0}
+.chip.is-selected{background:#2e59d9;color:#fff;border-color:#1f4ac5}
+.chip.is-selected:hover{background:#1f4ac5}
+.chip.is-disabled{opacity:.4;cursor:not-allowed}
+.chip.is-disabled:hover{background:#fff;border-color:#cbd5e1}
+.chip .chip-x{font-size:16px;line-height:1;opacity:.8}
+.chip:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+.chip-search-wrap{margin:6px 0 4px 0}
+.chip-search{
+  width:100%;padding:8px 12px;border:1.5px solid #4e73df;border-radius:10px;
+  font-size:14px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box;
+}
+.chip-search:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+html[data-theme="dark"] .chip-picker{background:var(--surface-2);border-color:var(--border-strong)}
+html[data-theme="dark"] .chip-selected-title,
+html[data-theme="dark"] .chip-all-title{color:#cbd5e1}
+html[data-theme="dark"] .chip-list--selected{background:var(--surface); border-color:var(--border-strong)}
+html[data-theme="dark"] .chip-list--selected:empty::before{color:#64748b}
+html[data-theme="dark"] .chip{background:var(--surface); color:var(--text); border-color:var(--border-strong)}
+html[data-theme="dark"] .chip:hover{background:#1e3a8a; border-color:#3b82f6}
+html[data-theme="dark"] .chip.is-selected{background:#3b82f6; color:#fff; border-color:#60a5fa}
+html[data-theme="dark"] .chip.is-selected:hover{background:#60a5fa}
+/* html[data-theme="dark"] .chip-search{background:var(--surface); color:var(--text); border-color:var(--border-strong)} */
+
+/* ===== UX v3: Character preview ===== */
+.char-preview{
+  display:none;align-items:center;gap:10px;margin-top:8px;padding:3px 10px;
+  background:#fdf5ea;border:1px solid #d9b382;border-radius:10px;color:#8b4513;font-size:14px;
+}
+.char-preview.show{display:flex}
+.char-preview .cp-icon{font-size:20px}
+.char-preview .cp-name{font-weight:700}
+.char-preview .cp-jewel{color:#6b4a20;font-weight:600}
+
+/* ===== UX v3: Empty state skeleton ===== */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 16px;text-align:center;color:#64748b;
+}
+.empty-state__icon{font-size:36px;opacity:.5;margin-bottom:8px}
+.empty-state__title{font-weight:700;font-size:15px;color:#475569;margin:2px 0}
+.empty-state__msg{font-size:13px;color:#64748b}
+.skeleton-list{display:flex;flex-direction:column;gap:12px;margin-top:12px;width:100%;max-width:360px}
+.skeleton-card{
+  height:72px;border-radius:12px;
+  background:linear-gradient(90deg,#ffffff 0%,#f3f5f7 50%,#ffffff 100%);
+  background-size:200% 100%;animation:sk-shimmer 2s infinite linear;
+}
+@keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+html[data-theme="dark"] .empty-state{color:#94a3b8}
+html[data-theme="dark"] .empty-state__title{color:#cbd5e1}
+
+/* ===== UX v3: Sticky bottom actions on desktop too ===== */
+.row-actions{
+  position:sticky;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);
+  padding:10px 0;z-index:50;border-top:1px solid rgba(0,0,0,.06);
+}
+html[data-theme="dark"] .row-actions{background:rgba(17,24,39,.94);border-top-color:#334155}
+
+/* ===== UX v3: Dark mode + QR toolbar ===== */
+.top-toolbar{position:fixed;top:10px;right:14px;display:flex;gap:8px;z-index:1300}
+.tb-btn{
+  border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:999px;
+  width:36px;height:36px;cursor:pointer;font-size:16px;display:inline-flex;
+  align-items:center;justify-content:center;transition:.15s;
+}
+.tb-btn:hover{background:rgba(255,255,255,.28)}
+.tb-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* ===== UX v3: QR Modal ===== */
+.qr-modal{position:fixed;inset:0;z-index:2500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)}
+.qr-modal.show{display:flex}
+.qr-modal__dialog{background:#fff;border-radius:14px;padding:20px;max-width:360px;width:92vw;text-align:center;box-shadow:0 16px 36px rgba(0,0,0,.35)}
+.qr-modal__title{font-size:18px;font-weight:700;margin:0 0 10px 0;color:#2e59d9}
+.qr-modal__canvas{display:flex;justify-content:center;margin:10px 0}
+.qr-modal__url{font-size:12px;color:#475569;word-break:break-all;background:#f1f5f9;padding:6px 8px;border-radius:8px;margin:8px 0}
+.qr-modal__close{margin-top:8px}
+html[data-theme="dark"] .qr-modal__dialog{background:#111827;color:#e5e7eb}
+html[data-theme="dark"] .qr-modal__title{color:#60a5fa}
+html[data-theme="dark"] .qr-modal__url{background:#1e293b;color:#cbd5e1}
+
+/* ===== UX v3: Credit moved to bottom-left to not overlap fb-fab ===== */
+.credit-floating{left:12px !important; right:auto !important; bottom:10px !important;}
+
+/* ===== UX v3: Emoji-minimal section headers ===== */
+.head-icon{font-size:16px;opacity:.8;margin-right:4px}
+
+/* ===== UX v3: keyboard hint ===== */
+kbd{background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:4px;padding:1px 5px;font-size:11px;font-family:monospace;color:#334155}
+html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e1}
+
+@media (max-width:768px){
+  .row-actions{position:static;background:transparent;backdrop-filter:none;padding:6px 0;border-top:none}
 }
 </style>
 
@@ -580,6 +798,9 @@ header .brand{ padding-top:6px; }
 <div id="consentToast" class="toast-consent hidden" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
   <h3 id="consentTitle" class="toast-consent__title consent-title-lg">โปรดทราบ</h3>
   <p class="toast-consent__msg consent-msg-lg">เว็บไซต์นี้จัดทำขึ้นโดย <strong>บุคคลทั่วไป</strong> <br> ทาง LINE เกมเศรษฐี ไม่มีส่วนเกี่ยวข้องใด ๆ กับเว็บไซต์นี้</p>
+  <label class="consent-remember">
+    <input type="checkbox" id="consentRemember"> ไม่ต้องแสดงอีก
+  </label>
   <div class="toast-consent__actions">
     <button id="consentOk" type="button" class="btn btn--primary">รับทราบ</button>
   </div>
@@ -589,11 +810,14 @@ header .brand{ padding-top:6px; }
   <div class="brand">
     <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
+  <div class="top-toolbar" role="toolbar" aria-label="เครื่องมือ">
+    <button id="themeToggle" class="tb-btn" type="button" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม (สว่าง/มืด)">🌙</button>
+  </div>
   </header>
 <div class="steps-bar" role="navigation" aria-label="ขั้นตอนการใช้งาน">
   <ol class="steps-inline">
-    <li2>ขั้นตอนการใช้งาน >></li2>
-    <li class="no-indent"><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14)</li>
+    <li class="steps-heading">ขั้นตอนการใช้งาน &gt;&gt;</li>
+    <li class="no-indent"><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14 สกิล)</li>
     <li class="no-indent"><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
     <li class="no-indent"><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
   </ol>
@@ -610,34 +834,52 @@ header .brand{ padding-top:6px; }
 
 <main>
   <section>
-    <h2 class="head-with-counter">
-      <span>🎯 เลือกความสามารถสูงสุด 14 อย่าง</span>
-      <span id="selectedCounter" class="sel-counter">เลือกแล้ว 0/14</span>
-    </h2>
-
-    
-    
-    <div id="minHint" class="hint hint--error">
-
+    <!-- เลือกตัวละคร (ล็อกจี้ [ลิงก์]) — ย้ายมาด้านบนสุดตาม UX -->
+    <div class="row-two-col" id="charRow">
+      <div class="col">
+        <label for="charSelect"><strong><span class="head-icon">👤</span>เลือกตัวละคร (เพื่อบังคับจี้ [ลิงก์])</strong></label>
+        <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
+          <option value="">— ไม่เลือกตัวละคร—</option>
+        </select>
+        <div class="input-help">ⓘ เมื่อเลือกตัวละคร ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-link">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
+        <div id="charPreview" class="char-preview" aria-live="polite">
+          <span class="cp-icon">🔒</span>
+          <div>
+            <!-- <div>ตัวละคร: <span class="cp-name"></span></div> -->
+            <div>จี้ลิงก์ที่จะล็อก: <span class="cp-jewel"></span></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="desiredSelects" class="grid"></div>
+    <h2 class="head-with-counter" style="margin-top:14px">
+      <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 14 สกิล)</span>
+      <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="14" aria-valuenow="0" aria-label="จำนวนที่เลือก">
+        <span class="sel-progress__track"><span class="sel-progress__fill"></span></span>
+        <span class="sel-progress__label">0/14</span>
+      </span>
+    </h2>
 
-    <!-- 2 columns 1 row: จำนวนเซ็ต + เฉพาะ [ดาร์ค] -->
-    <!-- เลือกตัวละคร (ล็อกจี้ [ลิงก์]) -->
-<div class="row-two-col" id="charRow">
-  <div class="col">
-    <label for="charSelect"><strong>เลือกตัวละคร (เพื่อบังคับจี้ [ลิงก์])</strong></label>
-    <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
-      <option value="">— ไม่ระบุ —</option>
-    </select>
-    <div class="input-help">ถ้าเลือก ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-neutral">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
-  </div>
-</div>
+    <div id="minHint" class="hint hint--error"></div>
+
+    <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
+      <div class="chip-selected-row">
+        <div class="chip-selected-title">สกิลที่เลือกแล้ว</div>
+        <div id="chipSelected" class="chip-list chip-list--selected" aria-live="polite"></div>
+      </div>
+      <div class="chip-search-wrap">
+        <input id="chipSearch" class="chip-search" type="search" placeholder="🔍 พิมพ์เพื่อค้นหาและกดเลือกความสามารถ" autocomplete="off">
+      </div>
+      <div id="chipAllWrap" class="chip-all-wrap" hidden>
+        <div class="chip-all-title">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
+        <div id="chipAll" class="chip-list chip-list--all"></div>
+      </div>
+    </div>
+
 <div class="row-two-col">
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size: 18px;font-family: Kanit;">
+        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size:18px;font-family:'LINE Seed Sans TH'; border-radius:12px;text-align:center;">
     
       </div>
       <div class="col">
@@ -664,11 +906,38 @@ header .brand{ padding-top:6px; }
 
   </section>
 
-  <section>
-    <h2 id="resultTitle">💖 เซ็ตจี้ที่ดีที่สุด</h2>
+  <section style="position:relative">
+    <h2 id="resultTitle"><span class="head-icon">💎</span>เซ็ตจี้ที่ดีที่สุด</h2>
     <p id="tooltipHint" class="hint-text"></p>
-    <div id="result" class="grid-results"></div>
+    <div id="result" class="grid-results">
+      <div class="empty-state" id="resultEmptyState">
+        <div class="empty-state__icon">✨</div>
+        <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
+        <div class="empty-state__msg">เลือกความสามารถอย่างน้อย 4 อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
+        <div class="skeleton-list" aria-hidden="true">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+    <div id="resultLocalOverlay" class="overlay" style="position:absolute;display:none" aria-hidden="true">
+      <div class="loader">
+        <div id="progressTextLocal" style="color:#fff" role="status" aria-live="polite">กำลังค้นหา…</div>
+        <div class="bar"><span id="progressBarLocal"></span></div>
+      </div>
+    </div>
   </section>
+
+  <!-- QR modal -->
+  <div id="qrModal" class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qrTitle" aria-hidden="true">
+    <div class="qr-modal__dialog">
+      <h3 id="qrTitle" class="qr-modal__title">📱 สแกน QR เพื่อเปิดลิงก์</h3>
+      <div id="qrCanvas" class="qr-modal__canvas"></div>
+      <div id="qrUrl" class="qr-modal__url"></div>
+      <button type="button" class="btn btn--secondary qr-modal__close" id="qrClose">ปิด</button>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -694,7 +963,9 @@ const toast = document.getElementById('toast');
 const resultTitle = document.getElementById('resultTitle');
 const minHint = document.getElementById('minHint');
 const darkOnly = document.getElementById('darkOnly');
-const selectedCounter = document.getElementById('selectedCounter');
+const selectedProgress = document.getElementById('selectedProgress');
+const selectedProgressFill = selectedProgress?.querySelector('.sel-progress__fill');
+const selectedProgressLabel = selectedProgress?.querySelector('.sel-progress__label');
 
 
 function showLoading(msg){
@@ -743,21 +1014,28 @@ function __formatETA(sec){
   if (m > 0) return `${m} นาที ${s} วินาที`;
   return `${s} วินาที`;
 }
-function showToast(text, ms=3000){
+function showToast(text, ms=3000, kind='info'){
   toast.textContent = text;
+  toast.classList.remove('toast--error','toast--warn');
+  if (kind === 'error') toast.classList.add('toast--error');
+  else if (kind === 'warn') toast.classList.add('toast--warn');
   toast.classList.add('show');
   setTimeout(()=> toast.classList.add('hide'), ms-250);
   setTimeout(()=> { toast.classList.remove('show','hide'); }, ms);
 }
-
-async function waitForTomSelect(maxMs=3000){
-  const t0 = performance.now();
-  while (typeof window.TomSelect !== 'function'){
-    if (performance.now()-t0 > maxMs) return false;
-    await new Promise(r=>setTimeout(r,50));
+function showErrorBanner(text){
+  let el = document.getElementById('errorBanner');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'errorBanner';
+    el.className = 'error-banner';
+    el.innerHTML = `<span class="error-banner__text"></span><button type="button" class="error-banner__close" aria-label="ปิด">×</button>`;
+    el.querySelector('.error-banner__close').addEventListener('click', ()=> el.remove());
+    document.querySelector('main')?.prepend(el);
   }
-  return true;
+  el.querySelector('.error-banner__text').textContent = text;
 }
+
 
 function updateCalcAvailability(){
   const count = getDesired().length;
@@ -767,7 +1045,7 @@ function updateCalcAvailability(){
     calcBtn2.disabled = true;
     minHint.classList.remove('hint--ok');
     minHint.classList.add('hint--error');
-    minHint.innerHTML = `<span class="dot"></span><span>เลือกอีก ${MIN_SELECTS - count} อย่างเพื่อเริ่มค้นหา (ขั้นต่ำ ${MIN_SELECTS} ความสามารถ)</span>`;
+    minHint.innerHTML = `<span class="dot"></span><span>เลือกอีก ${MIN_SELECTS - count} ความสามารถเพื่อเริ่มค้นหา (ขั้นต่ำ ${MIN_SELECTS} สกิล)</span>`;
   }else{
     calcBtn.disabled = false;
     calcBtn2.disabled = false;
@@ -775,126 +1053,37 @@ function updateCalcAvailability(){
     minHint.classList.add('hint--ok');
     minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาเซ็ตจี้แล้ว</span>`;
   }
-  // ตัวนับหัวข้อ
-  if (selectedCounter){
-    selectedCounter.textContent = `เลือกแล้ว ${count}/${MAX_SELECTS}`;
+  // ตัวนับ + progress bar
+  if (selectedProgress){
+    const pct = Math.min(100, Math.round((count / MAX_SELECTS) * 100));
+    if (selectedProgressFill) selectedProgressFill.style.width = pct + '%';
+    if (selectedProgressLabel) selectedProgressLabel.textContent = `${count}/${MAX_SELECTS}`;
+    selectedProgress.setAttribute('aria-valuenow', String(count));
+    selectedProgress.classList.toggle('is-ready', count >= MIN_SELECTS);
   }
 }
 
-function makeNativeSelects(options=[]){
-  const wrap=document.getElementById('desiredSelects'); wrap.innerHTML='';
-  for(let i=0;i<MAX_SELECTS;i++){
-    const sel=document.createElement('select');
-    sel.id=`desired${i}`;
-    sel.style.minHeight='44px';
-    sel.style.border='1px solid #cbd5e1';
-    sel.style.borderRadius='8px';
-    sel.style.padding='8px 10px';
-    const blank = document.createElement('option'); blank.value=''; blank.textContent='';
-    sel.appendChild(blank);
-    options.forEach(op=>{
-      const opt=document.createElement('option'); opt.value=op; opt.textContent=op; sel.appendChild(opt);
-    });
-    sel.addEventListener('change', ()=>{
-      updateCalcAvailability();
-      ensureMobileCascade(); // progressive
-    });
-    wrap.appendChild(sel);
-  }
-  tomSelects = [];
-  ensureMobileCascade();
-  updateCalcAvailability();
-}
 
+// chip-picker เป็นเจ้าของ state — ไม่สร้าง TomSelect DOM อีกต่อไป
 async function makeTomSelects(options=[]){
-  const ready = await waitForTomSelect();
-  const wrap=document.getElementById('desiredSelects'); wrap.innerHTML='';
-  for(let i=0;i<MAX_SELECTS;i++){
-    const sel=document.createElement('select');
-    sel.id=`desired${i}`;
-    sel.innerHTML = `<option value=""></option>` + options.map(s=>`<option value="${s}">${s}</option>`).join('');
-    wrap.appendChild(sel);
-  }
-  if(!ready){ makeNativeSelects(options); return; }
   tomSelects = [];
-  for(let i=0;i<MAX_SELECTS;i++){
-    const sel = document.getElementById(`desired${i}`);
-    const ts = new TomSelect(sel,{create:false,allowEmptyOption:true,placeholder:'',plugins:{clear_button:{title:'ลบค่า'}}});
-    ts.on('change',val=>{
-      if(!val) { updateCalcAvailability(); ensureMobileCascade(); return; }
-      const others=tomSelects.filter(t=>t!==ts).map(t=>t.getValue());
-      if(others.includes(val)){ alert(`⚠️ "${val}" เลือกไปแล้ว กรุณาเลือกใหม่`); ts.clear(); }
-      updateCalcAvailability();
-      ensureMobileCascade();
-    });
-    tomSelects.push(ts);
+  window.tomSelects = tomSelects;
+  if (typeof window.buildChipPicker === 'function'){
+    window.buildChipPicker(options);
   }
-  ensureMobileCascade();
   updateCalcAvailability();
 }
 
+// getDesired อ่านจาก chip state โดยตรง
 function getDesired(){
-  if (tomSelects.length){
-    return tomSelects.map(ts=>ts.getValue()).filter(Boolean);
-  }else{
-    const wrap=document.getElementById('desiredSelects');
-    return [...wrap.querySelectorAll('select')].map(s=>s.value).filter(Boolean);
-  }
+  return Array.isArray(window._chipSelected) ? window._chipSelected.slice() : [];
 }
 
-function getSelectValueAt(i){
-  if (tomSelects.length){
-    const ts = tomSelects[i];
-    return ts ? ts.getValue() : '';
-  }else{
-    const el = document.getElementById(`desired${i}`);
-    return el ? el.value : '';
-  }
-}
-
-function hideSelectAt(i){
-  if (tomSelects.length){
-    const ts = tomSelects[i];
-    if (ts && ts.wrapper) ts.wrapper.classList.add('mobile-hidden');
-  }else{
-    const el = document.getElementById(`desired${i}`);
-    if (el) el.classList.add('mobile-hidden');
-  }
-}
-function showSelectAt(i){
-  if (tomSelects.length){
-    const ts = tomSelects[i];
-    if (ts && ts.wrapper) ts.wrapper.classList.remove('mobile-hidden');
-  }else{
-    const el = document.getElementById(`desired${i}`);
-    if (el) el.classList.remove('mobile-hidden');
-  }
-}
-
-/* ===== Progressive reveal (mobile) ===== */
-const START_VISIBLE_MOBILE = 4;
-function isMobileProgressive(){
-  return window.matchMedia('(max-width: 768px)').matches;
-}
-function ensureMobileCascade(){
-  if (!isMobileProgressive()){
-    for (let i=0;i<MAX_SELECTS;i++) showSelectAt(i);
-    return;
-  }
-  let visible = START_VISIBLE_MOBILE;
-  for (let i=0;i<MAX_SELECTS;i++){
-    if (i < visible){
-      const val = getSelectValueAt(i);
-      if (val && i === visible - 1){
-        visible++;
-      }
-    }
-  }
-  if (visible > MAX_SELECTS) visible = MAX_SELECTS;
-  for (let i=0;i<MAX_SELECTS;i++){
-    if (i < visible) showSelectAt(i); else hideSelectAt(i);
-  }
-}
+// compat stubs — ไม่มี TomSelect DOM แล้ว
+function getSelectValueAt(i){ return (window._chipSelected || [])[i] || ''; }
+function hideSelectAt(){ /* no-op */ }
+function showSelectAt(){ /* no-op */ }
+function ensureMobileCascade(){ /* no-op */ }
 
 function toNumber(val){
   if(typeof val === 'number') return val;
@@ -903,17 +1092,64 @@ function toNumber(val){
   return isNaN(n) ? 0 : n;
 }
 
-// Trim ID ตั้งแต่ต้น
+// Trim ID ตั้งแต่ต้น — รองรับกรณีที่ GViz ส่ง column id เป็น "A","B"... แทน label
 function normalizeByHeaders(rows){
+  // ตรวจล่วงหน้าว่า key ของคอลัมน์แรกคืออะไร (สำหรับ fallback)
+  const firstRowKeys = rows.length ? Object.keys(rows[0]) : [];
+  const firstKey = firstRowKeys[0] || null;
+
   return rows.map((r,i)=>{
-    const rawId = r["ID"];
-    const id = (rawId != null ? String(rawId) : `Jewel${i+1}`).trim();
+    // 1) ลองหาคอลัมน์ id จากชื่อที่รู้จัก
+    const namedCandidates = ["ID","Id","id","ชื่อ","ชื่อจี้","Name","NAME","name",
+                             "Jewel","JewelName","JewelID","Pendant","PendantID","A","B"];
+    let rawId = null;
+    for (const k of namedCandidates){
+      const v = r[k];
+      if (v != null && String(v).trim() !== ''){ rawId = String(v).trim(); break; }
+    }
+    // 2) Fallback: ใช้คอลัมน์แรกของแถว (ไม่ว่าชื่อ key จะเป็นอะไร)
+    if (!rawId && firstKey){
+      const v = r[firstKey];
+      if (v != null) rawId = String(v).trim();
+    }
+    // 3) ถ้า rawId เป็นตัวเลขล้วน → ค่านั้นไม่ใช่ชื่อ ให้สแกนทุก value หาชื่อจริง
+    if (!rawId || /^\d+(\.\d+)?$/.test(rawId)){
+      const nameVal = Object.values(r).find(v => {
+        const s = String(v ?? '').trim();
+        return s.length > 1 && !/^\d+(\.\d+)?$/.test(s);
+      });
+      rawId = nameVal ? String(nameVal).trim() : null;
+    }
+    const id = rawId || `Jewel${i+1}`;
+
+    // parse substats (ลอง key หลายรูปแบบ)
+    const subK  = ["Substat1","Substat2","Substat3","Substat4","Substat5",
+                   "substat1","substat2","substat3","substat4","substat5",
+                   "C","D","E","F","G"];
+    const valK  = ["Value1","Value2","Value3","Value4","Value5",
+                   "value1","value2","value3","value4","value5",
+                   "H","I","J","K","L"];
     const substats=[];
-    if(r["Substat1"]) substats.push({name:String(r["Substat1"]).trim(), value: toNumber(r["Value1"])});
-    if(r["Substat2"]) substats.push({name:String(r["Substat2"]).trim(), value: toNumber(r["Value2"])});
-    if(r["Substat3"]) substats.push({name:String(r["Substat3"]).trim(), value: toNumber(r["Value3"])});
-    if(r["Substat4"]) substats.push({name:String(r["Substat4"]).trim(), value: toNumber(r["Value4"])});
-    if(r["Substat5"]) substats.push({name:String(r["Substat5"]).trim(), value: toNumber(r["Value5"])});
+    // ลอง key แบบ Substat1/Value1 ก่อน
+    for (let s=1; s<=5; s++){
+      const sk = `Substat${s}`, vk = `Value${s}`;
+      if (r[sk] != null && String(r[sk]).trim()){
+        substats.push({name:String(r[sk]).trim(), value: toNumber(r[vk])});
+      }
+    }
+    // ถ้าไม่ได้เลย ลอง GViz single-letter keys (C=Substat1, D=Value1, E=Substat2, ...)
+    if (substats.length === 0 && firstRowKeys.length > 2){
+      // รูปแบบ: col0=ID, col1=Substat1, col2=Value1, col3=Substat2, col4=Value2, ...
+      for (let s=0; s<5; s++){
+        const sk = firstRowKeys[1 + s*2];
+        const vk = firstRowKeys[2 + s*2];
+        if (!sk) break;
+        const sv = r[sk]; const vv = r[vk];
+        if (sv != null && String(sv).trim()){
+          substats.push({name:String(sv).trim(), value: toNumber(vv)});
+        }
+      }
+    }
     return { id, substats };
   }).filter(j=>j.substats.length>0);
 }
@@ -1073,7 +1309,7 @@ function createWorker(){
 async function calculate(){
   const desired = getDesired();
   if(!desired || desired.length < MIN_SELECTS){
-    alert(`⚠️ กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`);
+    showToast(`⚠️ กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`, 3000, 'warn');
     return;
   }
 
@@ -1088,7 +1324,7 @@ async function calculate(){
 
     if(jewelPool.length < 4){
       const filterMsg = darkOnly.checked ? `ภายใต้การกรองชื่อขึ้นต้น "${DARK_PREFIX}"` : '';
-      alert(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`);
+      showToast(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`, 3500, 'warn');
       return;
     }
 
@@ -1100,13 +1336,14 @@ async function calculate(){
 
     const cand = buildCandidates(desired, jewelPool);
     if(cand.length<4){
-      alert("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้");
+      showToast("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้", 3500, 'warn');
       return;
     }
 
-    resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
-    showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
-    setProgress(10,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
+    resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
+    document.getElementById('result').innerHTML = '';
+    showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
+    setCalcProgress(10,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
 
     // ส่งงานให้ worker
     __etaState.start = performance.now(); 
@@ -1114,8 +1351,51 @@ async function calculate(){
     worker.postMessage({ desired, cand, topK });
   }catch(err){
     hideLoading();
-    alert("เกิดข้อผิดพลาดในการดึง/ประมวลผลข้อมูล:\n\n" + (err?.message || err));
+    hideCalcOverlay();
+    showErrorBanner("เกิดข้อผิดพลาดในการดึง/ประมวลผลข้อมูล: " + (err?.message || err));
   }
+}
+
+function restoreEmptyState(){
+  const container = document.getElementById('result');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="empty-state" id="resultEmptyState">
+      <div class="empty-state__icon">✨</div>
+      <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
+      <div class="empty-state__msg">เลือกความสามารถอย่างน้อย 4 อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
+      <div class="skeleton-list" aria-hidden="true">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>`;
+}
+
+function showCalcOverlay(msg){
+  const ov = document.getElementById('resultLocalOverlay');
+  const tx = document.getElementById('progressTextLocal');
+  const bar = document.getElementById('progressBarLocal');
+  if (bar){
+    // reset (disable transition briefly so it snaps to 0)
+    const prev = bar.style.transition;
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    void bar.offsetWidth; // force reflow
+    bar.style.transition = prev || '';
+  }
+  if (tx) tx.innerHTML = (msg || 'กำลังค้นหา…').replace(/\n/g,'<br>');
+  if (ov){ ov.style.display = 'flex'; ov.classList.add('show'); ov.setAttribute('aria-hidden','false'); }
+}
+function hideCalcOverlay(){
+  const ov = document.getElementById('resultLocalOverlay');
+  if (ov){ ov.style.display = 'none'; ov.classList.remove('show'); ov.setAttribute('aria-hidden','true'); }
+}
+function setCalcProgress(pct, msg){
+  const bar = document.getElementById('progressBarLocal');
+  const tx = document.getElementById('progressTextLocal');
+  if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  if (tx && msg) tx.innerHTML = msg; // allow <br>
 }
 
 function renderResults(best){
@@ -1132,7 +1412,10 @@ function renderResults(best){
         const icon = desired.includes(s.name)?'✅':'✨';
         return `${icon} ${s.name}: ${s.value}%`;
       }).join('\n');
-      return `<div class="jewel-column" data-tooltip="${tooltip}">${j.id}</div>`;
+      const isLink = j.id.startsWith('[ลิงก์]');
+      const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
+      const badge = isLink ? '<span class="jewel-lock-badge">🔒 ล็อกตัวละคร</span>' : '';
+      return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
     const notList = desired.filter((_,idx)=> r.notIdx.includes(idx));
@@ -1193,23 +1476,28 @@ card.innerHTML = `
   }
 }
 
-/* resetAll: ล้างช่องจำนวนเซ็ตกลับ placeholder + progressive mobile */
+/* resetAll */
 function resetAll(){
-  if (tomSelects.length){
-    tomSelects.forEach(ts=> ts.clear(true));
-  }else{
-    document.querySelectorAll('#desiredSelects select').forEach(s=> s.value='');
-  }
+  // ล้าง chip state
+  if (typeof window.clearChipState === 'function') window.clearChipState();
   if (darkOnly) darkOnly.checked = false;
 
   if (topKInput){
     topKInput.value = '';
   }
 
-  document.getElementById('result').innerHTML='';
-  resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
+  restoreEmptyState();
+  resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
 
-  ensureMobileCascade();
+  // ล้างตัวเลือกตัวละครและ preview
+  const charSel = document.getElementById('charSelect');
+  if (charSel){
+    if (charSel.tomselect) charSel.tomselect.clear(true);
+    else charSel.value = '';
+  }
+  const cp = document.getElementById('charPreview');
+  if (cp) cp.classList.remove('show');
+
   updateCalcAvailability();
   showToast('🧹 ล้างตัวเลือกและผลลัพธ์แล้ว', 2000);
 }
@@ -1218,27 +1506,72 @@ function resetAll(){
 function enableTouchTooltips(){ /* mobile toast disabled by request */ }
 
 darkOnly?.addEventListener('change', ()=>{
-  document.getElementById('result').innerHTML='';
-  resultTitle.textContent = '💖 เซ็ตจี้ที่ดีที่สุด';
+  restoreEmptyState();
+  resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
 });
+
+// ===== Keyword map: ability → [alias, alias, ...] =====
+// ดึงจาก Sheet "Keywords" (gid ที่กำหนดใน KEYWORD_GID)
+// ถ้าไม่มี sheet หรือ fetch ล้มเหลว → ใช้ map ว่าง (ค้นหาปกติยังทำงาน)
+const KEYWORD_GID = '850304016'; // ← ใส่ gid ของ sheet "Keywords" ที่นี่ เช่น '123456789'
+
+function fetchKeywordSheet(){
+  if (!KEYWORD_GID) return Promise.resolve(new Map());
+  return new Promise((resolve)=>{
+    const cbName = '__KeywordsGViz_' + Date.now();
+    const timeout = setTimeout(()=>{ delete window[cbName]; resolve(new Map()); }, 6000);
+    window[cbName] = function(resp){
+      clearTimeout(timeout);
+      delete window[cbName];
+      try{
+        const table = resp && resp.table;
+        if (!table){ resolve(new Map()); return; }
+        const cols = (table.cols||[]).map(c=>(c.label||c.id||'').toString().trim());
+        const map = new Map();
+        (table.rows||[]).forEach(r=>{
+          const cells = (r.c||[]);
+          const ability = (cells[0]?.v ?? '').toString().trim();
+          const raw     = (cells[1]?.v ?? '').toString().trim();
+          if (!ability) return;
+          const kws = raw.split(',').map(k=>k.trim().toLowerCase()).filter(Boolean);
+          if (kws.length) map.set(ability, kws);
+        });
+        resolve(map);
+      }catch(e){ resolve(new Map()); }
+    };
+    const tqx = encodeURIComponent(`out:json;responseHandler:${cbName}`);
+    const src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${KEYWORD_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
+    const sc = document.createElement('script'); sc.src = src;
+    sc.onerror = ()=>{ clearTimeout(timeout); resolve(new Map()); };
+    document.head.appendChild(sc);
+  });
+}
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   try{
     showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
-    jewels = await fetchGVizJSONP();
+    // โหลดข้อมูลจี้ + keyword map พร้อมกัน
+    const [fetchedJewels, keywordMap] = await Promise.all([
+      fetchGVizJSONP(),
+      fetchKeywordSheet(),
+    ]);
+    jewels = fetchedJewels;
+    window.jewels = jewels;
+    window._abilityKeywords = keywordMap; // Map<ability, string[]>
     const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
 
     await makeTomSelects(substats);
+    setAbilityList(substats);
     hideLoading();
     showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
-                               'ℹ️ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
-    bindShareButtons();       // ผูกอีเวนต์ปุ่มแชร์
-    applyStateFromURL(); 
+                               '❓ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+    bindShareButtons();
+    applyStateFromURL();
 
   }catch(err){
     hideLoading();
     console.warn('Fetch error:', err);
-    alert('ไม่สามารถโหลดข้อมูล ได้: ' + (err?.message || err) + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
+    showErrorBanner('ไม่สามารถโหลดข้อมูลได้: ' + (err?.message || err) + ' — ตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer"');
     await makeTomSelects([]);
   }
 
@@ -1255,9 +1588,10 @@ const f = p / 100;
 let etaSec = f > 0 ? Math.max(0, elapsed / f - elapsed) : 0;
 if (__etaState.smoothSec == null) __etaState.smoothSec = etaSec;
 else __etaState.smoothSec = __etaState.smoothSec * 0.7 + etaSec * 0.3;
-setProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
+setCalcProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
     }else if(msg.type==='result'){
       renderResults(msg.best);
+      hideCalcOverlay();
       hideLoading();
     }
   };
@@ -1273,15 +1607,26 @@ setProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>
 </script>
 
 <script>
+// รายการความสามารถทั้งหมด (เซ็ตหลัง loadData) — ใช้สำหรับ URL encoding/decoding
+let _abilityList = [];
+function setAbilityList(arr){ _abilityList = Array.from(arr || []); }
+
 function buildShareURL(){
   const url = new URL(location.href);
   url.search = '';
   const params = url.searchParams;
 
-  getDesired().forEach(v => params.append('sel', v));
+  const desired = getDesired();
+  if (_abilityList.length){
+    // encode เป็น index list: "s=0,3,12,..." (สั้นกว่า sel=ชื่อไทย)
+    const indices = desired.map(v => _abilityList.indexOf(v)).filter(i => i >= 0);
+    if (indices.length) params.set('s', indices.join(','));
+  } else {
+    desired.forEach(v => params.append('sel', v));
+  }
   if(topKInput?.value) params.set('k', topKInput.value);
-  if(darkOnly?.checked) params.set('dark','1');
-  params.set('auto','1');
+  if(darkOnly?.checked) params.set('d','1');
+  params.set('a','1');
 
   url.search = params.toString();
   return url.toString();
@@ -1289,37 +1634,27 @@ function buildShareURL(){
 
 async function applyStateFromURL(){
   const params = new URLSearchParams(location.search);
-  const sels = params.getAll('sel');
+  // รองรับทั้ง URL ใหม่ (s=0,3,12) และ URL เก่า (sel=ชื่อ)
+  let sels = [];
+  const sParam = params.get('s');
+  if (sParam && _abilityList.length){
+    sels = sParam.split(',').map(n => _abilityList[parseInt(n,10)]).filter(Boolean);
+  } else {
+    sels = params.getAll('sel');
+  }
   const k = params.get('k');
-  const dark = params.get('dark');
-  const auto = params.get('auto');
+  const dark = params.get('d') || params.get('dark');
+  const auto = params.get('a') || params.get('auto');
 
   if(darkOnly) darkOnly.checked = (dark === '1');
   if(topKInput && k) topKInput.value = k;
 
-  // normalize string
-  const normalize = s => (s || '').trim();
-
-  if(tomSelects.length){
-    tomSelects.forEach(ts => ts.clear(true));
-    let idx = 0;
-    for(const raw of sels){
-      const target = normalize(raw);
-      const ts = tomSelects[idx++];
-      if(!ts) break;
-
-      // หา option ที่ตรง (ทั้ง value และ text)
-      const option = Object.values(ts.options).find(opt =>
-        normalize(opt.value) === target || normalize(opt.text) === target
-      );
-
-      if(option){
-        ts.addItem(option.value, true); // ใส่ค่าแบบ silent
-      }
-    }
+  // ตั้ง chip state จาก URL
+  const validSels = sels.map(s=>(s||'').trim()).filter(Boolean);
+  if (typeof window.setChipState === 'function'){
+    window.setChipState(validSels);
   }
 
-  ensureMobileCascade();
   updateCalcAvailability();
 
   if(auto === '1' && getDesired().length >= MIN_SELECTS){
@@ -1333,11 +1668,50 @@ function bindShareButtons(){
   const onShare = ()=>{
     const link = buildShareURL();
     navigator.clipboard.writeText(link).then(()=>{
-      showToast('✅ คัดลอกลิงก์แชร์แล้ว');
-    }).catch(()=>window.prompt('คัดลอกลิงก์นี้:', link));
+      showToast('✅ คัดลอกลิงก์แชร์แล้ว — แสดง QR');
+      showQRModal(link);
+    }).catch(()=>{
+      showQRModal(link);
+    });
   };
   document.getElementById('shareBtn')?.addEventListener('click', onShare);
+  document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
+
+function showQRModal(url){
+  const modal = document.getElementById('qrModal');
+  const canvas = document.getElementById('qrCanvas');
+  const urlEl = document.getElementById('qrUrl');
+  if (!modal || !canvas) return;
+  canvas.innerHTML = '';
+  if (urlEl) urlEl.textContent = url;
+  try{
+    if (typeof QRCode === 'function'){
+      new QRCode(canvas, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+    } else {
+      const img = document.createElement('img');
+      img.alt = 'QR';
+      img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
+      canvas.appendChild(img);
+    }
+  }catch(e){
+    canvas.textContent = 'ไม่สามารถสร้าง QR ได้';
+  }
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+}
+function hideQRModal(){
+  const modal = document.getElementById('qrModal');
+  if (!modal) return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('qrClose')?.addEventListener('click', hideQRModal);
+  document.getElementById('qrModal')?.addEventListener('click', (e)=>{
+    if (e.target?.id === 'qrModal') hideQRModal();
+  });
+});
 
 document.addEventListener('DOMContentLoaded', ()=>{
   bindShareButtons();
@@ -1562,7 +1936,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   position:fixed; right:12px; bottom:36px;
   z-index:999999; /* กัน element อื่นทับ */
   border:none; border-radius:6px; padding:4px 8px;
-  font-family:"Kanit",sans-serif; font-weight:600; font-size:12px;
+  font-family:"LINE Seed Sans TH","Kanit",sans-serif; font-weight:600; font-size:12px;
   cursor:pointer; color:rgba(255,255,255,.8); background:rgba(31, 74, 197,0.75);
   pointer-events:auto; /* เผื่อมี global css ไปตั้ง none */
 }
@@ -1576,7 +1950,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-modal__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   width:min(560px,92vw); background:#fff; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.25);
-  overflow:hidden; font-family:"Kanit",sans-serif;
+  overflow:hidden; font-family:"LINE Seed Sans TH","Kanit",sans-serif;
 }
 .fb-modal__header{
   display:flex; align-items:center; justify-content:space-between;
@@ -1592,6 +1966,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   font-family: inherit;
 }
 .steps-inline li.no-indent{ margin-left:0 !important; margin-right:0 !important; }
+.steps-inline li.steps-heading{ list-style:none; font-weight:700; color:#1f4ac5; margin-right:10px; }
 .consent-title-lg{ font-size:32px; color:#2e59d9; }
 .consent-msg-lg{ font-size:20px; }
 .fb-input:focus-visible{ outline:3px solid #7aa2ff; outline-offset:2px; }
@@ -1599,7 +1974,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
 .fb-btn{
   border:none; border-radius:10px; padding:6px 14px; font-weight:600; cursor:pointer;
-  min-height:32px; font-family:"Kanit",sans-serif;font-size: 16px;
+  min-height:32px; font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-size: 16px;
 }
 .fb-btn--ghost{ background:#f1f5f9; color:#0b1020; }
 .fb-btn--ghost:hover{ background:#e2e8f0; }
@@ -1627,7 +2002,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-toast{
   display:inline-flex; align-items:center; gap:10px; pointer-events:auto;
   background:rgb(0, 0, 0,1); color:#fff; padding:10px 14px; border-radius:12px;
-  box-shadow:0 8px 24px rgba(0,0,0,.35); font-family:"Kanit",sans-serif; font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.35); font-family:"LINE Seed Sans TH","Kanit",sans-serif; font-weight:600;
   opacity:0; transform:translateY(16px); transition:opacity .2s ease, transform .2s ease;
 }
 .fb-toast.show{ opacity:1; transform:translateY(0); }
@@ -1646,7 +2021,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-confirm__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   width:min(560px,92vw); background:#fff; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.25);
-  overflow:hidden; font-family:"Kanit",sans-serif;
+  overflow:hidden; font-family:"LINE Seed Sans TH","Kanit",sans-serif;
 }
 .fb-confirm__header{
   display:flex; align-items:center; justify-content:space-between;
@@ -1659,7 +2034,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-confirm__msg--alert{ color:#b91c1c; font-weight:800; } /* แดง + หนา */
 .fb-confirm__actions{ display:flex; gap:10px; justify-content:flex-end; padding:0 16px 16px; }
 .fb-confirm__btn{
-  border:none; border-radius:10px; padding:6px 14px; font-weight:600; min-height:32px; ; font-family:"Kanit",sans-serif;font-size: 16px;
+  border:none; border-radius:10px; padding:6px 14px; font-weight:600; min-height:32px; ; font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-size: 16px;
 }
 .fb-confirm__btn--ghost{ background:#f1f5f9; color:#0b1020; }
 .fb-confirm__btn--ghost:hover{ background:#e2e8f0; }
@@ -1856,6 +2231,206 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
 <div class="credit-floating">Credit: Bosskung © 2025</div>
 
+<script>
+/* ===== UX v4: Chip picker — เป็นเจ้าของ state ผ่าน window._chipSelected ===== */
+(function(){
+  let ALL_ABILITIES = [];
+  // source of truth — array ของชื่อความสามารถที่เลือก (สูงสุด MAX_SELECTS)
+  window._chipSelected = [];
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function notify(){
+    // แจ้ง main script ว่า state เปลี่ยน
+    if (typeof updateCalcAvailability === 'function') updateCalcAvailability();
+  }
+
+  function addAbility(name){
+    const sel = window._chipSelected;
+    const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
+    if (sel.includes(name) || sel.length >= max) return false;
+    sel.push(name);
+    return true;
+  }
+
+  function removeAbility(name){
+    const idx = window._chipSelected.indexOf(name);
+    if (idx === -1) return false;
+    window._chipSelected.splice(idx, 1);
+    return true;
+  }
+
+  function renderSelected(){
+    const wrap = document.getElementById('chipSelected');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    window._chipSelected.forEach(name => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip is-selected';
+      b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+      b.title = 'คลิกเพื่อเอาออก';
+      b.addEventListener('click', ()=>{
+        removeAbility(name);
+        refreshChips();
+        notify();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  function renderAll(){
+    const wrap = document.getElementById('chipAll');
+    const allWrap = document.getElementById('chipAllWrap');
+    if (!wrap) return;
+    const q = (document.getElementById('chipSearch')?.value || '').trim().toLowerCase();
+    // แสดง "ทั้งหมด" เฉพาะตอนมีคำค้นหา
+    if (allWrap){
+      if (q) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden','');
+    }
+    wrap.innerHTML = '';
+    if (!q) return;
+    const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
+    const atMax = window._chipSelected.length >= max;
+    ALL_ABILITIES.forEach(name => {
+      const nameMatch = name.toLowerCase().includes(q);
+      const kwMatch = (window._abilityKeywords?.get(name) || []).some(k => k.includes(q));
+      if (!nameMatch && !kwMatch) return;
+      const isSel = window._chipSelected.includes(name);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip' + (isSel ? ' is-selected' : '') + ((!isSel && atMax) ? ' is-disabled' : '');
+      b.textContent = name;
+      b.title = isSel ? 'คลิกเพื่อเอาออก' : (atMax ? 'ครบ ' + max + ' ความสามารถแล้ว' : 'คลิกเพื่อเพิ่ม');
+      if (!isSel && atMax) b.setAttribute('aria-disabled','true');
+      b.addEventListener('click', ()=>{
+        if (b.classList.contains('is-disabled')) return;
+        if (isSel) removeAbility(name); else addAbility(name);
+        refreshChips();
+        notify();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  function refreshChips(){ renderSelected(); renderAll(); }
+
+  window.buildChipPicker = function(options){
+    ALL_ABILITIES = Array.from(options || []).sort();
+    refreshChips();
+  };
+  window.refreshChipPicker = refreshChips;
+
+  // expose setChipState for applyStateFromURL
+  window.setChipState = function(arr){
+    window._chipSelected = Array.from(arr || []).slice(0, (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14);
+    refreshChips();
+    notify();
+  };
+  // clear all
+  window.clearChipState = function(){
+    window._chipSelected = [];
+    refreshChips();
+    notify();
+  };
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const s = document.getElementById('chipSearch');
+    if (s){ s.addEventListener('input', renderAll); }
+  });
+})();
+</script>
+
+<script>
+/* ===== UX v3: Theme toggle, keyboard shortcuts, char preview ===== */
+(function(){
+  // ---- Theme toggle (dark mode) ----
+  const THEME_KEY = 'theme_pref_v1';
+  const root = document.documentElement;
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initial = savedTheme || (prefersDark ? 'dark' : 'light');
+  root.setAttribute('data-theme', initial);
+
+  function setThemeIcon(){
+    const btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    btn.textContent = isDark ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', isDark ? 'สลับเป็นธีมสว่าง' : 'สลับเป็นธีมมืด');
+  }
+  function toggleTheme(){
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    setThemeIcon();
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    setThemeIcon();
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+  });
+
+  window.applySkillFilter = function(){}; // no-op (feature removed)
+
+  // ---- Character preview ----
+  function updateCharPreview(){
+    const cp = document.getElementById('charPreview');
+    if (!cp) return;
+    const sel = document.getElementById('charSelect');
+    const name = sel ? (sel.value || '') : '';
+    const nameEl = cp.querySelector('.cp-name');
+    const jewelEl = cp.querySelector('.cp-jewel');
+    if (!name){
+      cp.classList.remove('show');
+      return;
+    }
+    let linkId = '';
+    if (window.__charToLinkId && window.__charToLinkId[name]){
+      linkId = window.__charToLinkId[name];
+    } else if (Array.isArray(window.jewels)){
+      const j = window.jewels.find(j => String(j.id||'').startsWith('[ลิงก์]') && String(j.allowedChars||j.AllowedChars||'').trim() === name);
+      if (j) linkId = j.id;
+    }
+    if (nameEl) nameEl.textContent = name;
+    if (jewelEl) jewelEl.textContent = linkId || '— ไม่พบจี้ลิงก์ —';
+    cp.classList.add('show');
+  }
+  // hook via polling (TomSelect init is async)
+  document.addEventListener('DOMContentLoaded', ()=>{
+    let tries = 0;
+    const iv = setInterval(()=>{
+      const sel = document.getElementById('charSelect');
+      if (sel && sel.tomselect){
+        sel.tomselect.on('change', updateCharPreview);
+        clearInterval(iv);
+      } else if (sel){
+        sel.addEventListener('change', updateCharPreview);
+      }
+      if (++tries > 40) clearInterval(iv);
+    }, 250);
+  });
+
+  // ---- Keyboard shortcuts ----
+  document.addEventListener('keydown', (e)=>{
+    // Esc -> close QR modal
+    if (e.key === 'Escape'){
+      hideQRModal();
+      return;
+    }
+    // Enter while focused on topK -> calculate
+    if (e.key === 'Enter' && e.target && e.target.id === 'topK'){
+      e.preventDefault();
+      const btn = document.getElementById('calcBtn');
+      if (btn && !btn.disabled) btn.click();
+    }
+  });
+})();
+</script>
+
  <!-- <a href="https://www.facebook.com/bosskungthnp/" target="_blank" class="credit-floating">
   Credit: Bosskung © 2025
 </a>  -->
@@ -1864,59 +2439,45 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 <script>
 // --- Consent gate: show toast and delay data loading until acknowledged ---
 (function(){
-  const STORAGE_KEY = 'consent_ack_v1';
-  let count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+  const STORAGE_KEY = 'consent_ack_v2'; // v2: single flag "acknowledged"
+  const acknowledged = localStorage.getItem(STORAGE_KEY) === '1';
   const panel = document.getElementById('consentToast');
   const okBtn = document.getElementById('consentOk');
+  const rememberBox = document.getElementById('consentRemember');
 
-  // Keep original fetch function
   const __origFetchGVizJSONP = window.fetchGVizJSONP;
-  if (typeof __origFetchGVizJSONP === 'function'){
-    let waitingResolvers = []; // queue for any early calls
-    let asked = false;
+  if (typeof __origFetchGVizJSONP !== 'function') return;
 
-    // Replace with gated version
-    window.fetchGVizJSONP = function(){
-      if (parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10) >= 3){
-        return __origFetchGVizJSONP();
-      }
-      // Show consent toast only once
-      if (!asked){
-        asked = true;
-        if (panel){ panel.classList.remove('hidden'); }
-      }
-      return new Promise((resolve, reject)=>{
-        waitingResolvers.push({resolve, reject});
-      });
-    };
+  let waitingResolvers = [];
+  let asked = false;
 
-    function startNow(){
-      // hide panel
-      if (panel){ panel.classList.add('hidden'); }
-      // proceed with the original fetch, resolve all queued calls
-      __origFetchGVizJSONP().then((data)=>{
-        waitingResolvers.forEach(q => q.resolve(data));
-        waitingResolvers = [];
-      }).catch(err=>{
-        waitingResolvers.forEach(q => q.reject(err));
-        waitingResolvers = [];
-      });
-    }
+  window.fetchGVizJSONP = function(){
+    if (localStorage.getItem(STORAGE_KEY) === '1') return __origFetchGVizJSONP();
+    if (!asked){ asked = true; if (panel) panel.classList.remove('hidden'); }
+    return new Promise((resolve, reject)=> waitingResolvers.push({resolve, reject}));
+  };
 
-    // Wire button
-    if (okBtn){
-      okBtn.addEventListener('click', ()=>{
-    count++;
-    localStorage.setItem(STORAGE_KEY, String(count));
-    startNow();
-      });
-    }
+  function startNow(){
+    if (panel) panel.classList.add('hidden');
+    __origFetchGVizJSONP().then(data=>{
+      waitingResolvers.forEach(q => q.resolve(data));
+      waitingResolvers = [];
+    }).catch(err=>{
+      waitingResolvers.forEach(q => q.reject(err));
+      waitingResolvers = [];
+    });
+  }
 
-    if (count >= 3){
-      // ถ้าเคยกดครบแล้ว 3 ครั้ง → ซ่อน toast ตลอด
-      if (panel){ panel.classList.add('hidden'); }
-      window.fetchGVizJSONP = __origFetchGVizJSONP;
-    }
+  if (okBtn){
+    okBtn.addEventListener('click', ()=>{
+      if (rememberBox?.checked) localStorage.setItem(STORAGE_KEY, '1');
+      startNow();
+    });
+  }
+
+  if (acknowledged){
+    if (panel) panel.classList.add('hidden');
+    window.fetchGVizJSONP = __origFetchGVizJSONP;
   }
 })();
 </script>
@@ -2080,7 +2641,7 @@ if (resetBtn) {
         new TomSelect(el, {
           create: false,
           allowEmptyOption: true,
-          placeholder: 'พิมพ์ชื่อตัวละคร...',
+          placeholder: '🔍 พิมพ์ชื่อตัวละคร...',
           maxOptions: 500,
           searchField: ['text', 'value'],
           score: function(search){
@@ -2178,13 +2739,17 @@ if (resetBtn) {
         return _origCalc.apply(this, arguments);
       }
 
-      // หาจี้ลิงก์ที่ตรงกับตัวละคร
-      const fixedLink = window.jewels.find(j =>
+      // หาจี้ลิงก์ที่ตรงกับตัวละคร — ลอง allowedChars ใน main sheet ก่อน แล้ว fallback ไปใช้ map จาก gid=513976173
+      let fixedLink = window.jewels.find(j =>
         isLinkId(j.id) &&
         String(j.allowedChars || j.AllowedChars || '').trim() === charName
       );
+      if (!fixedLink && window.__charToLinkId && window.__charToLinkId[charName]){
+        const linkId = window.__charToLinkId[charName];
+        fixedLink = window.jewels.find(j => j.id === linkId);
+      }
       if (!fixedLink){
-        alert(`ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}\nกรุณาเช็กคอลัมน์ AllowedChars ในชีต`);
+        window.showToast(`⚠️ ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}`, 3500, 'warn');
         return;
       }
 
@@ -2213,7 +2778,7 @@ if (resetBtn) {
         .slice(0, 100000);
 
       if (otherCand.length < 3){
-        alert('จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น');
+        window.showToast('⚠️ จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น', 3500, 'warn');
         return;
       }
 
@@ -2222,9 +2787,10 @@ if (resetBtn) {
       if (topK < 3) topK = 3;
       if (topK > 20) topK = 20;
 
-      window.resultTitle.textContent = `💖 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
-      if (typeof window.showLoading === 'function') window.showLoading('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด (ล็อกจี้ลิงก์)...');
-      if (typeof window.setProgress === 'function') window.setProgress(10, 'เริ่มค้นหา (3-combo + จี้ลิงก์ที่ล็อก)');
+      window.resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
+      document.getElementById('result').innerHTML = '';
+      if (typeof window.showCalcOverlay === 'function') window.showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
+      if (typeof window.setCalcProgress === 'function') window.setCalcProgress(10, 'กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
 
       // Worker ที่คำนวณ 3-combination จากนั้น + fixedCand = เซ็ต 4 ชิ้นที่แม่นยำ
       const workerCode = `
@@ -2283,9 +2849,10 @@ if (resetBtn) {
           if (window.__etaState.smoothSec == null) window.__etaState.smoothSec = etaSec;
           else window.__etaState.smoothSec = window.__etaState.smoothSec * 0.7 + etaSec * 0.3;
           const etaStr = (typeof window.__formatETA === 'function') ? window.__formatETA(window.__etaState.smoothSec) : '';
-          if (typeof window.setProgress === 'function') window.setProgress(1 + p, `กำลังประมวลผล (ล็อก ${fixedLink.id})…<br>เสร็จภายใน ${etaStr}`);
+          if (typeof window.setCalcProgress === 'function') window.setCalcProgress(1 + p, `กำลังประมวลผล…<br>เสร็จภายใน ${etaStr}`);
         } else if (e.data.type === 'result'){
           if (typeof window.renderResults === 'function') window.renderResults(e.data.best);
+          if (typeof window.hideCalcOverlay === 'function') window.hideCalcOverlay();
           if (typeof window.hideLoading === 'function') window.hideLoading();
           fixedWorker.terminate();
           URL.revokeObjectURL(blobUrl);
@@ -2333,7 +2900,7 @@ if (resetBtn) {
       const ts = el.tomselect;
       const prev = ts.getValue();
       ts.clearOptions();
-      ts.addOptions([{value:'', text:'— ไม่ระบุ —'}, ...uniq.map(n => ({value:n, text:n}))]);
+      ts.addOptions([{value:'', text:'— ไม่เลือกตัวละคร —'}, ...uniq.map(n => ({value:n, text:n}))]);
       ts.refreshOptions(false);
       if (prev) ts.setValue(prev, true);
     } else {
@@ -2359,7 +2926,7 @@ if (resetBtn) {
       new TomSelect(el, {
         create: false,
         allowEmptyOption: true,
-        placeholder: 'พิมพ์ชื่อตัวละคร...',
+        placeholder: '🔍 พิมพ์ชื่อตัวละคร...',
         maxItems: 1,
         plugins: { clear_button: { title: 'ลบค่า' } },
         searchField: ['text', 'value'],
@@ -2391,13 +2958,17 @@ if (resetBtn) {
       if (idxAc < 0) idxAc = 1;
 
       const set = new Set();
+      const charToLinkId = window.__charToLinkId = {};
       (t.rows || []).forEach(r => {
         const c   = r.c || [];
         const id  = norm(c[idxId]?.v);
         const ac  = norm(c[idxAc]?.v);
         // ข้ามแถว header ที่อาจถูก return มาเป็น data row
         if (id === 'ID' || !id.startsWith(LINK_PREFIX)) return;
-        if (ac) ac.split(/[,;|/、]+/).map(norm).filter(Boolean).forEach(n => set.add(n));
+        if (ac) ac.split(/[,;|/、]+/).map(norm).filter(Boolean).forEach(n => {
+          set.add(n);
+          if (!charToLinkId[n]) charToLinkId[n] = id;
+        });
       });
 
       if (set.size > 0){
@@ -2409,7 +2980,7 @@ if (resetBtn) {
   };
 
   function loadCharGViz(){
-    const tqx = encodeURIComponent('out:json;responseHandler=__CharGViz_v2');
+    const tqx = encodeURIComponent('out:json;responseHandler:__CharGViz_v2');
     const src  = `https://docs.google.com/spreadsheets/d/${CHAR_SHEET_ID}/gviz/tq?gid=${CHAR_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
     const s = document.createElement('script');
     s.src = src;
