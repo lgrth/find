@@ -729,15 +729,12 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:4px 0}
 .chip-list{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
 .chip-list--selected{padding:6px;background:#fff;border:1px dashed #cbd5e1;border-radius:10px}
-.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาสกิลที่ช่องด้านล่าง";color:#94a3b8;font-size:13px;font-style:italic}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:6px 12px;border-radius:999px;border:1px solid #cbd5e1;
-  background:#fff;color:#334155;font-size:13px;font-weight:400;cursor:pointer;
   transition:.12s;user-select:none;font-family:inherit;
 }
 .chip:hover{background:#eef2ff;border-color:#93a7e0}
-.chip.is-selected{background:#2e59d9;color:#fff;border-color:#1f4ac5;font-weight:600}
 .chip.is-selected:hover{background:#1f4ac5}
 .chip.is-disabled{opacity:.4;cursor:not-allowed}
 .chip.is-disabled:hover{background:#fff;border-color:#cbd5e1}
@@ -752,7 +749,6 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-search:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 .chip-search-clear{
   position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;font-size:15px;color:#3b465a;
   padding:2px 4px;line-height:1;border-radius:4px;
 }
 .chip-search-clear:hover{color:#374151;background:#f3f4f6}
@@ -884,7 +880,6 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 /* ===== Mobile UX fixes ===== */
 /* Fix 3: larger chip touch targets */
 @media (max-width:768px){
-  .chip{ padding:10px 14px; height:32px; }
 }
 /* Fix 4: credit badge above sticky CTA bar */
 @media (max-width:768px){
@@ -910,15 +905,15 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
   .btn{padding:10px 12px!important;font-size:15px!important;min-height:38px!important}
 
   /* 6. หัวข้อ h2 เล็กลง */
-  section h2{font-size:16px!important}
 
   /* 7. chip selected — ลด height โดยลด padding แต่ font-size เท่าเดิม */
   .chip-list--selected .chip{padding:3px 10px!important}
 
-  /* 8. result card-head badges — ไม่ wrap บนมือถือ, ลด badge ให้พอดีบรรทัดเดียว */
-  .result-card .card-head .badges{flex-wrap:nowrap!important;align-items:center}
-  .result-card .card-head .badge{padding:3px 7px!important;font-size:11px!important;gap:3px!important}
-  .result-card .card-head .badges{gap:5px!important}
+  /* 8. result card-head — ทุกกล่องบรรทัดเดียวกัน */
+  .result-card .card-head{flex-wrap:nowrap!important;gap:6px!important;justify-content:flex-start!important}
+  .result-card .card-head .badges{margin-left:0!important;flex:1!important;flex-wrap:nowrap!important;justify-content:flex-end!important;align-items:center!important;gap:4px!important}
+  .result-card .card-head .badge{padding:2px 6px!important;font-size:11px!important;gap:3px!important}
+  .result-card .card-head .btn-copy{flex-shrink:0!important}
 }
 </style>
 
