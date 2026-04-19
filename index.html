@@ -927,7 +927,6 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
     <h1 class=”brand-title”>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div class=”top-toolbar” role=”toolbar” aria-label=”เครื่องมือ”>
-    <button id=”tutorialBtn” class=”tb-btn” type=”button” aria-label=”วิธีใช้งาน” title=”วิธีใช้งาน”>❓</button>
     <button id=”themeToggle” class=”tb-btn” type=”button” aria-label=”สลับธีมสว่าง/มืด” title=”สลับธีม (สว่าง/มืด)”>🌙</button>
   </div>
 </header>
@@ -1519,7 +1518,6 @@ function renderResults(best){
 
   const desired = getDesired()||[];
   best.forEach((r,i)=>{
-    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.15}s`;
     const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.25}s`;
     const group = r.ids.map(id => pool.find(j=>j.id===id));
 
@@ -1530,7 +1528,7 @@ function renderResults(best){
       }).join('\n');
       const isLink = j.id.startsWith('[ลิงก์]');
       const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
-      const badge = isLink ? '<span class="jewel-lock-badge">🔒 เฉพาะตัวละคร</span>': '';
+      const badge = isLink ? '<span class="jewel-lock-badge">🔒 เฉพาะตัวละคร</span>' : '';
       return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
@@ -2001,6 +1999,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <button type="button" class="fb-close" data-fb-close aria-label="ปิด">×</button>
     </div>
     <form id="fbForm" class="fb-form">
+      <label class="fb-label" style="font-size:14px; color:#cd0000;">ⓘ แสดงความคิดเห็นที่เกี่ยวกับเว็บไซต์นี้เท่านั้น ไม่เกี่ยวข้องกับ LINE เกมเศรษฐี</label>
       <label class="fb-label">ประเภท
         <select name="category" class="fb-input" >
           <option value="bug">Bug / ปัญหา</option>
@@ -2562,7 +2561,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 <script>
 // --- Tutorial bottom sheet ---
 (function(){
-  const TUTORIAL_KEY = 'tutorial_seen_v1';
+  const TUTORIAL_KEY = 'tutorial_seen_date';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
 
@@ -2571,31 +2570,29 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     sheet.classList.add('show');
     sheet.setAttribute('aria-hidden','false');
   }
-  function hide(remember){
+  function hide(){
     if(!sheet) return;
     sheet.classList.remove('show');
     sheet.setAttribute('aria-hidden','true');
-    if(remember) localStorage.setItem(TUTORIAL_KEY,'1');
+    // Mark today as seen — won't show again until tomorrow
+    localStorage.setItem(TUTORIAL_KEY, new Date().toISOString().slice(0,10));
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    // Attach all listeners after DOM is ready — consistent with theme toggle IIFE
-    document.getElementById('tutorialClose')?.addEventListener('click', ()=> hide(true));
-    sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hide(false); });
-    document.getElementById('tutorialBtn')?.addEventListener('click', ()=> show());
+    document.getElementById('tutorialClose')?.addEventListener('click', ()=> hide());
+    sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hide(); });
 
     // Swipe down to dismiss
     let touchStartY = 0;
     dialog?.addEventListener('touchstart', (e)=>{ touchStartY = e.touches[0].clientY; }, {passive:true});
     dialog?.addEventListener('touchend', (e)=>{
-      if(e.changedTouches[0].clientY - touchStartY > 80) hide(false);
+      if(e.changedTouches[0].clientY - touchStartY > 80) hide();
     }, {passive:true});
 
-    // First-visit: show only after consent is dismissed
-    // DOMContentLoaded runs AFTER app's DOMContentLoaded (which triggers consent to show),
-    // so checking consent visibility here gives the correct state.
+    // Show once per day — store today's date string
     function maybeShow(){
-      if(localStorage.getItem(TUTORIAL_KEY) === '1') return;
+      const today = new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
+      if(localStorage.getItem(TUTORIAL_KEY) === today) return;
       setTimeout(show, 450);
     }
 
