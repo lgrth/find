@@ -298,9 +298,9 @@ window._toggleTheme = function(btn){
   }
 
 /* ==== UX/UI Enhancements (Aug 2025) ==== */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:4px 14px;font-size:16px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:center}
-header .brand{text-align:center}
-.brand-title{font-size:16px;font-weight:700;margin:0}
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:6px 14px;font-size:14px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:center}
+header .brand{text-align:center;padding-top:0!important}
+.brand-title{font-size:15px!important;font-weight:700;margin:0!important;color:#fff}
 .brand-subtitle{font-size:14px;opacity:.9}
 
 .steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
@@ -879,14 +879,23 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 @media (hover:none){
   .jewel-info{ opacity:0.7 !important; }
 }
-/* Fix 7: topK full-width on mobile */
+/* === Mobile UI improvements === */
 @media (max-width:768px){
-  #topK.simple{ width:100% !important; margin-left:0 !important; box-sizing:border-box; }
-}
-/* Fix 8: steps bar — hide verbose labels on small screens */
-@media (max-width:640px){
-  .steps-bar .step-label{ display:none; }
-  .steps-bar .steps-inline li{ padding:6px 10px; }
+  /* 1. Header เล็กลง */
+  header{padding:2px 12px!important}
+  header .brand{padding-top:0!important}
+
+  /* 2+3. topK + darkOnly อยู่ row เดียวกัน */
+  .row-two-col{flex-direction:row!important;align-items:center;flex-wrap:wrap;gap:8px}
+  .row-two-col>.col:first-child{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .row-two-col>.col:first-child label{white-space:nowrap;font-size:13px;margin:0}
+  #topK.simple{width:64px!important;font-size:15px!important;padding:6px 8px!important;margin:0!important}
+
+  /* 4. ปุ่ม action สั้นลง + equal width */
+  .btn{padding:10px 12px!important;font-size:15px!important;min-height:38px!important}
+
+  /* 6. หัวข้อ h2 เล็กลง */
+  section h2{font-size:15px!important}
 }
 </style>
 
@@ -989,7 +998,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
         <div id="chipSelected" class="chip-list chip-list--selected" aria-live="polite"></div>
       </div>
       <div class="chip-search-wrap">
-        <input id="chipSearch" class="chip-search" type="search" placeholder="🔍 พิมพ์เพื่อค้นหาและกดเลือกความสามารถ" autocomplete="off">
+        <input id="chipSearch" class="chip-search" type="search" placeholder="🔍 ค้นหาความสามารถ" autocomplete="off">
       </div>
       <div id="chipAllWrap" class="chip-all-wrap" hidden>
         <div class="chip-all-title">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
