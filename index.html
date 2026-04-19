@@ -143,7 +143,7 @@
       padding:10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
       z-index:100;
     }
-    html[data-theme="dark"] .cta-bar{background:rgba(17,24,39,.94);border-top-color:#334155}
+    html[data-theme="dark"] .cta-bar{background:var(--surface);border-top-color:#334155}
   @media (max-width:768px){ .cta-bar{display:flex} 
   .row-actions{ display:none !important; }
 }
@@ -772,7 +772,7 @@ html[data-theme="dark"] .empty-state__title{color:#cbd5e1}
   position:sticky;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);
   padding:10px 0;z-index:50;border-top:1px solid rgba(0,0,0,.06);
 }
-html[data-theme="dark"] .row-actions{background:rgba(17,24,39,.94);border-top-color:#334155}
+html[data-theme="dark"] .row-actions{background:var(--surface);border-top-color:#334155}
 
 /* ===== UX v3: Dark mode + QR toolbar ===== */
 .top-toolbar{position:fixed;top:10px;right:14px;display:flex;gap:8px;z-index:1300}
@@ -898,7 +898,7 @@ html[data-theme="dark"] .tutorial-sheet__handle{background:#475569}
         </div>
       </li>
     </ol>
-    <p class="tutorial-tip">💡 แตะที่ชื่อจี้ในผลลัพธ์เพื่อดู substat ของแต่ละจี้</p>
+    <p class="tutorial-tip">💡 แตะที่ชื่อจี้ในผลลัพธ์เพื่อดูความสามารถเต็มของแต่ละจี้</p>
     <button id="tutorialClose" type="button" class="btn btn--primary tutorial-sheet__close">เข้าใจแล้ว เริ่มใช้งาน</button>
   </div>
 </div>
