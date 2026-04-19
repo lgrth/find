@@ -1516,7 +1516,7 @@ function renderResults(best){
       }).join('\n');
       const isLink = j.id.startsWith('[ลิงก์]');
       const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
-      const badge = isLink ? '<span class="jewel-lock-badge">🔒 ล็อกตัวละคร</span>' : '';
+      const badge = isLink ? '<span class="jewel-lock-badge">🔒 เฉพาะตัวละคร</span> <span class="cp-name"></span>' : '';
       return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
