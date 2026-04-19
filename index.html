@@ -397,6 +397,7 @@ header .brand{ padding-top:6px; }
 
 /* Ensure brand title shows above steps inside header */
 .brand-title{margin:0 0 8px 0; font-size:32px; font-weight:700; color:#fff}
+@media (max-width:640px){ .brand-title{ font-size:clamp(20px,5.5vw,26px) !important } }
 .steps-in-header{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:0}
 .steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#fff;color:#1f4ac5;font-weight:700;font-size:12px}
 .steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 10px;font-size:13px;color:#fff}
@@ -730,7 +731,7 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-search-wrap{margin:6px 0 4px 0}
 .chip-search{
   width:100%;padding:8px 12px;border:1.5px solid #4e73df;border-radius:10px;
-  font-size:14px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box;
+  font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box;
 }
 .chip-search:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 html[data-theme="dark"] .chip-picker{background:var(--surface-2);border-color:var(--border-strong)}
@@ -814,6 +815,29 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 @media (max-width:768px){
   .row-actions{position:static;background:transparent;backdrop-filter:none;padding:6px 0;border-top:none}
 }
+
+/* ===== Mobile UX fixes ===== */
+/* Fix 3: larger chip touch targets */
+@media (max-width:768px){
+  .chip{ padding:10px 14px; min-height:44px; }
+}
+/* Fix 4: credit badge above sticky CTA bar */
+@media (max-width:768px){
+  .credit-floating{ bottom:calc(68px + env(safe-area-inset-bottom)) !important; }
+}
+/* Fix 5: jewel ⓘ indicator always visible on touch devices */
+@media (hover:none){
+  .jewel-info{ opacity:0.7 !important; }
+}
+/* Fix 7: topK full-width on mobile */
+@media (max-width:768px){
+  #topK.simple{ width:100% !important; margin-left:0 !important; box-sizing:border-box; }
+}
+/* Fix 8: steps bar — hide verbose labels on small screens */
+@media (max-width:640px){
+  .steps-bar .step-label{ display:none; }
+  .steps-bar .steps-inline li{ padding:6px 10px; }
+}
 </style>
 
 </head>
@@ -842,9 +866,9 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 <div class="steps-bar" role="navigation" aria-label="ขั้นตอนการใช้งาน">
   <ol class="steps-inline">
     <li class="steps-heading">ขั้นตอนการใช้งาน &gt;&gt;</li>
-    <li class="no-indent"><span class="step-index">1</span> เลือกความสามารถ (สูงสุด 14 สกิล)</li>
-    <li class="no-indent"><span class="step-index">2</span> ใส่จำนวนเซ็ต (3–20)</li>
-    <li class="no-indent"><span class="step-index">3</span> กดปุ่ม “ค้นหาเซ็ตจี้ที่ดีที่สุด”</li>
+    <li class=”no-indent”><span class=”step-index”>1</span> <span class=”step-label”>เลือกความสามารถ</span></li>
+    <li class=”no-indent”><span class=”step-index”>2</span> <span class=”step-label”>ใส่จำนวนเซ็ต</span></li>
+    <li class=”no-indent”><span class=”step-index”>3</span> <span class=”step-label”>กดค้นหา</span></li>
   </ol>
 </div>
 
@@ -904,7 +928,7 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 <div class="row-two-col">
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="margin-left:8px;width:100px;font-size:18px;font-family:'LINE Seed Sans TH'; border-radius:12px;text-align:center;">
+        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="font-size:18px;font-family:'LINE Seed Sans TH'; border-radius:12px;text-align:center;">
     
       </div>
       <div class="col">
@@ -1618,6 +1642,7 @@ setCalcProgress(1 + Math.round(p*1), `กำลังประมวลผล…
       renderResults(msg.best);
       hideCalcOverlay();
       hideLoading();
+      document.getElementById('result')?.scrollIntoView({behavior:'smooth', block:'start'});
     }
   };
 
@@ -1820,6 +1845,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     let lpTimer = null;
     let longPressed = false;
+    let didMove = false;
     let startX = 0, startY = 0;
     const MOVE_TOL = 10;
     const LONG_PRESS_MS = 450;
@@ -1830,21 +1856,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const t = ev.touches[0];
       startX = t.clientX; startY = t.clientY;
       longPressed = false;
+      didMove = false;
       clearLP();
       lpTimer = setTimeout(()=>{ longPressed = true; showTip(el); positionTip(el); }, LONG_PRESS_MS);
     }, {passive:true});
 
     el.addEventListener('touchmove', (ev)=>{
-      if(!lpTimer) return;
       const t = ev.touches[0];
       const dx = Math.abs(t.clientX - startX);
       const dy = Math.abs(t.clientY - startY);
-      if(dx>MOVE_TOL || dy>MOVE_TOL){ clearLP(); }
+      if(dx>MOVE_TOL || dy>MOVE_TOL){ didMove = true; clearLP(); }
     }, {passive:true});
 
     el.addEventListener('touchend', ()=>{
-      if(longPressed){ setTimeout(hideTip, 1200); }
       clearLP();
+      if(longPressed){
+        setTimeout(hideTip, 1800);
+      } else if(!didMove){
+        if(tip.classList.contains('show')){ hideTip(); }
+        else { showTip(el); positionTip(el); setTimeout(hideTip, 2500); }
+      }
     }, {passive:true});
 
     el.addEventListener('touchcancel', ()=>{ clearLP(); hideTip(); }, {passive:true});
