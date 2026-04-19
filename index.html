@@ -21,10 +21,7 @@
 <script>
 /* Theme toggle — in <head> so it runs before first paint (no FOUC) */
 (function(){
-  var KEY = 'theme_pref_v1';
-  var saved = localStorage.getItem(KEY);
-  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
-  document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+  document.documentElement.setAttribute('data-theme', 'light');
 })();
 window._toggleTheme = function(btn){
   var html = document.documentElement;
@@ -301,9 +298,9 @@ window._toggleTheme = function(btn){
   }
 
 /* ==== UX/UI Enhancements (Aug 2025) ==== */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:8px 14px;font-size:22px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center}
-header .brand{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center}
-.brand-title{font-size:22px;font-weight:700}
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:4px 14px;font-size:16px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:center}
+header .brand{text-align:center}
+.brand-title{font-size:16px;font-weight:700;margin:0}
 .brand-subtitle{font-size:14px;opacity:.9}
 
 .steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
@@ -942,25 +939,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
   <div class=”brand”>
     <h1 class=”brand-title”>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
-  <div class=”top-toolbar” role=”toolbar” aria-label=”เครื่องมือ”>
-    <button id=”themeToggle” class=”tb-btn” type=”button” aria-label=”สลับธีมสว่าง/มืด” title=”สลับธีม (สว่าง/มืด)”>🌙</button>
-  </div>
 </header>
-<script>
-(function(){
-  var btn = document.getElementById('themeToggle');
-  var html = document.documentElement;
-  // Sync icon with current theme
-  btn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-  // Attach click handler directly — no DOMContentLoaded, no closures, runs right now
-  btn.onclick = function() {
-    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('theme_pref_v1', next);
-    btn.textContent = next === 'dark' ? '☀️' : '🌙';
-  };
-})();
-</script>
 
 <div id="overlay" class="overlay" aria-hidden="true" aria-busy="false">
   <div class="loader">
