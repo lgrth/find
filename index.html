@@ -1396,7 +1396,7 @@ function buildCandidates(desired, sourceJewels, unwanted=[]){
       if(idx!==undefined){ mask|=(1<<idx); score+=toNumber(s.value); }
       else{ otherNames.push(s.name); if(unwantedSet.has(s.name)) unwantedCount++; }
     }
-    return { id:j.id, mask, score, otherNames, unwantedCount };
+    return { id:j.id, mask, score, otherNames, unwantedCount, allNames: j.substats.map(s=>s.name) };
   }).filter(m=>m.mask!==0)
     .sort((a,b)=>b.score-a.score)
     .slice(0, SPEED_CFG.CANDIDATE_LIMIT);
@@ -1423,6 +1423,8 @@ function createWorker(){
       };
       // popcount helper for prune
       const popcount = (x) => { let c = 0; while (x) { c += x & 1; x >>>= 1; } return c; };
+      // precompute skill-name sets for duplicate-skill detection
+      const candNameSets = cand.map(c => new Set(c.allNames));
       for (let a = 0; a < n - 3; a++) {
         // prune: best-case remaining coverage at depth a
         if (best.length === topK){
@@ -1430,8 +1432,13 @@ function createWorker(){
           const minNotMissA = popcount(desiredMaskAll & (~maxCoverA));
           if (minNotMissA > best[best.length-1].notMiss) continue;
         }
+        const sA = candNameSets[a];
         for (let b = a + 1; b < n - 2; b++) {
           const maskAB = cand[a].mask | cand[b].mask; const scoreAB = cand[a].score + cand[b].score;
+          // skip if a & b share any skill
+          const sB = candNameSets[b];
+          let abDup = false; for (const nm of sB) { if (sA.has(nm)) { abDup=true; break; } }
+          if (abDup) continue;
           if (best.length === topK){
             const maxCoverAB = maskAB | suffixOr[b+1];
             const minNotMissAB = popcount(desiredMaskAll & (~maxCoverAB));
@@ -1439,12 +1446,20 @@ function createWorker(){
           }
           for (let c = b + 1; c < n - 1; c++) {
             const maskABC = maskAB | cand[c].mask; const scoreABC = scoreAB + cand[c].score;
+            // skip if c shares any skill with a or b
+            const sC = candNameSets[c];
+            let abcDup = false; for (const nm of sC) { if (sA.has(nm) || sB.has(nm)) { abcDup=true; break; } }
+            if (abcDup) continue;
             if (best.length === topK){
               const maxCoverABC = maskABC | suffixOr[c+1];
               const minNotMissABC = popcount(desiredMaskAll & (~maxCoverABC));
               if (minNotMissABC > best[best.length-1].notMiss) continue;
             }
             for (let d = c + 1; d < n; d++) {
+              // skip if d shares any skill with a, b, or c
+              const sD = candNameSets[d];
+              let dDup = false; for (const nm of sD) { if (sA.has(nm) || sB.has(nm) || sC.has(nm)) { dDup=true; break; } }
+              if (dDup) { done++; if (done-lastEmit>5000){lastEmit=done;self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)});} continue; }
               const mask = maskABC | cand[d].mask; const totalValue = scoreABC + cand[d].score;
               const notMask = desiredMaskAll & (~mask);
               let notMiss = 0, notIdx = [];
@@ -3094,7 +3109,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
           if (idx !== undefined){ mask |= (1 << idx); score += (typeof window.toNumber === 'function' ? window.toNumber(s.value) : parseFloat(s.value)||0); }
           else otherNames.push(s.name);
         }
-        return { id: j.id, mask, score, otherNames };
+        return { id: j.id, mask, score, otherNames, allNames: j.substats.map(s=>s.name) };
       }
 
       const fixedCand = toCand(fixedLink);
@@ -3138,11 +3153,26 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
             best.sort(function(a,b){ return (a.notMiss-b.notMiss)||(b.extraCount-a.extraCount)||(b.totalValue-a.totalValue); });
             if (best.length > topK) best.pop();
           }
+          // precompute skill-name sets for duplicate-skill detection
+          var fixedNameSet = new Set(fixed.allNames);
+          var candNameSets = cand.map(function(c){ return new Set(c.allNames); });
           for (var a = 0; a < n-2; a++){
+            // skip if a shares any skill with fixed
+            var sA = candNameSets[a];
+            var aDup = false; for (var _n of sA){ if(fixedNameSet.has(_n)){ aDup=true; break; } }
+            if (aDup) continue;
             for (var b = a+1; b < n-1; b++){
+              // skip if b shares any skill with fixed or a
+              var sB = candNameSets[b];
+              var bDup = false; for (var _n of sB){ if(fixedNameSet.has(_n)||sA.has(_n)){ bDup=true; break; } }
+              if (bDup) continue;
               var maskAB   = fixed.mask | cand[a].mask | cand[b].mask;
               var scoreAB  = fixed.score + cand[a].score + cand[b].score;
               for (var c = b+1; c < n; c++){
+                // skip if c shares any skill with fixed, a, or b
+                var sC = candNameSets[c];
+                var cDup = false; for (var _n of sC){ if(fixedNameSet.has(_n)||sA.has(_n)||sB.has(_n)){ cDup=true; break; } }
+                if (cDup){ done++; if(done-lastEmit>5000){lastEmit=done;self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)});} continue; }
                 var mask       = maskAB | cand[c].mask;
                 var totalValue = scoreAB + cand[c].score;
                 var notMask = desiredMaskAll & (~mask);
