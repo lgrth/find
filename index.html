@@ -183,10 +183,18 @@ window._toggleTheme = function(btn){
   margin: 0; /* กันโดน margin ดันเลย์เอาต์ */
 }
 .result-card .card-head .badges{
-  margin-left: auto;  /* ดันไปชิดขวา */
+  margin-left: auto;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+}
+
+/* rank label: desktop=full, mobile=short */
+.rank-short{ display:none }
+@media (max-width:768px){
+  .rank-full{ display:none }
+  .rank-short{ display:inline }
 }
 
 /* จอเล็ก จูนระยะห่างนิดหน่อย */
@@ -335,7 +343,7 @@ header .brand{text-align:center;padding-top:0!important}
 .row-ability.row-miss{background:#fff1f2;border:1px solid #fecdd3}
 .row-ability.row-extra{background:#eef2ff;border:1px solid #c7d2fe}
 
-.btn-copy{margin-top:8px;display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-weight:600}
+.btn-copy{margin-top:0;display:inline-flex;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-weight:600}
 .btn-copy:hover{background:#eef2f7}
 
 .result-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -721,7 +729,7 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:4px 0}
 .chip-list{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
 .chip-list--selected{padding:6px;background:#fff;border:1px dashed #cbd5e1;border-radius:10px}
-.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาที่ช่องด้านล่าง";color:#94a3b8;font-size:13px;font-style:italic}
+.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาที่ช่องด้านล่างและกดเลือกสกิลที่ต้องการค้นหา";color:#94a3b8;font-size:13px;font-style:italic}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:6px 12px;border-radius:999px;border:1px solid #cbd5e1;
@@ -736,11 +744,18 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip .chip-x{font-size:16px;line-height:1;opacity:.8}
 .chip:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 .chip-search-wrap{margin:6px 0 4px 0}
+.chip-search-box{position:relative;display:flex;align-items:center}
 .chip-search{
-  width:100%;padding:8px 12px;border:1.5px solid #4e73df;border-radius:10px;
+  width:100%;padding:8px 36px 8px 12px;border:1.5px solid #4e73df;border-radius:10px;
   font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box;
 }
 .chip-search:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+.chip-search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:15px;color:#9ca3af;
+  padding:2px 4px;line-height:1;border-radius:4px;
+}
+.chip-search-clear:hover{color:#374151;background:#f3f4f6}
 html[data-theme="dark"] .chip-picker{background:var(--surface-2);border-color:var(--border-strong)}
 html[data-theme="dark"] .chip-selected-title,
 html[data-theme="dark"] .chip-all-title{color:#cbd5e1}
@@ -896,6 +911,9 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 
   /* 6. หัวข้อ h2 เล็กลง */
   section h2{font-size:15px!important}
+
+  /* 7. chip selected — ลด height โดยลด padding แต่ font-size เท่าเดิม */
+  .chip-list--selected .chip{padding:3px 10px!important}
 }
 </style>
 
@@ -998,7 +1016,10 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
         <div id="chipSelected" class="chip-list chip-list--selected" aria-live="polite"></div>
       </div>
       <div class="chip-search-wrap">
-        <input id="chipSearch" class="chip-search" type="search" placeholder="🔍 ค้นหาความสามารถ" autocomplete="off">
+        <div class="chip-search-box">
+          <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาความสามารถ" autocomplete="off">
+          <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
+        </div>
       </div>
       <div id="chipAllWrap" class="chip-all-wrap" hidden>
         <div class="chip-all-title">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
@@ -1009,7 +1030,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 <div class="row-two-col">
       <div class="col">
         <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" style="font-size:18px;font-family:'LINE Seed Sans TH'; border-radius:12px;text-align:center;">
+        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" value="10" style="font-size:18px;font-family:'LINE Seed Sans TH'; border-radius:12px;text-align:center;">
     
       </div>
       <div class="col">
@@ -1453,6 +1474,15 @@ async function calculate(){
 
     jewelPool = computeJewelPool();
 
+    // ข้อ 1: ไม่เลือกตัวละคร → ตัดจี้ [ลิงก์] ทั้งหมดออกจาก pool
+    {
+      const _charEl = document.getElementById('charSelect');
+      const _charVal = _charEl ? ((_charEl.tomselect ? _charEl.tomselect.getValue() : _charEl.value) || '').trim() : '';
+      if (!_charVal) {
+        jewelPool = jewelPool.filter(j => !j.id.startsWith('[ลิงก์]'));
+      }
+    }
+
     if(jewelPool.length < 4){
       const filterMsg = darkOnly.checked ? `ภายใต้การกรองชื่อขึ้นต้น "${DARK_PREFIX}"` : '';
       showToast(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`, 3500, 'warn');
@@ -1568,7 +1598,7 @@ function renderResults(best){
 
     const headerHTML = `
   <div class="card-head">
-    <h3>อันดับ ${i+1}</h3>
+    <h3><span class="rank-full">อันดับ ${i+1}</span><span class="rank-short">#${i+1}</span></h3>
     ${badgesHTML}
   </div>
 `;
@@ -1604,6 +1634,19 @@ card.innerHTML = `
   // ถ้า Reduce Motion เปิดอยู่ ให้แน่ใจว่าการ์ดมองเห็น
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.querySelectorAll('.result-card').forEach(el => el.style.opacity = '1');
+  }
+
+  // auto-scroll ไปยัง section ผลลัพธ์บนมือถือเท่านั้น
+  if (window.innerWidth < 768){
+    const resultEl = document.getElementById('resultTitle');
+    const targetEl = resultEl?.closest('section') || resultEl;
+    if (targetEl){
+      setTimeout(()=>{
+        const headerHeight = document.querySelector('header')?.offsetHeight || 50;
+        const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }, 100);
+    }
   }
 }
 
@@ -1724,7 +1767,6 @@ setCalcProgress(1 + Math.round(p*1), `กำลังประมวลผล…
       renderResults(msg.best);
       hideCalcOverlay();
       hideLoading();
-      document.getElementById('result')?.scrollIntoView({behavior:'smooth', block:'start'});
     }
   };
 
@@ -2476,7 +2518,21 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
   document.addEventListener('DOMContentLoaded', ()=>{
     const s = document.getElementById('chipSearch');
-    if (s){ s.addEventListener('input', renderAll); }
+    const clr = document.getElementById('chipSearchClear');
+    if (s){
+      s.addEventListener('input', ()=>{
+        if(clr) clr.hidden = s.value === '';
+        renderAll();
+      });
+    }
+    if(clr){
+      clr.addEventListener('click', ()=>{
+        s.value = '';
+        clr.hidden = true;
+        s.focus();
+        renderAll();
+      });
+    }
   });
 })();
 </script>
@@ -2936,7 +2992,7 @@ if (resetBtn) {
       const fixedCand = toCand(fixedLink);
       // 3-combo pool: กรอง fixedLink ออก และเอาเฉพาะที่ match desired อย่างน้อย 1 bit
       const otherCand = pool
-        .filter(j => j && j.id !== fixedLink.id)
+        .filter(j => j && j.id !== fixedLink.id && !isLinkId(j.id))
         .map(toCand)
         .filter(c => c.mask !== 0)
         .sort((a,b) => b.score - a.score)
