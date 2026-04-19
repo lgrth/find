@@ -1000,7 +1000,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
       <div class="chip-search-wrap">
         <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">➕ เพิ่มสกิลที่ต้องการ</div>
         <div class="chip-search-box">
-          <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาความสามารถ" autocomplete="off">
+          <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ" autocomplete="off">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
         </div>
       </div>
@@ -1587,7 +1587,7 @@ function renderResults(best){
       const isLink = j.id.startsWith('[ลิงก์]');
       const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
       const charLabel = isLink ? (j.allowedChars || j.AllowedChars || '').toString().trim() : '';
-      const badge = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + charLabel : 'ตัวละคร'}</span>` : '';
+      const badge = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + charLabel : 'ตัวละคร' 🔒}</span>` : '';
       return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
