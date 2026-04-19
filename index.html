@@ -1587,18 +1587,21 @@ function renderResults(best){
       const isLink = j.id.startsWith('[ลิงก์]');
       const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
       const charLabel = isLink ? (j.allowedChars || j.AllowedChars || '').toString().trim() : '';
-      const badge = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + charLabel : 'ตัวละคร' 🔒}</span>` : '';
+      const badge = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + charLabel : 'ตัวละคร'} 🔒</span>` : '';
       return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
     const notList = desired.filter((_,idx)=> r.notIdx.includes(idx));
     const allNames = new Set(); group.filter(Boolean).forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
-    const extra = [...allNames].filter(nm => !desired.includes(nm));
+    // แยก extra ออกจาก unwanted — recalculate ใน render เพื่อให้ทั้ง normal และ fixed-link path ถูกต้อง
+    const unwantedSet = new Set(Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
+    const extra = [...allNames].filter(nm => !desired.includes(nm) && !unwantedSet.has(nm));
+    const extraUnwanted = [...allNames].filter(nm => !desired.includes(nm) && unwantedSet.has(nm));
+    const effectiveUnwantedCount = extraUnwanted.length;
     const matchedCount = desired.length - notList.length;
 
-    
     const notBadge = notList.length > 0 ? `<span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 หายไป ${notList.length}</span>` : '';
-    const warnBadge = (r.unwantedCount > 0) ? `<span class="badge badge--warn" title="เซ็ตนี้มีสกิลที่ไม่ต้องการ ${r.unwantedCount} รายการ">⚠️ ไม่ต้องการ ${r.unwantedCount}</span>` : '';
+    const warnBadge = effectiveUnwantedCount > 0 ? `<span class="badge badge--warn" title="เซ็ตนี้มีสกิลที่ไม่ต้องการ ${effectiveUnwantedCount} รายการ">⚠️ ไม่ต้องการ ${effectiveUnwantedCount}</span>` : '';
     const badgesHTML = `
       <div class="badges" aria-label="สรุปความตรงใจ">
         <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">✅ ตรงเป๊ะ ${matchedCount}</span>
@@ -1606,9 +1609,10 @@ function renderResults(best){
         ${warnBadge}
         ${extra.length > 0 ? `<span class="badge badge--extra badge--extra-sm" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">+${extra.length}</span>` : ''}
       </div>`;
-    
+
     const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong>หายไป:</strong> ${notList.join(', ')}</div>` : '';
     const extraHTML = extra.length ? `<div class="row-ability row-extra row-extra--collapsible" onclick="this.classList.toggle('expanded')"><strong>ได้เพิ่ม:</strong> <span class="extra-text">${extra.join(', ')}</span></div>` : '';
+    const unwantedHTML = extraUnwanted.length ? `<div class="row-ability row-miss"><strong>ไม่ต้องการ:</strong> ${extraUnwanted.join(', ')}</div>` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
 
     const headerHTML = `
@@ -1623,6 +1627,7 @@ card.innerHTML = `
   <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
   <div class="card-info">
     <p>${notMatchHTML}</p>
+    <p>${unwantedHTML}</p>
     <p>${extraHTML}</p>
     <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
   </div>
