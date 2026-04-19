@@ -729,7 +729,7 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:4px 0}
 .chip-list{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
 .chip-list--selected{padding:6px;background:#fff;border:1px dashed #cbd5e1;border-radius:10px}
-.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาที่ช่องด้านล่างและกดเลือกสกิลที่ต้องการค้นหา";color:#94a3b8;font-size:13px;font-style:italic}
+.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาสกิลที่ช่องด้านล่าง";color:#94a3b8;font-size:13px;font-style:italic}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:6px 12px;border-radius:999px;border:1px solid #cbd5e1;
@@ -2126,7 +2126,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-modal{ position:fixed; inset:0; display:none; z-index:1000000; }
 .fb-modal.show{ display:block; }
 .fb-modal__backdrop{
-  position:absolute; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px);
+  position:absolute; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(2px);
 }
 .fb-modal__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
@@ -2198,7 +2198,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* === FB Confirm (isolated: .fb-confirm-*) === */
 .fb-confirm{ position:fixed; inset:0; display:none; z-index:1000002; }
 .fb-confirm.show{ display:block; }
-.fb-confirm__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px); }
+.fb-confirm__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(2px); }
 .fb-confirm__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   width:min(560px,92vw); background:#fff; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.25);
