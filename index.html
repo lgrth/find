@@ -1516,7 +1516,7 @@ function renderResults(best){
       }).join('\n');
       const isLink = j.id.startsWith('[ลิงก์]');
       const cls = 'jewel-column' + (isLink ? ' jewel-link' : '');
-      const badge = isLink ? '<span class="jewel-lock-badge">🔒 เฉพาะตัวละคร</span> <span class="cp-name"></span>' : '';
+      const badge = isLink ? '<span class="jewel-lock-badge">🔒 เฉพาะตัวละคร</span>'+'<span class="cp-name"></span>' : '';
       return `<div class="${cls}" data-tooltip="${tooltip}">${badge}<span class="jewel-name">${j.id}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
@@ -1987,7 +1987,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <button type="button" class="fb-close" data-fb-close aria-label="ปิด">×</button>
     </div>
     <form id="fbForm" class="fb-form">
-      <label class="fb-label" style="font-size:14px; color:#cd0000;">ⓘ แสดงความคิดเห็นที่เกี่ยวกับเว็บไซต์นี้เท่านั้น ไม่เกี่ยวข้องกับ LINE เกมเศรษฐี</label>
+      <label class="fb-label" style="font-size:14px; color:#990000;">ⓘ แสดงความคิดเห็นที่เกี่ยวกับเว็บไซต์นี้เท่านั้น ไม่เกี่ยวข้องกับ LINE เกมเศรษฐี</label>
       <label class="fb-label">ประเภท
         <select name="category" class="fb-input" >
           <option value="bug">Bug / ปัญหา</option>
