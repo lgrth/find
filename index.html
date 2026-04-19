@@ -943,9 +943,24 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
     <h1 class=”brand-title”>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div class=”top-toolbar” role=”toolbar” aria-label=”เครื่องมือ”>
-    <button id=”themeToggle” class=”tb-btn” type=”button” aria-label=”สลับธีมสว่าง/มืด” title=”สลับธีม (สว่าง/มืด)” onclick=”_toggleTheme(this)”>🌙</button>
+    <button id=”themeToggle” class=”tb-btn” type=”button” aria-label=”สลับธีมสว่าง/มืด” title=”สลับธีม (สว่าง/มืด)”>🌙</button>
   </div>
 </header>
+<script>
+(function(){
+  var btn = document.getElementById('themeToggle');
+  var html = document.documentElement;
+  // Sync icon with current theme
+  btn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  // Attach click handler directly — no DOMContentLoaded, no closures, runs right now
+  btn.onclick = function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme_pref_v1', next);
+    btn.textContent = next === 'dark' ? '☀️' : '🌙';
+  };
+})();
+</script>
 
 <div id="overlay" class="overlay" aria-hidden="true" aria-busy="false">
   <div class="loader">
