@@ -207,30 +207,23 @@
   .badge--not{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
   .badge--extra{background:#eef2ff;color:#0b289e;border:1px solid #c7d2fe} 
 
-  /* rank colors */
-  .rank-1  h3{ background:#B91C1C; } /* red 700 */
-  .rank-2  h3{ background:#E11D48; } /* rose 600 */
-  .rank-3  h3{ background:#A21CAF; } /* fuchsia 700 */
-  .rank-4  h3{ background:#6D28D9; } /* violet 700 */
-  .rank-5  h3{ background:#3730A3; } /* indigo 800 */
-
-  .rank-6  h3{ background:#1D4ED8; } /* blue 700 */
-  .rank-7  h3{ background:#0369A1; } /* sky 700 */
-  .rank-8  h3{ background:#0F766E; } /* teal 700 */
-  .rank-9  h3{ background:#047857; } /* emerald 700 */
-  .rank-10 h3{ background:#15803D; } /* green 700 */
-
-  .rank-11 h3{ background:#3F6212; } /* olive (lime 700 โทนเข้ม) */
-  .rank-12 h3{ background:#B45309; } /* amber 700 เข้ม (อ่านกับขาวได้) */
-  .rank-13 h3{ background:#C2410C; } /* orange 700 */
-  .rank-14 h3{ background:#EA580C; } /* coral 600 เข้มพอ */
-  .rank-15 h3{ background:#8B4513; } /* saddle brown */
-
-  .rank-16 h3{ background:#A15C2F; } /* copper */
-  .rank-17 h3{ background:#7A6A58; } /* taupe */
-  .rank-18 h3{ background:#475569; } /* slate gray 600 */
-  .rank-19 h3{ background:#334155; } /* charcoal (slate 700) */
-  .rank-20 h3{ background:#0B0F14; } /* near black */
+  /* rank colors — light mode: light bg + dark text */
+  [class*="rank-"] h3{
+    background-color: #eef2ff !important;
+    background-image: none !important;
+    color: #1e3a8a !important;
+    text-shadow: none !important;
+  }
+  /* Top 3: left border accent on the card itself */
+  .rank-1{ border-left: 4px solid #fbbf24 !important; }
+  .rank-2{ border-left: 4px solid #94a3b8 !important; }
+  .rank-3{ border-left: 4px solid #cd7c3c !important; }
+  /* dark mode: dark bg + white text */
+  html[data-theme="dark"] [class*="rank-"] h3{
+    background-color: #1e3a8a !important;
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.4) !important;
+  }
 
   .jewel-wrap{grid-column:1 / -1}
   .jewel-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:14px}
@@ -294,9 +287,9 @@
   }
 
 /* ==== UX/UI Enhancements (Aug 2025) ==== */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:6px 14px;font-size:14px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:center}
+header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:0 12px;font-size:14px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:space-between;min-height:44px}
 header .brand{text-align:center;padding-top:0!important}
-.brand-title{font-size:15px!important;font-weight:700;margin:0!important;color:#fff}
+.brand-title{font-size:20px;font-weight:700;margin:0;color:#fff;letter-spacing:.3px}
 .brand-subtitle{font-size:14px;opacity:.9}
 
 .steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
@@ -363,16 +356,16 @@ header .brand{ padding-top:6px; }
 }
 
 /* Brand title in header */
-.brand{display:flex;flex-direction:column;gap:4px;align-items:center}
-.brand-title{font-size:32px;font-weight:700;color:#fff}
+.brand{display:flex;flex-direction:column;gap:0;align-items:center;justify-content:center}
+.brand-title{font-size:15px;font-weight:700;color:#fff}
 .steps-in-header{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:8px}
 .steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 10px;font-size:13px;color:#fff}
 .steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#fff;color:#1f4ac5;font-weight:700;font-size:12px}
 
 
 /* Ensure brand title shows above steps inside header */
-.brand-title{margin:0 0 8px 0; font-size:32px; font-weight:700; color:#fff}
-@media (max-width:640px){ .brand-title{ font-size:clamp(20px,5.5vw,26px) !important } }
+.brand-title{margin:0; font-size:18px; font-weight:700; color:#fff; letter-spacing:.3px}
+@media (max-width:640px){ .brand-title{ font-size:18px !important } }
 .steps-in-header{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:0}
 .steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#fff;color:#1f4ac5;font-weight:700;font-size:12px}
 .steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 10px;font-size:13px;color:#fff}
@@ -600,10 +593,10 @@ html[data-theme="dark"] .char-preview .cp-jewel{color:#e9c893}
 
 /* ===== UX v3: Counter progress bar ===== */
 .sel-progress{
-  display:flex;align-items:center;gap:10px;flex:1;min-width:160px;
-  background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 12px 4px 12px;
+  display:inline-flex;align-items:center;gap:6px;
+  background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 12px;
 }
-.sel-progress__track{flex:1;height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden;min-width:80px;display:block}
+.sel-progress__track{display:none}
 .sel-progress__fill{display:block;height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#f97316);transition:width .5s ease,background .25s ease;border-radius:999px}
 .sel-progress.is-ready .sel-progress__fill{background:linear-gradient(90deg,#22c55e,#16a34a)}
 .sel-progress__label{font-size:13px;font-weight:700;color:#385b8c;white-space:nowrap}
@@ -751,7 +744,7 @@ html[data-theme="dark"] .tutorial-sheet__handle{background:#475569}
 
 /* ===== Section divider ===== */
 .section-divider{display:flex;align-items:center;gap:10px;margin:20px 0 8px}
-.section-divider__line{flex:1;height:1px;background:#e2e8f0}
+.section-divider__line{flex:1;height:2px;background:#e2e8f0}
 .section-divider__text{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;letter-spacing:.4px}
 html[data-theme="dark"] .section-divider__line{background:#334155}
 html[data-theme="dark"] .section-divider__text{color:#64748b}
@@ -791,6 +784,113 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
   .result-card .card-head .badges{margin-left:0!important;flex:1!important;flex-wrap:nowrap!important;justify-content:flex-end!important;align-items:center!important;gap:4px!important}
   .result-card .card-head .badge{padding:2px 6px!important;font-size:11px!important;gap:3px!important}
   .result-card .card-head .btn-copy{flex-shrink:0!important}
+}
+
+/* === Dark mode + Help buttons in header === */
+.theme-toggle,.help-btn{
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.2);border-radius:8px;
+  color:#fff;cursor:pointer;line-height:1;padding:4px 8px;min-height:36px;min-width:36px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;transition:background .15s;flex-shrink:0;font-size:16px;font-weight:700;
+}
+.theme-toggle:hover,.help-btn:hover{background:rgba(0,0,0,.55)}
+.theme-toggle:focus-visible,.help-btn:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+/* === Ghost-reset button === */
+.btn--ghost-reset{background:transparent;color:#dc2626;border:1.5px solid #fca5a5;box-shadow:none;font-size:18px;padding:16px 20px;min-height:44px}
+.btn--ghost-reset:hover{background:#fef2f2;border-color:#f87171}
+html[data-theme="dark"] .btn--ghost-reset{color:#fca5a5;border-color:#7f1d1d}
+html[data-theme="dark"] .btn--ghost-reset:hover{background:#3a0f14}
+/* === Disabled share === */
+.btn--secondary[disabled]{opacity:.4;cursor:not-allowed;transform:none !important}
+/* === topK presets === */
+.topk-wrap{display:flex;flex-direction:column;gap:6px}
+.topk-presets{display:flex;gap:6px}
+.topk-preset{flex:1;padding:8px 4px;border:1.5px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.12s;min-height:40px}
+.topk-preset:hover{border-color:#4e73df;color:#1f4ac5;background:#eef2ff}
+.topk-preset.active{background:#2e59d9;color:#fff;border-color:#1f4ac5}
+.topk-preset:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+html[data-theme="dark"] .topk-preset{background:var(--surface);color:var(--text);border-color:var(--border-strong)}
+html[data-theme="dark"] .topk-preset.active{background:#3b82f6;border-color:#60a5fa}
+/* === Chip :active feedback === */
+@media (prefers-reduced-motion:no-preference){.chip:active{transform:scale(.93)}}
+/* === Toast bottom on mobile === */
+@media (max-width:768px){
+  .toast{top:auto !important;bottom:calc(72px + env(safe-area-inset-bottom));transform:translateX(-50%)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.hide{transform:translateX(-50%) translateY(8px)}
+}
+
+/* badge--extra-sm: compact extra count */
+.badge--extra-sm{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;padding:3px 8px;font-size:11px;font-weight:600;border-radius:999px}
+html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border-color:#3730a3}
+
+/* row-extra collapsible: truncate by default, expand on tap */
+.row-extra--collapsible{cursor:pointer;position:relative}
+.row-extra--collapsible .extra-text{
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
+  transition:none;
+}
+.row-extra--collapsible.expanded .extra-text{display:block;-webkit-line-clamp:unset;overflow:visible}
+.row-extra--collapsible::after{content:'▾ เพิ่มเติม';position:absolute;right:8px;top:6px;font-size:11px;opacity:.6;font-weight:600}
+.row-extra--collapsible.expanded::after{content:'▴ ย่อลง'}
+
+/* === Unwanted skills section === */
+.chip-unwanted-section{margin-top:10px;border-top:2px solid #cbd5e1;padding-top:8px}
+.chip-unwanted-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:6px}
+.chip-unwanted-title{font-size:14px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:6px}
+.chip-unwanted-toggle{background:none;border:none;cursor:pointer;font-size:13px;color:#dc2626;padding:0 4px}
+/* chip-unwanted-body transitions handled by chipAnimCSS */
+.chip-list--unwanted{padding:6px;background:#fff5f5;border:1px dashed #fca5a5;border-radius:10px;min-height:36px}
+.chip-list--unwanted:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาด้านล่าง";color:#fca5a5;font-size:13px;font-style:italic}
+.chip.is-unwanted{background:#dc2626;color:#fff;border-color:#b91c1c}
+.chip.is-unwanted:hover{background:#b91c1c}
+.chip-unwanted-search{width:100%;padding:8px 36px 8px 12px;border:1.5px solid #fca5a5;border-radius:10px;font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box}
+.chip-unwanted-search:focus-visible{outline:3px solid #fca5a5;outline-offset:2px}
+.chip-unwanted-results{margin-top:6px}
+.chip-unwanted-results-title{font-size:13px;font-weight:600;color:#dc2626;margin-bottom:4px}
+html[data-theme="dark"] .chip-unwanted-section{border-top-color:#7f1d1d}
+html[data-theme="dark"] .chip-list--unwanted{background:#3a0f14;border-color:#7f1d1d}
+html[data-theme="dark"] .chip-list--unwanted:empty::before{color:#fca5a5}
+html[data-theme="dark"] .chip-unwanted-title{color:#fca5a5}
+html[data-theme="dark"] .chip-unwanted-toggle{color:#fca5a5}
+html[data-theme="dark"] .chip-unwanted-search{background:var(--surface);color:var(--text);border-color:#7f1d1d}
+/* Warning badge on result card */
+.badge--warn{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:3px 8px;font-size:11px;font-weight:700;border-radius:999px;display:inline-flex;align-items:center;gap:3px}
+html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-color:#9f1239}
+
+/* Chip pop-in animation */
+@keyframes chip-pop{
+  0%  { transform:scale(0.4); opacity:0; }
+  65% { transform:scale(1.12); opacity:1; }
+  100%{ transform:scale(1);   opacity:1; }
+}
+@keyframes chip-pop-unwanted{
+  0%  { transform:scale(0.4); opacity:0; }
+  65% { transform:scale(1.12); opacity:1; }
+  100%{ transform:scale(1);   opacity:1; }
+}
+@media (prefers-reduced-motion:no-preference){
+  .chip.is-selected.chip-entering{ animation:chip-pop .22s cubic-bezier(.34,1.56,.64,1) forwards; }
+  .chip.is-unwanted.chip-entering{ animation:chip-pop-unwanted .22s cubic-bezier(.34,1.56,.64,1) forwards; }
+}
+
+/* 3. Card delay — snappier stagger */
+@keyframes fadeSlideIn{
+  0%  { opacity:0; transform:translateY(14px); }
+  100%{ opacity:1; transform:translateY(0); }
+}
+
+/* 2. Unwanted section slide-down */
+.chip-unwanted-body{
+  display:block;
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+  opacity:0;
+}
+.chip-unwanted-body.open{
+  max-height:600px;
+  opacity:1;
 }
 </style>
 
@@ -840,8 +940,13 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 </div>
 
 <header>
-  <div class=”brand”>
-    <h1 class=”brand-title”>ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
+  <div style="width:88px;flex-shrink:0"></div>
+  <div class="brand" style="flex:1;text-align:center">
+    <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+    <button id="helpBtn" class="help-btn" type="button" aria-label="วิธีใช้งาน">❓</button>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button>
   </div>
 </header>
 
@@ -859,11 +964,12 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
     <!-- เลือกตัวละคร (ล็อกจี้ [ลิงก์]) — ย้ายมาด้านบนสุดตาม UX -->
     <div class="row-two-col" id="charRow">
       <div class="col">
-        <label for="charSelect"><strong><span class="head-icon">👤</span>เลือกตัวละคร (เพื่อบังคับจี้ [ลิงก์])</strong></label>
+        <label for="charSelect"><strong><span class="head-icon">👤</span>ตัวละคร</strong></label>
         <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
           <option value="">— ไม่เลือกตัวละคร—</option>
         </select>
         <div class="input-help">ⓘ เมื่อเลือกตัวละคร ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-link">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
+        
         <div id="charPreview" class="char-preview" aria-live="polite">
           <span class="cp-icon">🔒</span>
           <div>
@@ -887,48 +993,80 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 
     <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
       <div class="chip-selected-row">
-        <div class="chip-selected-title">สกิลที่เลือกแล้ว</div>
+        <div class="chip-selected-title">✅ สกิลที่ต้องการ</div>
         <div id="minHint" class="hint hint--error"></div>
         <div id="chipSelected" class="chip-list chip-list--selected" aria-live="polite"></div>
       </div>
       <div class="chip-search-wrap">
+        <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">➕ เพิ่มสกิลที่ต้องการ</div>
         <div class="chip-search-box">
           <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาความสามารถ" autocomplete="off">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
         </div>
       </div>
       <div id="chipAllWrap" class="chip-all-wrap" hidden>
-        <div class="chip-all-title">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
+        
         <div id="chipAll" class="chip-list chip-list--all"></div>
       </div>
+
+      <div class="chip-unwanted-section">
+        <div class="chip-unwanted-header" id="chipUnwantedHeader">
+          <span class="chip-unwanted-title">🚫 สกิลที่ไม่ต้องการ</span>
+          <button class="chip-unwanted-toggle" id="chipUnwantedToggle" type="button" aria-expanded="false">▾ แสดง</button>
+        </div>
+        <div class="chip-unwanted-body" id="chipUnwantedBody">
+          <div id="chipUnwanted" class="chip-list chip-list--unwanted" aria-live="polite"></div>
+          <div class="chip-search-wrap" style="margin-top:6px">
+            <div style="font-size:12px;font-weight:600;color:#dc2626;margin-bottom:4px">➕ เพิ่มสกิลที่ไม่ต้องการ</div>
+            <div class="chip-search-box">
+              <input id="chipUnwantedSearch" class="chip-unwanted-search" type="text" placeholder="🔍 ค้นหาสกิลที่ไม่ต้องการ" autocomplete="off">
+              <button id="chipUnwantedSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
+            </div>
+          </div>
+          <div id="chipUnwantedAllWrap" hidden>
+            <div class="chip-unwanted-results-title">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
+            <div id="chipUnwantedAll" class="chip-list chip-list--all"></div>
+          </div>
+        </div>
+      </div>
+
+      
     </div>
 
 <div class="row-two-col">
       <div class="col">
-        <label for="topK"><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <input id="topK" class="simple" type="number" placeholder="3-20" inputmode="numeric" pattern="[0-9]*" min="3" max="20" value="10" style="font-size:18px;font-family:'LINE Seed Sans TH'; border-radius:12px;text-align:center;">
+        <label><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
+        <div class="topk-wrap">
+          <div class="topk-presets" role="group" aria-label="เลือกจำนวนเซ็ต">
+            <button type="button" class="topk-preset" data-val="5">5</button>
+            <button type="button" class="topk-preset active" data-val="10">10</button>
+            <button type="button" class="topk-preset" data-val="15">15</button>
+            <button type="button" class="topk-preset" data-val="20">20</button>
+          </div>
+        </div>
+        <input id="topK" class="simple" type="number" min="3" max="20" value="10" style="display:none">
     
       </div>
       <div class="col">
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;min-height:44px">
+        <label style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;min-height:44px">
           <input type="checkbox" id="darkOnly" class="checkbox-lg" aria-label="แสดงเฉพาะจี้ดาร์ค">
-          <span>แสดงผลเฉพาะจี้ <span class="badge-neutral" title="แสดงเฉพาะจี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค]</span> (เร็วกว่า)</span>
+          <span>เฉพาะจี้ <span class="badge-neutral" title="แสดงเฉพาะจี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค]</span></span>
         </label>
       </div>
     </div>
 
     <div class="row-actions">
   <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-  <button id="shareBtn" type="button" class="btn btn--secondary">แชร์ให้เพื่อน</button>
-  <button id="resetBtn" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+  <button id="shareBtn" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
+  <button id="resetBtn" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
 </div>
 
 
     <!-- Sticky CTA (mobile/tablet only) -->
    <div class="cta-bar" aria-label="ตัวเลือกด่วน">
   <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-  <button id="shareBtn2" type="button" class="btn btn--secondary">แชร์ให้เพื่อน</button>
-  <button id="resetBtn2" class="btn btn--danger" onclick="resetAll()">รีเซ็ต</button>
+  <button id="shareBtn2" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
+  <button id="resetBtn2" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
 </div>
 
   </section>
@@ -941,11 +1079,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
         <div class="empty-state__icon">✨</div>
         <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
         <div class="empty-state__msg">เลือกความสามารถอย่างน้อย 4 อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
-        <div class="skeleton-list" aria-hidden="true">
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-        </div>
+        
       </div>
     </div>
     <div id="resultLocalOverlay" class="overlay" style="position:absolute;display:none" aria-hidden="true">
@@ -1252,16 +1386,17 @@ function computeJewelPool(){
 }
 
 const SPEED_CFG = { CANDIDATE_LIMIT: 1500 };
-function buildCandidates(desired, sourceJewels){
+function buildCandidates(desired, sourceJewels, unwanted=[]){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
+  const unwantedSet = new Set(unwanted);
   return sourceJewels.map(j=>{
-    let mask=0, score=0, otherNames=[];
+    let mask=0, score=0, otherNames=[], unwantedCount=0;
     for(const s of j.substats){
       const idx=bitIndex.get(s.name);
       if(idx!==undefined){ mask|=(1<<idx); score+=toNumber(s.value); }
-      else{ otherNames.push(s.name); }
+      else{ otherNames.push(s.name); if(unwantedSet.has(s.name)) unwantedCount++; }
     }
-    return { id:j.id, mask, score, otherNames };
+    return { id:j.id, mask, score, otherNames, unwantedCount };
   }).filter(m=>m.mask!==0)
     .sort((a,b)=>b.score-a.score)
     .slice(0, SPEED_CFG.CANDIDATE_LIMIT);
@@ -1283,7 +1418,7 @@ function createWorker(){
       const best = [];
       const pushTop = (item) => {
         best.push(item);
-        best.sort((a,b)=> (a.notMiss - b.notMiss) || (b.extraCount - a.extraCount) || (b.totalValue - a.totalValue) );
+        best.sort((a,b)=> (a.notMiss - b.notMiss) || (a.unwantedCount - b.unwantedCount) || (b.extraCount - a.extraCount) || (b.totalValue - a.totalValue) );
         if (best.length > topK) best.pop();
       };
       // popcount helper for prune
@@ -1320,7 +1455,8 @@ function createWorker(){
               cand[c].otherNames.forEach(x=>setExtra.add(x));
               cand[d].otherNames.forEach(x=>setExtra.add(x));
               const extraCount = setExtra.size;
-              pushTop({ ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id], notMiss, notIdx, totalValue, extraCount });
+              const unwantedCount = (cand[a].unwantedCount||0)+(cand[b].unwantedCount||0)+(cand[c].unwantedCount||0)+(cand[d].unwantedCount||0);
+              pushTop({ ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id], notMiss, notIdx, totalValue, extraCount, unwantedCount });
               done++; if (done - lastEmit > 5000) { lastEmit = done; self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) }); }
             }
           }
@@ -1371,7 +1507,8 @@ async function calculate(){
     if(topK > 20) topK = 20;
     if(topKInput) topKInput.value = String(topK);
 
-    const cand = buildCandidates(desired, jewelPool);
+    const unwanted = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [];
+    const cand = buildCandidates(desired, jewelPool, unwanted);
     if(cand.length<4){
       showToast("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้", 3500, 'warn');
       return;
@@ -1385,7 +1522,7 @@ async function calculate(){
     // ส่งงานให้ worker
     __etaState.start = performance.now(); 
     __etaState.smoothSec = null;
-    worker.postMessage({ desired, cand, topK });
+    worker.postMessage({ desired, cand, topK, unwanted });
   }catch(err){
     hideLoading();
     hideCalcOverlay();
@@ -1401,11 +1538,7 @@ function restoreEmptyState(){
       <div class="empty-state__icon">✨</div>
       <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
       <div class="empty-state__msg">เลือกความสามารถอย่างน้อย 4 อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
-      <div class="skeleton-list" aria-hidden="true">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      </div>
+      
     </div>`;
 }
 
@@ -1437,11 +1570,13 @@ function setCalcProgress(pct, msg){
 
 function renderResults(best){
   const container=document.getElementById('result'); container.innerHTML='';
+  // Enable share buttons now results exist
+  ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=false; });
   const pool = (jewelPool && jewelPool.length) ? jewelPool : jewels;
 
   const desired = getDesired()||[];
   best.forEach((r,i)=>{
-    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.25}s`;
+    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.06}s`;
     const group = r.ids.map(id => pool.find(j=>j.id===id));
 
     const jewelCols = group.map(j=>{
@@ -1462,15 +1597,18 @@ function renderResults(best){
     const matchedCount = desired.length - notList.length;
 
     
+    const notBadge = notList.length > 0 ? `<span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 หายไป ${notList.length}</span>` : '';
+    const warnBadge = (r.unwantedCount > 0) ? `<span class="badge badge--warn" title="เซ็ตนี้มีสกิลที่ไม่ต้องการ ${r.unwantedCount} รายการ">⚠️ ไม่ต้องการ ${r.unwantedCount}</span>` : '';
     const badgesHTML = `
       <div class="badges" aria-label="สรุปความตรงใจ">
         <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">✅ ตรงเป๊ะ ${matchedCount}</span>
-        <span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 หายไป ${notList.length}</span>
-        <span class="badge badge--extra" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">✨ ได้เพิ่ม ${extra.length}</span>
+        ${notBadge}
+        ${warnBadge}
+        ${extra.length > 0 ? `<span class="badge badge--extra badge--extra-sm" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">+${extra.length}</span>` : ''}
       </div>`;
     
     const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong>หายไป:</strong> ${notList.join(', ')}</div>` : '';
-    const extraHTML = extra.length ? `<div class="row-ability row-extra"><strong>ได้เพิ่ม:</strong> ${extra.join(', ')}</div>` : '';
+    const extraHTML = extra.length ? `<div class="row-ability row-extra row-extra--collapsible" onclick="this.classList.toggle('expanded')"><strong>ได้เพิ่ม:</strong> <span class="extra-text">${extra.join(', ')}</span></div>` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
 
     const headerHTML = `
@@ -1532,8 +1670,17 @@ card.innerHTML = `
 
 /* resetAll */
 function resetAll(){
-  // ล้าง chip state
+  // ล้าง chip state (includes unwanted)
   if (typeof window.clearChipState === 'function') window.clearChipState();
+
+  // ล้าง unwanted search input
+  const unwantedSearchEl = document.getElementById('chipUnwantedSearch');
+  const unwantedSearchClearEl = document.getElementById('chipUnwantedSearchClear');
+  if (unwantedSearchEl) { unwantedSearchEl.value = ''; }
+  if (unwantedSearchClearEl) unwantedSearchClearEl.hidden = true;
+  const unwantedAllWrap = document.getElementById('chipUnwantedAllWrap');
+  if (unwantedAllWrap) unwantedAllWrap.hidden = true;
+  if (typeof window.refreshUnwantedChips === 'function') window.refreshUnwantedChips();
   if (darkOnly) darkOnly.checked = false;
 
   if (topKInput){
@@ -1688,6 +1835,11 @@ function buildShareURL(){
   }
   if(topKInput?.value) params.set('k', topKInput.value);
   if(darkOnly?.checked) params.set('d','1');
+  const unwantedSels = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
+  if(_abilityList.length && unwantedSels.length){
+    const uIdx = unwantedSels.map(v=>_abilityList.indexOf(v)).filter(i=>i>=0);
+    if(uIdx.length) params.set('u', uIdx.join(','));
+  }
   params.set('a','1');
 
   url.search = params.toString();
@@ -1709,6 +1861,11 @@ async function applyStateFromURL(){
   const auto = params.get('a') || params.get('auto');
 
   if(darkOnly) darkOnly.checked = (dark === '1');
+  const uParam = params.get('u');
+  if(uParam && _abilityList.length){
+    const uSels = uParam.split(',').map(n=>_abilityList[parseInt(n,10)]).filter(Boolean);
+    if(typeof window.setUnwantedState==='function') window.setUnwantedState(uSels);
+  }
   if(topKInput && k) topKInput.value = k;
 
   // ตั้ง chip state จาก URL
@@ -2329,7 +2486,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     window._chipSelected.forEach(name => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'chip is-selected';
+      b.className = 'chip is-selected chip-entering';
       b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
       b.title = 'คลิกเพื่อเอาออก';
       b.addEventListener('click', ()=>{
@@ -2338,6 +2495,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
         notify();
       });
       wrap.appendChild(b);
+      requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
     });
   }
 
@@ -2389,14 +2547,86 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     refreshChips();
     notify();
   };
-  // clear all
   window.clearChipState = function(){
     window._chipSelected = [];
+    window._chipUnwanted = [];
     refreshChips();
+    refreshUnwantedChips();
     notify();
   };
 
+  // ── Unwanted skills state ──
+  window._chipUnwanted = [];
+
+  function addUnwanted(name){
+    if(window._chipUnwanted.includes(name)) return false;
+    if(window._chipSelected.includes(name)) return false; // cannot overlap
+    window._chipUnwanted.push(name);
+    return true;
+  }
+  function removeUnwanted(name){
+    const idx = window._chipUnwanted.indexOf(name);
+    if(idx===-1) return false;
+    window._chipUnwanted.splice(idx,1);
+    return true;
+  }
+  function renderUnwantedSelected(){
+    const wrap = document.getElementById('chipUnwanted');
+    if(!wrap) return;
+    wrap.innerHTML='';
+    window._chipUnwanted.forEach(name=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='chip is-unwanted chip-entering';
+      b.innerHTML=`<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+      b.title='คลิกเพื่อเอาออก';
+      b.addEventListener('click',()=>{ removeUnwanted(name); refreshUnwantedChips(); });
+      wrap.appendChild(b);
+      requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
+    });
+  }
+  function renderUnwantedAll(){
+    const wrap=document.getElementById('chipUnwantedAll');
+    const allWrap=document.getElementById('chipUnwantedAllWrap');
+    if(!wrap) return;
+    const q=(document.getElementById('chipUnwantedSearch')?.value||'').trim().toLowerCase();
+    if(allWrap){ if(q) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden',''); }
+    wrap.innerHTML='';
+    if(!q) return;
+    ALL_ABILITIES.forEach(name=>{
+      if(!name.toLowerCase().includes(q) && !(window._abilityKeywords?.get(name)||[]).some(k=>k.includes(q))) return;
+      if(window._chipSelected.includes(name)) return; // skip already-wanted
+      const isSel=window._chipUnwanted.includes(name);
+      const b=document.createElement('button');
+      b.type='button'; b.className='chip'+(isSel?' is-unwanted':'');
+      b.textContent=name;
+      b.title=isSel?'คลิกเพื่อเอาออก':'คลิกเพื่อเพิ่มในรายการไม่ต้องการ';
+      b.addEventListener('click',()=>{
+        if(isSel) removeUnwanted(name); else addUnwanted(name);
+        refreshUnwantedChips();
+      });
+      wrap.appendChild(b);
+    });
+  }
+  function refreshUnwantedChips(){ renderUnwantedSelected(); renderUnwantedAll(); }
+  window.refreshUnwantedChips = refreshUnwantedChips;
+  window.setUnwantedState = function(arr){
+    window._chipUnwanted = Array.from(arr||[]).filter(n=>!window._chipSelected.includes(n));
+    refreshUnwantedChips();
+  };
+
   document.addEventListener('DOMContentLoaded', ()=>{
+    
+    // === topK preset buttons ===
+    (function(){
+      const topKHidden = document.getElementById('topK');
+      function setTopK(val){
+        if(topKHidden) topKHidden.value = val;
+        document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
+      }
+      document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
+      if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); setTopK(topKHidden.value); }
+    })();
+
     const s = document.getElementById('chipSearch');
     const clr = document.getElementById('chipSearchClear');
     if (s){
@@ -2413,6 +2643,22 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
         renderAll();
       });
     }
+    // Unwanted search
+    const us = document.getElementById('chipUnwantedSearch');
+    const uclr = document.getElementById('chipUnwantedSearchClear');
+    if(us){
+      us.addEventListener('input',()=>{ if(uclr) uclr.hidden=us.value===''; renderUnwantedAll(); });
+    }
+    if(uclr){ uclr.addEventListener('click',()=>{ us.value=''; uclr.hidden=true; us.focus(); renderUnwantedAll(); }); }
+    // Toggle open/close
+    document.getElementById('chipUnwantedHeader')?.addEventListener('click',()=>{
+      const body=document.getElementById('chipUnwantedBody');
+      const btn=document.getElementById('chipUnwantedToggle');
+      if(!body||!btn) return;
+      const open=body.classList.toggle('open');
+      btn.textContent=open?'▴ ซ่อน':'▾ แสดง';
+      btn.setAttribute('aria-expanded',String(open));
+    });
   });
 })();
 </script>
@@ -2423,7 +2669,16 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   // Sync theme icon on load (theme applied from <head> script)
   (function(){
     var btn = document.getElementById('themeToggle');
-    if(btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    if(!btn) return;
+    var saved; try{ saved=localStorage.getItem('theme'); }catch(e){}
+    if(saved==='dark'||saved==='light'){ document.documentElement.setAttribute('data-theme',saved); }
+    btn.textContent = document.documentElement.getAttribute('data-theme')==='dark' ? '☀️' : '🌙';
+    btn.addEventListener('click', function(){
+      var next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      btn.textContent = next==='dark' ? '☀️' : '🌙';
+      try{ localStorage.setItem('theme', next); }catch(e){}
+    });
   })();
 
   window.applySkillFilter = function(){}; // no-op (feature removed)
@@ -2516,22 +2771,8 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       if(e.changedTouches[0].clientY - touchStartY > 80) hide();
     }, {passive:true});
 
-    // Show once per day — store today's date string
-    function maybeShow(){
-      const today = new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
-      if(localStorage.getItem(TUTORIAL_KEY) === today) return;
-      setTimeout(show, 450);
-    }
-
-    const consent = document.getElementById('consentToast');
-    if(consent && !consent.classList.contains('hidden')){
-      const obs = new MutationObserver(()=>{
-        if(consent.classList.contains('hidden')){ obs.disconnect(); maybeShow(); }
-      });
-      obs.observe(consent, {attributes:true, attributeFilter:['class']});
-    } else {
-      maybeShow();
-    }
+    // Tutorial opens only on demand via help button
+    document.getElementById('helpBtn')?.addEventListener('click', show);
   });
 })();
 
