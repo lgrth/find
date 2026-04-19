@@ -245,7 +245,7 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
 
-  .hint{margin:8px 0 4px 0;font-size:12px;display:flex;align-items:center;gap:8px}
+  .hint{margin:4px 0 4px 0;font-size:12px;display:flex;align-items:center;gap:8px}
   .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
   .hint--error{color:#b71c1c}
   .hint--error .dot{background:#e74a3b}
@@ -960,11 +960,9 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
       </div>
     </div>
 
-    <div class="section-divider" aria-hidden="true">
+   <div class="section-divider" aria-hidden="true">
       <div class="section-divider__line"></div>
-      <span class="section-divider__text">✦ ความสามารถที่ต้องการ ✦</span>
-      <div class="section-divider__line"></div>
-    </div>
+     </div>
 
     <h2 class="head-with-counter" style="margin-top:4px">
       <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 14 สกิล)</span>
@@ -974,11 +972,10 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
       </span>
     </h2>
 
-    <div id="minHint" class="hint hint--error"></div>
-
     <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
       <div class="chip-selected-row">
         <div class="chip-selected-title">สกิลที่เลือกแล้ว</div>
+        <div id="minHint" class="hint hint--error"></div>
         <div id="chipSelected" class="chip-list chip-list--selected" aria-live="polite"></div>
       </div>
       <div class="chip-search-wrap">
@@ -1055,7 +1052,8 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 </main>
 
 <script>
-const SHEET_ID = "1QYMUnTbalZ2gIGdVJiCwxLucc-e7d_nUustjy-7Ody4";
+const _dk=(e,k)=>{const h=e.split('').reverse().join('');let r='';for(let i=0;i<h.length;i+=2)r+=String.fromCharCode(parseInt(h.slice(i,i+2),16)^k.charCodeAt((i/2)%k.length));return r;};
+const SHEET_ID = _dk('7110d54204f1927075b0c4e391d643a56455a58020e782a1061137d3315791a0112255a05166e383e61286a5','k9x#mP2w');
 const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
 const MAX_SELECTS = 14;
@@ -3055,7 +3053,7 @@ if (resetBtn) {
 <script>
 /* === v2.0: Character select — ดึงจาก gid=513976173 ของ SHEET_ID เดิม === */
 (function(){
-  const CHAR_SHEET_ID = "1QYMUnTbalZ2gIGdVJiCwxLucc-e7d_nUustjy-7Ody4";
+  const CHAR_SHEET_ID = _dk('7110d54204f1927075b0c4e391d643a56455a58020e782a1061137d3315791a0112255a05166e383e61286a5','k9x#mP2w');
   const CHAR_GID      = "513976173";
   const LINK_PREFIX   = "[ลิงก์]";
   const norm = s => (s == null ? "" : String(s)).trim();
