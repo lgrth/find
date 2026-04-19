@@ -1674,6 +1674,8 @@ function resetAll(){
   const chipSearchClearEl = document.getElementById('chipSearchClear');
   if (chipSearchEl) { chipSearchEl.value = ''; if (typeof renderAll === 'function') renderAll(); }
   if (chipSearchClearEl) chipSearchClearEl.hidden = true;
+  const chipAllWrap = document.getElementById('chipAllWrap');
+  if (chipAllWrap) chipAllWrap.hidden = true;
 
   restoreEmptyState();
   resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
