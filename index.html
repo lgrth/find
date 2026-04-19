@@ -737,7 +737,7 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
   transition:.12s;user-select:none;font-family:inherit;
 }
 .chip:hover{background:#eef2ff;border-color:#93a7e0}
-.chip.is-selected{background:#2e59d9;color:#fff;border-color:#1f4ac5;font-weight: 600;}
+.chip.is-selected{background:#2e59d9;color:#fff;border-color:#1f4ac5;font-weight:600}
 .chip.is-selected:hover{background:#1f4ac5}
 .chip.is-disabled{opacity:.4;cursor:not-allowed}
 .chip.is-disabled:hover{background:#fff;border-color:#cbd5e1}
@@ -752,7 +752,7 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-search:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 .chip-search-clear{
   position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;font-size:15px;color:#384965;
+  background:none;border:none;cursor:pointer;font-size:15px;color:#3b465a;
   padding:2px 4px;line-height:1;border-radius:4px;
 }
 .chip-search-clear:hover{color:#374151;background:#f3f4f6}
@@ -914,6 +914,11 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 
   /* 7. chip selected — ลด height โดยลด padding แต่ font-size เท่าเดิม */
   .chip-list--selected .chip{padding:3px 10px!important}
+
+  /* 8. result card-head badges — ไม่ wrap บนมือถือ, ลด badge ให้พอดีบรรทัดเดียว */
+  .result-card .card-head .badges{flex-wrap:nowrap!important;align-items:center}
+  .result-card .card-head .badge{padding:3px 7px!important;font-size:11px!important;gap:3px!important}
+  .result-card .card-head .badges{gap:5px!important}
 }
 </style>
 
@@ -1627,7 +1632,10 @@ card.innerHTML = `
       });
     });
     const head = card.querySelector('.card-head');
-    if(head){ head.appendChild(copyBtn); } else { card.appendChild(copyBtn); }
+    const badgesEl = head?.querySelector('.badges');
+    if(badgesEl){ badgesEl.appendChild(copyBtn); }
+    else if(head){ head.appendChild(copyBtn); }
+    else { card.appendChild(copyBtn); }
     container.appendChild(card);
   });
 
@@ -2126,7 +2134,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-modal{ position:fixed; inset:0; display:none; z-index:1000000; }
 .fb-modal.show{ display:block; }
 .fb-modal__backdrop{
-  position:absolute; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(2px);
+  position:absolute; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px);
 }
 .fb-modal__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
@@ -2198,7 +2206,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 /* === FB Confirm (isolated: .fb-confirm-*) === */
 .fb-confirm{ position:fixed; inset:0; display:none; z-index:1000002; }
 .fb-confirm.show{ display:block; }
-.fb-confirm__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(2px); }
+.fb-confirm__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px); }
 .fb-confirm__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   width:min(560px,92vw); background:#fff; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.25);
@@ -2380,21 +2388,13 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       const t = showToast('กำลังส่ง…', {loading:true, duration:Infinity});
 
       try{
-        const res = await fetch(FEEDBACK_WEBAPP_URL, { method: 'POST', body: fd });
-        let ok = false;
-        try{ const data = await res.json(); ok = !!(res.ok && data && data.ok); }
-        catch(_){ ok = res.ok; }
-
-        if (ok){
-          // อัปเดต toast เป็นสำเร็จ แล้วปิดโมดอล
-          t.update('ส่งเรียบร้อย ขอบคุณมาก!', {type:'success', loading:false});
-          setTimeout(()=> t.close(), 1500);
-          setTimeout(()=> { $form.reset(); close(); }, 400);
-        }else{
-          throw new Error('ส่งไม่สำเร็จ');
-        }
+        // ใช้ no-cors เพื่อข้าม CORS policy ของ Google Apps Script (ไม่สามารถอ่าน response ได้ แต่ request ถูกส่งไปถึง server)
+        await fetch(FEEDBACK_WEBAPP_URL, { method: 'POST', mode: 'no-cors', body: fd });
+        t.update('ส่งเรียบร้อย ขอบคุณมาก!', {type:'success', loading:false});
+        setTimeout(()=> t.close(), 1500);
+        setTimeout(()=> { $form.reset(); close(); }, 400);
       }catch(err){
-        t.update('❌ ส่งไม่สำเร็จ', {type:'error', loading:false});
+        t.update('❌ ส่งไม่สำเร็จ — กรุณาลองใหม่', {type:'error', loading:false});
         setTimeout(()=> t.close(), 1500);
       }finally{
         if ($submit) { $submit.disabled = false; }
