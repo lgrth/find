@@ -1040,11 +1040,13 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div class="topk-presets" role="group" aria-label="เลือกจำนวนเซ็ต">
             <button type="button" class="topk-preset" data-val="5">5</button>
             <button type="button" class="topk-preset active" data-val="10">10</button>
-            <button type="button" class="topk-preset" data-val="15">15</button>
             <button type="button" class="topk-preset" data-val="20">20</button>
+            <button type="button" class="topk-preset" data-val="30">30</button>
+            <button type="button" class="topk-preset" data-val="40">40</button>
+            <button type="button" class="topk-preset" data-val="50">50</button>
           </div>
         </div>
-        <input id="topK" class="simple" type="number" min="3" max="20" value="10" style="display:none">
+        <input id="topK" class="simple" type="number" min="3" max="50" value="10" style="display:none">
     
       </div>
       <div class="col">
@@ -1519,7 +1521,7 @@ async function calculate(){
     let topK = parseInt((topKInput?.value || '').trim(),10);
     if(isNaN(topK)) topK = 5;
     if(topK < 3) topK = 3;
-    if(topK > 20) topK = 20;
+    if(topK > 50) topK = 50;
     if(topKInput) topKInput.value = String(topK);
 
     const unwanted = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [];
@@ -1971,14 +1973,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
       inp.classList.remove('is-valid','is-invalid');
       return;
     }
-    if(v>=3 && v<=20){
+    if(v>=3 && v<=50){
       inp.classList.add('is-valid');
       inp.classList.remove('is-invalid');
-      help.textContent = 'อยู่ในช่วง 3–20 พร้อมคำนวณ';
+      help.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
     }else{
       inp.classList.add('is-invalid');
       inp.classList.remove('is-valid');
-      help.textContent = 'ใส่ค่าระหว่าง 3–20 เท่านั้น';
+      help.textContent = 'ใส่ค่าระหว่าง 3–50 เท่านั้น';
     }
   };
   inp.addEventListener('input', validate);
@@ -3129,7 +3131,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       let topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10);
       if (isNaN(topK)) topK = 5;
       if (topK < 3) topK = 3;
-      if (topK > 20) topK = 20;
+      if (topK > 50) topK = 50;
 
       window.resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
       document.getElementById('result').innerHTML = '';
