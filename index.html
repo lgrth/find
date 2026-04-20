@@ -1387,11 +1387,12 @@ function computeJewelPool(){
   return jewels.slice();
 }
 
-const SPEED_CFG = { CANDIDATE_LIMIT: 1500 };
+const SPEED_CFG = { CANDIDATE_LIMIT: 1500, FIXED_LINK_LIMIT: 3000 };
+const _popcount = x => { let c=0; while(x){c+=x&1;x>>>=1;} return c; };
 function buildCandidates(desired, sourceJewels, unwanted=[]){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
   const unwantedSet = new Set(unwanted);
-  return sourceJewels.map(j=>{
+  const all = sourceJewels.map(j=>{
     let mask=0, score=0, otherNames=[], unwantedCount=0;
     for(const s of j.substats){
       const idx=bitIndex.get(s.name);
@@ -1400,90 +1401,154 @@ function buildCandidates(desired, sourceJewels, unwanted=[]){
     }
     return { id:j.id, mask, score, otherNames, unwantedCount, allNames: j.substats.map(s=>s.name) };
   }).filter(m=>m.mask!==0)
-    .sort((a,b)=>b.score-a.score)
-    .slice(0, SPEED_CFG.CANDIDATE_LIMIT);
+    .sort((a,b)=>(_popcount(b.mask)-_popcount(a.mask))||(b.score-a.score));
+
+  // Guarantee at least one candidate per desired-skill bit before truncation
+  const guaranteedIds = new Set();
+  const guaranteed = [];
+  for(let bit=0; bit<desired.length; bit++){
+    const bitMask = 1<<bit;
+    const best = all.find(c=>(c.mask&bitMask)!==0);
+    if(best && !guaranteedIds.has(best.id)){ guaranteedIds.add(best.id); guaranteed.push(best); }
+  }
+  const slots = Math.max(0, SPEED_CFG.CANDIDATE_LIMIT - guaranteed.length);
+  const rest = all.filter(c=>!guaranteedIds.has(c.id)).slice(0, slots);
+  return [...guaranteed, ...rest];
 }
 
-// ← สร้าง Worker หลัง DOMContentLoaded และใช้ ASCII ล้วน
-function createWorker(){
-  const workerCode = `
-    self.onmessage = (e) => {
-      const { desired, cand, topK } = e.data;
-      const desiredMaskAll = (1 << desired.length) - 1;
-      const n = cand.length;
-      const totalCombos = n * (n - 1) * (n - 2) * (n - 3) / 24;
-      // Precompute suffixOr[i] = OR of cand[i..n-1].mask — used to prune branches
-      // that can never cover desired bits better than current best.
-      const suffixOr = new Array(n + 1); suffixOr[n] = 0;
-      for (let i = n - 1; i >= 0; i--) suffixOr[i] = suffixOr[i+1] | cand[i].mask;
-      let done = 0, lastEmit = 0;
-      const best = [];
-      const pushTop = (item) => {
-        best.push(item);
-        best.sort((a,b)=> (a.notMiss - b.notMiss) || (a.unwantedCount - b.unwantedCount) || (b.extraCount - a.extraCount) || (b.totalValue - a.totalValue) );
-        if (best.length > topK) best.pop();
-      };
-      // popcount helper for prune
-      const popcount = (x) => { let c = 0; while (x) { c += x & 1; x >>>= 1; } return c; };
-      // precompute skill-name sets for duplicate-skill detection
-      const candNameSets = cand.map(c => new Set(c.allNames));
-      for (let a = 0; a < n - 3; a++) {
-        // prune: best-case remaining coverage at depth a
-        if (best.length === topK){
-          const maxCoverA = cand[a].mask | suffixOr[a+1];
-          const minNotMissA = popcount(desiredMaskAll & (~maxCoverA));
-          if (minNotMissA > best[best.length-1].notMiss) continue;
+// Unified worker code builder — single source of truth for both 3-combo and 4-combo paths
+function buildWorkerCode(mode){
+  const is3 = mode === '3combo';
+  return `
+self.onmessage = function(e){
+  var desired = e.data.desired;
+  var cand    = e.data.cand;
+  var topK    = e.data.topK;
+  ${is3 ? 'var fixed = e.data.fixed;' : ''}
+  var n = cand.length;
+  var desiredMaskAll = (1 << desired.length) - 1;
+  var totalCombos = ${is3 ? 'n*(n-1)*(n-2)/6' : 'n*(n-1)*(n-2)*(n-3)/24'};
+  var done = 0, lastEmit = 0;
+  function emitProgress(){
+    if(done-lastEmit>5000){ lastEmit=done; self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)}); }
+  }
+
+  // sort: fewer missing → fewer unwanted → fewer extras → higher value
+  function cmp(a,b){
+    return (a.notMiss-b.notMiss)||(a.unwantedCount-b.unwantedCount)||(a.extraCount-b.extraCount)||(b.totalValue-a.totalValue);
+  }
+  // binary-insert keeps best[] sorted in O(topK) per insert
+  var best = [];
+  function pushTop(item){
+    var lo=0,hi=best.length;
+    while(lo<hi){ var mid=(lo+hi)>>1; if(cmp(item,best[mid])<0) hi=mid; else lo=mid+1; }
+    best.splice(lo,0,item);
+    if(best.length>topK) best.pop();
+  }
+
+  // build result object from an array of charm objects
+  function makeResult(charms){
+    var mask=0,tv=0,uw=0,ids=[],extraSeen={},extraCount=0;
+    for(var i=0;i<charms.length;i++){
+      var ch=charms[i];
+      mask|=ch.mask; tv+=ch.score; uw+=(ch.unwantedCount||0); ids.push(ch.id);
+      for(var k=0;k<ch.otherNames.length;k++){
+        var nm=ch.otherNames[k]; if(!extraSeen[nm]){ extraSeen[nm]=1; extraCount++; }
+      }
+    }
+    var notMask=desiredMaskAll&(~mask),notMiss=0,notIdx=[];
+    for(var i=0;i<desired.length;i++){ if((notMask>>i)&1){notMiss++;notIdx.push(i);} }
+    return {ids:ids,notMiss:notMiss,notIdx:notIdx,totalValue:tv,extraCount:extraCount,unwantedCount:uw};
+  }
+
+  // precompute name-sets for duplicate-skill detection
+  ${is3 ? 'var fixedSet=new Set(fixed.allNames);' : ''}
+  var namesets=cand.map(function(c){ return new Set(c.allNames); });
+
+  ${!is3 ? `
+  // suffixOr pruning for 4-combo
+  function popcount(x){ var c=0; while(x){c+=x&1;x>>>=1;} return c; }
+  var suffixOr=new Array(n+1); suffixOr[n]=0;
+  for(var i=n-1;i>=0;i--) suffixOr[i]=suffixOr[i+1]|cand[i].mask;
+  ` : ''}
+
+  ${is3 ? `
+  for(var a=0;a<n-2;a++){
+    var sA=namesets[a],skip=false;
+    for(var _nm of sA){ if(fixedSet.has(_nm)){skip=true;break;} } if(skip) continue;
+    for(var b=a+1;b<n-1;b++){
+      var sB=namesets[b]; skip=false;
+      for(var _nm of sB){ if(fixedSet.has(_nm)||sA.has(_nm)){skip=true;break;} } if(skip) continue;
+      for(var c=b+1;c<n;c++){
+        var sC=namesets[c]; skip=false;
+        for(var _nm of sC){ if(fixedSet.has(_nm)||sA.has(_nm)||sB.has(_nm)){skip=true;break;} }
+        if(skip){ done++; emitProgress(); continue; }
+        pushTop(makeResult([fixed,cand[a],cand[b],cand[c]]));
+        done++; emitProgress();
+      }
+    }
+  }
+  ` : `
+  for(var a=0;a<n-3;a++){
+    if(best.length===topK){
+      if(popcount(desiredMaskAll&(~(cand[a].mask|suffixOr[a+1])))>best[best.length-1].notMiss) continue;
+    }
+    var sA=namesets[a];
+    for(var b=a+1;b<n-2;b++){
+      var sB=namesets[b],skip=false;
+      for(var _nm of sB){ if(sA.has(_nm)){skip=true;break;} } if(skip) continue;
+      var maskAB=cand[a].mask|cand[b].mask;
+      if(best.length===topK){
+        if(popcount(desiredMaskAll&(~(maskAB|suffixOr[b+1])))>best[best.length-1].notMiss) continue;
+      }
+      for(var c=b+1;c<n-1;c++){
+        var sC=namesets[c]; skip=false;
+        for(var _nm of sC){ if(sA.has(_nm)||sB.has(_nm)){skip=true;break;} } if(skip) continue;
+        var maskABC=maskAB|cand[c].mask;
+        if(best.length===topK){
+          if(popcount(desiredMaskAll&(~(maskABC|suffixOr[c+1])))>best[best.length-1].notMiss) continue;
         }
-        const sA = candNameSets[a];
-        for (let b = a + 1; b < n - 2; b++) {
-          const maskAB = cand[a].mask | cand[b].mask; const scoreAB = cand[a].score + cand[b].score;
-          // skip if a & b share any skill
-          const sB = candNameSets[b];
-          let abDup = false; for (const nm of sB) { if (sA.has(nm)) { abDup=true; break; } }
-          if (abDup) continue;
-          if (best.length === topK){
-            const maxCoverAB = maskAB | suffixOr[b+1];
-            const minNotMissAB = popcount(desiredMaskAll & (~maxCoverAB));
-            if (minNotMissAB > best[best.length-1].notMiss) continue;
-          }
-          for (let c = b + 1; c < n - 1; c++) {
-            const maskABC = maskAB | cand[c].mask; const scoreABC = scoreAB + cand[c].score;
-            // skip if c shares any skill with a or b
-            const sC = candNameSets[c];
-            let abcDup = false; for (const nm of sC) { if (sA.has(nm) || sB.has(nm)) { abcDup=true; break; } }
-            if (abcDup) continue;
-            if (best.length === topK){
-              const maxCoverABC = maskABC | suffixOr[c+1];
-              const minNotMissABC = popcount(desiredMaskAll & (~maxCoverABC));
-              if (minNotMissABC > best[best.length-1].notMiss) continue;
-            }
-            for (let d = c + 1; d < n; d++) {
-              // skip if d shares any skill with a, b, or c
-              const sD = candNameSets[d];
-              let dDup = false; for (const nm of sD) { if (sA.has(nm) || sB.has(nm) || sC.has(nm)) { dDup=true; break; } }
-              if (dDup) { done++; if (done-lastEmit>5000){lastEmit=done;self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)});} continue; }
-              const mask = maskABC | cand[d].mask; const totalValue = scoreABC + cand[d].score;
-              const notMask = desiredMaskAll & (~mask);
-              let notMiss = 0, notIdx = [];
-              for (let i = 0; i < desired.length; i++) { if ((notMask >> i) & 1) { notMiss++; notIdx.push(i); } }
-              const setExtra = new Set();
-              cand[a].otherNames.forEach(x=>setExtra.add(x));
-              cand[b].otherNames.forEach(x=>setExtra.add(x));
-              cand[c].otherNames.forEach(x=>setExtra.add(x));
-              cand[d].otherNames.forEach(x=>setExtra.add(x));
-              const extraCount = setExtra.size;
-              const unwantedCount = (cand[a].unwantedCount||0)+(cand[b].unwantedCount||0)+(cand[c].unwantedCount||0)+(cand[d].unwantedCount||0);
-              pushTop({ ids:[cand[a].id,cand[b].id,cand[c].id,cand[d].id], notMiss, notIdx, totalValue, extraCount, unwantedCount });
-              done++; if (done - lastEmit > 5000) { lastEmit = done; self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) }); }
-            }
-          }
+        for(var d=c+1;d<n;d++){
+          var sD=namesets[d]; skip=false;
+          for(var _nm of sD){ if(sA.has(_nm)||sB.has(_nm)||sC.has(_nm)){skip=true;break;} }
+          if(skip){ done++; emitProgress(); continue; }
+          pushTop(makeResult([cand[a],cand[b],cand[c],cand[d]]));
+          done++; emitProgress();
         }
       }
-      self.postMessage({ type:'result', best });
-    };
+    }
+  }
+  `}
+
+  self.postMessage({type:'result',best:best});
+};
   `;
-  const url = URL.createObjectURL(new Blob([workerCode], {type:'application/javascript'}));
-  return new Worker(url);
+}
+window.buildWorkerCode = buildWorkerCode;
+
+let _workerBlobUrl = null;
+function recreateWorker(){
+  if(worker){ worker.terminate(); worker = null; }
+  if(_workerBlobUrl){ URL.revokeObjectURL(_workerBlobUrl); _workerBlobUrl = null; }
+  _workerBlobUrl = URL.createObjectURL(new Blob([buildWorkerCode('4combo')],{type:'application/javascript'}));
+  worker = new Worker(_workerBlobUrl);
+  worker.onmessage = (e)=>{
+    const msg=e.data;
+    if(msg.type==='progress'){
+      const p=Math.max(0,Math.min(100,msg.p));
+      const now=performance.now();
+      const elapsed=Math.max(0,(now-(__etaState.start||now))/1000);
+      const f=p/100;
+      let etaSec=f>0?Math.max(0,elapsed/f-elapsed):0;
+      if(__etaState.smoothSec==null) __etaState.smoothSec=etaSec;
+      else __etaState.smoothSec=__etaState.smoothSec*0.7+etaSec*0.3;
+      setCalcProgress(1+Math.round(p),`กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
+    }else if(msg.type==='result'){
+      renderResults(msg.best);
+      hideCalcOverlay();
+      hideLoading();
+    }
+  };
 }
 
 /* ====== คำนวณ ====== */
@@ -1536,8 +1601,9 @@ async function calculate(){
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     setCalcProgress(10,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
 
-    // ส่งงานให้ worker
-    __etaState.start = performance.now(); 
+    // ยกเลิก Worker เก่าแล้วสร้างใหม่ทุกครั้ง เพื่อป้องกันผลลัพธ์ค้างจากการค้นหาก่อนหน้า
+    recreateWorker();
+    __etaState.start = performance.now();
     __etaState.smoothSec = null;
     worker.postMessage({ desired, cand, topK, unwanted });
   }catch(err){
@@ -1590,11 +1656,12 @@ function renderResults(best){
   // Enable share buttons now results exist
   ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=false; });
   const pool = (jewelPool && jewelPool.length) ? jewelPool : jewels;
+  const jewelMap = new Map(pool.map(j=>[j.id,j]));
 
   const desired = getDesired()||[];
   best.forEach((r,i)=>{
     const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.06}s`;
-    const group = r.ids.map(id => pool.find(j=>j.id===id));
+    const group = r.ids.map(id => jewelMap.get(id));
 
     const jewelCols = group.map(j=>{
       const tooltip = j.substats.map(s=>{
@@ -1806,26 +1873,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     await makeTomSelects([]);
   }
 
-  // สร้าง worker
-  worker = createWorker();
-  worker.onmessage = (e)=>{
-    const msg=e.data;
-    if(msg.type==='progress'){
-
-     const p = Math.max(0, Math.min(100, msg.p));
-const now = performance.now();
-const elapsed = Math.max(0, (now - (__etaState.start || now)) / 1000);
-const f = p / 100;
-let etaSec = f > 0 ? Math.max(0, elapsed / f - elapsed) : 0;
-if (__etaState.smoothSec == null) __etaState.smoothSec = etaSec;
-else __etaState.smoothSec = __etaState.smoothSec * 0.7 + etaSec * 0.3;
-setCalcProgress(1 + Math.round(p*1), `กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
-    }else if(msg.type==='result'){
-      renderResults(msg.best);
-      hideCalcOverlay();
-      hideLoading();
-    }
-  };
+  // สร้าง worker ครั้งแรก (recreateWorker จะสร้างใหม่ก่อนทุกการคำนวณ)
+  recreateWorker();
 
   enableTouchTooltips();
   ensureMobileCascade();
@@ -3104,24 +3153,28 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       const pool = (window.jewelPool && window.jewelPool.length) ? window.jewelPool : window.jewels;
 
       const bitIndex = new Map(desired.map((n,i) => [n, i]));
+      const unwantedSet = new Set(Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
+      const _pc = x => { let c=0; while(x){c+=x&1;x>>>=1;} return c; };
       function toCand(j){
-        let mask = 0, score = 0, otherNames = [];
-        for (const s of j.substats){
-          const idx = bitIndex.get(s.name);
-          if (idx !== undefined){ mask |= (1 << idx); score += (typeof window.toNumber === 'function' ? window.toNumber(s.value) : parseFloat(s.value)||0); }
-          else otherNames.push(s.name);
+        let mask=0, score=0, otherNames=[], unwantedCount=0;
+        for(const s of j.substats){
+          const idx=bitIndex.get(s.name);
+          if(idx!==undefined){ mask|=(1<<idx); score+=(typeof window.toNumber==='function'?window.toNumber(s.value):parseFloat(s.value)||0); }
+          else{ otherNames.push(s.name); if(unwantedSet.has(s.name)) unwantedCount++; }
         }
-        return { id: j.id, mask, score, otherNames, allNames: j.substats.map(s=>s.name) };
+        return { id:j.id, mask, score, otherNames, unwantedCount, allNames:j.substats.map(s=>s.name) };
       }
 
       const fixedCand = toCand(fixedLink);
+      const _limit = (window.SPEED_CFG && window.SPEED_CFG.FIXED_LINK_LIMIT) || 3000;
       // 3-combo pool: กรอง fixedLink ออก และเอาเฉพาะที่ match desired อย่างน้อย 1 bit
+      // sort by (bits covered desc, score desc) เหมือน buildCandidates
       const otherCand = pool
         .filter(j => j && j.id !== fixedLink.id && !isLinkId(j.id))
         .map(toCand)
         .filter(c => c.mask !== 0)
-        .sort((a,b) => b.score - a.score)
-        .slice(0, 100000);
+        .sort((a,b) => (_pc(b.mask)-_pc(a.mask))||(b.score-a.score))
+        .slice(0, _limit);
 
       if (otherCand.length < 3){
         window.showToast('⚠️ จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น', 3500, 'warn');
@@ -3138,65 +3191,8 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       if (typeof window.showCalcOverlay === 'function') window.showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
       if (typeof window.setCalcProgress === 'function') window.setCalcProgress(10, 'กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
 
-      // Worker ที่คำนวณ 3-combination จากนั้น + fixedCand = เซ็ต 4 ชิ้นที่แม่นยำ
-      const workerCode = `
-        self.onmessage = function(e){
-          var desired = e.data.desired;
-          var cand    = e.data.cand;
-          var fixed   = e.data.fixed;
-          var topK    = e.data.topK;
-          var desiredMaskAll = (1 << desired.length) - 1;
-          var n = cand.length;
-          var totalCombos = n * (n-1) * (n-2) / 6;
-          var done = 0, lastEmit = 0;
-          var best = [];
-          function pushTop(item){
-            best.push(item);
-            best.sort(function(a,b){ return (a.notMiss-b.notMiss)||(b.extraCount-a.extraCount)||(b.totalValue-a.totalValue); });
-            if (best.length > topK) best.pop();
-          }
-          // precompute skill-name sets for duplicate-skill detection
-          var fixedNameSet = new Set(fixed.allNames);
-          var candNameSets = cand.map(function(c){ return new Set(c.allNames); });
-          for (var a = 0; a < n-2; a++){
-            // skip if a shares any skill with fixed
-            var sA = candNameSets[a];
-            var aDup = false; for (var _n of sA){ if(fixedNameSet.has(_n)){ aDup=true; break; } }
-            if (aDup) continue;
-            for (var b = a+1; b < n-1; b++){
-              // skip if b shares any skill with fixed or a
-              var sB = candNameSets[b];
-              var bDup = false; for (var _n of sB){ if(fixedNameSet.has(_n)||sA.has(_n)){ bDup=true; break; } }
-              if (bDup) continue;
-              var maskAB   = fixed.mask | cand[a].mask | cand[b].mask;
-              var scoreAB  = fixed.score + cand[a].score + cand[b].score;
-              for (var c = b+1; c < n; c++){
-                // skip if c shares any skill with fixed, a, or b
-                var sC = candNameSets[c];
-                var cDup = false; for (var _n of sC){ if(fixedNameSet.has(_n)||sA.has(_n)||sB.has(_n)){ cDup=true; break; } }
-                if (cDup){ done++; if(done-lastEmit>5000){lastEmit=done;self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)});} continue; }
-                var mask       = maskAB | cand[c].mask;
-                var totalValue = scoreAB + cand[c].score;
-                var notMask = desiredMaskAll & (~mask);
-                var notMiss = 0, notIdx = [];
-                for (var i = 0; i < desired.length; i++){ if((notMask>>i)&1){ notMiss++; notIdx.push(i); } }
-                var extraSet = {};
-                var addOther = function(arr){ for(var k=0;k<arr.length;k++) extraSet[arr[k]]=1; };
-                addOther(fixed.otherNames);
-                addOther(cand[a].otherNames);
-                addOther(cand[b].otherNames);
-                addOther(cand[c].otherNames);
-                var extraCount = Object.keys(extraSet).length;
-                pushTop({ ids:[fixed.id, cand[a].id, cand[b].id, cand[c].id], notMiss:notMiss, notIdx:notIdx, totalValue:totalValue, extraCount:extraCount });
-                done++;
-                if (done - lastEmit > 5000){ lastEmit = done; self.postMessage({ type:'progress', p: Math.round(done/totalCombos*100) }); }
-              }
-            }
-          }
-          self.postMessage({ type:'result', best:best });
-        };
-      `;
-      const blobUrl = URL.createObjectURL(new Blob([workerCode], {type:'application/javascript'}));
+      // ใช้ buildWorkerCode ที่เป็น single source of truth สำหรับทั้งสองเส้นทาง
+      const blobUrl = URL.createObjectURL(new Blob([window.buildWorkerCode('3combo')],{type:'application/javascript'}));
       const fixedWorker = new Worker(blobUrl);
 
       window.__etaState = { start: performance.now(), smoothSec: null };
