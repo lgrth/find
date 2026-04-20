@@ -716,17 +716,31 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   display:none;align-items:flex-end;justify-content:center;
 }
 .tutorial-sheet.show{ display:flex; }
+.tutorial-sheet.hiding{ display:flex; }
+
 .tutorial-sheet__dialog{
   background:#fff;border-radius:20px 20px 0 0;
   padding:16px 20px calc(28px + env(safe-area-inset-bottom)) 20px;
   width:100%;max-width:560px;
   box-shadow:0 -8px 32px rgba(0,0,0,.18);
-  animation:sheet-up .3s cubic-bezier(.22,.61,.36,1);
 }
-@keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.tutorial-sheet__handle{
-  width:36px;height:4px;border-radius:999px;
-  background:#cbd5e1;margin:0 auto 16px auto;
+
+.tutorial-sheet.show .tutorial-sheet__dialog{
+  animation:sheet-up 0.5s cubic-bezier(.22,.61,.36,1);
+}
+
+.tutorial-sheet.hiding .tutorial-sheet__dialog{
+  animation:sheet-down 0.5s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+@keyframes sheet-up{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+
+@keyframes sheet-down{
+  from{transform:translateY(0)}
+  to{transform:translateY(100%)}
 }
 .tutorial-sheet__title{margin:0 0 16px 0;font-size:20px;font-weight:700;color:#1e3a8a;text-align:center}
 .tutorial-steps{list-style:none;margin:0 0 14px 0;padding:0;display:flex;flex-direction:column;gap:10px}
@@ -754,7 +768,7 @@ html[data-theme="dark"] .tutorial-steps li{background:#1e293b}
 
 /* ===== Section divider ===== */
 .section-divider{display:flex;align-items:center;gap:10px;margin:8px 0 8px}
-.section-divider__line{flex:1;height:2px;background:#bcd3ef}
+.section-divider__line{flex:1;height:2px;background:#dde4f1}
 .section-divider__text{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;letter-spacing:.4px}
 html[data-theme="dark"] .section-divider__line{background:#4c6079}
 html[data-theme="dark"] .section-divider__text{color:#64748b}
@@ -2928,18 +2942,46 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   const TUTORIAL_KEY = 'tutorial_autoshown_once_v1';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
+  const IDLE_TUTORIAL_MS = 60000; // ปรับได้
+  let idleTimer = null;
   let pendingAutoShow = false;
 
   function show(){
     if(!sheet) return;
+    sheet.classList.remove('hiding');
     sheet.classList.add('show');
     sheet.setAttribute('aria-hidden','false');
   }
 
-  function hide(){
-    if(!sheet) return;
-    sheet.classList.remove('show');
-    sheet.setAttribute('aria-hidden','true');
+ function hide(){
+  if(!sheet) return;
+  if (sheet.classList.contains('hiding')) return;
+
+  sheet.classList.remove('show');
+  sheet.classList.add('hiding');
+  sheet.setAttribute('aria-hidden','true');
+
+  setTimeout(()=>{
+    sheet.classList.remove('hiding');
+  }, 500);
+
+  // เริ่มนับ idle ใหม่หลังปิด
+  resetIdleTutorialTimer();
+}
+
+  function startIdleTutorialTimer(){
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(()=>{
+      // เด้งอีกครั้งเฉพาะตอนยังไม่มี interaction นานพอ และ sheet ยังไม่เปิดอยู่
+      if (!sheet?.classList.contains('show')) {
+        show();
+      }
+    }, IDLE_TUTORIAL_MS);
+  }
+
+  function resetIdleTutorialTimer(){
+    clearTimeout(idleTimer);
+    startIdleTutorialTimer();
   }
 
   function markAutoShown(){
@@ -2973,11 +3015,23 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     });
 
     document.addEventListener('sheetLoadSuccessToastShown', ()=>{
-      if (!pendingAutoShow) return;
-      pendingAutoShow = false;
-      setTimeout(showAutoTutorialOnce, 2600); // รอให้ toast success แสดงจบก่อน
-    });
+      if (pendingAutoShow) {
+        pendingAutoShow = false;
+        setTimeout(()=>{
+          showAutoTutorialOnce();
+          resetIdleTutorialTimer();
+        }, 2600); // รอให้ toast success แสดงจบก่อน
+        return;
+      }
 
+      // กรณีไม่ใช่ first visit แต่โหลดเสร็จแล้ว ให้เริ่ม idle timer ตรงนี้
+      resetIdleTutorialTimer();
+    });
+    // Idle detection: ถ้าไม่มี action เลยนาน ๆ ให้เด้ง tutorial อีกครั้ง
+    const idleEvents = ['click','touchstart','keydown','input','change'];
+    idleEvents.forEach((eventName)=>{
+      document.addEventListener(eventName, resetIdleTutorialTimer, { passive: true });
+    });
     // Tutorial opens on demand via help button
     document.getElementById('helpBtn')?.addEventListener('click', show);
   });
