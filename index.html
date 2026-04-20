@@ -264,8 +264,17 @@
     .row-two-col{flex-direction:column;align-items:stretch;gap:12px}
     .row-two-col > .col{width:100%}
     .row input.simple{width:100%}
-    .row-actions{flex-direction:column;align-items:stretch;gap:10px}
-    .btn{width:100%}
+    .row-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    align-items:stretch;
+  }
+
+  .row-actions .btn{
+    width:100%;
+    min-width:0;
+  }
     .result-card{grid-template-columns:1fr}
   }
 
@@ -474,7 +483,7 @@ header .brand{ padding-top:6px; }
 /* Body-level tooltip */
 .jewel-tooltip{
   position: fixed;
-  top: 0; left: 0;
+  top: 0; left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
   background: rgba(0,0,0,.85);
@@ -483,7 +492,9 @@ header .brand{ padding-top:6px; }
   border-radius: 6px;
   font-size: 12.5px;
   line-height: 1.4;
-  max-width: 360px;
+  max-width: min(320px, calc(100vw - 16px));
+  box-sizing: border-box;
+  width: max-content;
   box-shadow: 0 8px 18px rgba(0,0,0,.25);
   z-index: 9999;
   opacity: 0;
@@ -884,6 +895,17 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 
   /* 4. ปุ่ม action สั้นลง + equal width */
   .btn{padding:10px 12px!important;font-size:15px!important;min-height:38px!important}
+
+  .row-actions{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+
+  .row-actions .btn{
+    padding:10px 8px!important;
+    font-size:14px!important;
+  }
+}
 
   /* 6. หัวข้อ h2 เล็กลง */
   section h2{font-size:16px!important}
