@@ -785,6 +785,7 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   background:rgba(0,0,0,.75);
   display:none;align-items:flex-end;justify-content:center;
 }
+html[data-theme="dark"] .tutorial-sheet{background:rgba(255, 255, 255, 0.5);}
 .tutorial-sheet.show{ display:flex; }
 .tutorial-sheet.hiding{ display:flex; }
 
@@ -1173,7 +1174,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
         </div>
       </div>
       <div id="chipAllWrap" class="chip-all-wrap" hidden>
-        
+        <div class="chip-unwanted-results-title" style="color: #7da0ca;">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
         <div id="chipAll" class="chip-list chip-list--all"></div>
       </div>
 
@@ -1227,7 +1228,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
         <div class="topk-wrap">
           <div class="topk-presets" role="group" aria-label="เลือกจำนวนเซ็ต">
             <button type="button" class="topk-preset" data-val="5">5</button>
-            <button type="button" class="topk-preset active" data-val="10">10</button>
+            <button type="button" class="topk-preset" data-val="10">10</button>
             <button type="button" class="topk-preset" data-val="20">20</button>
             <button type="button" class="topk-preset" data-val="30">30</button>
             <button type="button" class="topk-preset" data-val="40">40</button>
@@ -1794,7 +1795,7 @@ async function calculate(){
     }
 
     let topK = parseInt((topKInput?.value || '').trim(),10);
-    if(isNaN(topK)) topK = 5;
+    if(isNaN(topK)) topK = DEFAULT_TOPK;
     if(topK < 3) topK = 3;
     if(topK > 50) topK = 50;
     if(topKInput) topKInput.value = String(topK);
@@ -1869,7 +1870,9 @@ function renderResults(best){
   const jewelMap = new Map(pool.map(j=>[j.id,j]));
 
   const desired = getDesired()||[];
-  best.forEach((r,i)=>{
+  const topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10) || DEFAULT_TOPK;
+
+  best.slice(0, topK).forEach((r,i)=>{
     const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.06}s`;
     const group = r.ids.map(id => jewelMap.get(id));
 
@@ -1983,8 +1986,11 @@ function resetAll(){
   if (darkOnly) darkOnly.checked = false;
 
   if (topKInput){
-    topKInput.value = '';
+    topKInput.value = String(DEFAULT_TOPK);
   }
+  document.querySelectorAll('.topk-preset').forEach(btn => {
+  btn.classList.remove('active');
+});
 
   // ล้าง chip search input
   const chipSearchEl = document.getElementById('chipSearch');
@@ -2733,6 +2739,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
 <script>
 /* ===== UX v4: Chip picker — เป็นเจ้าของ state ผ่าน window._chipSelected ===== */
+const DEFAULT_TOPK = 10;
 (function(){
   let ALL_ABILITIES = [];
   // source of truth — array ของชื่อความสามารถที่เลือก (สูงสุด MAX_SELECTS)
@@ -2934,7 +2941,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       if(topKHelp) topKHelp.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
     }
     document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
-    if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); setTopK(topKHidden.value); }
+    if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); }
   })();
 
   const s = document.getElementById('chipSearch');
@@ -3124,7 +3131,12 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   if (sheet?.classList.contains('show')) return;
 
   const desiredCount = Array.isArray(window._chipSelected) ? window._chipSelected.length : 0;
-  const targetEl = desiredCount < 4 ? chipSearchBox : (calcBtn ?? calcBtn2);
+  const visibleCalcBtn =
+  (calcBtn2 && calcBtn2.offsetParent !== null) ? calcBtn2 :
+  (calcBtn && calcBtn.offsetParent !== null) ? calcBtn :
+  calcBtn2 || calcBtn;
+
+const targetEl = desiredCount < 4 ? chipSearchBox : visibleCalcBtn;
 
   if (!targetEl) return;
 
@@ -3576,7 +3588,7 @@ document.getElementById('helpBtn')?.addEventListener('click', show);
       }
 
       let topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10);
-      if (isNaN(topK)) topK = 5;
+      if (isNaN(topK)) topK = DEFAULT_TOPK;
       if (topK < 3) topK = 3;
       if (topK > 50) topK = 50;
 
