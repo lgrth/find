@@ -628,6 +628,27 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 .chip-search-wrap{margin:6px 0 4px 0}
 .chip-search-box{position:relative;display:flex;align-items:center}
+@media (prefers-reduced-motion: no-preference){
+  .chip-search-box.is-idle-guide{
+    animation: chip-search-shake .5s ease-in-out 3;
+  }
+  @keyframes chip-search-shake{
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-7px); }
+    40%     { transform: translateX(7px); }
+    60%     { transform: translateX(-4px); }
+    80%     { transform: translateX(4px); }
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .chip-search-box.is-idle-guide .chip-search{
+    animation: chip-search-glow .7s ease-in-out 3;
+  }
+  @keyframes chip-search-glow{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(78,115,223,0); }
+    50%    { box-shadow: 0 0 0 6px rgba(78,115,223,.55); }
+  }
+}
 .chip-search{
   width:100%;padding:8px 36px 8px 12px;border:1.5px solid #4e73df;border-radius:10px;
   font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box;
@@ -1075,7 +1096,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
       </div>
       <div class="chip-search-wrap">
         <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">➕ เพิ่มสกิลที่ต้องการ</div>
-        <div class="chip-search-box">
+        <div id="chipSearchBox" class="chip-search-box">
           <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ" autocomplete="off">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
         </div>
@@ -2942,7 +2963,10 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   const TUTORIAL_KEY = 'tutorial_autoshown_once_v1';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
-  const IDLE_TUTORIAL_MS = 60000; // ปรับได้
+  const IDLE_GUIDE_MS = 30000; // 30 วินาที: ชี้ด้วยการเขย่าช่องค้นหา
+  const chipSearchBox = document.querySelector('#chipSearch')?.closest('.chip-search-box');
+  const IDLE_TUTORIAL_MS = 90000; // ปรับ idle time
+  let idleGuideTimer = null;
   let idleTimer = null;
   let pendingAutoShow = false;
 
@@ -2969,6 +2993,35 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   resetIdleTutorialTimer();
 }
 
+  function playIdleGuide(){
+  if (!chipSearchBox) return;
+  if (sheet?.classList.contains('show')) return;
+  // Skip if element is scrolled out of view
+  const rect = chipSearchBox.getBoundingClientRect();
+  if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+
+  chipSearchBox.classList.remove('is-idle-guide');
+  void chipSearchBox.offsetWidth;
+  chipSearchBox.classList.add('is-idle-guide');
+
+  setTimeout(()=>{
+    chipSearchBox.classList.remove('is-idle-guide');
+  }, 1700); // 0.5s × 3 iterations + buffer
+  }
+
+  function startIdleGuideTimer(){
+    clearTimeout(idleGuideTimer);
+    idleGuideTimer = setTimeout(()=>{
+      playIdleGuide();
+    }, IDLE_GUIDE_MS);
+  }
+
+  function resetIdleGuideTimer(){
+    clearTimeout(idleGuideTimer);
+    chipSearchBox?.classList.remove('is-idle-guide');
+    startIdleGuideTimer();
+  }
+
   function startIdleTutorialTimer(){
     clearTimeout(idleTimer);
     idleTimer = setTimeout(()=>{
@@ -2981,6 +3034,8 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
   function resetIdleTutorialTimer(){
     clearTimeout(idleTimer);
+    clearTimeout(idleGuideTimer);
+    startIdleGuideTimer();
     startIdleTutorialTimer();
   }
 
@@ -3029,11 +3084,17 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     });
     // Idle detection: ถ้าไม่มี action เลยนาน ๆ ให้เด้ง tutorial อีกครั้ง
     const idleEvents = ['click','touchstart','keydown','input','change'];
-    idleEvents.forEach((eventName)=>{
-      document.addEventListener(eventName, resetIdleTutorialTimer, { passive: true });
-    });
-    // Tutorial opens on demand via help button
-    document.getElementById('helpBtn')?.addEventListener('click', show);
+idleEvents.forEach((eventName)=>{
+  document.addEventListener(eventName, resetIdleTutorialTimer, { passive: true });
+});
+
+// fallback: ถ้า event โหลดชีตสำเร็จไม่ถูกจับ อย่างน้อยให้เริ่ม timer หลังหน้าโหลดเสร็จ
+setTimeout(()=>{
+  resetIdleTutorialTimer();
+}, 3500);
+
+// Tutorial opens on demand via help button
+document.getElementById('helpBtn')?.addEventListener('click', show);
   });
 })();
 
