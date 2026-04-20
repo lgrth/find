@@ -3003,10 +3003,6 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   chipSearchBox.classList.remove('is-idle-guide');
   void chipSearchBox.offsetWidth;
   chipSearchBox.classList.add('is-idle-guide');
-
-  setTimeout(()=>{
-    chipSearchBox.classList.remove('is-idle-guide');
-  }, 1700); // 0.5s × 3 iterations + buffer
   }
 function stopIdleGuide(){
   if (!chipSearchBox) return;
