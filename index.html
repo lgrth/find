@@ -619,6 +619,7 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
   transition:.12s;user-select:none;font-family:inherit;
 }
 .chip:hover{background:#eef2ff;border-color:#93a7e0}
+
 .chip.is-selected{background:#2e59d9;color:#fff;border-color:#1f4ac5;font-weight:600}
 .chip.is-selected:hover{background:#1f4ac5}
 .chip.is-disabled{opacity:.4;cursor:not-allowed}
@@ -641,6 +642,8 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 html[data-theme="dark"] .chip-picker{background:var(--surface-2);border-color:var(--border-strong)}
 html[data-theme="dark"] .chip-selected-title,
 html[data-theme="dark"] .chip-all-title{color:#cbd5e1}
+html[data-theme="dark"] .chip.is-unwanted{background:#a74444; border-color:#ff6d6d}
+html[data-theme="dark"] .chip.is-unwanted:hover{background:#fa6060;border-color: #f79c9c;}
 html[data-theme="dark"] .chip-list--selected{background:var(--surface); border-color:var(--border-strong)}
 html[data-theme="dark"] .chip-list--selected:empty::before{color:#64748b}
 html[data-theme="dark"] .chip{background:var(--surface); color:var(--text); border-color:var(--border-strong)}
@@ -848,12 +851,16 @@ html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border
 .chip-unwanted-search:focus-visible{outline:3px solid #fca5a5;outline-offset:2px}
 .chip-unwanted-results{margin-top:6px}
 .chip-unwanted-results-title{font-size:13px;font-weight:600;color:#dc2626;margin-bottom:4px}
+/* hover สีแดงโทนอ่อน เฉพาะ chips ในผลการค้นหาของส่วนสกิลที่ไม่ต้องการ */
+#chipUnwantedAll .chip:not(.is-unwanted):hover{background:#fff5f5;border-color:#fca5a5;color:#991b1b}
+#chipUnwantedAll .chip:not(.is-unwanted):focus-visible{outline-color:#fca5a5}
+html[data-theme="dark"] #chipUnwantedAll .chip:not(.is-unwanted):hover{background:#4c0519;border-color:#f87171;color:#fecaca}
 html[data-theme="dark"] .chip-unwanted-section{border-top-color:#7f1d1d}
 html[data-theme="dark"] .chip-list--unwanted{background:#3a0f14;border-color:#7f1d1d}
 html[data-theme="dark"] .chip-list--unwanted:empty::before{color:#fca5a5}
 html[data-theme="dark"] .chip-unwanted-title{color:#fca5a5}
 html[data-theme="dark"] .chip-unwanted-toggle{color:#fca5a5}
-html[data-theme="dark"] .chip-unwanted-search{background:var(--surface);color:var(--text);border-color:#7f1d1d}
+html[data-theme="dark"] .chip-unwanted-search{color:#dc2626}
 /* Warning badge on result card */
 .badge--warn{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:3px 8px;font-size:11px;font-weight:700;border-radius:999px;display:inline-flex;align-items:center;gap:3px}
 html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-color:#9f1239}
