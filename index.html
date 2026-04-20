@@ -18,6 +18,7 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
 <script>
 /* Force light mode before first paint (no FOUC) */
 (function(){
@@ -2153,64 +2154,187 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 let _abilityList = [];
 function setAbilityList(arr){ _abilityList = Array.from(arr || []); }
 
-function buildShareURL(){
-  const url = new URL(location.href);
-  url.search = '';
-  const params = url.searchParams;
+const SHARE_STATE_VERSION = 2;
 
+function getCharSelectValue(){
+  const el = document.getElementById('charSelect');
+  if (!el) return '';
+  if (el.tomselect) return (el.tomselect.getValue() || '').trim();
+  return (el.value || '').trim();
+}
+
+function setCharSelectValue(value){
+  const el = document.getElementById('charSelect');
+  if (!el || !value) return;
+  if (el.tomselect) el.tomselect.setValue(value, true);
+  else el.value = value;
+}
+
+function toAbilityIndices(list){
+  if (!_abilityList.length || !Array.isArray(list)) return [];
+  return list
+    .map(name => _abilityList.indexOf(name))
+    .filter(idx => idx >= 0);
+}
+
+function fromAbilityIndices(list){
+  if (!_abilityList.length || !Array.isArray(list)) return [];
+  return list
+    .map(idx => _abilityList[Number(idx)])
+    .filter(Boolean);
+}
+
+function buildLegacyShareURL(url){
+  const params = url.searchParams;
   const desired = getDesired();
+
   if (_abilityList.length){
-    // encode เป็น index list: "s=0,3,12,..." (สั้นกว่า sel=ชื่อไทย)
-    const indices = desired.map(v => _abilityList.indexOf(v)).filter(i => i >= 0);
+    const indices = toAbilityIndices(desired);
     if (indices.length) params.set('s', indices.join(','));
   } else {
     desired.forEach(v => params.append('sel', v));
   }
-  if(topKInput?.value) params.set('k', topKInput.value);
-  if(darkOnly?.checked) params.set('d','1');
-  const unwantedSels = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
-  if(_abilityList.length && unwantedSels.length){
-    const uIdx = unwantedSels.map(v=>_abilityList.indexOf(v)).filter(i=>i>=0);
-    if(uIdx.length) params.set('u', uIdx.join(','));
-  }
-  params.set('a','1');
 
+  if (topKInput?.value) params.set('k', String(topKInput.value));
+  if (darkOnly?.checked) params.set('d', '1');
+
+  const unwantedSels = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
+  if (_abilityList.length && unwantedSels.length){
+    const uIdx = toAbilityIndices(unwantedSels);
+    if (uIdx.length) params.set('u', uIdx.join(','));
+  }
+
+  const charVal = getCharSelectValue();
+  if (charVal) params.set('char', charVal);
+
+  params.set('a', '1');
   url.search = params.toString();
   return url.toString();
 }
 
-async function applyStateFromURL(){
+function buildShareURL(){
+  const url = new URL(location.href);
+  url.search = '';
+
+  const desired = getDesired();
+  const unwanted = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
+  const charVal = getCharSelectValue();
+
+  const state = {
+    v: SHARE_STATE_VERSION,               // version
+    s: toAbilityIndices(desired),         // selected abilities
+    u: toAbilityIndices(unwanted),        // unwanted abilities
+    k: topKInput?.value ? String(topKInput.value) : '',
+    m: darkOnly?.checked ? 1 : 0,         // darkOnly mode
+    a: 1,                                 // auto-run
+    c: charVal || ''                      // character
+  };
+
+  // ตัด field ว่างออกเพื่อลดขนาด payload
+  if (!state.s.length) delete state.s;
+  if (!state.u.length) delete state.u;
+  if (!state.k) delete state.k;
+  if (!state.m) delete state.m;
+  if (!state.c) delete state.c;
+
+  if (typeof LZString?.compressToEncodedURIComponent === 'function'){
+    try{
+      const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(state));
+      if (compressed){
+        url.searchParams.set('d', compressed);
+        return url.toString();
+      }
+    }catch(err){
+      console.warn('Compressed share URL build failed, fallback to legacy URL.', err);
+    }
+  }
+
+  // fallback เผื่อ lib โหลดไม่ทัน / error
+  return buildLegacyShareURL(url);
+}
+
+function parseCompressedStateFromURL(){
   const params = new URLSearchParams(location.search);
-  // รองรับทั้ง URL ใหม่ (s=0,3,12) และ URL เก่า (sel=ชื่อ)
+  const packed = params.get('d');
+  if (!packed || typeof LZString?.decompressFromEncodedURIComponent !== 'function') return null;
+
+  try{
+    const json = LZString.decompressFromEncodedURIComponent(packed);
+    if (!json) return null;
+
+    const parsed = JSON.parse(json);
+    if (!parsed || typeof parsed !== 'object') return null;
+
+    return {
+      sels: fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s : []),
+      unwanted: fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u : []),
+      k: parsed.k != null ? String(parsed.k) : '',
+      dark: parsed.m === 1 ? '1' : '',
+      auto: parsed.a === 1 ? '1' : '',
+      char: parsed.c != null ? String(parsed.c) : ''
+    };
+  }catch(err){
+    console.warn('Compressed share URL parse failed, fallback to legacy params.', err);
+    return null;
+  }
+}
+
+function parseLegacyStateFromURL(){
+  const params = new URLSearchParams(location.search);
+
   let sels = [];
   const sParam = params.get('s');
+
   if (sParam && _abilityList.length){
-    sels = sParam.split(',').map(n => _abilityList[parseInt(n,10)]).filter(Boolean);
+    sels = sParam
+      .split(',')
+      .map(n => _abilityList[parseInt(n, 10)])
+      .filter(Boolean);
   } else {
     sels = params.getAll('sel');
   }
-  const k = params.get('k');
-  const dark = params.get('d') || params.get('dark');
-  const auto = params.get('a') || params.get('auto');
 
-  if(darkOnly) darkOnly.checked = (dark === '1');
   const uParam = params.get('u');
-  if(uParam && _abilityList.length){
-    const uSels = uParam.split(',').map(n=>_abilityList[parseInt(n,10)]).filter(Boolean);
-    if(typeof window.setUnwantedState==='function') window.setUnwantedState(uSels);
-  }
-  if(topKInput && k) topKInput.value = k;
+  const unwanted = (uParam && _abilityList.length)
+    ? uParam.split(',').map(n => _abilityList[parseInt(n, 10)]).filter(Boolean)
+    : [];
 
-  // ตั้ง chip state จาก URL
-  const validSels = sels.map(s=>(s||'').trim()).filter(Boolean);
+  return {
+    sels,
+    unwanted,
+    k: params.get('k') || '',
+    dark: params.get('d') || params.get('dark') || '',
+    auto: params.get('a') || params.get('auto') || '',
+    char: params.get('char') || ''
+  };
+}
+
+async function applyStateFromURL(){
+  const state = parseCompressedStateFromURL() || parseLegacyStateFromURL();
+
+  if (darkOnly) darkOnly.checked = (state.dark === '1');
+  if (topKInput && state.k) topKInput.value = state.k;
+
+  const validSels = (state.sels || [])
+    .map(s => (s || '').trim())
+    .filter(Boolean);
+
   if (typeof window.setChipState === 'function'){
     window.setChipState(validSels);
   }
 
+  if (Array.isArray(state.unwanted) && typeof window.setUnwantedState === 'function'){
+    window.setUnwantedState(state.unwanted);
+  }
+
+  if (state.char){
+    setCharSelectValue(state.char);
+  }
+
   updateCalcAvailability();
 
-  if(auto === '1' && getDesired().length >= MIN_SELECTS){
-    await new Promise(r => setTimeout(r,100));
+  if (state.auto === '1' && getDesired().length >= MIN_SELECTS){
+    await new Promise(r => setTimeout(r, 100));
     calculate();
   }
 }
@@ -2492,7 +2616,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <style>
 /* === Feedback widget (isolated: .fb-*) === */
 .fb-fab{
-  position:fixed; right:12px; bottom:32px;
+  position:fixed; right:12px; bottom:50px;
   z-index:999999; /* กัน element อื่นทับ */
   border:none; border-radius:6px; padding:4px 8px;
   font-family:"LINE Seed Sans TH","Kanit",sans-serif; font-weight:600; font-size:12px;
@@ -3529,34 +3653,30 @@ document.getElementById('helpBtn')?.addEventListener('click', show);
     };
   }
 
-  // 2) Share URL add & apply ?char=
-  function addCharToShareURL(){
-    if (!window.buildShareURL) return;
-    const _orig = window.buildShareURL;
-    window.buildShareURL = function(){
-      const u = new URL(_orig(), location.href);
-      const el = document.getElementById('charSelect');
-      let val = '';
-      if (el){
-        if (el.tomselect) val = el.tomselect.getValue();
-        else val = el.value || '';
-      }
-      if (val) u.searchParams.set('char', val);
-      else u.searchParams.delete('char');
-      return u.toString();
-    };
+  // 2) Share URL character support is now handled inside compressed state (?d=...)
+// คง function ไว้เพื่อไม่ให้ flow เดิมพัง
+function addCharToShareURL(){
+  // no-op: buildShareURL() รุ่นใหม่รวม char ไว้ใน payload แล้ว
+}
+
+async function applyCharFromURL(){
+  // รองรับทั้ง URL ใหม่แบบ compressed และ URL เก่าแบบ ?char=
+  const compressed = (typeof parseCompressedStateFromURL === 'function')
+    ? parseCompressedStateFromURL()
+    : null;
+
+  const charFromCompressed = compressed?.char || '';
+  if (charFromCompressed){
+    setCharSelectValue(charFromCompressed);
+    return;
   }
 
-  async function applyCharFromURL(){
-    const el = document.getElementById('charSelect');
-    if (!el) return;
-    const params = new URLSearchParams(location.search);
-    const char = params.get('char');
-    if (char){
-      if (el.tomselect){ el.tomselect.setValue(char, true); }
-      else el.value = char;
-    }
+  const params = new URLSearchParams(location.search);
+  const char = params.get('char');
+  if (char){
+    setCharSelectValue(char);
   }
+}
 
   // 3) Patch calculate to enforce fixed [ลิงก์] — ส่ง fixedCand เข้า Worker จริงๆ (3-combo)
   function patchCalculate(){
