@@ -923,8 +923,22 @@ html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border
 .chip-unwanted-title{font-size:14px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:6px}
 .chip-unwanted-toggle{background:none;border:none;cursor:pointer;font-size:13px;color:#dc2626;padding:0 4px;font-family:"LINE Seed Sans TH","Kanit",sans-serif}
 /* chip-unwanted-body transitions handled by chipAnimCSS */
-.chip-list--unwanted{padding:6px;background:#fff5f5;border:1px dashed #fca5a5;border-radius:10px;min-height:36px}
-.chip-list--unwanted:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาด้านล่าง";color:#fca5a5;font-size:13px;font-style:italic}
+.chip-list--unwanted{
+  padding:6px;
+  background:#fff5f5;
+  border:1px dashed #fca5a5;
+  border-radius:10px;
+  min-height:36px;
+}
+.chip-list--unwanted.is-hidden{
+  display:none;
+}
+.chip-list--unwanted:empty::before{
+  content:"ยังไม่เลือก — พิมพ์ค้นหาด้านล่าง";
+  color:#fca5a5;
+  font-size:13px;
+  font-style:italic;
+}
 .chip.is-unwanted{background:#dc2626;color:#fff;border-color:#b91c1c}
 .chip.is-unwanted:hover{background:#b91c1c}
 .chip-unwanted-search{width:100%;padding:8px 36px 8px 12px;border:1.5px solid #fca5a5;border-radius:10px;font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box}
@@ -936,8 +950,16 @@ html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border
 #chipUnwantedAll .chip:not(.is-unwanted):focus-visible{outline-color:#fca5a5}
 html[data-theme="dark"] #chipUnwantedAll .chip:not(.is-unwanted):hover{background:#4c0519;border-color:#f87171;color:#fecaca}
 html[data-theme="dark"] .chip-unwanted-section{border-top-color:#625050}
-html[data-theme="dark"] .chip-list--unwanted{background:#3a0f14;border-color:#7f1d1d}
-html[data-theme="dark"] .chip-list--unwanted:empty::before{color:#fca5a5}
+html[data-theme="dark"] .chip-list--unwanted{
+  background:#3a0f14;
+  border-color:#7f1d1d;
+}
+html[data-theme="dark"] .chip-list--unwanted.is-hidden{
+  display:none;
+}
+html[data-theme="dark"] .chip-list--unwanted:empty::before{
+  color:#fca5a5;
+}
 html[data-theme="dark"] .chip-unwanted-title{color:#fca5a5}
 html[data-theme="dark"] .chip-unwanted-toggle{color:#fca5a5}
 html[data-theme="dark"] .chip-unwanted-search{color:#dc2626}
@@ -1120,7 +1142,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
       <div class="chip-search-wrap">
         <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">➕ เพิ่มสกิลที่ต้องการ</div>
         <div id="chipSearchBox" class="chip-search-box">
-          <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ" autocomplete="off">
+          <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ" autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
         </div>
       </div>
@@ -1139,7 +1161,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div class="chip-search-wrap" style="margin-top:6px">
             <div style="font-size:12px;font-weight:600;color:#dc2626;margin-bottom:4px">➕ เพิ่มสกิลที่ไม่ต้องการ</div>
             <div class="chip-search-box">
-              <input id="chipUnwantedSearch" class="chip-unwanted-search" type="text" placeholder="🔍 ค้นหาสกิลที่ไม่ต้องการ" autocomplete="off">
+              <input id="chipUnwantedSearch" class="chip-unwanted-search" type="text" placeholder="🔍 ค้นหาสกิลที่ไม่ต้องการ" autocomplete="off" autocorrect="off" spellcheck="false">
               <button id="chipUnwantedSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
             </div>
           </div>
@@ -2821,7 +2843,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   const wrap = document.getElementById('chipUnwanted');
   if(!wrap) return;
 
-  wrap.innerHTML='';
+  wrap.innerHTML = '';
 
   if(!window._chipUnwanted.length){
     wrap.classList.add('is-hidden');
@@ -2831,12 +2853,15 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   wrap.classList.remove('is-hidden');
 
   window._chipUnwanted.forEach(name=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='chip is-unwanted chip-entering';
-    b.innerHTML=`<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
-    b.title='คลิกเพื่อเอาออก';
-    b.addEventListener('click',()=>{ removeUnwanted(name); refreshUnwantedChips(); });
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip is-unwanted chip-entering';
+    b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+    b.title = 'คลิกเพื่อเอาออก';
+    b.addEventListener('click', ()=>{
+      removeUnwanted(name);
+      refreshUnwantedChips();
+    });
     wrap.appendChild(b);
     requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
   });
@@ -2872,43 +2897,75 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   };
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    
-    // === topK preset buttons ===
-    (function(){
-      const topKHidden = document.getElementById('topK');
-      const topKHelp = document.getElementById('topKHelp');
-      function setTopK(val){
-        if(topKHidden){ topKHidden.value = val; topKHidden.classList.remove('is-invalid'); }
-        document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
-        if(topKHelp) topKHelp.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
-      }
-      document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
-      if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); setTopK(topKHidden.value); }
-    })();
 
-    const s = document.getElementById('chipSearch');
-    const clr = document.getElementById('chipSearchClear');
+  // === topK preset buttons ===
+  (function(){
+    const topKHidden = document.getElementById('topK');
+    const topKHelp = document.getElementById('topKHelp');
+    function setTopK(val){
+      if(topKHidden){ topKHidden.value = val; topKHidden.classList.remove('is-invalid'); }
+      document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
+      if(topKHelp) topKHelp.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
+    }
+    document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
+    if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); setTopK(topKHidden.value); }
+  })();
+
+  const s = document.getElementById('chipSearch');
+  const clr = document.getElementById('chipSearchClear');
+
+  const us = document.getElementById('chipUnwantedSearch');
+  const uclr = document.getElementById('chipUnwantedSearchClear');
+
+  function resetSearchInputs(){
     if (s){
-      s.addEventListener('input', ()=>{
-        if(clr) clr.hidden = s.value === '';
-        renderAll();
-      });
+      s.value = '';
+      if (clr) clr.hidden = true;
     }
-    if(clr){
-      clr.addEventListener('click', ()=>{
-        s.value = '';
-        clr.hidden = true;
-        s.focus();
-        renderAll();
-      });
+    if (us){
+      us.value = '';
+      if (uclr) uclr.hidden = true;
     }
-    // Unwanted search
-    const us = document.getElementById('chipUnwantedSearch');
-    const uclr = document.getElementById('chipUnwantedSearchClear');
-    if(us){
-      us.addEventListener('input',()=>{ if(uclr) uclr.hidden=us.value===''; renderUnwantedAll(); });
-    }
-    if(uclr){ uclr.addEventListener('click',()=>{ us.value=''; uclr.hidden=true; us.focus(); renderUnwantedAll(); }); }
+    renderAll();
+    renderUnwantedAll();
+  }
+
+  // ล้างค่าทันทีตอนโหลดหน้า
+  resetSearchInputs();
+
+  // กัน browser restore ค่ากลับมาจาก bfcache / session restore
+  window.addEventListener('pageshow', resetSearchInputs);
+
+  if (s){
+    s.addEventListener('input', ()=>{
+      if(clr) clr.hidden = s.value === '';
+      renderAll();
+    });
+  }
+  if(clr){
+    clr.addEventListener('click', ()=>{
+      s.value = '';
+      clr.hidden = true;
+      s.focus();
+      renderAll();
+    });
+  }
+
+  // Unwanted search
+  if(us){
+    us.addEventListener('input', ()=>{
+      if(uclr) uclr.hidden = us.value === '';
+      renderUnwantedAll();
+    });
+  }
+  if(uclr){
+    uclr.addEventListener('click', ()=>{
+      us.value = '';
+      uclr.hidden = true;
+      us.focus();
+      renderUnwantedAll();
+    });
+  }
     // Toggle open/close
     document.getElementById('chipUnwantedHeader')?.addEventListener('click',()=>{
       const body=document.getElementById('chipUnwantedBody');
