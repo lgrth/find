@@ -792,11 +792,20 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   position:fixed;inset:0;z-index:2400;
   background:rgba(0,0,0,.75);
   display:none;align-items:flex-end;justify-content:center;
+  opacity: 0;
 }
 html[data-theme="dark"] .tutorial-sheet{background:rgba(255, 255, 255, 0.5);}
-.tutorial-sheet.show{ display:flex; }
-.tutorial-sheet.hiding{ display:flex; }
+.tutorial-sheet.show{ display:flex; animation: fade-in 0.25s ease-out forwards;}
+.tutorial-sheet.hiding{ display:flex; animation: fade-out 0.25s ease-out forwards;}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
 .tutorial-sheet__dialog{
   background:#fff;border-radius:20px 20px 0 0;
   padding:16px 20px calc(28px + env(safe-area-inset-bottom)) 20px;
@@ -3668,7 +3677,7 @@ document.getElementById('helpBtn')?.addEventListener('click', show);
       const ts = el.tomselect;
       const prev = ts.getValue();
       ts.clearOptions();
-      ts.addOptions([{value:'', text:'— ไม่เลือกตัวละคร —'}, ...uniq.map(n => ({value:n, text:n}))]);
+      ts.addOptions([{value:'', text:''}, ...uniq.map(n => ({value:n, text:n}))]);
       ts.refreshOptions(false);
       if (prev) ts.setValue(prev, true);
     } else {
