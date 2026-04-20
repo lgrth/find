@@ -1264,6 +1264,12 @@ function showToast(text, ms=3000, kind='info'){
   if (kind === 'error') toast.classList.add('toast--error');
   else if (kind === 'warn') toast.classList.add('toast--warn');
   toast.classList.add('show');
+
+  // NEW: ยิง event เมื่อ toast โหลดชีตสำเร็จแสดง
+  if (text && text.includes('โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย')) {
+    document.dispatchEvent(new CustomEvent('sheetLoadSuccessToastShown'));
+  }
+
   setTimeout(()=> toast.classList.add('hide'), ms-250);
   setTimeout(()=> { toast.classList.remove('show','hide'); }, ms);
 }
@@ -2916,26 +2922,38 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 })();
 </script>
 
-
-
 <script>
 // --- Tutorial bottom sheet ---
 (function(){
-  const TUTORIAL_KEY = 'tutorial_seen_date';
+  const TUTORIAL_KEY = 'tutorial_autoshown_once_v1';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
+  let pendingAutoShow = false;
 
   function show(){
     if(!sheet) return;
     sheet.classList.add('show');
     sheet.setAttribute('aria-hidden','false');
   }
+
   function hide(){
     if(!sheet) return;
     sheet.classList.remove('show');
     sheet.setAttribute('aria-hidden','true');
-    // Mark today as seen — won't show again until tomorrow
-    localStorage.setItem(TUTORIAL_KEY, new Date().toISOString().slice(0,10));
+  }
+
+  function markAutoShown(){
+    localStorage.setItem(TUTORIAL_KEY, '1');
+  }
+
+  function shouldAutoShow(){
+    return localStorage.getItem(TUTORIAL_KEY) !== '1';
+  }
+
+  function showAutoTutorialOnce(){
+    if (!shouldAutoShow()) return;
+    show();
+    markAutoShown();
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
@@ -2949,7 +2967,18 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       if(e.changedTouches[0].clientY - touchStartY > 80) hide();
     }, {passive:true});
 
-    // Tutorial opens only on demand via help button
+    // เปิดเองหลัง consent + หลัง toast โหลด sheet สำเร็จ
+    document.addEventListener('queueFirstVisitTutorial', ()=>{
+      pendingAutoShow = true;
+    });
+
+    document.addEventListener('sheetLoadSuccessToastShown', ()=>{
+      if (!pendingAutoShow) return;
+      pendingAutoShow = false;
+      setTimeout(showAutoTutorialOnce, 2600); // รอให้ toast success แสดงจบก่อน
+    });
+
+    // Tutorial opens on demand via help button
     document.getElementById('helpBtn')?.addEventListener('click', show);
   });
 })();
@@ -2986,11 +3015,17 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   }
 
   if (okBtn){
-    okBtn.addEventListener('click', ()=>{
-      if (rememberBox?.checked) localStorage.setItem(STORAGE_KEY, '1');
-      startNow();
-    });
-  }
+  okBtn.addEventListener('click', ()=>{
+    if (rememberBox?.checked) localStorage.setItem(STORAGE_KEY, '1');
+
+    // NEW: คิวไว้ว่า ถ้าเป็นการเข้าครั้งแรก ให้รอเปิด tutorial หลัง toast โหลด sheet สำเร็จ
+    if (localStorage.getItem('tutorial_autoshown_once_v1') !== '1') {
+      document.dispatchEvent(new CustomEvent('queueFirstVisitTutorial'));
+    }
+
+    startNow();
+  });
+}
 
   if (acknowledged){
     if (panel) panel.classList.add('hidden');
