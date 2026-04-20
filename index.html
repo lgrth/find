@@ -610,8 +610,21 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-selected-row{margin-bottom:8px}
 .chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:4px 0}
 .chip-list{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
-.chip-list--selected{padding:6px;background:#fff;border:1px dashed #cbd5e1;border-radius:10px}
-.chip-list--selected:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาสกิลด้านล่าง";color:#94a3b8;font-size:13px;font-style:italic}
+.chip-list--selected{
+  padding:6px;
+  background:#fff;
+  border:1px dashed #cbd5e1;
+  border-radius:10px;
+}
+.chip-list--selected.is-hidden{
+  display:none;
+}
+.chip-list--selected:empty::before{
+  content:"ยังไม่เลือก — พิมพ์ค้นหาสกิลด้านล่าง";
+  color:#94a3b8;
+  font-size:13px;
+  font-style:italic;
+}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:6px 12px;border-radius:999px;border:1px solid #cbd5e1;
@@ -629,9 +642,10 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-search-wrap{margin:6px 0 4px 0}
 .chip-search-box{position:relative;display:flex;align-items:center}
 @media (prefers-reduced-motion: no-preference){
-  .chip-search-box.is-idle-guide{
-    animation: chip-search-shake .5s ease-in-out infinite;
-  }
+  .chip-search-box.is-idle-guide,
+  .btn.is-idle-guide{
+  animation: chip-search-shake .5s ease-in-out infinite;
+}
   @keyframes chip-search-shake{
     0%,100% { transform: translateX(0); }
     20%     { transform: translateX(-8px); }
@@ -641,9 +655,10 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
   }
 }
 @media (prefers-reduced-motion: reduce){
-  .chip-search-box.is-idle-guide .chip-search{
-    animation: chip-search-glow .5s ease-in-out infinite;
-  }
+  .chip-search-box.is-idle-guide .chip-search,
+  .btn.is-idle-guide{
+  animation: chip-search-glow .5s ease-in-out infinite;
+}
   @keyframes chip-search-glow{
     0%,100%{ box-shadow: 0 0 0 0 rgba(78,115,223,0); }
     50%    { box-shadow: 0 0 0 6px rgba(78,115,223,.55); }
@@ -665,8 +680,16 @@ html[data-theme="dark"] .chip-selected-title,
 html[data-theme="dark"] .chip-all-title{color:#cbd5e1}
 html[data-theme="dark"] .chip.is-unwanted{background:#a74444; border-color:#ff6d6d}
 html[data-theme="dark"] .chip.is-unwanted:hover{background:#fa6060;border-color: #f79c9c;}
-html[data-theme="dark"] .chip-list--selected{background:var(--surface); border-color:var(--border-strong)}
-html[data-theme="dark"] .chip-list--selected:empty::before{color:#64748b}
+html[data-theme="dark"] .chip-list--selected{
+  background:var(--surface);
+  border-color:var(--border-strong);
+}
+html[data-theme="dark"] .chip-list--selected.is-hidden{
+  display:none;
+}
+html[data-theme="dark"] .chip-list--selected:empty::before{
+  color:#64748b;
+}
 html[data-theme="dark"] .chip{background:var(--surface); color:var(--text); border-color:var(--border-strong)}
 html[data-theme="dark"] .chip:hover{background:#1e3a8a; border-color:#3b82f6}
 html[data-theme="dark"] .chip.is-selected{background:#3b82f6; color:#fff; border-color:#60a5fa}
@@ -1092,7 +1115,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
       <div class="chip-selected-row">
         <div class="chip-selected-title">✅ สกิลที่ต้องการ</div>
         <div id="minHint" class="hint hint--error"></div>
-        <div id="chipSelected" class="chip-list chip-list--selected" aria-live="polite"></div>
+        <div id="chipSelected" class="chip-list chip-list--selected is-hidden" aria-live="polite"></div>
       </div>
       <div class="chip-search-wrap">
         <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">➕ เพิ่มสกิลที่ต้องการ</div>
@@ -1112,7 +1135,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <button class="chip-unwanted-toggle" id="chipUnwantedToggle" type="button" aria-expanded="false">▼ แสดง</button>
         </div>
         <div class="chip-unwanted-body" id="chipUnwantedBody">
-          <div id="chipUnwanted" class="chip-list chip-list--unwanted" aria-live="polite"></div>
+          <div id="chipUnwanted" class="chip-list chip-list--unwanted is-hidden" aria-live="polite"></div>
           <div class="chip-search-wrap" style="margin-top:6px">
             <div style="font-size:12px;font-weight:600;color:#dc2626;margin-bottom:4px">➕ เพิ่มสกิลที่ไม่ต้องการ</div>
             <div class="chip-search-box">
@@ -2695,24 +2718,33 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   }
 
   function renderSelected(){
-    const wrap = document.getElementById('chipSelected');
-    if (!wrap) return;
-    wrap.innerHTML = '';
-    window._chipSelected.forEach(name => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip is-selected chip-entering';
-      b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
-      b.title = 'คลิกเพื่อเอาออก';
-      b.addEventListener('click', ()=>{
-        removeAbility(name);
-        refreshChips();
-        notify();
-      });
-      wrap.appendChild(b);
-      requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
-    });
+  const wrap = document.getElementById('chipSelected');
+  if (!wrap) return;
+
+  wrap.innerHTML = '';
+
+  if (!window._chipSelected.length){
+    wrap.classList.add('is-hidden');
+    return;
   }
+
+  wrap.classList.remove('is-hidden');
+
+  window._chipSelected.forEach(name => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip is-selected chip-entering';
+    b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+    b.title = 'คลิกเพื่อเอาออก';
+    b.addEventListener('click', ()=>{
+      removeAbility(name);
+      refreshChips();
+      notify();
+    });
+    wrap.appendChild(b);
+    requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
+  });
+}
 
   function renderAll(){
     const wrap = document.getElementById('chipAll');
@@ -2786,19 +2818,29 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     return true;
   }
   function renderUnwantedSelected(){
-    const wrap = document.getElementById('chipUnwanted');
-    if(!wrap) return;
-    wrap.innerHTML='';
-    window._chipUnwanted.forEach(name=>{
-      const b=document.createElement('button');
-      b.type='button'; b.className='chip is-unwanted chip-entering';
-      b.innerHTML=`<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
-      b.title='คลิกเพื่อเอาออก';
-      b.addEventListener('click',()=>{ removeUnwanted(name); refreshUnwantedChips(); });
-      wrap.appendChild(b);
-      requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
-    });
+  const wrap = document.getElementById('chipUnwanted');
+  if(!wrap) return;
+
+  wrap.innerHTML='';
+
+  if(!window._chipUnwanted.length){
+    wrap.classList.add('is-hidden');
+    return;
   }
+
+  wrap.classList.remove('is-hidden');
+
+  window._chipUnwanted.forEach(name=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='chip is-unwanted chip-entering';
+    b.innerHTML=`<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+    b.title='คลิกเพื่อเอาออก';
+    b.addEventListener('click',()=>{ removeUnwanted(name); refreshUnwantedChips(); });
+    wrap.appendChild(b);
+    requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
+  });
+}
   function renderUnwantedAll(){
     const wrap=document.getElementById('chipUnwantedAll');
     const allWrap=document.getElementById('chipUnwantedAllWrap');
@@ -2963,8 +3005,10 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   const TUTORIAL_KEY = 'tutorial_autoshown_once_v1';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
-  const IDLE_GUIDE_MS = 10000; // 10 วินาที: ชี้ด้วยการเขย่าช่องค้นหา
+  const IDLE_GUIDE_MS = 10000; // 10 วินาที
   const chipSearchBox = document.querySelector('#chipSearch')?.closest('.chip-search-box');
+  const calcBtn = document.getElementById('calcBtn');
+  const calcBtn2 = document.getElementById('calcBtn2');
   const IDLE_TUTORIAL_MS = 90000; // ปรับ idle time
   let idleGuideTimer = null;
   let idleTimer = null;
@@ -2994,19 +3038,27 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 }
 
   function playIdleGuide(){
-  if (!chipSearchBox) return;
   if (sheet?.classList.contains('show')) return;
-  // Skip if element is scrolled out of view
-  const rect = chipSearchBox.getBoundingClientRect();
+
+  const desiredCount = Array.isArray(window._chipSelected) ? window._chipSelected.length : 0;
+  const targetEl = desiredCount < 4 ? chipSearchBox : (calcBtn || calcBtn2);
+
+  if (!targetEl) return;
+
+  const rect = targetEl.getBoundingClientRect();
   if (rect.bottom < 0 || rect.top > window.innerHeight) return;
 
-  chipSearchBox.classList.remove('is-idle-guide');
-  void chipSearchBox.offsetWidth;
-  chipSearchBox.classList.add('is-idle-guide');
-  }
+  chipSearchBox?.classList.remove('is-idle-guide');
+  calcBtn?.classList.remove('is-idle-guide');
+  calcBtn2?.classList.remove('is-idle-guide');
+
+  void targetEl.offsetWidth;
+  targetEl.classList.add('is-idle-guide');
+}
 function stopIdleGuide(){
-  if (!chipSearchBox) return;
-  chipSearchBox.classList.remove('is-idle-guide');
+  chipSearchBox?.classList.remove('is-idle-guide');
+  calcBtn?.classList.remove('is-idle-guide');
+  calcBtn2?.classList.remove('is-idle-guide');
 }
   function startIdleGuideTimer(){
     clearTimeout(idleGuideTimer);
@@ -3016,10 +3068,10 @@ function stopIdleGuide(){
   }
 
   function resetIdleGuideTimer(){
-    clearTimeout(idleGuideTimer);
-    chipSearchBox?.classList.remove('is-idle-guide');
-    startIdleGuideTimer();
-  }
+  clearTimeout(idleGuideTimer);
+  stopIdleGuide();
+  startIdleGuideTimer();
+}
 
   function startIdleTutorialTimer(){
     clearTimeout(idleTimer);
