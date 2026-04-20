@@ -3041,7 +3041,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   if (sheet?.classList.contains('show')) return;
 
   const desiredCount = Array.isArray(window._chipSelected) ? window._chipSelected.length : 0;
-  const targetEl = desiredCount < 4 ? chipSearchBox : (calcBtn || calcBtn2);
+  const targetEl = desiredCount < 4 ? chipSearchBox : (calcBtn ?? calcBtn2);
 
   if (!targetEl) return;
 
