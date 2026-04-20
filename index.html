@@ -914,16 +914,22 @@ html[data-theme="dark"] .btn--ghost-reset:hover{background:#3a0f14}
 .topk-preset:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 html[data-theme="dark"] .topk-preset{background:var(--surface);color:var(--text);border-color:var(--border-strong)}
 html[data-theme="dark"] .topk-preset:hover{border-color:#6679b1;color:#ffffff;background:#1e2d53}
-html[data-theme="dark"] .topk-preset.active{background:#6790d1;border-color:#60a5fa}
+html[data-theme="dark"] .topk-preset.active{background:#3b82f6;border-color:#60a5fa}
 /* === Chip :active feedback === */
 @media (prefers-reduced-motion:no-preference){.chip:active{transform:scale(.93)}}
 /* === Toast bottom on mobile === */
 @media (max-width:768px){
   .toast{
+    width: 60vw !important;
+    max-width: none !important;
     top: 50% !important;
     bottom: auto !important;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.95);
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word;
+    line-height: 1.6 !important;
     backdrop-filter: blur(8px);
     transition: all 0.2s ease;
   }
@@ -2432,7 +2438,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <h3 id="fbConfirmTitle" class="fb-confirm__title">ยืนยันการส่งความคิดเห็น</h3>
       <button type="button" class="fb-confirm__close" data-fbcancel aria-label="ปิด">×</button>
     </div>
-    <div class="fb-confirm__body">
+    <div class="fb-confirm__body" style="word-break: normal;overflow-wrap: break-word;">
       <p class="fb-confirm__msg">
         <strong class="fb-confirm__msg--alert" style="font-weight: 500;font-size: 18px;color: black;">
           🚨 แบบฟอร์มนี้สำหรับส่งความคิดเห็นเฉพาะเว็บไซต์นี้เท่านั้น 
