@@ -244,13 +244,13 @@
   .note{font-size:12px;color:#666;margin-top:6px}
 
   .toast{
-    position:fixed;left:50%;top:47%;transform:translateX(-50%);
+    position:fixed;left:50%;top:47%;transform:translateX(-50%) scale(0.95);
     background:rgb(0, 0, 0,1);color:#ffffff;padding:20px 28px;border-radius:10px;
-    box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:.25s ease;
+    box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition: all .25s ease;backdrop-filter: blur(8px);
     z-index: 1200;font-weight:700
   }
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .toast.hide{opacity:0;transform:translateX(-50%) translateY(-10px)}
+  .toast.show{opacity:1;transform:translateX(-50%) scale(1)}
+  .toast.hide{opacity:0;transform:translateX(-50%) scale(0.9)}
 
   .hint{margin:4px 0 4px 0;font-size:12px;display:flex;align-items:center;gap:8px}
   .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
@@ -712,7 +712,7 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 /* ===== Tutorial Bottom Sheet ===== */
 .tutorial-sheet{
   position:fixed;inset:0;z-index:2400;
-  background:rgba(0,0,0,.5);
+  background:rgba(0,0,0,.75);
   display:none;align-items:flex-end;justify-content:center;
 }
 .tutorial-sheet.show{ display:flex; }
@@ -729,27 +729,34 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   background:#cbd5e1;margin:0 auto 16px auto;
 }
 .tutorial-sheet__title{margin:0 0 16px 0;font-size:20px;font-weight:700;color:#1e3a8a;text-align:center}
-.tutorial-steps{list-style:none;margin:0 0 14px 0;padding:0;display:flex;flex-direction:column;gap:14px}
-.tutorial-steps li{display:flex;align-items:flex-start;gap:12px}
-.tutorial-num{font-size:22px;line-height:1.2;flex-shrink:0}
+.tutorial-steps{list-style:none;margin:0 0 14px 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.tutorial-steps li{display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:12px;padding:10px 12px;border-left:4px solid #e2e8f0}
+.tutorial-step-icon{font-size:26px;line-height:1;flex-shrink:0;width:34px;text-align:center;padding-top:2px}
+.tutorial-step-head{display:flex;align-items:center;gap:5px;margin-bottom:2px;flex-wrap:wrap}
+.tutorial-step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.tutorial-opt{font-size:11px;color:#94a3b8;font-weight:400}
 .tutorial-steps li div{font-size:15px;line-height:1.5}
 .tutorial-sub{display:block;font-size:13px;color:#64748b;margin-top:2px}
 .tutorial-tip{
-  font-size:13px;color:#475569;background:#f1f5f9;
+  font-size:13px;color:#7c96bb;background:#f1f5f9;
   border-radius:10px;padding:8px 12px;margin:0 0 16px 0;
 }
 .tutorial-sheet__close{width:100%;margin-top:4px}
-html[data-theme="dark"] .tutorial-sheet__dialog{background:#111827;color:#e5e7eb}
+/* chip-unwanted hint — hides when panel is open */
+.chip-unwanted-hint{font-size:12px;color:#9ca3af;padding-left:2px}
+#chipUnwantedBody.open + .chip-unwanted-hint{display:none}
+html[data-theme="dark"] .tutorial-sheet__dialog{background:#111827;color:#e5e7eb;box-shadow:0 -8px 32px rgba(255, 255, 255, 0.18);}
 html[data-theme="dark"] .tutorial-sheet__title{color:#60a5fa}
 html[data-theme="dark"] .tutorial-sub{color:#94a3b8}
-html[data-theme="dark"] .tutorial-tip{background:#1e293b;color:#94a3b8}
+html[data-theme="dark"] .tutorial-tip{background:#17202d;color:#738297}
 html[data-theme="dark"] .tutorial-sheet__handle{background:#475569}
+html[data-theme="dark"] .tutorial-steps li{background:#1e293b}
 
 /* ===== Section divider ===== */
-.section-divider{display:flex;align-items:center;gap:10px;margin:20px 0 8px}
-.section-divider__line{flex:1;height:2px;background:#e2e8f0}
+.section-divider{display:flex;align-items:center;gap:10px;margin:8px 0 8px}
+.section-divider__line{flex:1;height:2px;background:#bcd3ef}
 .section-divider__text{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;letter-spacing:.4px}
-html[data-theme="dark"] .section-divider__line{background:#334155}
+html[data-theme="dark"] .section-divider__line{background:#4c6079}
 html[data-theme="dark"] .section-divider__text{color:#64748b}
 
 /* ===== Mobile UX fixes ===== */
@@ -784,7 +791,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 
   /* 8. result card-head — ทุกกล่องบรรทัดเดียวกัน */
   .result-card .card-head{flex-wrap:nowrap!important;gap:6px!important;justify-content:flex-start!important}
-  .result-card .card-head .badges{margin-left:0!important;flex:1!important;flex-wrap:nowrap!important;justify-content:flex-end!important;align-items:center!important;gap:4px!important}
+  .result-card .card-head .badges{margin-left:0!important;flex:1!important;flex-wrap:wrap!important;justify-content:flex-end!important;align-items:center!important;gap:4px!important}
   .result-card .card-head .badge{padding:2px 6px!important;font-size:11px!important;gap:3px!important}
   .result-card .card-head .btn-copy{flex-shrink:0!important}
 }
@@ -813,14 +820,29 @@ html[data-theme="dark"] .btn--ghost-reset:hover{background:#3a0f14}
 .topk-preset.active{background:#2e59d9;color:#fff;border-color:#1f4ac5}
 .topk-preset:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
 html[data-theme="dark"] .topk-preset{background:var(--surface);color:var(--text);border-color:var(--border-strong)}
-html[data-theme="dark"] .topk-preset.active{background:#3b82f6;border-color:#60a5fa}
+html[data-theme="dark"] .topk-preset:hover{border-color:#6679b1;color:#ffffff;background:#1e2d53}
+html[data-theme="dark"] .topk-preset.active{background:#6790d1;border-color:#60a5fa}
 /* === Chip :active feedback === */
 @media (prefers-reduced-motion:no-preference){.chip:active{transform:scale(.93)}}
 /* === Toast bottom on mobile === */
 @media (max-width:768px){
-  .toast{top:auto !important;bottom:calc(72px + env(safe-area-inset-bottom));transform:translateX(-50%)}
-  .toast.show{transform:translateX(-50%) translateY(0)}
-  .toast.hide{transform:translateX(-50%) translateY(8px)}
+  .toast{
+    top: 50% !important;
+    bottom: auto !important;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+
+  .toast.show{
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .toast.hide{
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
 }
 
 /* badge--extra-sm: compact extra count */
@@ -834,14 +856,14 @@ html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border
   transition:none;
 }
 .row-extra--collapsible.expanded .extra-text{display:block;-webkit-line-clamp:unset;overflow:visible}
-.row-extra--collapsible::after{content:'▾ เพิ่มเติม';position:absolute;right:8px;top:6px;font-size:11px;opacity:.6;font-weight:600}
-.row-extra--collapsible.expanded::after{content:'▴ ย่อลง'}
+.row-extra--collapsible::after{content:'▼ เพิ่มเติม';position:absolute;right:8px;top:6px;font-size:11px;opacity:.6;font-weight:600}
+.row-extra--collapsible.expanded::after{content:'▲ ย่อลง'}
 
 /* === Unwanted skills section === */
-.chip-unwanted-section{margin-top:10px;border-top:2px solid #cbd5e1;padding-top:8px}
+.chip-unwanted-section{margin-top:10px;border-top:1.5px solid #cbd5e1;padding-top:8px}
 .chip-unwanted-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:6px}
 .chip-unwanted-title{font-size:14px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:6px}
-.chip-unwanted-toggle{background:none;border:none;cursor:pointer;font-size:13px;color:#dc2626;padding:0 4px}
+.chip-unwanted-toggle{background:none;border:none;cursor:pointer;font-size:13px;color:#dc2626;padding:0 4px;font-family:"LINE Seed Sans TH","Kanit",sans-serif}
 /* chip-unwanted-body transitions handled by chipAnimCSS */
 .chip-list--unwanted{padding:6px;background:#fff5f5;border:1px dashed #fca5a5;border-radius:10px;min-height:36px}
 .chip-list--unwanted:empty::before{content:"ยังไม่เลือก — พิมพ์ค้นหาด้านล่าง";color:#fca5a5;font-size:13px;font-style:italic}
@@ -855,7 +877,7 @@ html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border
 #chipUnwantedAll .chip:not(.is-unwanted):hover{background:#fff5f5;border-color:#fca5a5;color:#991b1b}
 #chipUnwantedAll .chip:not(.is-unwanted):focus-visible{outline-color:#fca5a5}
 html[data-theme="dark"] #chipUnwantedAll .chip:not(.is-unwanted):hover{background:#4c0519;border-color:#f87171;color:#fecaca}
-html[data-theme="dark"] .chip-unwanted-section{border-top-color:#7f1d1d}
+html[data-theme="dark"] .chip-unwanted-section{border-top-color:#625050}
 html[data-theme="dark"] .chip-list--unwanted{background:#3a0f14;border-color:#7f1d1d}
 html[data-theme="dark"] .chip-list--unwanted:empty::before{color:#fca5a5}
 html[data-theme="dark"] .chip-unwanted-title{color:#fca5a5}
@@ -910,26 +932,81 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
     <div class="tutorial-sheet__handle"></div>
     <h3 id="tutorialTitle" class="tutorial-sheet__title">วิธีใช้งาน</h3>
     <ol class="tutorial-steps">
-      <li>
-        <span class="tutorial-num">①</span>
-        <div><strong>เลือกความสามารถที่ต้องการ</strong>
-          <span class="tutorial-sub">พิมพ์ค้นหาในช่องค้นหา แล้วแตะเลือกสกิล (สูงสุด 14 สกิล — ยิ่งเยอะยิ่งแม่น)</span>
+      <li style="border-left-color:#16a34a">
+        <span class="tutorial-step-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" class="icon">
+  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M8 12l3 3l5-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</span>
+        <div>
+          <div class="tutorial-step-head">
+            <span class="tutorial-step-num" style="background:#16a34a">1</span>
+            <strong>เลือกความสามารถที่ต้องการ</strong>
+          </div>
+          <span class="tutorial-sub">พิมพ์ค้นหาในช่องค้นหา แล้วแตะเลือกสกิล (ขั้นต่ำ 4 สกิล สูงสุด 14 สกิล — ยิ่งเยอะยิ่งแม่น)</span>
         </div>
       </li>
-      <li>
-        <span class="tutorial-num">②</span>
-        <div><strong>เลือกตัวละคร</strong> (ถ้ามี)
-          <span class="tutorial-sub">ระบบจะล็อกจี้ [ลิงก์] ให้อัตโนมัติ 1 ช่อง</span>
+      <li style="border-left-color:#dc2626">
+        <span class="tutorial-step-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" class="tutorial-step-icon-svg">
+    <!-- วงกลม -->
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    <!-- เส้นทแยง -->
+    <line x1="7" y1="7" x2="17" y2="17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>
+</span>
+        <div>
+          <div class="tutorial-step-head">
+            <span class="tutorial-step-num" style="background:#dc2626">2</span>
+            <strong>ระบุสกิลที่ไม่ต้องการ</strong>
+            <span class="tutorial-opt">  [ไม่บังคับ]</span>
+          </div>
+          <span class="tutorial-sub">กด ▼ แสดง ที่หัวข้อ "🚫 สกิลที่ไม่ต้องการ" แล้วค้นหาและเลือกสกิลที่ไม่อยากได้ในเซ็ต ระบบจะจัดอันดับเซ็ตที่หลีกเลี่ยงสกิลเหล่านั้นก่อน</span>
         </div>
       </li>
-      <li>
-        <span class="tutorial-num">③</span>
-        <div><strong>ใส่จำนวนเซ็ตที่ต้องการ</strong> แล้วกดปุ่ม "ค้นหาเซ็ตจี้"
-          <span class="tutorial-sub">ระบบจะหาเซ็ต 4 จี้ที่ตรงกับสกิลของคุณมากที่สุด</span>
+      <li style="border-left-color:#7c3aed">
+        <span class="tutorial-step-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" class="tutorial-step-icon-svg">
+    <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M4 20c0-3.5 4-6 8-6s8 2.5 8 6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"/>
+  </svg>
+</span>
+        <div>
+          <div class="tutorial-step-head">
+            <span class="tutorial-step-num" style="background:#7c3aed">3</span>
+            <strong>เลือกตัวละคร</strong>
+            <span class="tutorial-opt">  [ไม่บังคับ]</span>
+          </div>
+          <span class="tutorial-sub">ระบบจะล็อกจี้ [ลิงก์] ให้อัตโนมัติ 1 ช่องตามตัวละครที่เลือก</span>
+        </div>
+      </li>
+      <li style="border-left-color:#3b82f6">
+        <span class="tutorial-step-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" class="tutorial-step-icon-svg">
+    <!-- วงกลม -->
+    <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    <!-- ด้ามแว่น -->
+    <line x1="14.5" y1="14.5" x2="20" y2="20"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"/>
+  </svg>
+</span>
+        <div>
+          <div class="tutorial-step-head">
+            <span class="tutorial-step-num" style="background:#3b82f6">4</span>
+            <strong>เลือกจำนวนเซ็ต แล้วกด "ค้นหาเซ็ตจี้"</strong>
+          </div>
+          <span class="tutorial-sub">ระบบจะหาเซ็ต 4 จี้ที่ตรงกับสกิลของคุณมากที่สุด จัดอันดับให้อัตโนมัติ</span>
         </div>
       </li>
     </ol>
-    <p class="tutorial-tip">💡 แตะที่ชื่อจี้ในผลลัพธ์เพื่อดูความสามารถเต็มของแต่ละจี้</p>
+    <p class="tutorial-tip">💡 Tip: แตะที่ชื่อจี้ในผลลัพธ์เพื่อดูความสามารถเต็มของแต่ละจี้</p>
     <button id="tutorialClose" type="button" class="btn btn--primary tutorial-sheet__close">เข้าใจแล้ว เริ่มใช้งาน</button>
   </div>
 </div>
@@ -952,8 +1029,8 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
     <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-    <button id="helpBtn" class="help-btn" type="button" aria-label="วิธีใช้งาน">❓</button>
-    <button id="themeToggle" class="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button>
+    <button id="helpBtn" class="help-btn" type="button" aria-label="วิธีใช้งาน"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.454 1.272 1.454 3.329 0 4.601-.42.367-.891.61-1.378.733V13.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75c.44 0 .845-.188 1.128-.46.282-.273.372-.613.372-.957 0-.343-.09-.684-.372-.957zM12 15.75a.75.75 0 100 1.5.75.75 0 000-1.5z" clip-rule="evenodd"/></svg></button>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="เปลี่ยนธีม"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd"/></svg></button>
   </div>
 </header>
 
@@ -968,28 +1045,6 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
 
 <main>
   <section>
-    <!-- เลือกตัวละคร (ล็อกจี้ [ลิงก์]) — ย้ายมาด้านบนสุดตาม UX -->
-    <div class="row-two-col" id="charRow">
-      <div class="col">
-        <label for="charSelect"><strong><span class="head-icon">👤</span>ตัวละคร</strong></label>
-        <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
-          <option value="">— ไม่เลือกตัวละคร—</option>
-        </select>
-        <div class="input-help">ⓘ เมื่อเลือกตัวละคร ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-link">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
-        
-        <div id="charPreview" class="char-preview" aria-live="polite">
-          <span class="cp-icon">🔒</span>
-          <div>
-            <div>จี้ลิงก์ที่จะล็อก: <span class="cp-jewel"></span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-   <div class="section-divider" aria-hidden="true">
-      <div class="section-divider__line"></div>
-     </div>
-
     <h2 class="head-with-counter" style="margin-top:4px">
       <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 14 สกิล)</span>
       <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="14" aria-valuenow="0" aria-label="จำนวนที่เลือก">
@@ -1019,7 +1074,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
       <div class="chip-unwanted-section">
         <div class="chip-unwanted-header" id="chipUnwantedHeader">
           <span class="chip-unwanted-title">🚫 สกิลที่ไม่ต้องการ</span>
-          <button class="chip-unwanted-toggle" id="chipUnwantedToggle" type="button" aria-expanded="false">▾ แสดง</button>
+          <button class="chip-unwanted-toggle" id="chipUnwantedToggle" type="button" aria-expanded="false">▼ แสดง</button>
         </div>
         <div class="chip-unwanted-body" id="chipUnwantedBody">
           <div id="chipUnwanted" class="chip-list chip-list--unwanted" aria-live="polite"></div>
@@ -1035,12 +1090,32 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
             <div id="chipUnwantedAll" class="chip-list chip-list--all"></div>
           </div>
         </div>
+        <div class="chip-unwanted-hint">ⓘ กดปุ่ม <strong>▼ แสดง</strong> เพื่อระบุสกิลที่ไม่ต้องการในเซ็ต</div>
       </div>
 
-      
     </div>
 
-<div class="row-two-col">
+    <div class="section-divider" aria-hidden="true" style="margin-top:16px;"><div class="section-divider__line"></div></div>
+
+    <!-- ตัวละคร -->
+    <div class="row-two-col" id="charRow">
+      <div class="col">
+        <label for="charSelect"><strong><span class="head-icon">👤</span>ตัวละคร</strong></label>
+        <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
+          <option value="">— ไม่เลือกตัวละคร—</option>
+        </select>
+        <div class="input-help">ⓘ เมื่อเลือกตัวละคร ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-link">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
+        <div id="charPreview" class="char-preview" aria-live="polite">
+          <span class="cp-icon">🔒</span>
+          <div><div>จี้ลิงก์ที่จะล็อก: <span class="cp-jewel"></span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider" aria-hidden="true"><div class="section-divider__line"></div></div>
+
+    <!-- จำนวนเซ็ต + ดาร์ค -->
+    <div class="row-two-col">
       <div class="col">
         <label><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
         <div class="topk-wrap">
@@ -1054,7 +1129,6 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           </div>
         </div>
         <input id="topK" class="simple" type="number" min="3" max="50" value="10" style="display:none">
-    
       </div>
       <div class="col">
         <label style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;min-height:44px">
@@ -1065,17 +1139,16 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
     </div>
 
     <div class="row-actions">
-  <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-  <button id="shareBtn" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
-  <button id="resetBtn" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
-</div>
-
+      <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
+      <button id="shareBtn" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
+      <button id="resetBtn" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
+    </div>
 
     <!-- Sticky CTA (mobile/tablet only) -->
-   <div class="cta-bar" aria-label="ตัวเลือกด่วน">
-  <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-  <button id="shareBtn2" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
-  <button id="resetBtn2" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
+    <div class="cta-bar" aria-label="ตัวเลือกด่วน">
+      <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
+      <button id="shareBtn2" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
+      <button id="resetBtn2" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
 </div>
 
   </section>
@@ -1210,6 +1283,9 @@ function showErrorBanner(text){
 
 function updateCalcAvailability(){
   const count = getDesired().length;
+  const charEl = document.getElementById('charSelect');
+  const charName = charEl ? ((charEl.tomselect ? charEl.tomselect.getValue() : charEl.value) || '').trim() : '';
+  const waitingCharSheet = charName && !window.__charSheetReady;
   // ปุ่มพร้อม/ไม่พร้อม + ข้อความแนะนำ
   if (count < MIN_SELECTS){
     calcBtn.disabled = true;
@@ -1217,6 +1293,12 @@ function updateCalcAvailability(){
     minHint.classList.remove('hint--ok');
     minHint.classList.add('hint--error');
     minHint.innerHTML = `<span class="dot"></span><span>เลือกอีก ${MIN_SELECTS - count} ความสามารถเพื่อเริ่มค้นหา (ขั้นต่ำ ${MIN_SELECTS} สกิล)</span>`;
+  }else if(waitingCharSheet){
+    calcBtn.disabled = true;
+    calcBtn2.disabled = true;
+    minHint.classList.remove('hint--error');
+    minHint.classList.add('hint--ok');
+    minHint.innerHTML = `<span class="dot"></span><span>กำลังโหลดข้อมูลตัวละคร…</span>`;
   }else{
     calcBtn.disabled = false;
     calcBtn2.disabled = false;
@@ -1420,7 +1502,8 @@ function buildCandidates(desired, sourceJewels, unwanted=[]){
   }
   const slots = Math.max(0, SPEED_CFG.CANDIDATE_LIMIT - guaranteed.length);
   const rest = all.filter(c=>!guaranteedIds.has(c.id)).slice(0, slots);
-  return [...guaranteed, ...rest];
+  // re-sort หลัง merge เพื่อให้ suffixOr pruning ทำงานถูกต้อง
+  return [...guaranteed, ...rest].sort((a,b)=>(_popcount(b.mask)-_popcount(a.mask))||(b.score-a.score));
 }
 
 // Unified worker code builder — single source of truth for both 3-combo and 4-combo paths
@@ -1534,10 +1617,12 @@ self.onmessage = function(e){
 window.buildWorkerCode = buildWorkerCode;
 
 let _workerBlobUrl = null;
+let _4comboWorkerCode = null;
 function recreateWorker(){
   if(worker){ worker.terminate(); worker = null; }
   if(_workerBlobUrl){ URL.revokeObjectURL(_workerBlobUrl); _workerBlobUrl = null; }
-  _workerBlobUrl = URL.createObjectURL(new Blob([buildWorkerCode('4combo')],{type:'application/javascript'}));
+  if(!_4comboWorkerCode) _4comboWorkerCode = buildWorkerCode('4combo');
+  _workerBlobUrl = URL.createObjectURL(new Blob([_4comboWorkerCode],{type:'application/javascript'}));
   worker = new Worker(_workerBlobUrl);
   worker.onmessage = (e)=>{
     const msg=e.data;
@@ -1551,9 +1636,15 @@ function recreateWorker(){
       else __etaState.smoothSec=__etaState.smoothSec*0.7+etaSec*0.3;
       setCalcProgress(1+Math.round(p),`กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
     }else if(msg.type==='result'){
-      renderResults(msg.best);
-      hideCalcOverlay();
-      hideLoading();
+      try{
+        renderResults(msg.best);
+      }catch(err){
+        console.error('renderResults error:', err);
+        showErrorBanner('เกิดข้อผิดพลาดในการแสดงผลลัพธ์: ' + (err?.message || err));
+      }finally{
+        hideCalcOverlay();
+        hideLoading();
+      }
     }
   };
 }
@@ -1603,7 +1694,7 @@ async function calculate(){
       return;
     }
 
-    resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
+    if(resultTitle) resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
     document.getElementById('result').innerHTML = '';
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     setCalcProgress(10,'เริ่มค้นหาเซ็ตจี้ที่ดีที่สุด');
@@ -1627,8 +1718,8 @@ function restoreEmptyState(){
     <div class="empty-state" id="resultEmptyState">
       <div class="empty-state__icon">✨</div>
       <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
-      <div class="empty-state__msg">เลือกความสามารถอย่างน้อย 4 อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
-      
+      <div class="empty-state__msg">เลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
+
     </div>`;
 }
 
@@ -1708,7 +1799,7 @@ function renderResults(best){
 
     const headerHTML = `
   <div class="card-head">
-    <h3><span class="rank-full">อันดับ ${i+1}</span><span class="rank-short">#${i+1}</span></h3>
+    <h3 aria-label="อันดับ ${i+1}"><span class="rank-full" aria-hidden="true">อันดับ ${i+1}</span><span class="rank-short" aria-hidden="true">#${i+1}</span></h3>
     ${badgesHTML}
   </div>
 `;
@@ -1717,9 +1808,9 @@ card.innerHTML = `
   ${headerHTML}
   <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
   <div class="card-info">
-    <p>${notMatchHTML}</p>
-    <p>${unwantedHTML}</p>
-    <p>${extraHTML}</p>
+    ${notMatchHTML ? `<p>${notMatchHTML}</p>` : ''}
+    ${unwantedHTML ? `<p>${unwantedHTML}</p>` : ''}
+    ${extraHTML ? `<p>${extraHTML}</p>` : ''}
     <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
   </div>
 `;
@@ -1792,7 +1883,7 @@ function resetAll(){
   if (chipAllWrap) chipAllWrap.hidden = true;
 
   restoreEmptyState();
-  resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
 
   // ล้างตัวเลือกตัวละครและ preview
   const charSel = document.getElementById('charSelect');
@@ -1812,7 +1903,7 @@ function enableTouchTooltips(){ /* mobile toast disabled by request */ }
 
 darkOnly?.addEventListener('change', ()=>{
   restoreEmptyState();
-  resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
 });
 
 // ===== Keyword map: ability → [alias, alias, ...] =====
@@ -1820,17 +1911,18 @@ darkOnly?.addEventListener('change', ()=>{
 // ถ้าไม่มี sheet หรือ fetch ล้มเหลว → ใช้ map ว่าง (ค้นหาปกติยังทำงาน)
 const KEYWORD_GID = '850304016'; // ← ใส่ gid ของ sheet "Keywords" ที่นี่ เช่น '123456789'
 
+let _keywordFailed = false;
 function fetchKeywordSheet(){
   if (!KEYWORD_GID) return Promise.resolve(new Map());
   return new Promise((resolve)=>{
     const cbName = '__KeywordsGViz_' + Date.now();
-    const timeout = setTimeout(()=>{ delete window[cbName]; resolve(new Map()); }, 6000);
+    const timeout = setTimeout(()=>{ delete window[cbName]; _keywordFailed = true; resolve(new Map()); }, 6000);
     window[cbName] = function(resp){
       clearTimeout(timeout);
       delete window[cbName];
       try{
         const table = resp && resp.table;
-        if (!table){ resolve(new Map()); return; }
+        if (!table){ _keywordFailed = true; resolve(new Map()); return; }
         const cols = (table.cols||[]).map(c=>(c.label||c.id||'').toString().trim());
         const map = new Map();
         (table.rows||[]).forEach(r=>{
@@ -1842,12 +1934,12 @@ function fetchKeywordSheet(){
           if (kws.length) map.set(ability, kws);
         });
         resolve(map);
-      }catch(e){ resolve(new Map()); }
+      }catch(e){ _keywordFailed = true; resolve(new Map()); }
     };
     const tqx = encodeURIComponent(`out:json;responseHandler:${cbName}`);
     const src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${KEYWORD_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
     const sc = document.createElement('script'); sc.src = src;
-    sc.onerror = ()=>{ clearTimeout(timeout); resolve(new Map()); };
+    sc.onerror = ()=>{ clearTimeout(timeout); _keywordFailed = true; resolve(new Map()); };
     document.head.appendChild(sc);
   });
 }
@@ -1870,6 +1962,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     hideLoading();
     showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
                                '❓ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+    if(_keywordFailed) setTimeout(()=> showToast('ℹ️ ค้นสกิลด้วยชื่อตรงๆ ได้เลย (ไม่สามารถโหลดคำค้นหาเพิ่มเติมได้)', 4000), 2800);
     bindShareButtons();
     applyStateFromURL();
 
@@ -2045,15 +2138,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </script>
 <script>
 (function(){
+  let _debTimer = null;
   function setHeaderOffset(){
     const h = document.querySelector('header');
-    if(!h) return;
-    const px = Math.round(h.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--header-h', px + 'px');
+    if(h) document.documentElement.style.setProperty('--header-h', Math.round(h.getBoundingClientRect().height) + 'px');
+    const cta = document.querySelector('.cta-bar');
+    if(cta) document.documentElement.style.setProperty('--cta-h', Math.round(cta.getBoundingClientRect().height) + 'px');
+  }
+  function debouncedSetHeaderOffset(){
+    clearTimeout(_debTimer);
+    _debTimer = setTimeout(setHeaderOffset, 100);
   }
   window.addEventListener('load', setHeaderOffset, {once:true});
-  window.addEventListener('resize', setHeaderOffset);
-  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(setHeaderOffset); }
+  window.addEventListener('resize', debouncedSetHeaderOffset);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(debouncedSetHeaderOffset); }
   setTimeout(setHeaderOffset, 250);
 })();
 </script>
@@ -2085,70 +2183,65 @@ document.addEventListener('DOMContentLoaded', ()=>{
     tip.style.top = y + 'px';
   }
 
-  function bind(el){
-    el.addEventListener('mouseenter', ()=>showTip(el));
-    el.addEventListener('mouseleave', hideTip);
-    el.addEventListener('mousemove', ()=>positionTip(el));
+  // Event delegation — ผูก listener ครั้งเดียวบน document แทน per-element
+  // แก้ปัญหา listener สะสมทุกครั้งที่ renderResults() สร้างการ์ดใหม่
 
-    let lpTimer = null;
-    let longPressed = false;
-    let didMove = false;
-    let startX = 0, startY = 0;
-    const MOVE_TOL = 10;
-    const LONG_PRESS_MS = 450;
-    function clearLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } }
-
-    el.addEventListener('touchstart', (ev)=>{
-      if(ev.touches.length !== 1) return;
-      const t = ev.touches[0];
-      startX = t.clientX; startY = t.clientY;
-      longPressed = false;
-      didMove = false;
-      clearLP();
-      lpTimer = setTimeout(()=>{ longPressed = true; showTip(el); positionTip(el); }, LONG_PRESS_MS);
-    }, {passive:true});
-
-    el.addEventListener('touchmove', (ev)=>{
-      const t = ev.touches[0];
-      const dx = Math.abs(t.clientX - startX);
-      const dy = Math.abs(t.clientY - startY);
-      if(dx>MOVE_TOL || dy>MOVE_TOL){ didMove = true; clearLP(); }
-    }, {passive:true});
-
-    el.addEventListener('touchend', ()=>{
-      clearLP();
-      if(longPressed){
-        setTimeout(hideTip, 1800);
-      } else if(!didMove){
-        if(tip.classList.contains('show')){ hideTip(); }
-        else { showTip(el); positionTip(el); setTimeout(hideTip, 2500); }
-      }
-    }, {passive:true});
-
-    el.addEventListener('touchcancel', ()=>{ clearLP(); hideTip(); }, {passive:true});
-
-    if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
-    el.addEventListener('focus', ()=>showTip(el));
-    el.addEventListener('blur', hideTip);
-    el.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') hideTip(); });
-  }
-
-  function init(){
-    document.querySelectorAll('.jewel-column[data-tooltip]').forEach(bind);
-  }
-  if(document.readyState !== 'loading') init();
-  else document.addEventListener('DOMContentLoaded', init);
-
-  const obs = new MutationObserver(muts=>{
-    muts.forEach(m=>{
-      m.addedNodes && m.addedNodes.forEach(n=>{
-        if(n.nodeType!==1) return;
-        if(n.matches && n.matches('.jewel-column[data-tooltip]')) bind(n);
-        n.querySelectorAll && n.querySelectorAll('.jewel-column[data-tooltip]').forEach(bind);
-      });
-    });
+  // Mouse
+  document.addEventListener('mouseover', e=>{
+    const el=e.target.closest('.jewel-column[data-tooltip]');
+    if(el) showTip(el);
   });
-  obs.observe(document.body, {childList:true, subtree:true});
+  document.addEventListener('mouseout', e=>{
+    const el=e.target.closest('.jewel-column[data-tooltip]');
+    if(el && !el.contains(e.relatedTarget)) hideTip();
+  });
+  document.addEventListener('mousemove', e=>{
+    if(!tip.classList.contains('show')) return;
+    const el=e.target.closest('.jewel-column[data-tooltip]');
+    if(el) positionTip(el);
+  });
+
+  // Touch — long-press delegation (state รวมไว้ที่ module level)
+  const LONG_PRESS_MS=450, MOVE_TOL=10;
+  let lpTimer=null, longPressed=false, didMove=false, startX=0, startY=0, activeEl=null;
+  function clearLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
+
+  document.addEventListener('touchstart', e=>{
+    const el=e.target.closest('.jewel-column[data-tooltip]');
+    if(!el||e.touches.length!==1) return;
+    const t=e.touches[0];
+    activeEl=el; startX=t.clientX; startY=t.clientY;
+    longPressed=false; didMove=false; clearLP();
+    lpTimer=setTimeout(()=>{ longPressed=true; showTip(el); positionTip(el); },LONG_PRESS_MS);
+  },{passive:true});
+
+  document.addEventListener('touchmove', e=>{
+    if(!activeEl) return;
+    const t=e.touches[0];
+    if(Math.abs(t.clientX-startX)>MOVE_TOL||Math.abs(t.clientY-startY)>MOVE_TOL){ didMove=true; clearLP(); }
+  },{passive:true});
+
+  document.addEventListener('touchend', ()=>{
+    if(!activeEl) return;
+    const el=activeEl; activeEl=null; clearLP();
+    if(longPressed){ setTimeout(hideTip,1800); }
+    else if(!didMove){
+      if(tip.classList.contains('show')) hideTip();
+      else { showTip(el); positionTip(el); setTimeout(hideTip,2500); }
+    }
+  },{passive:true});
+
+  document.addEventListener('touchcancel',()=>{ clearLP(); hideTip(); activeEl=null; },{passive:true});
+
+  // Keyboard
+  document.addEventListener('focusin', e=>{
+    const el=e.target.closest('.jewel-column[data-tooltip]');
+    if(el){ if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0'); showTip(el); }
+  });
+  document.addEventListener('focusout', e=>{
+    if(e.target.closest('.jewel-column[data-tooltip]')) hideTip();
+  });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') hideTip(); });
 })();
 </script>
 <script>
@@ -2547,6 +2640,9 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
     if (sel.includes(name) || sel.length >= max) return false;
     sel.push(name);
+    // auto-remove from unwanted if overlapping
+    const uidx = window._chipUnwanted.indexOf(name);
+    if(uidx !== -1){ window._chipUnwanted.splice(uidx, 1); refreshUnwantedChips(); }
     return true;
   }
 
@@ -2697,9 +2793,11 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     // === topK preset buttons ===
     (function(){
       const topKHidden = document.getElementById('topK');
+      const topKHelp = document.getElementById('topKHelp');
       function setTopK(val){
-        if(topKHidden) topKHidden.value = val;
+        if(topKHidden){ topKHidden.value = val; topKHidden.classList.remove('is-invalid'); }
         document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
+        if(topKHelp) topKHelp.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
       }
       document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
       if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); setTopK(topKHidden.value); }
@@ -2734,7 +2832,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       const btn=document.getElementById('chipUnwantedToggle');
       if(!body||!btn) return;
       const open=body.classList.toggle('open');
-      btn.textContent=open?'▴ ซ่อน':'▾ แสดง';
+      btn.textContent=open?'▲ ซ่อน':'▼ แสดง';
       btn.setAttribute('aria-expanded',String(open));
     });
   });
@@ -2748,14 +2846,16 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   (function(){
     var btn = document.getElementById('themeToggle');
     if(!btn) return;
+    var SVG_MOON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd"/></svg>';
+    var SVG_SUN  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg>';
     var saved; try{ saved=localStorage.getItem('theme'); }catch(e){}
     if(saved==='dark'||saved==='light'){ document.documentElement.setAttribute('data-theme',saved); }
-    btn.textContent = document.documentElement.getAttribute('data-theme')==='dark' ? '☀️' : '🌙';
+    btn.innerHTML = document.documentElement.getAttribute('data-theme')==='dark' ? SVG_SUN : SVG_MOON;
     btn.addEventListener('click', function(){
       var next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
-      btn.textContent = next==='dark' ? '☀️' : '🌙';
-      try{ localStorage.setItem('theme', next); }catch(e){}
+      btn.innerHTML = next==='dark' ? SVG_SUN : SVG_MOON;
+      try{ localStorage.setItem('theme', next); }catch(e){ if(typeof showToast==='function') showToast('⚠️ ไม่สามารถบันทึกธีมได้', 2500, 'warn'); }
     });
   })();
 
@@ -2781,7 +2881,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       if (j) linkId = j.id;
     }
     if (nameEl) nameEl.textContent = name;
-    if (jewelEl) jewelEl.textContent = linkId || '— ไม่พบจี้ลิงก์ —';
+    if (jewelEl) jewelEl.textContent = linkId || 'ตัวละครนี้ไม่มีจี้ลิงก์';
     cp.classList.add('show');
   }
   // hook via polling (TomSelect init is async)
@@ -3193,7 +3293,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       if (topK < 3) topK = 3;
       if (topK > 50) topK = 50;
 
-      window.resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
+      if(window.resultTitle) window.resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
       document.getElementById('result').innerHTML = '';
       if (typeof window.showCalcOverlay === 'function') window.showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
       if (typeof window.setCalcProgress === 'function') window.setCalcProgress(10, 'กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
@@ -3226,22 +3326,13 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     };
   }
 
-  // 4) patchRenderResults: ไม่ต้องยัดจี้ลิงก์หลัง render แล้ว (Worker จัดการถูกต้องแล้ว)
-  function patchRenderResults(){
-    // ไม่ต้องทำอะไร — Worker ส่ง ids ที่มี fixedLink.id อยู่แล้วเป็นตัวแรก
-  }
-
-  // 5) Try to sort inside render pipeline when creating group array (fallback if we have access)
-  // Not always possible without direct source, so we rely on r.ids ordering above.
-
-  // 6) Init on DOM ready
+  // 4) Init on DOM ready
   document.addEventListener('DOMContentLoaded', async ()=>{
     // After jewels available, build character select
     await buildCharacterSelect();
     addCharToShareURL();
     await applyCharFromURL();
     patchCalculate();
-    patchRenderResults();
   });
 })();
 </script>
@@ -3341,6 +3432,8 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
         console.warn('[CharGViz] ไม่พบข้อมูลตัวละคร — ตรวจสอบว่า gid=513976173 มีข้อมูลและเปิดแชร์ให้ Anyone');
       }
     } catch(e){ console.warn('[CharGViz] parse error', e); }
+    window.__charSheetReady = true;
+    if(typeof updateCalcAvailability === 'function') updateCalcAvailability();
   };
 
   function loadCharGViz(){
@@ -3349,7 +3442,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     const s = document.createElement('script');
     s.src = src;
     s.async = true;
-    s.onerror = () => console.warn('[CharGViz] โหลดไม่สำเร็จ: ตรวจสิทธิ์แชร์ sheet ให้ Anyone with the link – Viewer');
+    s.onerror = () => { console.warn('[CharGViz] โหลดไม่สำเร็จ: ตรวจสิทธิ์แชร์ sheet ให้ Anyone with the link – Viewer'); window.__charSheetReady = true; if(typeof updateCalcAvailability === 'function') updateCalcAvailability(); };
     document.head.appendChild(s);
   }
 
