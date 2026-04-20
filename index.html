@@ -689,6 +689,14 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
     0%,100%{ box-shadow: 0 0 0 0 rgba(78,115,223,0); }
     50%    { box-shadow: 0 0 0 6px rgba(78,115,223,.55); }
   }
+  html[data-theme="dark"] .chip-search-box.is-idle-guide .chip-search,
+  html[data-theme="dark"] .btn.is-idle-guide {
+    animation: chip-search-glow-dark 0.5s ease-in-out infinite;
+  }
+  @keyframes chip-search-glow-dark {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(100, 160, 255, 0); }
+    50% {box-shadow: 0 0 0 6px rgba(116, 202, 255, 0.8); }
+  }
 }
 .chip-search{
   width:100%;padding:8px 36px 8px 12px;border:1.5px solid #4e73df;border-radius:10px;
