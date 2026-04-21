@@ -60,12 +60,12 @@
     overflow-wrap: anywhere;
     line-height: 1.5;
   }
-  body{font-family:"LINE Seed Sans TH","Kanit",sans-serif;margin:0;background:#f4f6f8;color:#333}
+  body{font-family:var(--font-ui);margin:0;background:var(--bg);color:var(--text)}
 
   /* ความกว้างหน้า: เดสก์ท็อป 2 คอลัมน์ + กว้างขึ้นบนจอใหญ่ */
   main{
-    display:grid;grid-template-columns:1fr 1fr;gap:16px;
-    padding:5px;margin:0 auto; margin-top: 10px;
+    display:grid;grid-template-columns:1fr 1fr;gap:var(--space-7);
+    padding:var(--space-2);margin:0 auto; margin-top: var(--space-4);
     max-width:1200px;
   }
   @media (min-width:1440px){ main{max-width:1400px} }
@@ -74,12 +74,12 @@
 
   /* Tablet/มือถือ -> 1 คอลัมน์ */
   @media (max-width:1024px){
-    main{ grid-template-columns:1fr; gap:18px; padding:5px }
+    main{ grid-template-columns:1fr; gap:18px; padding:var(--space-2) }
   }
 
-  section{background:#fff;padding:14px 16px;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-  h2{margin:0 0 8px 0;color:#4e73df;font-size:20px}
-  h2, header, label { font-family: "LINE Seed Sans TH", "Kanit", sans-serif; }
+  section{background:var(--surface);padding:var(--space-6) var(--space-7);border-radius:var(--radius-xl);box-shadow:var(--shadow-card)}
+  h2{margin:0 0 var(--space-1) 0;color:var(--primary-2);font-size:20px}
+  h2, header, label { font-family: var(--font-ui); }
 
   /* หัวข้อ + counter */
   .head-with-counter{
@@ -87,59 +87,59 @@
   }
   .sel-counter{
     color:#385b8c;font-weight:600;font-size:14px;
-    background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:6px 12px
+    background:var(--chip-bg);border:1px solid var(--chip-border);border-radius:var(--radius-pill);padding:var(--space-2) var(--space-5)
   }
 
   /* ===== Controls ===== */
-  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-2)}
   @media (min-width:1280px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
   .ts-wrapper.single .ts-control{min-height:38px;padding:4px 10px}
   .ts-wrapper.single .ts-control .item,.ts-wrapper.single .ts-control input{line-height:26px;font-size:16px !important}
-  .ts-wrapper .ts-control{border:1.5px solid #4e73df;border-radius:8px}
+  .ts-wrapper .ts-control{border:1.5px solid var(--primary-2);border-radius:var(--radius-sm)}
   .ts-dropdown{z-index:9999}
   .option {font-size:14px !important;}
 
-  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
-  .row label{font-size:14px;color:#555}
+  .row{display:flex;flex-wrap:wrap;gap:var(--space-4);align-items:center;margin:var(--space-4) 0}
+  .row label{font-size:14px;color:var(--text-muted)}
   .row input.simple{
-    padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;width:160px;font-size:16px;min-height:44px
+    padding:var(--space-4) var(--space-5);border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface);width:160px;font-size:16px;min-height:44px
   }
   /* กัน iOS ซูม */
   @media (max-width:768px){
     input, select, textarea, .ts-wrapper .ts-control{ font-size:16px }
   }
 
-  .row-two-col{display:flex;gap:16px;align-items:center;margin:6px 0;padding:4px 0;}
+  .row-two-col{display:flex;gap:var(--space-7);align-items:center;margin:var(--space-2) 0;padding:var(--space-1) 0;}
   .row-two-col > .col{flex:1;min-width:0}
   .checkbox-lg{width:24px;height:24px;vertical-align:middle} /* ≥ 44px โดยรวม label */
 
   /* ปุ่มใหญ่แตะง่าย + โฟกัสชัด */
-  .row-actions{display:flex;gap:12px;align-items:center;margin-top:6px}
+  .row-actions{display:flex;gap:var(--space-5);align-items:center;margin-top:var(--space-2)}
   .btn{
-    font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-weight:800;
+    font-family:var(--font-ui);font-weight:800;
     display:inline-block;flex:1;text-align:center;border:none;
-    padding:16px 20px;border-radius:12px;cursor:pointer;
-    font-size:18px;letter-spacing:.3px;transition:.15s;color:#fff;min-height:44px
+    padding:var(--space-7) var(--space-8);border-radius:var(--radius-lg);cursor:pointer;
+    font-size:18px;letter-spacing:0;transition:.15s;color:#fff;min-height:44px
   }
-  .btn--primary{background:#2e59d9;font-weight:700;box-shadow:0 6px 16px rgba(46,89,217,.35)}
-  .btn--primary:hover{background:#1f4ac5;box-shadow:0 8px 18px rgba(31,74,197,.4)}
+  .btn--primary{background:var(--primary);font-weight:700;box-shadow:var(--shadow-primary)}
+  .btn--primary:hover{background:var(--primary-2);box-shadow:var(--shadow-primary-hover)}
   .btn--secondary{
-  background:#6b7280; /* gray-500 */
-  box-shadow:0 6px 16px rgba(107,114,128,.35);
+  background:var(--secondary);
+  box-shadow:var(--shadow-secondary);
 }
 .btn--secondary:hover{
-  background:#4b5563; /* gray-600 */
-  box-shadow:0 8px 18px rgba(75,85,99,.4);
+  background:var(--secondary-2);
+  box-shadow:var(--shadow-secondary-hover);
 }
 
-  .btn--danger{background:#e74a3b;font-weight:700;box-shadow:0 6px 16px rgba(231,74,59,.35)}
-  .btn--danger:hover{background:#c0392b;box-shadow:0 8px 18px rgba(192,57,43,.4)}
+  .btn--danger{background:var(--danger);font-weight:700;box-shadow:var(--shadow-danger)}
+  .btn--danger:hover{background:var(--danger-2);box-shadow:var(--shadow-danger-hover)}
   .btn[disabled]{opacity:.6;cursor:not-allowed}
   .btn:focus-visible,
   select:focus-visible,
   input:focus-visible,
   .ts-wrapper .ts-control:focus-within{
-    outline:3px solid #7aa2ff; outline-offset:2px
+    outline:var(--focus-ring); outline-offset:2px
   }
 
     /* ===== Sticky CTA (มือถือ/แท็บเล็ต) ===== */
@@ -248,7 +248,7 @@
     position:fixed;left:50%;top:47%;transform:translateX(-50%) scale(0.95);
     background:rgb(0, 0, 0,1);color:#ffffff;padding:20px 28px;border-radius:10px;
     box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition: all .25s ease;backdrop-filter: blur(8px);
-    z-index: 1200;font-weight:700;
+    z-index: 3700;font-weight:700;
     text-align:center;
   }
   .toast.show{opacity:1;transform:translateX(-50%) scale(1)}
@@ -298,9 +298,9 @@
   }
 
 /* ==== UX/UI Enhancements (Aug 2025) ==== */
-header{background:linear-gradient(180deg,#4e73df,#0a1d55);color:#fff;padding:0 12px;font-size:14px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:space-between;min-height:44px}
+header{background:linear-gradient(180deg,var(--primary),#0a1d55);color:#fff;padding:0 var(--space-5);font-size:14px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.2);position:fixed;top:0;left:0;right:0;z-index:3000;display:flex;align-items:center;justify-content:space-between;min-height:44px}
 header .brand{text-align:center;padding-top:0!important}
-.brand-title{font-size:22px;font-weight:700;margin:0;color:#fff;letter-spacing:.3px}
+.brand-title{font-size:22px;font-weight:700;margin:0;color:#fff;letter-spacing:0}
 .brand-subtitle{font-size:14px;opacity:.9}
 
 .steps-inline{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px 0;padding:0;list-style:none}
@@ -308,16 +308,16 @@ header .brand{text-align:center;padding-top:0!important}
 .steps-inline li2{display:flex;align-items:center;gap:8px;background:rgba(31,74,197,.14);border:1px solid rgba(16,39,71,.28);border-radius:12px;padding:4px 10px;font-size:13px;color:#fff;}
 .steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1f4ac5;color:#fff;font-weight:700;font-size:12px}
 
-.input-help{font-size:12px;color:#475569;margin-top:6px}
+.input-help{font-size:12px;color:var(--text-soft);margin-top:var(--space-2)}
 #topK.simple{width:100px !important}
 .is-valid{border-color:#16a34a!important; box-shadow:0 0 0 3px rgba(22,163,74,.15)!important}
 .is-invalid{border-color:#dc2626!important; box-shadow:0 0 0 3px rgba(220,38,38,.12)!important}
 
-.badge-neutral{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe}
+.badge-neutral{display:inline-block;padding:2px var(--space-3);border-radius:var(--radius-pill);font-weight:600;background:var(--primary-soft);color:#1e3a8a;border:1px solid #c7d2fe}
 .badge-link{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;background:#fdf5ea;color:#8b4513;border:1px solid #d9b382}
 
 .btn{font-weight:700} /* ลดจาก 800 -> 700 */
-.btn:focus-visible{outline:3px solid #7aa2ff; outline-offset:2px}
+.btn:focus-visible{outline:var(--focus-ring); outline-offset:2px}
 @media (prefers-reduced-motion:no-preference){
   .btn:hover{transform:translateY(-1px)}
   .btn:active{transform:translateY(0)}
@@ -549,7 +549,7 @@ header .brand{ padding-top:6px; }
   padding: 18px 20px;
   border-radius: 14px;
   box-shadow: 0 16px 36px rgba(0,0,0,.35);
-  z-index: 2000;
+  z-index: 4000;
   width: min(90vw, 560px);
   text-align: center;
 }
@@ -564,16 +564,31 @@ header .brand{ padding-top:6px; }
   .toast-consent__msg{ font-size: 14px; }
 }
 
-/* ===== UX v3: dark mode variables ===== */
+/* ===== Design tokens & theme variables ===== */
 :root{
-  --bg:#f4f6f8; --surface:#ffffff; --surface-2:#f7f7f8; --text:#222; --text-muted:#555;
-  --border:#e5e7eb; --border-strong:#cbd5e1; --primary:#2e59d9; --primary-2:#1f4ac5;
-  --chip-bg:#f1f5f9; --chip-border:#e2e8f0; --shadow:0 4px 12px rgba(0,0,0,.08);
+  --font-ui:"LINE Seed Sans TH","Kanit",sans-serif;
+  --bg:#f4f6f8; --surface:#ffffff; --surface-2:#f7f7f8; --surface-muted:#f8fafc;
+  --text:#222; --text-strong:#111827; --text-muted:#555; --text-soft:#64748b;
+  --border:#e5e7eb; --border-strong:#cbd5e1;
+  --primary:#2e59d9; --primary-2:#1f4ac5; --primary-soft:#eef2ff;
+  --secondary:#6b7280; --secondary-2:#4b5563; --secondary-soft:#f1f5f9; --secondary-soft-2:#e2e8f0;
+  --danger:#e74a3b; --danger-2:#c0392b; --danger-text:#b91c1c; --danger-soft:#fff1f2; --danger-soft-2:#fee2e2; --danger-border:#fecdd3;
+  --chip-bg:#f1f5f9; --chip-border:#e2e8f0;
+  --radius-xs:6px; --radius-sm:8px; --radius-md:10px; --radius-lg:12px; --radius-xl:14px; --radius-pill:999px;
+  --space-1:4px; --space-2:6px; --space-3:8px; --space-4:10px; --space-5:12px; --space-6:14px; --space-7:16px; --space-8:20px;
+  --shadow:0 4px 12px rgba(0,0,0,.08); --shadow-card:var(--shadow); --shadow-modal:0 16px 36px rgba(0,0,0,.35);
+  --shadow-primary:0 6px 16px rgba(46,89,217,.35); --shadow-primary-hover:0 8px 18px rgba(31,74,197,.4);
+  --shadow-secondary:0 6px 16px rgba(107,114,128,.35); --shadow-secondary-hover:0 8px 18px rgba(75,85,99,.4);
+  --shadow-danger:0 6px 16px rgba(231,74,59,.35); --shadow-danger-hover:0 8px 18px rgba(192,57,43,.4);
+  --focus-ring:3px solid #7aa2ff; --focus-ring-danger:3px solid #fca5a5; --overlay:rgba(0,0,0,.75);
 }
 html[data-theme="dark"]{
-  --bg:#0f172a; --surface:#1e293b; --surface-2:#1e293b; --text:#e5e7eb; --text-muted:#94a3b8;
+  --bg:#0f172a; --surface:#1e293b; --surface-2:#1e293b; --surface-muted:#1e293b;
+  --text:#e5e7eb; --text-strong:#e5e7eb; --text-muted:#94a3b8; --text-soft:#94a3b8;
   --border:#334155; --border-strong:#475569; --primary:#3b82f6; --primary-2:#60a5fa;
-  --chip-bg:#1e293b; --chip-border:#334155; --shadow:0 4px 12px rgba(0,0,0,.4);
+  --secondary-soft:#334155; --secondary-soft-2:#475569;
+  --danger-text:#fca5a5; --danger-soft:transparent; --danger-soft-2:#3a0f14; --danger-border:#7f1d1d;
+  --chip-bg:#1e293b; --chip-border:#334155; --shadow:0 4px 12px rgba(0,0,0,.4); --shadow-card:var(--shadow);
 }
 html[data-theme="dark"] body{background:var(--bg); color:var(--text)}
 html[data-theme="dark"] section{background:var(--surface); color:var(--text); box-shadow:var(--shadow)}
@@ -649,15 +664,15 @@ html[data-theme="dark"] .sel-progress__track{background:#334155}
 html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 
 /* ===== UX v3: Chip picker ===== */
-.chip-picker{margin:6px 0 10px 0;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px}
-.chip-selected-row{margin-bottom:8px}
-.chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:4px 0}
-.chip-list{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
+.chip-picker{margin:var(--space-2) 0 var(--space-4) 0;padding:var(--space-4);background:var(--surface-muted);border:1px solid var(--chip-border);border-radius:var(--radius-lg)}
+.chip-selected-row{margin-bottom:var(--space-3)}
+.chip-selected-title,.chip-all-title{font-size:16px;font-weight:700;color:#475569;margin:var(--space-1) 0}
+.chip-list{display:flex;flex-wrap:wrap;gap:var(--space-2);min-height:36px}
 .chip-list--selected{
-  padding:6px;
-  background:#fff;
-  border:1px dashed #cbd5e1;
-  border-radius:10px;
+  padding:var(--space-2);
+  background:var(--surface);
+  border:1px dashed var(--border-strong);
+  border-radius:var(--radius-md);
 }
 .chip-list--selected.is-hidden{
   display:none;
@@ -669,20 +684,20 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
   font-style:italic;
 }
 .chip{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 12px;border-radius:999px;border:1px solid #cbd5e1;
-  background:#fff;color:#334155;font-size:13px;font-weight:400;cursor:pointer;
+  display:inline-flex;align-items:center;gap:var(--space-2);
+  padding:var(--space-2) var(--space-5);border-radius:var(--radius-pill);border:1px solid var(--border-strong);
+  background:var(--surface);color:#334155;font-size:13px;font-weight:400;cursor:pointer;
   transition:.12s;user-select:none;font-family:inherit;
 }
-.chip:hover{background:#eef2ff;border-color:#93a7e0}
+.chip:hover{background:var(--primary-soft);border-color:#93a7e0}
 
-.chip.is-selected{background:#2e59d9;color:#fff;border-color:#1f4ac5;font-weight:600}
-.chip.is-selected:hover{background:#1f4ac5}
+.chip.is-selected{background:var(--primary);color:#fff;border-color:var(--primary-2);font-weight:600}
+.chip.is-selected:hover{background:var(--primary-2)}
 .chip.is-disabled{opacity:.4;cursor:not-allowed}
-.chip.is-disabled:hover{background:#fff;border-color:#cbd5e1}
+.chip.is-disabled:hover{background:var(--surface);border-color:var(--border-strong)}
 .chip .chip-x{font-size:16px;line-height:1;opacity:.8}
-.chip:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
-.chip-search-wrap{margin:6px 0 4px 0}
+.chip:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.chip-search-wrap{margin:var(--space-2) 0 var(--space-1) 0}
 .chip-search-box{position:relative;display:flex;align-items:center}
 @media (prefers-reduced-motion: no-preference){
   .chip-search-box.is-idle-guide,
@@ -716,10 +731,10 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
   }
 }
 .chip-search{
-  width:100%;padding:8px 36px 8px 12px;border:1.5px solid #4e73df;border-radius:10px;
-  font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box;
+  width:100%;padding:var(--space-3) 36px var(--space-3) var(--space-5);border:1.5px solid var(--primary-2);border-radius:var(--radius-md);
+  font-size:16px;font-family:inherit;background:var(--surface);color:var(--text-strong);box-sizing:border-box;
 }
-.chip-search:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+.chip-search:focus-visible{outline:var(--focus-ring);outline-offset:2px}
 .chip-search-clear{
   position:absolute;right:8px;top:50%;transform:translateY(-50%);
   background:none;border:none;cursor:pointer;font-size:15px;color:#2b3a54;
@@ -782,16 +797,138 @@ html[data-theme="dark"] .empty-state__title{color:#cbd5e1}
 html[data-theme="dark"] .row-actions{background:var(--surface);border-top-color:#334155}
 
 /* ===== UX v3: QR Modal ===== */
-.qr-modal{position:fixed;inset:0;z-index:2500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75)}
+.qr-modal{position:fixed;inset:0;z-index:2500;display:none;align-items:center;justify-content:center;background:var(--overlay)}
 .qr-modal.show{display:flex;}
-.qr-modal__dialog{background:#fff;border-radius:14px;padding:20px;max-width:360px;width:92vw;text-align:center;box-shadow:0 16px 36px rgba(0,0,0,.35);animation: chip-pop 0.5s ease}
-.qr-modal__title{font-size:18px;font-weight:700;margin:0 0 10px 0;color:#2e59d9}
-.qr-modal__canvas{display:flex;justify-content:center;margin:10px 0}
-.qr-modal__url{font-size:12px;color:#475569;word-break:break-all;background:#f1f5f9;padding:6px 8px;border-radius:8px;margin:8px 0}
-.qr-modal__close{margin-top:8px}
-html[data-theme="dark"] .qr-modal__dialog{background:#111827;color:#e5e7eb}
-html[data-theme="dark"] .qr-modal__title{color:#60a5fa}
-html[data-theme="dark"] .qr-modal__url{background:#1e293b;color:#cbd5e1}
+.qr-modal__dialog{background:var(--surface);border-radius:var(--radius-xl);padding:var(--space-8);max-width:360px;width:92vw;text-align:center;box-shadow:var(--shadow-modal);animation: modal-show 0.25s ease-out}
+.qr-modal__title{font-size:18px;font-weight:700;margin:0 0 var(--space-4) 0;color:var(--primary)}
+.qr-modal__canvas{display:flex;justify-content:center;margin:var(--space-4) 0}
+.qr-modal__url{font-size:12px;color:var(--text-soft);word-break:break-all;background:var(--chip-bg);padding:var(--space-2) var(--space-3);border-radius:var(--radius-sm);margin:var(--space-3) 0}
+.qr-modal__close{margin-top:var(--space-3)}
+html[data-theme="dark"] .qr-modal__dialog{background:#111827;color:var(--text)}
+html[data-theme="dark"] .qr-modal__title{color:var(--primary-2)}
+html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1}
+
+/* ===== Favorite filter modal ===== */
+.fav-modal{position:fixed;inset:0;z-index:3600;display:none;align-items:center;justify-content:center;background:var(--overlay);padding:var(--space-7);box-sizing:border-box}
+.fav-modal.show{display:flex}
+.fav-modal__dialog{background:var(--surface);border-radius:var(--radius-xl);width:min(560px,94vw);max-height:min(720px,92vh);overflow:auto;box-shadow:var(--shadow-modal);font-family:var(--font-ui);animation: modal-show 0.25s ease-out;}
+.fav-modal__header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-5);padding:var(--space-6) var(--space-7);border-bottom:1px solid var(--chip-border);background:var(--surface-muted)}
+.fav-modal__title{margin:0;color:#1e3a8a;font-size:18px;font-weight:600}
+.fav-count{color:var(--text-soft);font-size:14px;font-weight:600}
+.fav-modal__close{border:none;background:transparent;color:#334155;font-size:24px;line-height:1;cursor:pointer}
+.fav-modal__body{padding:var(--space-6) var(--space-7)}
+.fav-tabs{display:flex;gap:var(--space-2);margin-bottom:var(--space-4);padding:var(--space-1);background:var(--surface-muted);border:1px solid var(--chip-border);border-radius:var(--radius-md)}
+.fav-tab{flex:1;border:none;border-radius:var(--radius-sm);background:transparent;color:var(--text-soft);font-family:inherit;font-size:14px;font-weight:700;padding:var(--space-3) var(--space-4);cursor:pointer}
+.fav-tab.active{background:var(--primary);color:#fff}
+.fav-tab:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.fav-panel[hidden]{display:none}
+.fav-toolbar{display:flex;align-items:center;gap:var(--space-3)}
+.fav-search{flex:1;min-width:160px;border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);font-size:14px;font-family:inherit;box-sizing:border-box}
+.fav-search:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.fav-btn[disabled]{opacity:.45;cursor:not-allowed}
+.fav-save-panel{display:none;margin:var(--space-4) 0 var(--space-6) 0;padding:var(--space-5);border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface-muted)}
+.fav-save-panel.show{display:block}
+.fav-field{display:block;font-weight:700;color:#334155;font-size:14px}
+.fav-input{display:block;width:100%;box-sizing:border-box;margin-top:var(--space-2);border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);font-size:16px;font-family:inherit}
+.fav-summary{margin:var(--space-2) 0 var(--space-5) 0;color:var(--text-soft);font-size:13px;line-height:1.5}
+.fav-list{display:flex;flex-direction:column;gap:var(--space-4);margin-top:var(--space-5)}
+.fav-empty{padding:18px var(--space-5);border:1px dashed var(--border-strong);border-radius:var(--radius-md);text-align:center;color:var(--text-soft);background:var(--surface-muted);font-size: 13px;}
+.fav-item{border:1px solid var(--chip-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);background:var(--surface)}
+.fav-item__name{font-weight:600;color:#1e293b;font-size:15px;margin-bottom:4px}
+.fav-item__meta{font-size:12px;color:var(--text-soft);line-height:1.45;margin-bottom:var(--space-4)}
+.saved-result-jewels{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin:var(--space-3) 0}
+.saved-result-jewel{border:1px solid var(--chip-border);border-radius:var(--radius-sm);background:var(--surface-muted);padding:var(--space-3);font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.15;text-align: center;display:flex;align-items:center;justify-content:center}
+.saved-result-metrics{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4)}
+.saved-result-metric{border:1px solid var(--chip-border);border-radius:var(--radius-pill);background:var(--surface-muted);color:var(--text-soft);padding:2px var(--space-3);font-size:12px;font-weight:400}
+.fav-actions{display:flex;gap:var(--space-3);flex-wrap:wrap}
+.fav-btn{border:none;border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;min-height:36px}
+.fav-btn--primary{background:var(--primary);color:#fff}
+.fav-btn--primary:hover{background:var(--primary-2)}
+.fav-btn--ghost{background:var(--secondary-soft-2);color:#334155}
+.fav-btn--ghost:hover{background:#d8dee6}
+.fav-btn--danger{background:var(--danger-soft);color:var(--danger-text);border:1px solid var(--danger-border)}
+.fav-btn--danger:hover{background:var(--danger-soft-2)}
+html[data-theme="dark"] .fav-btn--danger:hover{border-color:var(--danger-border)}
+html[data-theme="dark"] .fav-modal__dialog{background:#111827;color:#e5e7eb}
+html[data-theme="dark"] .fav-modal__header{background:#1e293b;border-bottom-color:#334155}
+html[data-theme="dark"] .fav-modal__title{color:#60a5fa}
+html[data-theme="dark"] .fav-count{color:#94a3b8}
+html[data-theme="dark"] .fav-modal__close{color:#cbd5e1}
+html[data-theme="dark"] .fav-save-panel,
+html[data-theme="dark"] .fav-empty{background:#1e293b;border-color:#475569;color:#94a3b8}
+html[data-theme="dark"] .fav-field,
+html[data-theme="dark"] .fav-item__name{color:#e5e7eb}
+html[data-theme="dark"] .fav-input,
+html[data-theme="dark"] .fav-search{background:#0f172a;color:#e5e7eb;border-color:#475569}
+html[data-theme="dark"] .fav-summary,
+html[data-theme="dark"] .fav-item__meta{color:#94a3b8}
+html[data-theme="dark"] .fav-item{background:#1e293b;border-color:#334155}
+html[data-theme="dark"] .saved-result-jewel,
+html[data-theme="dark"] .saved-result-metric{background:#0f172a;border-color:#334155}
+html[data-theme="dark"] .fav-btn--ghost{background:#334155;color:#e5e7eb}
+html[data-theme="dark"] .fav-btn--ghost:hover{background:#475569}
+html[data-theme="dark"] .fav-tabs{background:#0f172a;border-color:#334155}
+html[data-theme="dark"] .fav-tab{color:#94a3b8}
+html[data-theme="dark"] .fav-tab.active{background:var(--primary);color:#fff}
+@media (max-width:520px){
+  .fav-toolbar{flex-direction:column;align-items:stretch}
+  .fav-toolbar .fav-btn{width:100%}
+  .fav-search{width:100%}
+}
+
+/* ===== Result product features ===== */
+.data-freshness{display:inline-flex;align-items:center;gap:var(--space-1);margin:0 0 0 2px;color:var(--text-soft);font-size:12px;font-weight:400}
+.result-utility-row{display:flex;flex-direction:column;gap:var(--space-3);margin:0 0 var(--space-4)}
+.compare-tray{display:none;border:1px solid var(--chip-border);border-radius:var(--radius-xl);background:var(--surface-muted);padding:var(--space-5)}
+.compare-tray.show{display:block}
+.compare-tray__head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-4)}
+.compare-tray__title{font-weight:600;color:#1e3a8a;font-size:15px}
+.compare-title-icon{width:15px;height:15px;vertical-align:-2px;margin-right:var(--space-1)}
+.compare-tray__sub{color:var(--text-soft);font-size:12px;font-weight:500;margin-top:1px}
+.compare-tray__items{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-4)}
+.compare-item{border:1px solid var(--chip-border);border-radius:var(--radius-md);background:var(--surface);padding:var(--space-4);font-size:12px;line-height:1.45}
+.compare-item__top{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-3)}
+.compare-item__rank{display:inline-flex;align-items:center;background:var(--primary-soft);color:#1e3a8a;border:1px solid #c7d2fe;border-radius:var(--radius-pill);padding:2px var(--space-3);font-weight:600;font-size:12px}
+.compare-remove{border:none;background:transparent;color:var(--text-soft);font-size:18px;line-height:1;cursor:pointer}
+.compare-jewels{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin-bottom:var(--space-3)}
+.compare-jewel{border:1px solid var(--chip-border);border-radius:var(--radius-sm);background:var(--surface-muted);padding:var(--space-2) var(--space-3);font-weight:600;color:var(--text-strong);font-size:13px;line-height:1.35;text-align: center;white-space: normal; overflow-wrap: anywhere; word-break: break-word;;text-align: center;display:flex;align-items:center;justify-content:center}
+.compare-metrics{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.compare-metric{border:1px solid var(--chip-border);border-radius:var(--radius-pill);background:var(--surface-muted);color:var(--text-soft);padding:2px var(--space-3);font-size:12px;font-weight:400}
+.compare-clear{border:none;background:transparent;color:var(--danger-text);font-family:inherit;font-size:12px;font-weight:400;cursor:pointer}
+.result-guidance{border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:var(--radius-md);background:#fffbeb;color:#78350f;padding:var(--space-4) var(--space-5);font-size:13px;line-height:1.55}
+.result-guidance__title{font-weight:800;margin-bottom:var(--space-1)}
+.result-guidance ul{margin:var(--space-1) 0 0 18px;padding:0}
+.result-action{position:relative;display:inline-flex;align-items:center}
+.result-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:32px;height:26px;padding:0 var(--space-5);border:1px solid var(--chip-border);border-radius:var(--radius-pill);background:var(--surface-muted);color:#334155;cursor:pointer;font-family:inherit;font-size:14px;font-weight:900;line-height:1}
+.result-icon-btn:hover{background:var(--primary-soft);border-color:#c7d2fe;color:#1e3a8a}
+.result-icon-btn.is-active{background:var(--primary);border-color:var(--primary-2);color:#fff}
+.result-card--highlight{outline:4px solid #f59e0b;outline-offset:3px;box-shadow:0 0 0 6px rgba(245,158,11,.18), var(--shadow-card)}
+.result-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;display:none;min-width:120px;background:var(--surface);border:1px solid var(--chip-border);border-radius:var(--radius-md);box-shadow:var(--shadow-modal);padding:var(--space-2)}
+.result-action.open .result-menu{display:block}
+.result-menu button{display:block;width:100%;border:none;background:transparent;color:var(--text);font-family:inherit;font-size:13px;font-weight:400;text-align:left;padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;justify-content:left;gap:6px}
+.result-menu button:hover{background:var(--surface-muted)}
+.extra-skill{border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:0 1px;margin:0;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.extra-skill:hover{color:var(--primary-2)}
+.skill-action-menu{position:fixed;z-index:4000;display:none;min-width:210px;background:var(--surface);border:1px solid var(--chip-border);border-radius:var(--radius-md);box-shadow:var(--shadow-modal);padding:var(--space-2)}
+.skill-action-menu.show{display:block}
+.skill-action-menu__title{font-size:14px;font-weight:600;color:var(--text-soft);padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--chip-border);margin-bottom:var(--space-1)}
+.skill-action-menu button{display:block;width:100%;border:none;background:transparent;color:var(--text);font-family:inherit;font-size:12px;font-weight:500;text-align:left;padding:var(--space-1) var(--space-3) var(--space-1) var(--space-3);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.skill-action-menu button:hover{background:var(--surface-muted)}
+html[data-theme="dark"] .data-freshness{color:#94a3b8}
+html[data-theme="dark"] .compare-tray,
+html[data-theme="dark"] .result-menu,
+html[data-theme="dark"] .skill-action-menu{background:#111827;border-color:#334155}
+html[data-theme="dark"] .compare-tray{background:#0f172a}
+html[data-theme="dark"] .compare-tray__title{color:#60a5fa}
+html[data-theme="dark"] .compare-item{background:#1e293b;border-color:#334155}
+html[data-theme="dark"] .compare-jewel,
+html[data-theme="dark"] .compare-metric{background:#0f172a;border-color:#334155}
+html[data-theme="dark"] .compare-item__rank{background:#1e3a8a;color:#dbeafe;border-color:#3b82f6}
+html[data-theme="dark"] .result-icon-btn{background:#1e293b;border-color:#334155;color:#cbd5e1}
+html[data-theme="dark"] .result-icon-btn:hover{background:#1e3a8a;border-color:#3b82f6;color:#fff}
+html[data-theme="dark"] .result-guidance{background:#3a2a14;color:#fde68a;border-color:#92400e}
+html[data-theme="dark"] .result-menu button:hover,
+html[data-theme="dark"] .skill-action-menu button:hover{background:#1e293b}
 
 /* ===== UX v3: Emoji-minimal section headers ===== */
 .head-icon{font-size:16px;opacity:.8;margin-right:4px}
@@ -806,12 +943,11 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 
 /* ===== Tutorial Bottom Sheet ===== */
 .tutorial-sheet{
-  position:fixed;inset:0;z-index:2400;
+  position:fixed;inset:0;z-index:3650;
   background:rgba(0,0,0,.75);
   display:none;align-items:flex-end;justify-content:center;
   opacity: 0;
 }
-html[data-theme="dark"] .tutorial-sheet{background:rgba(255, 255, 255, 0.5);}
 .tutorial-sheet.show{ display:flex; animation: fade-in 0.25s ease-out forwards;}
 .tutorial-sheet.hiding{ display:flex; animation: fade-out 0.25s ease-out forwards;}
 @keyframes fade-in {
@@ -854,6 +990,7 @@ html[data-theme="dark"] .tutorial-sheet{background:rgba(255, 255, 255, 0.5);}
 .tutorial-step-head{display:flex;align-items:center;gap:5px;margin-bottom:2px;flex-wrap:wrap}
 .tutorial-step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
 .tutorial-opt{font-size:11px;color:#94a3b8;font-weight:400}
+.tutorial-required{font-size:11px;color:#be5165;background:#f6eef1;border:1px solid #e7c9d0;border-radius:999px;padding:1px 7px;font-weight:600}
 .tutorial-steps li div{font-size:15px;line-height:1.5}
 .tutorial-sub{display:block;font-size:13px;color:#64748b;margin-top:2px}
 .tutorial-tip{
@@ -925,14 +1062,15 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
   .result-card .card-head .btn-copy{flex-shrink:0!important}
 }
 
-/* === Dark mode + Help buttons in header === */
-.theme-toggle,.help-btn{
+/* === Dark mode + Header icon buttons === */
+.theme-toggle,.help-btn,.favorite-btn{
   background:rgba(10, 29, 85, 0.5);border:1px solid rgba(78, 114, 223, 1);border-radius:999px;
   color:#fff;cursor:pointer;line-height:1;padding:4px 8px;min-height:36px;min-width:36px;
   display:flex;align-items:center;justify-content:center;
 }
-.theme-toggle:hover,.help-btn:hover{background:rgba(0,0,0,.55)}
-.theme-toggle:focus-visible,.help-btn:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+.favorite-btn{font-size:14px;font-weight:800;background-color: rgba(58, 42, 20, 0.5);border-color: rgb(160, 111, 47);}
+.theme-toggle:hover,.help-btn:hover,.favorite-btn:hover{background:rgba(0,0,0,.55)}
+.theme-toggle:focus-visible,.help-btn:focus-visible,.favorite-btn:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
 /* === Ghost-reset button === */
 .btn--ghost-reset{background:transparent;color:#dc2626;border:1.5px solid #fca5a5;box-shadow:none;font-size:18px;padding:16px 20px;min-height:44px}
 .btn--ghost-reset:hover{background:#fef2f2;border-color:#f87171}
@@ -941,15 +1079,15 @@ html[data-theme="dark"] .btn--ghost-reset:hover{background:#3a0f14}
 /* === Disabled share === */
 .btn--secondary[disabled]{opacity:.4;cursor:not-allowed;transform:none !important}
 /* === topK presets === */
-.topk-wrap{display:flex;flex-direction:column;gap:6px}
-.topk-presets{display:flex;gap:6px}
-.topk-preset{flex:1;padding:8px 4px;border:1.5px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.12s;min-height:40px}
-.topk-preset:hover{border-color:#4e73df;color:#1f4ac5;background:#eef2ff}
-.topk-preset.active{background:#2e59d9;color:#fff;border-color:#1f4ac5}
-.topk-preset:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+.topk-wrap{display:flex;flex-direction:column;gap:var(--space-2)}
+.topk-presets{display:flex;gap:var(--space-2)}
+.topk-preset{flex:1;padding:var(--space-3) var(--space-1);border:1.5px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface);color:#334155;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.12s;min-height:40px}
+.topk-preset:hover{border-color:var(--primary-2);color:var(--primary-2);background:var(--primary-soft)}
+.topk-preset.active{background:var(--primary);color:#fff;border-color:var(--primary-2)}
+.topk-preset:focus-visible{outline:var(--focus-ring);outline-offset:2px}
 html[data-theme="dark"] .topk-preset{background:var(--surface);color:var(--text);border-color:var(--border-strong)}
 html[data-theme="dark"] .topk-preset:hover{border-color:#6679b1;color:#ffffff;background:#1e2d53}
-html[data-theme="dark"] .topk-preset.active{background:#3b82f6;border-color:#60a5fa}
+html[data-theme="dark"] .topk-preset.active{background:var(--primary);border-color:var(--primary-2)}
 /* === Chip :active feedback === */
 @media (prefers-reduced-motion:no-preference){.chip:active{transform:scale(.93)}}
 /* === Toast bottom on mobile === */
@@ -1022,8 +1160,8 @@ html[data-theme="dark"] .badge--extra-sm{background:#1e1b4b;color:#c7d2fe;border
 }
 .chip.is-unwanted{background:#dc2626;color:#fff;border-color:#b91c1c}
 .chip.is-unwanted:hover{background:#b91c1c}
-.chip-unwanted-search{width:100%;padding:8px 36px 8px 12px;border:1.5px solid #fca5a5;border-radius:10px;font-size:16px;font-family:inherit;background:#fff;color:#111827;box-sizing:border-box}
-.chip-unwanted-search:focus-visible{outline:3px solid #fca5a5;outline-offset:2px}
+.chip-unwanted-search{width:100%;padding:var(--space-3) 36px var(--space-3) var(--space-5);border:1.5px solid #fca5a5;border-radius:var(--radius-md);font-size:16px;font-family:inherit;background:var(--surface);color:var(--text-strong);box-sizing:border-box}
+.chip-unwanted-search:focus-visible{outline:var(--focus-ring-danger);outline-offset:2px}
 .chip-unwanted-results{margin-top:6px}
 .chip-unwanted-results-title{font-size:13px;font-weight:600;color:#dc2626;margin-bottom:4px}
 /* hover สีแดงโทนอ่อน เฉพาะ chips ในผลการค้นหาของส่วนสกิลที่ไม่ต้องการ */
@@ -1047,6 +1185,13 @@ html[data-theme="dark"] .chip-unwanted-search{color:#dc2626}
 /* Warning badge on result card */
 .badge--warn{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:3px 8px;font-size:11px;font-weight:700;border-radius:999px;display:inline-flex;align-items:center;gap:3px}
 html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-color:#9f1239}
+
+/* Modal show animation */
+@keyframes modal-show{
+  0%  { transform:scale(0.95); opacity:0; }
+  65% { transform:scale(1.05); opacity:1; }
+  100%{ transform:scale(1);   opacity:1; }
+}
 
 /* Chip pop-in animation */
 @keyframes chip-pop{
@@ -1104,6 +1249,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div class="tutorial-step-head">
             <span class="tutorial-step-num" style="background:#16a34a">1</span>
             <strong>เลือกความสามารถที่ต้องการ</strong>
+            <span class="tutorial-required">จำเป็น</span>
           </div>
           <span class="tutorial-sub">พิมพ์ค้นหาในช่องค้นหา แล้วแตะเลือกสกิล (ขั้นต่ำ 4 สกิล สูงสุด 14 สกิล — ยิ่งเยอะยิ่งแม่น)</span>
         </div>
@@ -1121,7 +1267,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div class="tutorial-step-head">
             <span class="tutorial-step-num" style="background:#dc2626">2</span>
             <strong>ระบุสกิลที่ไม่ต้องการ</strong>
-            <span class="tutorial-opt">  [ไม่บังคับ]</span>
+            <span class="tutorial-opt">  [ไม่จำเป็น]</span>
           </div>
           <span class="tutorial-sub">กด ▼ แสดง ที่หัวข้อ "🚫 สกิลที่ไม่ต้องการ" แล้วค้นหาและเลือกสกิลที่ไม่อยากได้ในเซ็ต ระบบจะจัดอันดับเซ็ตที่หลีกเลี่ยงสกิลเหล่านั้นก่อน</span>
         </div>
@@ -1141,7 +1287,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div class="tutorial-step-head">
             <span class="tutorial-step-num" style="background:#7c3aed">3</span>
             <strong>เลือกตัวละคร</strong>
-            <span class="tutorial-opt">  [ไม่บังคับ]</span>
+            <span class="tutorial-opt">  [ไม่จำเป็น]</span>
           </div>
           <span class="tutorial-sub">ระบบจะล็อกจี้ [ลิงก์] ให้อัตโนมัติ 1 ช่องตามตัวละครที่เลือก</span>
         </div>
@@ -1162,8 +1308,28 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div class="tutorial-step-head">
             <span class="tutorial-step-num" style="background:#3b82f6">4</span>
             <strong>เลือกจำนวนเซ็ต แล้วกด "ค้นหาเซ็ตจี้"</strong>
+            <span class="tutorial-required">จำเป็น</span>
           </div>
           <span class="tutorial-sub">ระบบจะหาเซ็ต 4 จี้ที่ตรงกับสกิลของคุณมากที่สุด จัดอันดับให้อัตโนมัติ</span>
+        </div>
+      </li>
+      <li style="border-left-color:#f59e0b">
+        <span class="tutorial-step-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" class="tutorial-step-icon-svg">
+    <path d="M12 3.5l2.55 5.17l5.7.83l-4.12 4.02l.97 5.68L12 16.52l-5.1 2.68l.97-5.68L3.75 9.5l5.7-.83L12 3.5z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linejoin="round"/>
+  </svg>
+</span>
+        <div>
+          <div class="tutorial-step-head">
+            <span class="tutorial-step-num" style="background:#f59e0b">5</span>
+            <strong>บันทึก Filter ที่ใช้บ่อย</strong>
+            <span class="tutorial-opt">  [ไม่จำเป็น]</span>
+          </div>
+          <span class="tutorial-sub">หลังตั้งค่า Filter ถูกใจแล้ว กด ★ มุมขวาบน เพื่อบันทึกไว้ใช้ซ้ำในครั้งหน้า</span>
         </div>
       </li>
     </ol>
@@ -1190,6 +1356,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
     <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+    <button id="favoriteBtn" class="favorite-btn" type="button" aria-label="Filter ค้นหาที่บันทึกไว้" title="⭐️ Filter ค้นหาที่บันทึกไว้">★</button>
     <button id="helpBtn" class="help-btn" type="button" aria-label="วิธีใช้งาน"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 16.75a1.75 1.75 0 1 0 0 3.5a1.75 1.75 0 0 0 0-3.5zm0-2.5c-.69 0-1.25-.56-1.25-1.25v-.9c0-1.45.85-2.4 2-3.2c1.05-.75 1.8-1.4 1.8-2.5c0-1.4-1.15-2.35-2.75-2.35c-1.2 0-2.1.45-2.85 1.2a.75.75 0 1 1-1.08-1.04c1-1.1 2.6-1.8 4.4-1.8c2.8 0 4.75 1.7 4.75 4.15c0 1.8-1.1 3-2.4 3.9c-1 .7-1.65 1.3-1.65 2.15v.6c0 .69-.56 1.25-1.25 1.25z"/></svg></button>
     <button id="themeToggle" class="theme-toggle" type="button" aria-label="เปลี่ยนธีม"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd"/></svg></button>
   </div>
@@ -1213,6 +1380,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
         <span class="sel-progress__label">0/14</span>
       </span>
     </h2>
+    <div id="dataFreshness" class="data-freshness" aria-live="polite">ข้อมูล: กำลังโหลด...</div>
 
     <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
       <div class="chip-selected-row">
@@ -1317,6 +1485,9 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
   <section style="position:relative">
     <h2 id="resultTitle"><span class="head-icon">💎</span>เซ็ตจี้ที่ดีที่สุด</h2>
     <p id="tooltipHint" class="hint-text"></p>
+    <div class="result-utility-row">
+      <div id="compareTray" class="compare-tray" aria-live="polite"></div>
+    </div>
     <div id="result" class="grid-results">
       <div class="empty-state" id="resultEmptyState">
         <div class="empty-state__icon">✨</div>
@@ -1339,7 +1510,47 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
       <h3 id="qrTitle" class="qr-modal__title">📱 ส่ง QR CODE แชร์ให้เพื่อน</h3>
       <div id="qrCanvas" class="qr-modal__canvas"></div>
       <div id="qrUrl" class="qr-modal__url"></div>
-      <button type="button" class="btn btn--secondary qr-modal__close" id="qrClose">คัดลอกลิงก์</button>
+      <button type="button" class="btn btn--secondary qr-modal__close" id="qrClose">ปิด</button>
+    </div>
+  </div>
+
+  <!-- Favorite filter modal -->
+  <div id="favModal" class="fav-modal" role="dialog" aria-modal="true" aria-labelledby="favTitle" aria-hidden="true">
+    <div class="fav-modal__dialog">
+      <div class="fav-modal__header">
+        <h3 id="favTitle" class="fav-modal__title">⭐️ Filter การค้นหาที่บันทึกไว้ <span id="favCount" class="fav-count">(0)</span></h3>
+        <button type="button" class="fav-modal__close" id="favClose" aria-label="ปิด">×</button>
+      </div>
+      <div class="fav-modal__body">
+        <div class="fav-tabs" role="tablist" aria-label="ประเภทที่บันทึกไว้">
+          <button type="button" class="fav-tab active" id="favFilterTab" role="tab" aria-selected="true" aria-controls="favFilterPanel">Filter</button>
+          <button type="button" class="fav-tab" id="favResultTab" role="tab" aria-selected="false" aria-controls="favResultPanel">เซ็ตจี้</button>
+        </div>
+        <div id="favFilterPanel" class="fav-panel" role="tabpanel" aria-labelledby="favFilterTab">
+          <div class="fav-toolbar">
+            <input id="favSearchInput" class="fav-search" type="search" placeholder="ค้นหาชื่อชุด Filter..." autocomplete="off">
+            <button type="button" class="fav-btn fav-btn--primary" id="favSaveCurrent">+ บันทึก Filter ปัจจุบัน</button>
+            <button type="button" class="fav-btn fav-btn--danger" id="favClearAll">ลบทั้งหมด</button>
+          </div>
+          <div id="favSavePanel" class="fav-save-panel">
+            <label class="fav-field" for="favNameInput">ชื่อชุด
+              <input id="favNameInput" class="fav-input" type="text" placeholder="เช่น สายล้ม / สายวิค / ชื่อตัวละคร" autocomplete="off">
+            </label>
+            <p id="favSaveSummary" class="fav-summary"></p>
+            <div class="fav-actions">
+              <button type="button" class="fav-btn fav-btn--ghost" id="favCancelSave">ยกเลิก</button>
+              <button type="button" class="fav-btn fav-btn--primary" id="favConfirmSave">บันทึก</button>
+            </div>
+          </div>
+          <div id="favList" class="fav-list"></div>
+        </div>
+        <div id="favResultPanel" class="fav-panel" role="tabpanel" aria-labelledby="favResultTab" hidden>
+          <div class="fav-toolbar">
+            <input id="savedResultSearchInput" class="fav-search" type="search" placeholder="ค้นหาเซ็ตจี้ที่บันทึกไว้..." autocomplete="off">
+          </div>
+          <div id="savedResultList" class="fav-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -1958,6 +2169,15 @@ function invalidateResultsForCriteriaChange(){
   restoreEmptyState();
   if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
   ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=true; });
+  _currentResultSnapshots.clear();
+  _pinnedResults.clear();
+  renderCompareTray();
+}
+
+function clearPinnedResults(){
+  _pinnedResults.clear();
+  document.querySelectorAll('.pin-result-btn.is-active').forEach(btn=>btn.classList.remove('is-active'));
+  renderCompareTray();
 }
 
 function showCalcOverlay(msg){
@@ -1986,6 +2206,179 @@ function setCalcProgress(pct, msg){
   if (tx && msg) tx.innerHTML = msg; // allow <br>
 }
 
+let _lastDataLoadedAt = null;
+let _currentResultSnapshots = new Map();
+let _pinnedResults = new Map();
+
+function setDataFreshness(date=new Date()){
+  _lastDataLoadedAt = date;
+  const el = document.getElementById('dataFreshness');
+  if(!el) return;
+  const text = date.toLocaleString('th-TH', {
+    day:'2-digit', month:'short', year:'numeric',
+    hour:'2-digit', minute:'2-digit'
+  });
+  el.textContent = `• ข้อมูลอัปเดตล่าสุด: ${text} น.`;
+}
+
+function getCurrentFilterSnapshot(){
+  return {
+    selected: (typeof getDesired === 'function') ? getDesired() : [],
+    unwanted: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [],
+    char: (typeof getCharSelectValue === 'function') ? getCharSelectValue() : '',
+    darkOnly: !!darkOnly?.checked,
+    topK: topKInput?.value ? String(topKInput.value) : String(DEFAULT_TOPK)
+  };
+}
+
+function createResultSnapshot({rank, result, group, notList, extra, extraUnwanted, total, matchedCount}){
+  const names = group.map(j=>j?.id).filter(Boolean);
+  return {
+    key: (typeof makeResultKey === 'function') ? makeResultKey(names) : names.slice().sort().join('|'),
+    rank,
+    names,
+    score: total,
+    matchedCount,
+    missing: notList.slice(),
+    extra: extra.slice(),
+    unwanted: extraUnwanted.slice(),
+    filter: getCurrentFilterSnapshot(),
+    createdAt: new Date().toISOString()
+  };
+}
+
+function formatResultSummary(snapshot){
+  const lines = [
+    `เซ็ตจี้ ${snapshot.rank ? 'อันดับ ' + snapshot.rank : ''}`.trim(),
+    `จี้: ${(snapshot.names || []).join(', ')}`,
+    `ตรงเป๊ะ: ${snapshot.matchedCount ?? 0}`,
+    `หายไป: ${(snapshot.missing || []).length ? snapshot.missing.join(', ') : 'ไม่มี'}`,
+    `ไม่ต้องการ: ${(snapshot.unwanted || []).length ? snapshot.unwanted.join(', ') : 'ไม่มี'}`,
+    `ได้เพิ่ม: ${(snapshot.extra || []).length ? snapshot.extra.join(', ') : 'ไม่มี'}`,
+    `คะแนนความเทพ: ${snapshot.score} คะแนน`
+  ];
+  return lines.join('\n');
+}
+
+function buildGuidanceItems({shownCount, topK, isEmpty=false}){
+  const items = [];
+  const selectedCount = (typeof getDesired === 'function') ? getDesired().length : 0;
+  const unwantedCount = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0;
+  if(darkOnly?.checked) items.push('ลองปิด “เฉพาะจี้ [ดาร์ค]” เพื่อให้มีจี้ให้เลือกมากขึ้น');
+  if(unwantedCount) items.push('ลองลดสกิลที่ไม่ต้องการบางข้อ เพราะอาจตัดเซ็ตดี ๆ ออกไป');
+  if(selectedCount > MIN_SELECTS) items.push('ลองลดจำนวนสกิลที่ต้องการ หรือเลือกเฉพาะสกิลสำคัญที่สุดก่อน');
+  if(!isEmpty && shownCount < topK) items.push('ลองลดจำนวนเซ็ตที่ต้องการ ถ้าต้องการดูเฉพาะตัวเลือกที่ดีที่สุด');
+  if(!items.length) items.push('ลองปรับเงื่อนไขแล้วค้นหาใหม่ เช่น เลือกตัวละครอื่นหรือเพิ่มสกิลที่ยอมรับได้');
+  return items;
+}
+
+function createGuidanceHTML({title, shownCount, topK, isEmpty=false}){
+  const items = buildGuidanceItems({shownCount, topK, isEmpty});
+  return `<div class="result-guidance">
+    <div class="result-guidance__title">${escapeHtmlText(title)}</div>
+    <ul>${items.map(item=>`<li>${escapeHtmlText(item)}</li>`).join('')}</ul>
+  </div>`;
+}
+
+function renderCompareTray(){
+  const tray = document.getElementById('compareTray');
+  if(!tray) return;
+  const items = Array.from(_pinnedResults.values());
+  if(!items.length){
+    tray.classList.remove('show');
+    tray.innerHTML = '';
+    return;
+  }
+  tray.classList.add('show');
+  tray.innerHTML = `
+    <div class="compare-tray__head">
+      <div>
+        <div class="compare-tray__title"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a6 6 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707s.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a6 6 0 0 1 1.013.16l3.134-3.133a3 3 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146"/></svg> เซ็ตที่ปักไว้เปรียบเทียบ (${items.length})</div>
+        <div class="compare-tray__sub">ดูจี้ 4 ชิ้นและตัวเลขสำคัญของแต่ละเซ็ตเทียบกัน</div>
+      </div>
+      <button type="button" class="compare-clear" id="compareClear">ล้างทั้งหมด</button>
+    </div>
+    <div class="compare-tray__items">
+      ${items.map(item=>`
+        <div class="compare-item">
+          <div class="compare-item__top">
+            <span class="compare-item__rank">เซ็ตที่ ${item.rank}</span>
+            <button type="button" class="compare-remove" data-key="${escapeHtmlAttr(item.key)}" aria-label="เอาออก">×</button>
+          </div>
+          <div class="compare-jewels">
+            ${(item.names || []).map(name=>`<div class="compare-jewel">${escapeHtmlText(name)}</div>`).join('')}
+          </div>
+          <div class="compare-metrics">
+            <span class="compare-metric">คะแนน ${escapeHtmlText(item.score)}</span>
+            <span class="compare-metric">ตรง ${item.matchedCount ?? 0}</span>
+            <span class="compare-metric">หายไป ${(item.missing || []).length}</span>
+            <span class="compare-metric">ไม่ต้องการ ${(item.unwanted || []).length}</span>
+            <span class="compare-metric">ได้เพิ่ม ${(item.extra || []).length}</span>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('compareClear')?.addEventListener('click', ()=>{
+    _pinnedResults.clear();
+    document.querySelectorAll('.pin-result-btn.is-active').forEach(btn=>btn.classList.remove('is-active'));
+    renderCompareTray();
+  });
+  tray.querySelectorAll('.compare-remove').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      _pinnedResults.delete(btn.dataset.key || '');
+      document.querySelectorAll('.pin-result-btn.is-active').forEach(pin=>{
+        const card = pin.closest('.result-card');
+        const names = Array.from(card?.querySelectorAll('.jewel-name') || []).map(el=>el.textContent.trim()).filter(Boolean);
+        if(names.join('|') === btn.dataset.key) pin.classList.remove('is-active');
+      });
+      renderCompareTray();
+    });
+  });
+}
+
+function togglePinnedResult(snapshot, btn){
+  if(!snapshot?.key) return;
+  if(_pinnedResults.has(snapshot.key)){
+    _pinnedResults.delete(snapshot.key);
+    btn?.classList.remove('is-active');
+  }else{
+    _pinnedResults.set(snapshot.key, snapshot);
+    btn?.classList.add('is-active');
+  }
+  renderCompareTray();
+}
+
+function copyText(text, successMessage){
+  if(navigator.clipboard?.writeText){
+    return navigator.clipboard.writeText(text)
+      .then(()=> showToast(successMessage || '✅ คัดลอกแล้ว'))
+      .catch(()=>{
+        showToast('⚠️ ไม่สามารถคัดลอกอัตโนมัติได้', 3000, 'warn');
+      });
+  }
+  showToast('⚠️ เบราว์เซอร์นี้ไม่รองรับการคัดลอกอัตโนมัติ', 3000, 'warn');
+  return Promise.resolve();
+}
+
+function shareResultSnapshot(snapshot){
+  const link = buildShareURL(snapshot.key, snapshot.filter || null, snapshot.names || []);
+  if(navigator.share){
+    navigator.share({ title: 'เซ็ตจี้ที่แนะนำ', text: 'เปิดดูเซ็ตจี้นี้', url: link }).catch(()=>{
+      copyText(link, '✅ คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
+    });
+  }else{
+    copyText(link, '✅ คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
+    showQRModal(link);
+  }
+}
+
+function isSharedResultTarget(snapshot){
+  if(!snapshot) return false;
+  if(_pendingHighlightResultNames.length){
+    return makeResultKey(snapshot.names || []) === makeResultKey(_pendingHighlightResultNames);
+  }
+  return !!(_pendingHighlightResultKey && snapshot.key === _pendingHighlightResultKey);
+}
+
 function updateExtraOverflowToggles(root=document){
   root.querySelectorAll('.row-extra--collapsible').forEach(row=>{
     const text = row.querySelector('.extra-text');
@@ -2006,6 +2399,7 @@ function updateExtraOverflowToggles(root=document){
 function renderResults(best){
   best = Array.isArray(best) ? best : [];
   const container=document.getElementById('result'); container.innerHTML='';
+  _currentResultSnapshots.clear();
   const desired = getDesired()||[];
   const topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10) || DEFAULT_TOPK;
   const shownCount = Math.min(best.length, topK);
@@ -2023,11 +2417,19 @@ function renderResults(best){
         <div class="empty-state__icon">✨</div>
         <div class="empty-state__title">ไม่พบเซ็ตที่ตรงเงื่อนไข</div>
         <div class="empty-state__msg">ลองลดจำนวนสกิลที่ไม่ต้องการ หรือปรับเงื่อนไขแล้วค้นหาใหม่</div>
-      </div>`;
+      </div>
+      ${createGuidanceHTML({title:'ลองปรับเงื่อนไขตามนี้', shownCount, topK, isEmpty:true})}`;
     return;
   }
 
   const jewelMap = new Map((jewels || []).map(j=>[j.id,j]));
+  if(shownCount < topK){
+    container.insertAdjacentHTML('beforeend', createGuidanceHTML({
+      title:`พบ ${shownCount} จาก ${topK} เซ็ต`,
+      shownCount,
+      topK
+    }));
+  }
 
   best.slice(0, topK).forEach((r,i)=>{
     const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.06}s`;
@@ -2064,10 +2466,26 @@ function renderResults(best){
         ${extra.length > 0 ? `<span class="badge badge--extra badge--extra-sm" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">+${extra.length}</span>` : ''}
       </div>`;
 
-    const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong class="row-ability__label">หายไป:</strong><span class="row-ability__text">${notList.map(escapeHtmlText).join(', ')}</span></div>` : '';
-    const extraHTML = extra.length ? `<div class="row-ability row-extra row-extra--collapsible"><div class="row-ability__head"><strong class="row-ability__label">ได้เพิ่ม:</strong><span class="row-ability__toggle" aria-hidden="true"></span></div><span class="row-ability__text extra-text">${extra.map(escapeHtmlText).join(', ')}</span></div>` : '';
-    const unwantedHTML = extraUnwanted.length ? `<div class="row-ability row-miss"><strong class="row-ability__label">ไม่ต้องการ:</strong><span class="row-ability__text">${extraUnwanted.map(escapeHtmlText).join(', ')}</span></div>` : '';
     const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
+    const extraSkillHTML = extra.map((nm, idx)=>`<button type="button" class="extra-skill" data-skill="${escapeHtmlAttr(nm)}">${escapeHtmlText(nm)}</button>${idx < extra.length - 1 ? ', ' : ''}`).join('');
+    const snapshot = createResultSnapshot({
+      rank: i + 1,
+      result: r,
+      group,
+      notList,
+      extra,
+      extraUnwanted,
+      total,
+      matchedCount
+    });
+    _currentResultSnapshots.set(snapshot.key, snapshot);
+    if(isSharedResultTarget(snapshot)){
+      card.classList.add('result-card--highlight');
+    }
+
+    const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong class="row-ability__label">หายไป:</strong><span class="row-ability__text">${notList.map(escapeHtmlText).join(', ')}</span></div>` : '';
+    const extraHTML = extra.length ? `<div class="row-ability row-extra row-extra--collapsible"><div class="row-ability__head"><strong class="row-ability__label">ได้เพิ่ม:</strong><span class="row-ability__toggle" aria-hidden="true"></span></div><span class="row-ability__text extra-text">${extraSkillHTML}</span></div>` : '';
+    const unwantedHTML = extraUnwanted.length ? `<div class="row-ability row-miss"><strong class="row-ability__label">ไม่ต้องการ:</strong><span class="row-ability__text">${extraUnwanted.map(escapeHtmlText).join(', ')}</span></div>` : '';
 
     const headerHTML = `
   <div class="card-head">
@@ -2087,26 +2505,62 @@ card.innerHTML = `
   </div>
 `;
 
-    // เพิ่มปุ่มคัดลอกชื่อจี้ 4 ชิ้น (ไอคอนเล็ก)
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn-copy';
-    const names = group.map(j=>j?.id).filter(Boolean);
-    copyBtn.setAttribute('type','button');
-    copyBtn.setAttribute('title','คัดลอกชื่อจี้ทั้ง 4');
-    copyBtn.setAttribute('aria-label','คัดลอกชื่อจี้ทั้ง 4');
-    copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
-    copyBtn.addEventListener('click', ()=>{
-      navigator.clipboard.writeText(names.join(', ')).then(()=>{
-        showToast('✅ คัดลอกเซ็ตจี้แล้ว');
-      });
+    const names = snapshot.names || [];
+    const pinBtn = document.createElement('button');
+    pinBtn.className = 'result-icon-btn pin-result-btn' + (_pinnedResults.has(snapshot.key) ? ' is-active' : '');
+    pinBtn.type = 'button';
+    pinBtn.title = 'ปักไว้เพื่อเทียบ';
+    pinBtn.setAttribute('aria-label','ปักไว้เพื่อเทียบ');
+    pinBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a6 6 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707s.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a6 6 0 0 1 1.013.16l3.134-3.133a3 3 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146"/></svg>';
+    pinBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      togglePinnedResult(snapshot, pinBtn);
+    });
+
+    const actionWrap = document.createElement('div');
+    actionWrap.className = 'result-action';
+    actionWrap.innerHTML = `
+      <button type="button" class="result-icon-btn result-menu-btn" aria-label="ตัวเลือกเซ็ตนี้" title="ตัวเลือกเซ็ตนี้">⋯</button>
+      <div class="result-menu" role="menu">
+        <button type="button" data-action="copy-names"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg><span>คัดลอกชื่อจี้</span></button>
+        <button type="button" data-action="share-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg><span>แชร์เซ็ตนี้</span></button>
+        <button type="button" data-action="save-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg><span>บันทึกเซ็ตนี้</span></button>
+      </div>`;
+    actionWrap.querySelector('.result-menu-btn')?.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      document.querySelectorAll('.result-action.open').forEach(el=>{ if(el !== actionWrap) el.classList.remove('open'); });
+      actionWrap.classList.toggle('open');
+    });
+    actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
+      const action = e.target?.dataset?.action;
+      if(!action) return;
+      e.stopPropagation();
+      actionWrap.classList.remove('open');
+      if(action === 'copy-names') copyText(names.join(', '), '✅ คัดลอกชื่อจี้แล้ว');
+      if(action === 'share-result') shareResultSnapshot(snapshot);
+      if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
     });
     const head = card.querySelector('.card-head');
     const badgesEl = head?.querySelector('.badges');
-    if(badgesEl){ badgesEl.appendChild(copyBtn); }
-    else if(head){ head.appendChild(copyBtn); }
-    else { card.appendChild(copyBtn); }
+    if(badgesEl){ badgesEl.append(pinBtn, actionWrap); }
+    else if(head){ head.append(pinBtn, actionWrap); }
+    else { card.append(pinBtn, actionWrap); }
     container.appendChild(card);
   });
+
+  if(_pendingHighlightResultKey || _pendingHighlightResultNames.length){
+    const highlighted = container.querySelector('.result-card--highlight');
+    if(highlighted){
+      setTimeout(()=>{
+        highlighted.scrollIntoView({behavior:'smooth', block:'center'});
+        showToast('✅ เปิดเซ็ตจี้ที่แชร์ไว้แล้ว', 2400);
+      }, 250);
+    }else{
+      showToast('⚠️ ไม่พบเซ็ตที่แชร์ในผลลัพธ์ชุดนี้ อาจมีข้อมูลเปลี่ยนไป', 3600, 'warn');
+    }
+    _pendingHighlightResultKey = '';
+    _pendingHighlightResultNames = [];
+  }
 
   updateExtraOverflowToggles(container);
 
@@ -2163,6 +2617,8 @@ function resetAll(){
 
   restoreEmptyState();
   if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  _currentResultSnapshots.clear();
+  clearPinnedResults();
 
   // ล้างตัวเลือกตัวละครและ preview
   const charSel = document.getElementById('charSelect');
@@ -2237,6 +2693,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
     await makeTomSelects(substats);
     setAbilityList(substats);
+    setDataFreshness(new Date());
     hideLoading();
     showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
                                '❓ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
@@ -2270,6 +2727,8 @@ let _abilityList = [];
 let _abilityListReady = false;
 let _pendingURLStateApply = false;
 let _urlStateApplied = false;
+let _pendingHighlightResultKey = '';
+let _pendingHighlightResultNames = [];
 function setAbilityList(arr){
   _abilityList = Array.from(arr || []);
   _abilityListReady = true;
@@ -2315,9 +2774,20 @@ function fromAbilityIndices(list){
     .filter(Boolean);
 }
 
-function buildLegacyShareURL(url){
+function canonicalResultNames(names){
+  return Array.from(names || [])
+    .map(name => String(name || '').trim())
+    .filter(Boolean)
+    .sort((a,b)=>a.localeCompare(b, 'th'));
+}
+
+function makeResultKey(names){
+  return canonicalResultNames(names).join('|');
+}
+
+function buildLegacyShareURL(url, resultKey='', filterState=null, resultNames=[]){
   const params = url.searchParams;
-  const desired = getDesired();
+  const desired = Array.isArray(filterState?.selected) ? filterState.selected : getDesired();
 
   if (_abilityList.length){
     const indices = toAbilityIndices(desired);
@@ -2326,39 +2796,46 @@ function buildLegacyShareURL(url){
     desired.forEach(v => params.append('sel', v));
   }
 
-  if (topKInput?.value) params.set('k', String(topKInput.value));
-  if (darkOnly?.checked) params.set('d', '1');
+  const topKValue = filterState?.topK != null ? String(filterState.topK) : (topKInput?.value ? String(topKInput.value) : '');
+  if (topKValue) params.set('k', topKValue);
+  const darkValue = filterState ? !!filterState.darkOnly : !!darkOnly?.checked;
+  if (darkValue) params.set('d', '1');
 
-  const unwantedSels = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
+  const unwantedSels = Array.isArray(filterState?.unwanted) ? filterState.unwanted : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
   if (_abilityList.length && unwantedSels.length){
     const uIdx = toAbilityIndices(unwantedSels);
     if (uIdx.length) params.set('u', uIdx.join(','));
   }
 
-  const charVal = getCharSelectValue();
+  const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
   if (charVal) params.set('char', charVal);
 
   params.set('a', '1');
+  if (resultKey) params.set('r', resultKey);
+  const targetNames = canonicalResultNames(resultNames);
+  if (targetNames.length) params.set('rn', targetNames.join('||'));
   url.search = params.toString();
   return url.toString();
 }
 
-function buildShareURL(){
+function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   const url = new URL(location.href);
   url.search = '';
 
-  const desired = getDesired();
-  const unwanted = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
-  const charVal = getCharSelectValue();
+  const desired = Array.isArray(filterState?.selected) ? filterState.selected : getDesired();
+  const unwanted = Array.isArray(filterState?.unwanted) ? filterState.unwanted : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
+  const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
 
   const state = {
     v: SHARE_STATE_VERSION,               // version
     s: toAbilityIndices(desired),         // selected abilities
     u: toAbilityIndices(unwanted),        // unwanted abilities
-    k: topKInput?.value ? String(topKInput.value) : '',
-    m: darkOnly?.checked ? 1 : 0,         // darkOnly mode
+    k: filterState?.topK != null ? String(filterState.topK) : (topKInput?.value ? String(topKInput.value) : ''),
+    m: (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0,         // darkOnly mode
     a: 1,                                 // auto-run
-    c: charVal || ''                      // character
+    c: charVal || '',                     // character
+    r: resultKey || '',                   // result highlight key
+    t: canonicalResultNames(resultNames)  // target result jewel names
   };
 
   // ตัด field ว่างออกเพื่อลดขนาด payload
@@ -2367,6 +2844,8 @@ function buildShareURL(){
   if (!state.k) delete state.k;
   if (!state.m) delete state.m;
   if (!state.c) delete state.c;
+  if (!state.r) delete state.r;
+  if (!state.t.length) delete state.t;
 
   if (typeof LZString?.compressToEncodedURIComponent === 'function'){
     try{
@@ -2381,7 +2860,7 @@ function buildShareURL(){
   }
 
   // fallback เผื่อ lib โหลดไม่ทัน / error
-  return buildLegacyShareURL(url);
+  return buildLegacyShareURL(url, resultKey, filterState, resultNames);
 }
 
 function parseCompressedStateFromURL(){
@@ -2402,7 +2881,9 @@ function parseCompressedStateFromURL(){
       k: parsed.k != null ? String(parsed.k) : '',
       dark: parsed.m === 1 ? '1' : '',
       auto: parsed.a === 1 ? '1' : '',
-      char: parsed.c != null ? String(parsed.c) : ''
+      char: parsed.c != null ? String(parsed.c) : '',
+      resultKey: parsed.r != null ? String(parsed.r) : '',
+      resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t) : []
     };
   }catch(err){
     console.warn('Compressed share URL parse failed, fallback to legacy params.', err);
@@ -2436,7 +2917,9 @@ function parseLegacyStateFromURL(){
     k: params.get('k') || '',
     dark: params.get('d') || params.get('dark') || '',
     auto: params.get('a') || params.get('auto') || '',
-    char: params.get('char') || ''
+    char: params.get('char') || '',
+    resultKey: params.get('r') || '',
+    resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')) : []
   };
 }
 
@@ -2467,11 +2950,21 @@ async function applyStateFromURL(){
   if (state.char){
     setCharSelectValue(state.char);
   }
+  _pendingHighlightResultKey = state.resultKey || '';
+  _pendingHighlightResultNames = canonicalResultNames(state.resultNames || []);
 
   updateCalcAvailability();
 
   if (state.auto === '1' && getDesired().length >= MIN_SELECTS){
-    await new Promise(r => setTimeout(r, 100));
+    if(state.char){
+      let guard = 0;
+      while(!window.__charSheetReady && guard < 40){
+        await new Promise(r => setTimeout(r, 100));
+        guard++;
+      }
+    }else{
+      await new Promise(r => setTimeout(r, 100));
+    }
     calculate();
   }
 }
@@ -2493,6 +2986,12 @@ function bindShareButtons(){
   document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
 
+function setDialogVisible(modal, isVisible){
+  if (!modal) return;
+  modal.classList.toggle('show', isVisible);
+  modal.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+}
+
 function showQRModal(url){
   const modal = document.getElementById('qrModal');
   const canvas = document.getElementById('qrCanvas');
@@ -2512,25 +3011,121 @@ function showQRModal(url){
   }catch(e){
     canvas.textContent = 'ไม่สามารถสร้าง QR ได้';
   }
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
+  setDialogVisible(modal, true);
 }
 function hideQRModal(){
   const modal = document.getElementById('qrModal');
-  if (!modal) return;
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden','true');
+  setDialogVisible(modal, false);
 }
+
+let _activeSkillActionName = '';
+function getSkillActionMenu(){
+  let menu = document.getElementById('skillActionMenu');
+  if(menu) return menu;
+  menu = document.createElement('div');
+  menu.id = 'skillActionMenu';
+  menu.className = 'skill-action-menu';
+  menu.innerHTML = `
+    <div class="skill-action-menu__title"></div>
+    <button type="button" data-skill-action="want"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/></svg>
+      <span>เพิ่มเป็นสกิลที่ต้องการ</span></button>
+    <button type="button" data-skill-action="unwant"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>
+      <span>เพิ่มเป็นสกิลที่ไม่ต้องการ</span></button>`;
+  menu.addEventListener('click', (e)=>{
+    const action = e.target?.dataset?.skillAction;
+    if(!action || !_activeSkillActionName) return;
+    applySkillAction(_activeSkillActionName, action);
+  });
+  document.body.appendChild(menu);
+  return menu;
+}
+
+function showSkillActionMenu(skillName, sourceEl){
+  const menu = getSkillActionMenu();
+  _activeSkillActionName = skillName;
+  menu.querySelector('.skill-action-menu__title').textContent = 'สกิล: ' + skillName;
+  const rect = sourceEl.getBoundingClientRect();
+  menu.classList.add('show');
+  const menuRect = menu.getBoundingClientRect();
+  const left = Math.min(window.innerWidth - menuRect.width - 8, Math.max(8, rect.left));
+  const top = Math.min(window.innerHeight - menuRect.height - 8, rect.bottom + 6);
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+
+function hideSkillActionMenu(){
+  const menu = document.getElementById('skillActionMenu');
+  if(menu) menu.classList.remove('show');
+  _activeSkillActionName = '';
+}
+
+function applySkillAction(skillName, action){
+  if(action === 'want'){
+    const current = Array.isArray(window._chipSelected) ? window._chipSelected.slice() : [];
+    if(current.includes(skillName)){
+      showToast('สกิลนี้อยู่ในรายการที่ต้องการแล้ว', 2000);
+      hideSkillActionMenu();
+      return;
+    }
+    if(current.length >= MAX_SELECTS){
+      showToast(`เลือกสกิลที่ต้องการได้สูงสุด ${MAX_SELECTS} สกิล`, 2800, 'warn');
+      hideSkillActionMenu();
+      return;
+    }
+    if(typeof window.setChipState === 'function') window.setChipState(current.concat(skillName));
+    if(typeof window.setUnwantedState === 'function'){
+      const nextUnwanted = (window._chipUnwanted || []).filter(n=>n !== skillName);
+      window.setUnwantedState(nextUnwanted);
+    }
+    updateCalcAvailability();
+    showToast('✅ เพิ่มไปยังสกิลที่ต้องการแล้ว', 2500);
+  }
+  if(action === 'unwant'){
+    if((window._chipSelected || []).includes(skillName)){
+      const nextSelected = (window._chipSelected || []).filter(n=>n !== skillName);
+      if(typeof window.setChipState === 'function') window.setChipState(nextSelected);
+      const nextUnwanted = Array.from(new Set([...(window._chipUnwanted || []), skillName]));
+      if(typeof window.setUnwantedState === 'function') window.setUnwantedState(nextUnwanted);
+      updateCalcAvailability();
+      showToast('✅ ย้ายไปยังสกิลที่ไม่ต้องการแล้ว', 2500);
+      hideSkillActionMenu();
+      return;
+    }
+    const current = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [];
+    if(current.includes(skillName)){
+      showToast('สกิลนี้อยู่ในรายการที่ไม่ต้องการแล้ว', 2000);
+      hideSkillActionMenu();
+      return;
+    }
+    if(!current.includes(skillName) && typeof window.setUnwantedState === 'function') window.setUnwantedState(current.concat(skillName));
+    updateCalcAvailability();
+    showToast('✅ เพิ่มไปยังสกิลที่ไม่ต้องการแล้ว', 2500);
+  }
+  hideSkillActionMenu();
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('qrClose')?.addEventListener('click', hideQRModal);
   document.getElementById('qrModal')?.addEventListener('click', (e)=>{
     if (e.target?.id === 'qrModal') hideQRModal();
   });
   document.getElementById('result')?.addEventListener('click', (e)=>{
+    const skillBtn = e.target.closest('.extra-skill');
+    if(skillBtn){
+      e.preventDefault();
+      e.stopPropagation();
+      showSkillActionMenu(skillBtn.dataset.skill || skillBtn.textContent.trim(), skillBtn);
+      return;
+    }
+    if(e.target.closest('.result-action')) return;
     const row = e.target.closest('.row-extra--collapsible.is-overflowing');
     if(!row) return;
     row.classList.toggle('expanded');
     row.setAttribute('aria-expanded', row.classList.contains('expanded') ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.result-action')) document.querySelectorAll('.result-action.open').forEach(el=>el.classList.remove('open'));
+    if(!e.target.closest('.skill-action-menu') && !e.target.closest('.extra-skill')) hideSkillActionMenu();
   });
 });
 
@@ -2538,6 +3133,533 @@ document.addEventListener('DOMContentLoaded', ()=>{
   bindShareButtons();
   applyStateFromURL();
 });
+</script>
+
+<script>
+/* ===== Favorite filter presets (localStorage) ===== */
+const RESULT_SET_STORAGE_KEY = 'lgr_saved_result_sets_v1';
+
+function readResultSetStore(){
+  try{
+    const raw = localStorage.getItem(RESULT_SET_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if(parsed && Array.isArray(parsed.items)) return parsed;
+  }catch(e){}
+  return { version: 1, items: [] };
+}
+
+function writeResultSetStore(store){
+  try{
+    localStorage.setItem(RESULT_SET_STORAGE_KEY, JSON.stringify(store));
+    return true;
+  }catch(e){
+    showToast('⚠️ ไม่สามารถบันทึกเซ็ตจี้ได้', 3000, 'warn');
+    return false;
+  }
+}
+
+function resultSetDefaultName(snapshot){
+  const first = (snapshot.names || [])[0] || 'เซ็ตจี้';
+  return `อันดับ ${snapshot.rank || '-'} - `;
+}
+
+function saveResultSetSnapshot(snapshot, preferredName=''){
+  if(!snapshot?.names?.length) return;
+  const defaultName = preferredName || resultSetDefaultName(snapshot);
+  const name = prompt('ตั้งชื่อเซ็ตจี้ที่ต้องการบันทึก', defaultName);
+  if(name === null) return;
+  const finalName = name.trim();
+  if(!finalName){
+    showToast('⚠️ ใส่ชื่อเซ็ตจี้ก่อนบันทึก', 2600, 'warn');
+    return;
+  }
+  const store = readResultSetStore();
+  const now = new Date().toISOString();
+  const existing = store.items.find(item=>item.key === snapshot.key);
+  if(existing){
+    existing.snapshot = snapshot;
+    existing.name = finalName;
+    existing.updatedAt = now;
+  }else{
+    store.items.unshift({
+      id: 'result_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8),
+      key: snapshot.key,
+      name: finalName,
+      snapshot,
+      createdAt: now,
+      updatedAt: now
+    });
+  }
+  if(writeResultSetStore(store)){
+    renderSavedResultSets();
+    showToast('✅ บันทึกเซ็ตจี้แล้ว', 2000);
+  }
+}
+
+function deleteSavedResultSet(id){
+  const store = readResultSetStore();
+  const item = store.items.find(x=>x.id === id);
+  if(!item) return;
+  if(!confirm(`ลบเซ็ตจี้ "${item.name}"?`)) return;
+  store.items = store.items.filter(x=>x.id !== id);
+  if(writeResultSetStore(store)){
+    renderSavedResultSets();
+    showToast('ลบเซ็ตจี้ที่บันทึกไว้แล้ว', 1800);
+  }
+}
+
+function renderSavedResultSets(){
+  const list = document.getElementById('savedResultList');
+  if(!list) return;
+  const store = readResultSetStore();
+  const q = (document.getElementById('savedResultSearchInput')?.value || '').trim().toLowerCase();
+  const items = q
+    ? store.items.filter(item=>`${item.name || ''} ${(item.snapshot?.names || []).join(' ')}`.toLowerCase().includes(q))
+    : store.items;
+  const countEl = document.getElementById('favCount');
+  if(countEl && document.getElementById('favResultTab')?.classList.contains('active')){
+    countEl.textContent = q ? `(${items.length}/${store.items.length})` : `(${store.items.length})`;
+  }
+  list.innerHTML = '';
+  if(!store.items.length){
+    const empty = document.createElement('div');
+    empty.className = 'fav-empty';
+    empty.textContent = 'ยังไม่มีเซ็ตจี้ที่บันทึกไว้';
+    list.appendChild(empty);
+    return;
+  }
+  if(!items.length){
+    const empty = document.createElement('div');
+    empty.className = 'fav-empty';
+    empty.textContent = 'ไม่พบเซ็ตจี้ที่ตรงกับคำค้นหา';
+    list.appendChild(empty);
+    return;
+  }
+  items.forEach(item=>{
+    const snapshot = item.snapshot || {};
+    const row = document.createElement('div');
+    row.className = 'fav-item';
+    const name = document.createElement('div');
+    name.className = 'fav-item__name';
+    name.textContent = item.name || resultSetDefaultName(snapshot);
+    const jewels = document.createElement('div');
+    jewels.className = 'saved-result-jewels';
+    (snapshot.names || []).forEach(jewelName=>{
+      const jewel = document.createElement('div');
+      jewel.className = 'saved-result-jewel';
+      jewel.textContent = jewelName;
+      jewels.appendChild(jewel);
+    });
+    const metrics = document.createElement('div');
+    metrics.className = 'saved-result-metrics';
+    [
+      `คะแนน ${snapshot.score || '-'}`,
+      `ตรงเป๊ะ ${snapshot.matchedCount ?? 0}`,
+      `หายไป ${(snapshot.missing || []).length}`,
+      `ไม่ต้องการ ${(snapshot.unwanted || []).length}`,
+      `ได้เพิ่ม ${(snapshot.extra || []).length}`
+    ].forEach(text=>{
+      const metric = document.createElement('span');
+      metric.className = 'saved-result-metric';
+      metric.textContent = text;
+      metrics.appendChild(metric);
+    });
+    const actions = document.createElement('div');
+    actions.className = 'fav-actions';
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'fav-btn fav-btn--primary';
+    copyBtn.textContent = 'คัดลอกสรุป';
+    copyBtn.addEventListener('click', ()=> copyText(formatResultSummary(snapshot), '✅ คัดลอกสรุปเซ็ตจี้แล้ว'));
+    const shareBtn = document.createElement('button');
+    shareBtn.type = 'button';
+    shareBtn.className = 'fav-btn fav-btn--ghost';
+    shareBtn.textContent = 'แชร์';
+    shareBtn.addEventListener('click', ()=> shareResultSnapshot(snapshot));
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'fav-btn fav-btn--danger';
+    deleteBtn.textContent = 'ลบ';
+    deleteBtn.addEventListener('click', ()=> deleteSavedResultSet(item.id));
+    actions.append(copyBtn, shareBtn, deleteBtn);
+    row.append(name, jewels, metrics, actions);
+    list.appendChild(row);
+  });
+}
+
+(function(){
+  const STORAGE_KEY = 'lgr_filter_favorites_v1';
+  let editingPresetId = null;
+
+  function readStore(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if(parsed && Array.isArray(parsed.presets)) return parsed;
+    }catch(e){}
+    return { version: 1, presets: [] };
+  }
+
+  function writeStore(store){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      return true;
+    }catch(e){
+      showToast('⚠️ ไม่สามารถบันทึกชุด Filter ได้', 3000, 'warn');
+      return false;
+    }
+  }
+
+  function getCurrentFavoriteState(){
+    return {
+      selected: (typeof getDesired === 'function') ? getDesired() : [],
+      unwanted: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [],
+      char: (typeof getCharSelectValue === 'function') ? getCharSelectValue() : '',
+      darkOnly: !!darkOnly?.checked,
+      topK: topKInput?.value ? String(topKInput.value) : String(DEFAULT_TOPK)
+    };
+  }
+
+  function hasMeaningfulFilter(state){
+    return !!(
+      state.selected.length ||
+      state.unwanted.length ||
+      state.char ||
+      state.darkOnly ||
+      String(state.topK || '') !== String(DEFAULT_TOPK)
+    );
+  }
+
+  function summarizeState(state){
+    return [
+      `${(state.selected || []).length} สกิลที่ต้องการ`,
+      `${(state.unwanted || []).length} สกิลที่ไม่ต้องการ`,
+      state.char ? state.char : 'ไม่เลือกตัวละคร',
+      state.darkOnly ? '[ดาร์ค] เท่านั้น' : 'ทุกจี้',
+      `${state.topK || DEFAULT_TOPK} เซ็ต`
+    ].join(' • ');
+  }
+
+  function createFavButton(label, variant, onClick){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `fav-btn fav-btn--${variant}`;
+    btn.textContent = label;
+    btn.addEventListener('click', onClick);
+    return btn;
+  }
+
+  function abilityExists(name){
+    try{
+      return Array.isArray(_abilityList) && _abilityList.length ? _abilityList.includes(name) : true;
+    }catch(e){
+      return true;
+    }
+  }
+
+  function syncTopKPreset(val){
+    if(topKInput) topKInput.value = String(val || DEFAULT_TOPK);
+    document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(topKInput?.value || DEFAULT_TOPK)));
+  }
+
+  function charExists(charName){
+    const el = document.getElementById('charSelect');
+    if(!charName || !el) return false;
+    if(el.tomselect) return !!el.tomselect.options[charName];
+    return Array.from(el.options || []).some(o => o.value === charName);
+  }
+
+  function isResultTabActive(){
+    return document.getElementById('favResultTab')?.classList.contains('active');
+  }
+
+  function switchFavoriteTab(tab){
+    const isResult = tab === 'result';
+    const filterTab = document.getElementById('favFilterTab');
+    const resultTab = document.getElementById('favResultTab');
+    const filterPanel = document.getElementById('favFilterPanel');
+    const resultPanel = document.getElementById('favResultPanel');
+    filterTab?.classList.toggle('active', !isResult);
+    resultTab?.classList.toggle('active', isResult);
+    filterTab?.setAttribute('aria-selected', isResult ? 'false' : 'true');
+    resultTab?.setAttribute('aria-selected', isResult ? 'true' : 'false');
+    if(filterPanel) filterPanel.hidden = isResult;
+    if(resultPanel) resultPanel.hidden = !isResult;
+    closeSavePanel();
+    if(isResult) renderSavedResultSets();
+    else renderFavorites();
+  }
+
+  function renderFavorites(){
+    const list = document.getElementById('favList');
+    if(!list) return;
+    const store = readStore();
+    const clearAllBtn = document.getElementById('favClearAll');
+    if(clearAllBtn) clearAllBtn.disabled = store.presets.length === 0;
+    const q = (document.getElementById('favSearchInput')?.value || '').trim().toLowerCase();
+    const presets = q
+      ? store.presets.filter(p=>{
+          const hay = `${p.name || ''}`.toLowerCase();
+          return hay.includes(q);
+        })
+      : store.presets;
+    const countEl = document.getElementById('favCount');
+    if(countEl && !isResultTabActive()){
+      countEl.textContent = q ? `(${presets.length}/${store.presets.length})` : `(${store.presets.length})`;
+    }
+    list.innerHTML = '';
+
+    if(!store.presets.length){
+      const empty = document.createElement('div');
+      empty.className = 'fav-empty';
+      empty.textContent = 'ยังไม่มีชุด Filter การค้นหาที่บันทึกไว้';
+      list.appendChild(empty);
+      return;
+    }
+
+    if(!presets.length){
+      const empty = document.createElement('div');
+      empty.className = 'fav-empty';
+      empty.textContent = 'ไม่พบชุด Filter ที่ตรงกับคำค้นหา';
+      list.appendChild(empty);
+      return;
+    }
+
+    presets.forEach(preset=>{
+      const item = document.createElement('div');
+      item.className = 'fav-item';
+
+      const name = document.createElement('div');
+      name.className = 'fav-item__name';
+      name.textContent = preset.name;
+
+      const meta = document.createElement('div');
+      meta.className = 'fav-item__meta';
+      meta.textContent = summarizeState(preset.state || {});
+
+      const actions = document.createElement('div');
+      actions.className = 'fav-actions';
+
+      const useBtn = createFavButton('ใช้ Filter นี้', 'primary', ()=> applyFavorite(preset.id));
+      const renameBtn = createFavButton('เปลี่ยนชื่อ', 'ghost', ()=> openSavePanel(preset.id));
+      const deleteBtn = createFavButton('ลบ', 'danger', ()=> deleteFavorite(preset.id));
+
+      actions.append(useBtn, renameBtn, deleteBtn);
+      item.append(name, meta, actions);
+      list.appendChild(item);
+    });
+  }
+
+  function openFavModal(){
+    const modal = document.getElementById('favModal');
+    if(!modal) return;
+    switchFavoriteTab('filter');
+    renderFavorites();
+    renderSavedResultSets();
+    closeSavePanel();
+    setDialogVisible(modal, true);
+  }
+
+  function closeFavModal(){
+    const modal = document.getElementById('favModal');
+    if(!modal) return;
+    setDialogVisible(modal, false);
+    closeSavePanel();
+  }
+
+  function openSavePanel(presetId=null){
+    const panel = document.getElementById('favSavePanel');
+    const input = document.getElementById('favNameInput');
+    const summary = document.getElementById('favSaveSummary');
+    const saveBtn = document.getElementById('favConfirmSave');
+    if(!panel || !input || !summary || !saveBtn) return;
+
+    editingPresetId = presetId;
+    const store = readStore();
+    const preset = presetId ? store.presets.find(p=>p.id===presetId) : null;
+    const state = preset ? preset.state : getCurrentFavoriteState();
+
+    if(!preset && !hasMeaningfulFilter(state)){
+      showToast('⚠️ ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
+      return;
+    }
+
+    input.value = preset ? preset.name : '';
+    summary.textContent = 'สรุป: ' + summarizeState(state);
+    saveBtn.textContent = preset ? 'บันทึกชื่อ' : 'บันทึก';
+    panel.classList.add('show');
+    setTimeout(()=> input.focus(), 0);
+  }
+
+  function closeSavePanel(){
+    const panel = document.getElementById('favSavePanel');
+    const input = document.getElementById('favNameInput');
+    const summary = document.getElementById('favSaveSummary');
+    const saveBtn = document.getElementById('favConfirmSave');
+    editingPresetId = null;
+    if(panel) panel.classList.remove('show');
+    if(input) input.value = '';
+    if(summary) summary.textContent = '';
+    if(saveBtn) saveBtn.textContent = 'บันทึก';
+  }
+
+  function saveFavorite(){
+    const input = document.getElementById('favNameInput');
+    const name = (input?.value || '').trim();
+    if(!name){
+      showToast('⚠️ ใส่ชื่อชุด Filter ก่อนบันทึก', 2800, 'warn');
+      input?.focus();
+      return;
+    }
+
+    const store = readStore();
+    const now = new Date().toISOString();
+
+    if(editingPresetId){
+      const preset = store.presets.find(p=>p.id===editingPresetId);
+      if(!preset) return;
+      const duplicate = store.presets.find(p=>p.id!==editingPresetId && p.name === name);
+      if(duplicate && !confirm(`มีชุดชื่อ "${name}" อยู่แล้ว ต้องการใช้ชื่อนี้ซ้ำไหม?`)) return;
+      preset.name = name;
+      preset.updatedAt = now;
+      if(writeStore(store)){
+        closeSavePanel();
+        renderFavorites();
+        showToast('✅ บันทึกชื่อชุด Filter แล้ว', 1800);
+      }
+      return;
+    }
+
+    const state = getCurrentFavoriteState();
+    if(!hasMeaningfulFilter(state)){
+      showToast('⚠️ ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
+      return;
+    }
+
+    const sameName = store.presets.find(p=>p.name === name);
+    if(sameName){
+      if(!confirm(`มีชุดชื่อ "${name}" อยู่แล้ว ต้องการบันทึกทับไหม?`)) return;
+      sameName.state = state;
+      sameName.updatedAt = now;
+    }else{
+      store.presets.unshift({
+        id: 'preset_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8),
+        name,
+        state,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+
+    if(writeStore(store)){
+      closeSavePanel();
+      renderFavorites();
+      showToast('✅ บันทึกชุด Filter แล้ว', 1800);
+    }
+  }
+
+  function applyFavorite(id){
+    const store = readStore();
+    const preset = store.presets.find(p=>p.id===id);
+    if(!preset || !preset.state) return;
+    const state = preset.state;
+
+    const missing = [];
+    const validSelected = Array.from(state.selected || []).filter(name=>{
+      const ok = abilityExists(name);
+      if(!ok) missing.push(name);
+      return ok;
+    });
+    const validUnwanted = Array.from(state.unwanted || []).filter(name=>{
+      const ok = abilityExists(name);
+      if(!ok) missing.push(name);
+      return ok;
+    }).filter(name=>!validSelected.includes(name));
+
+    if(typeof window.setChipState === 'function') window.setChipState(validSelected);
+    if(typeof window.setUnwantedState === 'function') window.setUnwantedState(validUnwanted);
+    if(darkOnly) darkOnly.checked = !!state.darkOnly;
+    syncTopKPreset(state.topK || DEFAULT_TOPK);
+
+    const char = (state.char || '').trim();
+    let missingChar = '';
+    if(char && typeof setCharSelectValue === 'function' && charExists(char)){
+      setCharSelectValue(char);
+    }else if(char){
+      missingChar = char;
+      const el = document.getElementById('charSelect');
+      if(el?.tomselect) el.tomselect.clear(true);
+      else if(el) el.value = '';
+    }else if(!char){
+      const el = document.getElementById('charSelect');
+      if(el?.tomselect) el.tomselect.clear(true);
+      else if(el) el.value = '';
+    }
+
+    if(typeof updateCharPreview === 'function') updateCharPreview();
+    if(typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
+    if(typeof updateCalcAvailability === 'function') updateCalcAvailability();
+
+    closeFavModal();
+    if(missing.length || missingChar){
+      const parts = [];
+      if(missing.length) parts.push(`ข้าม ${missing.length} สกิลที่ไม่พบ`);
+      if(missingChar) parts.push(`ไม่พบตัวละคร "${missingChar}"`);
+      showToast('ใช้ชุด Filter แล้ว แต่' + parts.join(' และ '), 4000, 'warn');
+    }else{
+      showToast('✅ ใช้ชุด Filter แล้ว กดค้นหาเพื่อดูผลลัพธ์', 3000);
+    }
+  }
+
+  function deleteFavorite(id){
+    const store = readStore();
+    const preset = store.presets.find(p=>p.id===id);
+    if(!preset) return;
+    if(!confirm(`ลบชุด "${preset.name}"?`)) return;
+    store.presets = store.presets.filter(p=>p.id!==id);
+    if(writeStore(store)){
+      renderFavorites();
+      closeSavePanel();
+      showToast('ลบชุด Filter แล้ว', 1800);
+    }
+  }
+
+  function clearAllFavorites(){
+    const store = readStore();
+    const count = store.presets.length;
+    if(!count){
+      showToast('ยังไม่มีชุด Filter ให้ลบ', 1800);
+      return;
+    }
+    const ok = confirm(`ลบชุด Filter ที่บันทึกไว้ทั้งหมด ${count} ชุด?\n\nโดยจะลบชุดทั้งหมด ไม่ใช่เฉพาะผลค้นหาที่แสดงอยู่ และย้อนกลับไม่ได้`);
+    if(!ok) return;
+    if(writeStore({ version: 1, presets: [] })){
+      const search = document.getElementById('favSearchInput');
+      if(search) search.value = '';
+      closeSavePanel();
+      renderFavorites();
+      showToast(`ลบชุด Filter ทั้งหมด ${count} ชุดแล้ว`, 2200);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('favoriteBtn')?.addEventListener('click', openFavModal);
+    document.getElementById('favClose')?.addEventListener('click', closeFavModal);
+    document.getElementById('favModal')?.addEventListener('click', e=>{ if(e.target?.id === 'favModal') closeFavModal(); });
+    document.getElementById('favSaveCurrent')?.addEventListener('click', ()=> openSavePanel());
+    document.getElementById('favSearchInput')?.addEventListener('input', renderFavorites);
+    document.getElementById('savedResultSearchInput')?.addEventListener('input', renderSavedResultSets);
+    document.getElementById('favFilterTab')?.addEventListener('click', ()=> switchFavoriteTab('filter'));
+    document.getElementById('favResultTab')?.addEventListener('click', ()=> switchFavoriteTab('result'));
+    document.getElementById('favClearAll')?.addEventListener('click', clearAllFavorites);
+    document.getElementById('favCancelSave')?.addEventListener('click', closeSavePanel);
+    document.getElementById('favConfirmSave')?.addEventListener('click', saveFavorite);
+    document.getElementById('favNameInput')?.addEventListener('keydown', e=>{
+      if(e.key === 'Enter'){ e.preventDefault(); saveFavorite(); }
+      if(e.key === 'Escape'){ closeSavePanel(); }
+    });
+  });
+})();
 </script>
 
 
@@ -2763,9 +3885,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-fab{
   position:fixed; right:12px; top:50px;
   z-index:999999; /* กัน element อื่นทับ */
-  border:none; border-radius:6px; padding:4px 8px;
-  font-family:"LINE Seed Sans TH","Kanit",sans-serif; font-weight:600; font-size:12px;
-  cursor:pointer; color:rgba(255,255,255,.8); background:rgba(31, 74, 197,0.75);
+  border:none; border-radius:var(--radius-xs); padding:var(--space-1) var(--space-3);
+  font-family:var(--font-ui); font-weight:600; font-size:12px;
+  cursor:pointer; color:rgba(255,255,255,.7); background:rgba(31, 74, 197,0.5);
   pointer-events:auto; /* เผื่อมี global css ไปตั้ง none */
 }
 .fb-fab:hover{ background:#163a9e }
@@ -2773,41 +3895,41 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-modal{ position:fixed; inset:0; display:none; z-index:1000000; }
 .fb-modal.show{ display:block; }
 .fb-modal__backdrop{
-  position:absolute; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px);
+  position:absolute; inset:0; background:var(--overlay); backdrop-filter:blur(2px);
 }
 .fb-modal__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  width:min(560px,92vw); background:#fff; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.25);
-  overflow:hidden; font-family:"LINE Seed Sans TH","Kanit",sans-serif;
+  width:min(560px,92vw); background:var(--surface); border-radius:var(--radius-xl); box-shadow:var(--shadow-modal);
+  overflow:hidden; font-family:var(--font-ui);
 }
 .fb-modal__header{
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;
+  padding:var(--space-5) var(--space-7); background:var(--secondary-soft); border-bottom:1px solid var(--chip-border);
 }
-.fb-modal__title{ margin:0; font-size:18px; color:#0b1020; }
+.fb-modal__title{ margin:0; font-size:18px; color:var(--text-strong); }
 .fb-close{ border:none; background:transparent; font-size:22px; line-height:1; cursor:pointer; color:#334155; }
 
-.fb-form{ padding:14px 16px; }
-.fb-label{ display:block; font-weight:600; margin:8px 0 6px; color:#334155; }
+.fb-form{ padding:var(--space-6) var(--space-7); }
+.fb-label{ display:block; font-weight:600; margin:var(--space-3) 0 var(--space-2); color:#334155; }
 .fb-input{
-  display:block; width:90%; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; font-size:15px; background:#fff;
+  display:block; width:90%; border:1px solid var(--border-strong); border-radius:var(--radius-md); padding:var(--space-4) var(--space-5); font-size:15px; background:var(--surface);
   font-family: inherit;
 }
 .steps-inline li.no-indent{ margin-left:0 !important; margin-right:0 !important; }
 .steps-inline li.steps-heading{ list-style:none; font-weight:700; color:#1f4ac5; margin-right:10px; }
 .consent-title-lg{ font-size:32px; color:#2e59d9; }
 .consent-msg-lg{ font-size:20px; }
-.fb-input:focus-visible{ outline:3px solid #7aa2ff; outline-offset:2px; }
+.fb-input:focus-visible{ outline:var(--focus-ring); outline-offset:2px; }
 
-.fb-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+.fb-actions{ display:flex; gap:var(--space-4); justify-content:flex-end; margin-top:var(--space-5); }
 .fb-btn{
-  border:none; border-radius:10px; padding:6px 14px; font-weight:600; cursor:pointer;
-  min-height:32px; font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-size: 16px;
+  border:none; border-radius:var(--radius-md); padding:var(--space-2) var(--space-6); font-weight:600; cursor:pointer;
+  min-height:32px; font-family:var(--font-ui);font-size:16px;
 }
-.fb-btn--ghost{ background:#f1f5f9; color:#0b1020; }
-.fb-btn--ghost:hover{ background:#e2e8f0; }
-.fb-btn--primary{ background:#2e59d9; color:#fff; }
-.fb-btn--primary:hover{ background:#1f4ac5; }
+.fb-btn--ghost{ background:var(--secondary-soft); color:var(--text-strong); }
+.fb-btn--ghost:hover{ background:var(--secondary-soft-2); }
+.fb-btn--primary{ background:var(--primary); color:#fff; }
+.fb-btn--primary:hover{ background:var(--primary-2); }
 .fb-spinner{
   width:16px; height:16px; border-radius:50%;
   border:2px solid rgba(255,255,255,.6); border-top-color:#fff; display:inline-block;
@@ -2815,7 +3937,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 }
 @keyframes fb-spin{ to{ transform:rotate(360deg) } }
 
-.fb-note{ font-size:12.5px; color:#475569; margin:8px 0 0; }
+.fb-note{ font-size:12.5px; color:var(--text-soft); margin:var(--space-3) 0 0; }
 
 
 /* === Toast (isolated: .fb-toast-*) === */
@@ -2848,26 +3970,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
 .fb-confirm__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px); }
 .fb-confirm__dialog{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  width:min(560px,92vw); background:#fff; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.25);
-  overflow:hidden; font-family:"LINE Seed Sans TH","Kanit",sans-serif;
+  width:min(560px,92vw); background:var(--surface); border-radius:var(--radius-xl); box-shadow:var(--shadow-modal);
+  overflow:hidden; font-family:var(--font-ui);
 }
 .fb-confirm__header{
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;
+  padding:var(--space-5) var(--space-7); background:var(--secondary-soft); border-bottom:1px solid var(--chip-border);
 }
-.fb-confirm__title{ margin:0; font-size:18px; color:#0b1020; }
+.fb-confirm__title{ margin:0; font-size:18px; color:var(--text-strong); }
 .fb-confirm__close{ border:none; background:transparent; font-size:22px; line-height:1; cursor:pointer; color:#334155; }
-.fb-confirm__body{ padding:16px; }
+.fb-confirm__body{ padding:var(--space-7); }
 .fb-confirm__msg{ margin:0; font-size:15px; line-height:1.6; }
-.fb-confirm__msg--alert{ color:#b91c1c; font-weight:800; } /* แดง + หนา */
-.fb-confirm__actions{ display:flex; gap:10px; justify-content:flex-end; padding:0 16px 16px; }
+.fb-confirm__msg--alert{ color:var(--danger-text); font-weight:800; } /* แดง + หนา */
+.fb-confirm__actions{ display:flex; gap:var(--space-4); justify-content:flex-end; padding:0 var(--space-7) var(--space-7); }
 .fb-confirm__btn{
-  border:none; border-radius:10px; padding:6px 14px; font-weight:600; min-height:32px; ; font-family:"LINE Seed Sans TH","Kanit",sans-serif;font-size: 16px;
+  border:none; border-radius:var(--radius-md); padding:var(--space-2) var(--space-6); font-weight:600; min-height:32px; font-family:var(--font-ui);font-size:16px;
 }
-.fb-confirm__btn--ghost{ background:#f1f5f9; color:#0b1020; }
-.fb-confirm__btn--ghost:hover{ background:#e2e8f0; }
-.fb-confirm__btn--primary{ background:#2e59d9; color:#fff; }
-.fb-confirm__btn--primary:hover{ background:#1f4ac5; }
+.fb-confirm__btn--ghost{ background:var(--secondary-soft); color:var(--text-strong); }
+.fb-confirm__btn--ghost:hover{ background:var(--secondary-soft-2); }
+.fb-confirm__btn--primary{ background:var(--primary); color:#fff; }
+.fb-confirm__btn--primary:hover{ background:var(--primary-2); }
 </style>
 
 
@@ -2890,8 +4012,8 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     const $submit   = $form.querySelector('button[type="submit"]');
     const $closeEls = $modal.querySelectorAll('[data-fb-close]');
 
-    function open(){ $modal.classList.add('show'); $modal.setAttribute('aria-hidden','false'); }
-    function close(){ $modal.classList.remove('show'); $modal.setAttribute('aria-hidden','true'); if($note) $note.textContent=''; }
+    function open(){ setDialogVisible($modal, true); }
+    function close(){ setDialogVisible($modal, false); if($note) $note.textContent=''; }
 
     $btn.addEventListener('click', open);
     $closeEls.forEach(el=> el.addEventListener('click', close));
@@ -2982,8 +4104,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   function openFbConfirm(){
     return new Promise((resolve)=>{
       if(!$fbConfirm){ return resolve(true); }
-      $fbConfirm.classList.add('show');
-      $fbConfirm.setAttribute('aria-hidden','false');
+      setDialogVisible($fbConfirm, true);
 
       const cancelEls = $fbConfirm.querySelectorAll('[data-fbcancel]');
       const onCancel = ()=>{ cleanup(); resolve(false); };
@@ -2993,8 +4114,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       $fbConfirmOk && $fbConfirmOk.addEventListener('click', onOk, { once:true });
 
       function cleanup(){
-        $fbConfirm.classList.remove('show');
-        $fbConfirm.setAttribute('aria-hidden','true');
+        setDialogVisible($fbConfirm, false);
       }
     });
   }
@@ -3107,7 +4227,6 @@ const DEFAULT_TOPK = 10;
     b.addEventListener('click', ()=>{
       removeAbility(name);
       refreshChips();
-      if (typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
       notify();
     });
     wrap.appendChild(b);
@@ -3143,7 +4262,6 @@ const DEFAULT_TOPK = 10;
         if (b.classList.contains('is-disabled')) return;
         if (isSel) removeAbility(name); else addAbility(name);
         refreshChips();
-        if (typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
         notify();
       });
       wrap.appendChild(b);
@@ -3187,6 +4305,14 @@ const DEFAULT_TOPK = 10;
     window._chipUnwanted.splice(idx,1);
     return true;
   }
+  function setUnwantedBodyOpen(isOpen){
+    const body = document.getElementById('chipUnwantedBody');
+    const btn = document.getElementById('chipUnwantedToggle');
+    if(!body || !btn) return;
+    body.classList.toggle('open', !!isOpen);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    btn.textContent = isOpen ? '▲ ซ่อน' : '▼ แสดง';
+  }
   function renderUnwantedSelected(){
   const wrap = document.getElementById('chipUnwanted');
   if(!wrap) return;
@@ -3199,6 +4325,7 @@ const DEFAULT_TOPK = 10;
   }
 
   wrap.classList.remove('is-hidden');
+  setUnwantedBodyOpen(true);
 
   window._chipUnwanted.forEach(name=>{
     const b = document.createElement('button');
@@ -3209,7 +4336,6 @@ const DEFAULT_TOPK = 10;
     b.addEventListener('click', ()=>{
       removeUnwanted(name);
       refreshUnwantedChips();
-      if (typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
     });
     wrap.appendChild(b);
     requestAnimationFrame(()=> requestAnimationFrame(()=> b.classList.remove('chip-entering')));
@@ -3234,7 +4360,6 @@ const DEFAULT_TOPK = 10;
       b.addEventListener('click',()=>{
         if(isSel) removeUnwanted(name); else addUnwanted(name);
         refreshUnwantedChips();
-        if (typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
       });
       wrap.appendChild(b);
     });
@@ -3417,7 +4542,7 @@ const DEFAULT_TOPK = 10;
   const chipSearchBox = document.querySelector('#chipSearch')?.closest('.chip-search-box');
   const calcBtn = document.getElementById('calcBtn');
   const calcBtn2 = document.getElementById('calcBtn2');
-  const IDLE_TUTORIAL_MS = 90000; // ปรับ idle time
+  const IDLE_TUTORIAL_MS = 120000; // ปรับ idle time
   let idleGuideTimer = null;
   let idleTimer = null;
   let pendingAutoShow = false;
