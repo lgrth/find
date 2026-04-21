@@ -902,7 +902,7 @@ html[data-theme="dark"] .fav-tab.active{background:var(--primary);color:#fff}
 .result-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:32px;height:26px;padding:0 var(--space-5);border:1px solid var(--chip-border);border-radius:var(--radius-pill);background:var(--surface-muted);color:#334155;cursor:pointer;font-family:inherit;font-size:14px;font-weight:900;line-height:1}
 .result-icon-btn:hover{background:var(--primary-soft);border-color:#c7d2fe;color:#1e3a8a}
 .result-icon-btn.is-active{background:var(--primary);border-color:var(--primary-2);color:#fff}
-.result-card--highlight{outline:4px solid #f59e0b;outline-offset:3px;box-shadow:0 0 0 6px rgba(245,158,11,.18), var(--shadow-card)}
+.result-card--highlight{outline:5px solid #0b46f5;outline-offset:3px;box-shadow:0 0 0 6px rgb(11 30 245 / 30%), var(--shadow-card)}
 .result-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;display:none;min-width:120px;background:var(--surface);border:1px solid var(--chip-border);border-radius:var(--radius-md);box-shadow:var(--shadow-modal);padding:var(--space-2)}
 .result-action.open .result-menu{display:block}
 .result-menu button{display:block;width:100%;border:none;background:transparent;color:var(--text);font-family:inherit;font-size:13px;font-weight:400;text-align:left;padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;justify-content:left;gap:6px}
@@ -2098,6 +2098,7 @@ async function calculate(){
   }
 
   try{
+    clearPinnedResults()
     if (!jewels || jewels.length === 0){
       showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
       jewels = await fetchGVizJSONP();
@@ -2527,19 +2528,25 @@ card.innerHTML = `
         <button type="button" data-action="save-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg><span>บันทึกเซ็ตนี้</span></button>
       </div>`;
     actionWrap.querySelector('.result-menu-btn')?.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      document.querySelectorAll('.result-action.open').forEach(el=>{ if(el !== actionWrap) el.classList.remove('open'); });
-      actionWrap.classList.toggle('open');
-    });
-    actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
-      const action = e.target?.dataset?.action;
-      if(!action) return;
-      e.stopPropagation();
-      actionWrap.classList.remove('open');
-      if(action === 'copy-names') copyText(names.join(', '), '✅ คัดลอกชื่อจี้แล้ว');
-      if(action === 'share-result') shareResultSnapshot(snapshot);
-      if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
-    });
+  e.stopPropagation();
+  document.querySelectorAll('.result-action.open').forEach(el=>{ if(el !== actionWrap) el.classList.remove('open'); });
+  actionWrap.classList.toggle('open');
+});
+
+actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
+  const menu = e.currentTarget;
+  const btn = e.target.closest('[data-action]');
+  if(!btn || !menu.contains(btn)) return;
+
+  const action = btn.dataset.action;
+
+  e.stopPropagation();
+  actionWrap.classList.remove('open');
+
+  if(action === 'copy-names') copyText(names.join(', '), '✅ คัดลอกชื่อจี้แล้ว');
+  if(action === 'share-result') shareResultSnapshot(snapshot);
+  if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
+});
     const head = card.querySelector('.card-head');
     const badgesEl = head?.querySelector('.badges');
     if(badgesEl){ badgesEl.append(pinBtn, actionWrap); }
