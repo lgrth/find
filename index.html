@@ -247,7 +247,7 @@
 .toast{
   position:fixed;
   left:50%;
-  top:calc(var(--header-h, 0px) + 12px);
+  top:max(12px, calc(var(--header-h, 0px) + 12px));
   transform:translate(-50%, -10px);
   width:min(440px, calc(100vw - 24px));
   min-height:52px;
@@ -447,7 +447,7 @@ html[data-theme="dark"] .toast--error .toast__icon{
 @media (max-width:640px){
   .toast{
     width:min(92vw, 420px);
-    top:calc(var(--header-h, 0px) + 10px);
+    top:80px;
     padding:10px 10px;
     gap:10px;
   }
@@ -564,7 +564,7 @@ header .brand{text-align:center;padding-top:0!important}
 body{ padding-top: var(--header-h); }
 header .brand{ padding-top:6px; }
 @media (max-width:640px){
-  .brand-title{ font-size:20px }
+  .brand-title{ font-size:18px }
 }
 .steps-inline li{margin:6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
 .steps-inline .step-index{
@@ -1455,20 +1455,6 @@ html[data-theme="dark"] .topk-preset.active{background:var(--primary);border-col
 @media (prefers-reduced-motion:no-preference){.chip:active{transform:scale(.93)}}
 /* === Toast bottom on mobile === */
 @media (max-width:768px){
-  .toast{
-    width: 60vw !important;
-    max-width: none !important;
-    top: 50% !important;
-    bottom: auto !important;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.95);
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: break-word;
-    line-height: 1.6 !important;
-    backdrop-filter: blur(8px);
-    transition: all 0.2s ease;
-  }
 
   .toast.show{
     transform: translate(-50%, -50%) scale(1);
@@ -5143,7 +5129,7 @@ const DEFAULT_TOPK = 10;
   const TUTORIAL_KEY = 'tutorial_autoshown_once_v1';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
-  const IDLE_GUIDE_MS = 10000; // 10 วินาที
+  const IDLE_GUIDE_MS = 15000; // 10 วินาที
   const chipSearchBox = document.querySelector('#chipSearch')?.closest('.chip-search-box');
   const calcBtn = document.getElementById('calcBtn');
   const calcBtn2 = document.getElementById('calcBtn2');
