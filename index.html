@@ -358,7 +358,7 @@ header .brand{text-align:center;padding-top:0!important}
 body{ padding-top: var(--header-h); }
 header .brand{ padding-top:6px; }
 @media (max-width:640px){
-  .brand-title{ font-size:22px }
+  .brand-title{ font-size:20px }
 }
 .steps-inline li{margin:6px;padding:4px 10px;font-size:13px;border-radius:12px;background:rgba(255,255,255,0.15);display:inline-block;}
 .steps-inline .step-index{
@@ -405,8 +405,26 @@ header .brand{ padding-top:6px; }
 
 
 /* Ensure brand title shows above steps inside header */
-.brand-title{margin:0; font-size:22px; font-weight:700; color:#fff; letter-spacing:.3px}
-@media (max-width:640px){ .brand-title{ font-size:22px !important } }
+.brand-title{
+  margin:0;
+  font-size:22px;
+  font-weight:700;
+  color:#fff;
+  letter-spacing:.3px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.brand-title:hover{
+  opacity:.92;
+}
+
+.brand-title:focus-visible{
+  outline:2px solid rgba(255,255,255,.9);
+  outline-offset:4px;
+  border-radius:8px;
+}
+@media (max-width:640px){ .brand-title{ font-size:20px !important } }
 .steps-in-header{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:0}
 .steps-inline .step-index{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#fff;color:#1f4ac5;font-weight:700;font-size:12px}
 .steps-inline li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 10px;font-size:13px;color:#fff}
@@ -809,18 +827,151 @@ html[data-theme="dark"] .qr-modal__title{color:var(--primary-2)}
 html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1}
 
 /* ===== Favorite filter modal ===== */
-.fav-modal{position:fixed;inset:0;z-index:3600;display:none;align-items:center;justify-content:center;background:var(--overlay);padding:var(--space-7);box-sizing:border-box}
+.fav-modal{position:fixed;inset:0;z-index:3600;display:none;align-items:center;justify-content:center;background:var(--overlay);padding:var(--space-7);box-sizing:border-box;backdrop-filter: blur(2px)}
 .fav-modal.show{display:flex}
-.fav-modal__dialog{background:var(--surface);border-radius:var(--radius-xl);width:min(560px,94vw);max-height:min(720px,92vh);overflow:auto;box-shadow:var(--shadow-modal);font-family:var(--font-ui);animation: modal-show 0.25s ease-out;}
-.fav-modal__header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-5);padding:var(--space-6) var(--space-7);border-bottom:1px solid var(--chip-border);background:var(--surface-muted)}
+.fav-modal__dialog{
+  background:var(--surface);
+  border-radius:var(--radius-xl);
+  width:min(560px,94vw);
+  max-height:min(720px,92vh);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:var(--shadow-modal);
+  font-family:var(--font-ui);
+  animation: modal-show 0.25s ease-out;
+}
+
+.fav-modal__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--space-5);
+  padding:var(--space-6) var(--space-7);
+  border-bottom:1px solid var(--chip-border);
+  background:var(--surface-muted);
+  position:sticky;
+  top:0;
+  z-index:6;
+  flex-shrink:0;
+}
+
 .fav-modal__title{margin:0;color:#1e3a8a;font-size:18px;font-weight:600}
 .fav-count{color:var(--text-soft);font-size:14px;font-weight:600}
 .fav-modal__close{border:none;background:transparent;color:#334155;font-size:24px;line-height:1;cursor:pointer}
-.fav-modal__body{padding:var(--space-6) var(--space-7)}
-.fav-tabs{display:flex;gap:var(--space-2);margin-bottom:var(--space-4);padding:var(--space-1);background:var(--surface-muted);border:1px solid var(--chip-border);border-radius:var(--radius-md)}
-.fav-tab{flex:1;border:none;border-radius:var(--radius-sm);background:transparent;color:var(--text-soft);font-family:inherit;font-size:14px;font-weight:700;padding:var(--space-3) var(--space-4);cursor:pointer}
+
+.fav-modal__body{
+  padding:0 var(--space-7) var(--space-6) var(--space-7);
+  overflow:auto;
+  background:var(--surface);
+}
+
+.fav-tabs{
+  display:flex;
+  gap:var(--space-2);
+  margin:0;
+  padding:var(--space-6) 0 var(--space-4) 0;
+  background:var(--surface);
+  border:none;
+  border-bottom:1px solid var(--chip-border);
+  border-radius:0;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+
+.fav-tab{flex:1;border:none;border-radius:var(--radius-sm);background:var(--secondary-soft);border: 0.5px solid var(--text-soft);color:var(--text-soft);font-family:inherit;font-size:14px;font-weight:700;padding:var(--space-3) var(--space-4);cursor:pointer}
 .fav-tab.active{background:var(--primary);color:#fff}
 .fav-tab:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.fav-panel[hidden]{display:none}
+
+.fav-toolbar{
+  display:flex;
+  align-items:center;
+  gap:var(--space-3);
+  position:sticky;
+  top:64px;
+  z-index:19;
+  background:var(--surface);
+  padding:var(--space-4) 0 var(--space-3) 0;
+}
+
+.fav-toolbar--filter{margin-bottom:var(--space-2)}
+.fav-toolbar--result{margin-bottom:var(--space-2)}
+
+.fav-search-wrap{
+  position:relative;
+  flex:1;
+  min-width:160px;
+}
+
+.fav-search{
+  width:100%;
+  min-width:0;
+  border:1px solid var(--border-strong);
+  border-radius:var(--radius-md);
+  padding:var(--space-3) 40px var(--space-3) var(--space-5);
+  font-size:14px;
+  font-family:inherit;
+  box-sizing:border-box;
+}
+.fav-search::-webkit-search-decoration,
+.fav-search::-webkit-search-cancel-button,
+.fav-search::-webkit-search-results-button,
+.fav-search::-webkit-search-results-decoration{
+  -webkit-appearance:none;
+  appearance:none;
+  display:none;
+}
+
+.fav-search:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+
+.fav-search-clear{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  border:none;
+  background:transparent;
+  color:#64748b;
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  padding:4px;
+  border-radius:6px;
+}
+.fav-search-clear:hover{background:#f1f5f9;color:#334155}
+.fav-search-clear[hidden]{display:none !important}
+
+.fav-toolbar__actions{
+  display:flex;
+  gap:var(--space-3);
+}
+
+.fav-btn[disabled]{opacity:.45;cursor:not-allowed}
+
+@media (max-width:520px){
+  .fav-toolbar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .fav-search-wrap,
+  .fav-search{
+    width:100%;
+  }
+
+  .fav-toolbar__actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:var(--space-3);
+    width:100%;
+  }
+
+  .fav-toolbar__actions .fav-btn{
+    width:100%;
+  }
+}
 .fav-panel[hidden]{display:none}
 .fav-toolbar{display:flex;align-items:center;gap:var(--space-3)}
 .fav-search{flex:1;min-width:160px;border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);font-size:14px;font-family:inherit;box-sizing:border-box}
@@ -870,11 +1021,9 @@ html[data-theme="dark"] .fav-btn--ghost:hover{background:#475569}
 html[data-theme="dark"] .fav-tabs{background:#0f172a;border-color:#334155}
 html[data-theme="dark"] .fav-tab{color:#94a3b8}
 html[data-theme="dark"] .fav-tab.active{background:var(--primary);color:#fff}
-@media (max-width:520px){
-  .fav-toolbar{flex-direction:column;align-items:stretch}
-  .fav-toolbar .fav-btn{width:100%}
-  .fav-search{width:100%}
-}
+html[data-theme="dark"] .fav-toolbar{background:#111827}
+html[data-theme="dark"] .fav-search-clear{color:#94a3b8}
+html[data-theme="dark"] .fav-search-clear:hover{background:#1e293b;color:#e5e7eb}
 
 /* ===== Result product features ===== */
 .data-freshness{display:inline-flex;align-items:center;gap:var(--space-1);margin:0 0 0 2px;color:var(--text-soft);font-size:12px;font-weight:400}
@@ -948,6 +1097,7 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   background:rgba(0,0,0,.75);
   display:none;align-items:flex-end;justify-content:center;
   opacity: 0;
+  backdrop-filter: blur(2px);
 }
 .tutorial-sheet.show{ display:flex; animation: fade-in 0.25s ease-out forwards;}
 .tutorial-sheet.hiding{ display:flex; animation: fade-out 0.25s ease-out forwards;}
@@ -1354,7 +1504,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
 <header>
   <div class="header-spacer"></div>
   <div class="brand" style="flex:1;text-align:center">
-    <h1 class="brand-title">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
+    <h1 class="brand-title" id="brandTitle" role="button" tabindex="0" aria-label="กลับหน้าหลัก">ระบบค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
     <button id="favoriteBtn" class="favorite-btn" type="button" aria-label="Filter ค้นหาที่บันทึกไว้" title="⭐️ Filter ค้นหาที่บันทึกไว้">★</button>
@@ -1528,10 +1678,15 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <button type="button" class="fav-tab" id="favResultTab" role="tab" aria-selected="false" aria-controls="favResultPanel">เซ็ตจี้</button>
         </div>
         <div id="favFilterPanel" class="fav-panel" role="tabpanel" aria-labelledby="favFilterTab">
-          <div class="fav-toolbar">
-            <input id="favSearchInput" class="fav-search" type="search" placeholder="ค้นหาชื่อชุด Filter..." autocomplete="off">
-            <button type="button" class="fav-btn fav-btn--primary" id="favSaveCurrent">+ บันทึก Filter ปัจจุบัน</button>
-            <button type="button" class="fav-btn fav-btn--danger" id="favClearAll">ลบทั้งหมด</button>
+          <div class="fav-toolbar fav-toolbar--filter">
+            <div class="fav-search-wrap">
+              <input id="favSearchInput" class="fav-search" type="search" placeholder="ค้นหาชื่อชุด Filter..." autocomplete="off">
+              <button type="button" class="fav-search-clear" id="favSearchClear" aria-label="ล้างการค้นหา" hidden>✕</button>
+            </div>
+            <div class="fav-toolbar__actions">
+              <button type="button" class="fav-btn fav-btn--primary" id="favSaveCurrent">+ บันทึก Filter ปัจจุบัน</button>
+              <button type="button" class="fav-btn fav-btn--danger" id="favClearAll">ลบทั้งหมด</button>
+            </div>
           </div>
           <div id="favSavePanel" class="fav-save-panel">
             <label class="fav-field" for="favNameInput">ชื่อชุด
@@ -1546,8 +1701,11 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
           <div id="favList" class="fav-list"></div>
         </div>
         <div id="favResultPanel" class="fav-panel" role="tabpanel" aria-labelledby="favResultTab" hidden>
-          <div class="fav-toolbar">
-            <input id="savedResultSearchInput" class="fav-search" type="search" placeholder="ค้นหาเซ็ตจี้ที่บันทึกไว้..." autocomplete="off">
+          <div class="fav-toolbar fav-toolbar--result">
+            <div class="fav-search-wrap">
+              <input id="savedResultSearchInput" class="fav-search" type="search" placeholder="ค้นหาเซ็ตจี้ที่บันทึกไว้..." autocomplete="off">
+              <button type="button" class="fav-search-clear" id="savedResultSearchClear" aria-label="ล้างการค้นหา" hidden>✕</button>
+            </div>
           </div>
           <div id="savedResultList" class="fav-list"></div>
         </div>
@@ -3204,6 +3362,30 @@ function saveResultSetSnapshot(snapshot, preferredName=''){
   }
 }
 
+function renameSavedResultSet(id){
+  const store = readResultSetStore();
+  const item = store.items.find(x=>x.id === id);
+  if(!item) return;
+
+  const currentName = item.name || resultSetDefaultName(item.snapshot || {});
+  const nextName = prompt('เปลี่ยนชื่อเซ็ตจี้', currentName);
+  if(nextName === null) return;
+
+  const finalName = nextName.trim();
+  if(!finalName){
+    showToast('⚠️ ใส่ชื่อเซ็ตจี้ก่อนบันทึก', 2600, 'warn');
+    return;
+  }
+
+  item.name = finalName;
+  item.updatedAt = new Date().toISOString();
+
+  if(writeResultSetStore(store)){
+    renderSavedResultSets();
+    showToast('✅ เปลี่ยนชื่อเซ็ตจี้แล้ว', 1800);
+  }
+}
+
 function deleteSavedResultSet(id){
   const store = readResultSetStore();
   const item = store.items.find(x=>x.id === id);
@@ -3258,39 +3440,42 @@ function renderSavedResultSets(){
       jewel.textContent = jewelName;
       jewels.appendChild(jewel);
     });
-    const metrics = document.createElement('div');
-    metrics.className = 'saved-result-metrics';
-    [
-      `คะแนน ${snapshot.score || '-'}`,
-      `ตรงเป๊ะ ${snapshot.matchedCount ?? 0}`,
-      `หายไป ${(snapshot.missing || []).length}`,
-      `ไม่ต้องการ ${(snapshot.unwanted || []).length}`,
-      `ได้เพิ่ม ${(snapshot.extra || []).length}`
-    ].forEach(text=>{
-      const metric = document.createElement('span');
-      metric.className = 'saved-result-metric';
-      metric.textContent = text;
-      metrics.appendChild(metric);
-    });
+    // const metrics = document.createElement('div');
+    // metrics.className = 'saved-result-metrics';
+    // [
+    //   `คะแนน ${snapshot.score || '-'}`,
+    //   `ตรงเป๊ะ ${snapshot.matchedCount ?? 0}`,
+    //   `หายไป ${(snapshot.missing || []).length}`,
+    //   `ไม่ต้องการ ${(snapshot.unwanted || []).length}`,
+    //   `ได้เพิ่ม ${(snapshot.extra || []).length}`
+    // ].forEach(text=>{
+    //   const metric = document.createElement('span');
+    //   metric.className = 'saved-result-metric';
+    //   metric.textContent = text;
+    //   metrics.appendChild(metric);
+    // });
     const actions = document.createElement('div');
     actions.className = 'fav-actions';
-    const copyBtn = document.createElement('button');
-    copyBtn.type = 'button';
-    copyBtn.className = 'fav-btn fav-btn--primary';
-    copyBtn.textContent = 'คัดลอกสรุป';
-    copyBtn.addEventListener('click', ()=> copyText(formatResultSummary(snapshot), '✅ คัดลอกสรุปเซ็ตจี้แล้ว'));
+    const renameBtn = document.createElement('button');
+    renameBtn.type = 'button';
+    renameBtn.className = 'fav-btn fav-btn--primary';
+    renameBtn.textContent = 'เปลี่ยนชื่อ';
+    renameBtn.addEventListener('click', ()=> renameSavedResultSet(item.id));
+
     const shareBtn = document.createElement('button');
     shareBtn.type = 'button';
     shareBtn.className = 'fav-btn fav-btn--ghost';
     shareBtn.textContent = 'แชร์';
     shareBtn.addEventListener('click', ()=> shareResultSnapshot(snapshot));
+
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'fav-btn fav-btn--danger';
     deleteBtn.textContent = 'ลบ';
     deleteBtn.addEventListener('click', ()=> deleteSavedResultSet(item.id));
-    actions.append(copyBtn, shareBtn, deleteBtn);
-    row.append(name, jewels, metrics, actions);
+
+    actions.append(renameBtn, shareBtn, deleteBtn);
+    row.append(name, jewels, actions);
     list.appendChild(row);
   });
 }
@@ -3380,6 +3565,30 @@ function renderSavedResultSets(){
   function isResultTabActive(){
     return document.getElementById('favResultTab')?.classList.contains('active');
   }
+
+  function bindFavoriteSearchClear(inputId, clearId, renderFn){
+  const input = document.getElementById(inputId);
+  const clearBtn = document.getElementById(clearId);
+  if(!input || !clearBtn) return;
+
+  const sync = ()=>{
+    clearBtn.hidden = !input.value.trim();
+  };
+
+  input.addEventListener('input', ()=>{
+    sync();
+    renderFn();
+  });
+
+  clearBtn.addEventListener('click', ()=>{
+    input.value = '';
+    sync();
+    renderFn();
+    input.focus();
+  });
+
+  sync();
+}
 
   function switchFavoriteTab(tab){
     const isResult = tab === 'result';
@@ -3643,7 +3852,10 @@ function renderSavedResultSets(){
     if(!ok) return;
     if(writeStore({ version: 1, presets: [] })){
       const search = document.getElementById('favSearchInput');
-      if(search) search.value = '';
+      if(search){
+        search.value = '';
+        search.dispatchEvent(new Event('input'));
+      }
       closeSavePanel();
       renderFavorites();
       showToast(`ลบชุด Filter ทั้งหมด ${count} ชุดแล้ว`, 2200);
@@ -3651,12 +3863,24 @@ function renderSavedResultSets(){
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
+        const brandTitle = document.getElementById('brandTitle');
+    if(brandTitle){
+      brandTitle.addEventListener('click', goToHomePage);
+      brandTitle.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          goToHomePage();
+        }
+      });
+    }
     document.getElementById('favoriteBtn')?.addEventListener('click', openFavModal);
     document.getElementById('favClose')?.addEventListener('click', closeFavModal);
     document.getElementById('favModal')?.addEventListener('click', e=>{ if(e.target?.id === 'favModal') closeFavModal(); });
     document.getElementById('favSaveCurrent')?.addEventListener('click', ()=> openSavePanel());
-    document.getElementById('favSearchInput')?.addEventListener('input', renderFavorites);
-    document.getElementById('savedResultSearchInput')?.addEventListener('input', renderSavedResultSets);
+
+    bindFavoriteSearchClear('favSearchInput', 'favSearchClear', renderFavorites);
+    bindFavoriteSearchClear('savedResultSearchInput', 'savedResultSearchClear', renderSavedResultSets);
+
     document.getElementById('favFilterTab')?.addEventListener('click', ()=> switchFavoriteTab('filter'));
     document.getElementById('favResultTab')?.addEventListener('click', ()=> switchFavoriteTab('result'));
     document.getElementById('favClearAll')?.addEventListener('click', clearAllFavorites);
@@ -3668,6 +3892,18 @@ function renderSavedResultSets(){
     });
   });
 })();
+
+function goToHomePage(){
+  const baseUrl = window.location.origin + window.location.pathname;
+
+  if(window.location.search || window.location.hash){
+    window.location.assign(baseUrl);
+    return;
+  }
+
+  window.location.reload();
+}
+
 </script>
 
 
@@ -3892,7 +4128,7 @@ function renderSavedResultSets(){
 /* === Feedback widget (isolated: .fb-*) === */
 .fb-fab{
   position:fixed; right:12px; top:50px;
-  z-index:999999; /* กัน element อื่นทับ */
+  z-index:999; /* กัน element อื่นทับ */
   border:none; border-radius:var(--radius-xs); padding:var(--space-1) var(--space-3);
   font-family:var(--font-ui); font-weight:600; font-size:12px;
   cursor:pointer; color:rgba(255,255,255,.7); background:rgba(31, 74, 197,0.5);
@@ -3922,6 +4158,10 @@ function renderSavedResultSets(){
 .fb-input{
   display:block; width:90%; border:1px solid var(--border-strong); border-radius:var(--radius-md); padding:var(--space-4) var(--space-5); font-size:15px; background:var(--surface);
   font-family: inherit;
+}
+html[data-theme="dark"] .fb-input{
+  display:block; width:90%; border:1px solid var(--border-strong); border-radius:var(--radius-md); padding:var(--space-4) var(--space-5); font-size:15px; background:var(--surface);
+  font-family: inherit;color: whitesmoke;
 }
 .steps-inline li.no-indent{ margin-left:0 !important; margin-right:0 !important; }
 .steps-inline li.steps-heading{ list-style:none; font-weight:700; color:#1f4ac5; margin-right:10px; }
@@ -4014,7 +4254,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     if (!$btn || !$modal || !$form) return;
 
     $btn.style.pointerEvents = 'auto';
-    $btn.style.zIndex = '999999';
+    $btn.style.zIndex = '999';
 
     const $spinner  = $form.querySelector('.fb-spinner');
     const $submit   = $form.querySelector('button[type="submit"]');
