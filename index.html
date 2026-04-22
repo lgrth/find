@@ -869,7 +869,8 @@ html[data-theme="dark"] .btn-copy{color:#cbd5e1}
 html[data-theme="dark"] .btn-copy:hover{background:#1e293b; border-color:#334155}
 html[data-theme="dark"] .result-card h3{color:#fff}
 html[data-theme="dark"] .jewel-tooltip{background:#000; color:#fff}
-html[data-theme="dark"] .sel-progress.is-ready .sel-progress__label{background: #0e2c0e;color:#86efac}
+html[data-theme="dark"] .sel-progress.is-ready {background: #0b620b;border-color:#86efac}
+html[data-theme="dark"] .sel-progress.is-ready .sel-progress__label{color:#f0fdf4}
 html[data-theme="dark"] .char-preview .cp-jewel{color:#e9c893}
 
 /* ===== UX v3: Counter progress bar ===== */
@@ -881,7 +882,8 @@ html[data-theme="dark"] .char-preview .cp-jewel{color:#e9c893}
 .sel-progress__fill{display:block;height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#f97316);transition:width .5s ease,background .25s ease;border-radius:999px}
 .sel-progress.is-ready .sel-progress__fill{background:linear-gradient(90deg,#22c55e,#16a34a)}
 .sel-progress__label{font-size:13px;font-weight:700;color:#385b8c;white-space:nowrap}
-.sel-progress.is-ready .sel-progress__label{background: #e8ffe8; color:#166534}
+.sel-progress.is-ready {  background:#f0fdf4;border-color:#86efac}
+.sel-progress.is-ready .sel-progress__label{color:#166534}
 html[data-theme="dark"] .sel-progress{background:var(--chip-bg); border-color:var(--chip-border)}
 html[data-theme="dark"] .sel-progress__track{background:#334155}
 html[data-theme="dark"] .sel-progress__label{color:var(--text)}
@@ -1190,7 +1192,7 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
 .fav-list{display:flex;flex-direction:column;gap:var(--space-4);margin-top:var(--space-5)}
 .fav-empty{padding:18px var(--space-5);border:1px dashed var(--border-strong);border-radius:var(--radius-md);text-align:center;color:var(--text-soft);background:var(--surface-muted);font-size: 13px;}
 .fav-item{border:1px solid var(--chip-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);background:var(--surface)}
-.fav-item__name{font-weight:600;color:#1e293b;font-size:15px;margin-bottom:4px}
+.fav-item__name{font-weight:600;color:var(--primary);font-size:15px;margin-bottom:4px}
 .fav-item__meta{font-size:12px;color:var(--text-soft);line-height:1.45;margin-bottom:var(--space-4)}
 .saved-result-jewels{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin:var(--space-3) 0}
 .saved-result-jewel{border:1px solid var(--chip-border);border-radius:var(--radius-sm);background:var(--surface-muted);padding:var(--space-3);font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.15;text-align: center;display:flex;align-items:center;justify-content:center}
@@ -1224,7 +1226,7 @@ html[data-theme="dark"] .saved-result-metric{background:#0f172a;border-color:#33
 html[data-theme="dark"] .fav-btn--ghost{background:#334155;color:#e5e7eb}
 html[data-theme="dark"] .fav-btn--ghost:hover{background:#475569}
 html[data-theme="dark"] .fav-tabs{background:#0f172a;border-color:#334155}
-html[data-theme="dark"] .fav-tab{color:#94a3b8}
+html[data-theme="dark"] .fav-tab{color:#e5e7eb}
 html[data-theme="dark"] .fav-tab.active{background:var(--primary);color:#fff}
 html[data-theme="dark"] .fav-toolbar{background:#111827}
 html[data-theme="dark"] .fav-search-clear{color:#94a3b8}
@@ -1663,10 +1665,10 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
         <div>
           <div class="tutorial-step-head">
             <span class="tutorial-step-num" style="background:#f59e0b">5</span>
-            <strong>บันทึก Filter ที่ใช้บ่อย</strong>
+            <strong>บันทึก Filter / เซ็ตจี้ที่โดนใจ</strong>
             <span class="tutorial-opt">  [ไม่จำเป็น]</span>
           </div>
-          <span class="tutorial-sub">หลังตั้งค่า Filter ถูกใจแล้ว กด ★ มุมขวาบน เพื่อบันทึกไว้ใช้ซ้ำในครั้งหน้า</span>
+          <span class="tutorial-sub">หลังตั้งค่า Filter ถูกใจแล้ว กด ★ มุมขวาบน เพื่อบันทึกไว้ใช้ซ้ำในครั้งหน้า หรือบันทึกเซ็ตจี้ที่ต้องการไว้</span>
         </div>
       </li>
     </ol>
@@ -1864,7 +1866,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
   <div id="favModal" class="fav-modal" role="dialog" aria-modal="true" aria-labelledby="favTitle" aria-hidden="true">
     <div class="fav-modal__dialog">
       <div class="fav-modal__header">
-        <h3 id="favTitle" class="fav-modal__title">⭐️ Filter การค้นหาที่บันทึกไว้ <span id="favCount" class="fav-count">(0)</span></h3>
+        <h3 id="favTitle" class="fav-modal__title">⭐️ Filter และเซ็ตจี้ที่บันทึกไว้ <span id="favCount" class="fav-count">(0)</span></h3>
         <button type="button" class="fav-modal__close" id="favClose" aria-label="ปิด">×</button>
       </div>
       <div class="fav-modal__body">
@@ -2793,7 +2795,7 @@ function copyText(text, successMessage){
 function shareResultSnapshot(snapshot){
   const link = buildShareURL(snapshot.key, snapshot.filter || null, snapshot.names || []);
   if(navigator.share){
-    navigator.share({ title: 'เซ็ตจี้ที่แนะนำ', text: 'เปิดดูเซ็ตจี้นี้', url: link }).catch(()=>{
+    navigator.share({ title: 'เซ็ตจี้ที่แนะนำ', text: 'กดเข้าไปดูเซ็ตจี้เกมเศรษฐีที่คัดมาได้เลย >>', url: link }).catch(()=>{
       copyText(link, 'คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
     });
   }else{
@@ -3754,7 +3756,7 @@ function renderSavedResultSets(){
     const shareBtn = document.createElement('button');
     shareBtn.type = 'button';
     shareBtn.className = 'fav-btn fav-btn--ghost';
-    shareBtn.textContent = 'แชร์';
+    shareBtn.textContent = 'แชร์เซ็ตจี้';
     shareBtn.addEventListener('click', ()=> shareResultSnapshot(snapshot));
 
     const deleteBtn = document.createElement('button');
