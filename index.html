@@ -2695,11 +2695,11 @@ function buildGuidanceItems({shownCount, topK, isEmpty=false}){
   const items = [];
   const selectedCount = (typeof getDesired === 'function') ? getDesired().length : 0;
   const unwantedCount = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0;
-  if(darkOnly?.checked) items.push('ลองปิด “เฉพาะจี้ [ดาร์ค]” เพื่อให้มีจี้ให้เลือกมากขึ้น');
-  if(unwantedCount) items.push('ลองลดสกิลที่ไม่ต้องการบางข้อ เพราะอาจตัดเซ็ตดี ๆ ออกไป');
+  if(darkOnly?.checked) items.push('ลองปิด “เฉพาะจี้ [ดาร์ค]” เพื่อให้มีจี้ตัวเลือกมากขึ้น');
+  if(unwantedCount) items.push('ลองลดสกิลที่ไม่ต้องการบางสกิลออกไป เพื่อให้ค้นหาเซ็ตจี้ได้มากขึ้น');
   if(selectedCount > MIN_SELECTS) items.push('ลองลดจำนวนสกิลที่ต้องการ หรือเลือกเฉพาะสกิลสำคัญที่สุดก่อน');
-  if(!isEmpty && shownCount < topK) items.push('ลองลดจำนวนเซ็ตที่ต้องการ ถ้าต้องการดูเฉพาะตัวเลือกที่ดีที่สุด');
-  if(!items.length) items.push('ลองปรับเงื่อนไขแล้วค้นหาใหม่ เช่น เลือกตัวละครอื่นหรือเพิ่มสกิลที่ยอมรับได้');
+  if(!isEmpty && shownCount < topK) items.push('ลองลดจำนวนเซ็ตที่ต้องการหรือแก้ไขสกิล เพื่อให้ค้นหาเซ็ตจี้ได้มากขึ้น');
+  if(!items.length) items.push('ลองปรับเงื่อนไขแล้วค้นหาใหม่ เช่น เลือกสกิลที่ต้องการน้อยลง หรือไม่ต้องการบางสกิลน้อยลง เพื่อให้ได้ผลลัพธ์มากขึ้น');
   return items;
 }
 
@@ -2838,7 +2838,7 @@ function renderResults(best){
 
   if(resultTitle){
     resultTitle.textContent = shownCount < topK
-      ? `💎 เซ็ตจี้ที่ดีที่สุด พบ ${shownCount} จาก ${topK} เซ็ต`
+      ? `💎 เซ็ตจี้ที่ดีที่สุด (พบ ${shownCount} จาก ${topK} เซ็ต)`
       : `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
   }
 
@@ -2856,7 +2856,7 @@ function renderResults(best){
   const jewelMap = new Map((jewels || []).map(j=>[j.id,j]));
   if(shownCount < topK){
     container.insertAdjacentHTML('beforeend', createGuidanceHTML({
-      title:`พบ ${shownCount} จาก ${topK} เซ็ต`,
+      title:`พบ ${shownCount} จาก ${topK} เซ็ต โปรดดูคำแนะนำด้านล่าง`,
       shownCount,
       topK
     }));
