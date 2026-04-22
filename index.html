@@ -2549,7 +2549,7 @@ async function calculate(){
   const runId = beginCalcRun();
   const desired = getDesired();
   if(!desired || desired.length < MIN_SELECTS){
-    showToast(`⚠️ กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`, 3000, 'warn');
+    showToast(`กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`, 3000, 'warn');
     return;
   }
 
@@ -2809,10 +2809,10 @@ function copyText(text, successMessage){
     return navigator.clipboard.writeText(text)
       .then(()=> showToast(successMessage || 'คัดลอกแล้ว'),3000,'success')
       .catch(()=>{
-        showToast('⚠️ ไม่สามารถคัดลอกอัตโนมัติได้', 3000, 'warn');
+        showToast('ไม่สามารถคัดลอกอัตโนมัติได้', 3000, 'warn');
       });
   }
-  showToast('⚠️ เบราว์เซอร์นี้ไม่รองรับการคัดลอกอัตโนมัติ', 3000, 'warn');
+  showToast('เบราว์เซอร์นี้ไม่รองรับการคัดลอกอัตโนมัติ', 3000, 'warn');
   return Promise.resolve();
 }
 
@@ -3019,7 +3019,7 @@ actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
         showToast('เปิดเซ็ตจี้ที่แชร์ไว้แล้ว', 2400, 'success');
       }, 250);
     }else{
-      showToast('⚠️ ไม่พบเซ็ตที่แชร์ในผลลัพธ์ชุดนี้ อาจมีข้อมูลเปลี่ยนไป', 3600, 'warn');
+      showToast('ไม่พบเซ็ตที่แชร์ในผลลัพธ์ชุดนี้ อาจมีข้อมูลเปลี่ยนไป', 3600, 'warn');
     }
     _pendingHighlightResultKey = '';
     _pendingHighlightResultNames = [];
@@ -3623,7 +3623,7 @@ function writeResultSetStore(store){
     localStorage.setItem(RESULT_SET_STORAGE_KEY, JSON.stringify(store));
     return true;
   }catch(e){
-    showToast('⚠️ ไม่สามารถบันทึกเซ็ตจี้ได้', 3000, 'warn');
+    showToast('ไม่สามารถบันทึกเซ็ตจี้ได้', 3000, 'warn');
     return false;
   }
 }
@@ -3640,7 +3640,7 @@ function saveResultSetSnapshot(snapshot, preferredName=''){
   if(name === null) return;
   const finalName = name.trim();
   if(!finalName){
-    showToast('⚠️ ใส่ชื่อเซ็ตจี้ก่อนบันทึก', 2600, 'warn');
+    showToast('ใส่ชื่อเซ็ตจี้ก่อนบันทึก', 2600, 'warn');
     return;
   }
   const store = readResultSetStore();
@@ -3677,7 +3677,7 @@ function renameSavedResultSet(id){
 
   const finalName = nextName.trim();
   if(!finalName){
-    showToast('⚠️ ใส่ชื่อเซ็ตจี้ก่อนบันทึก', 2600, 'warn');
+    showToast('ใส่ชื่อเซ็ตจี้ก่อนบันทึก', 2600, 'warn');
     return;
   }
 
@@ -3813,7 +3813,7 @@ function renderSavedResultSets(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
       return true;
     }catch(e){
-      showToast('⚠️ ไม่สามารถบันทึกชุด Filter ได้', 3000, 'warn');
+      showToast('ไม่สามารถบันทึกชุด Filter ได้', 3000, 'warn');
       return false;
     }
   }
@@ -4012,7 +4012,7 @@ function renderSavedResultSets(){
     const state = preset ? preset.state : getCurrentFavoriteState();
 
     if(!preset && !hasMeaningfulFilter(state)){
-      showToast('⚠️ ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
+      showToast('ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
       return;
     }
 
@@ -5076,7 +5076,7 @@ const DEFAULT_TOPK = 10;
       var next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       btn.innerHTML = next==='dark' ? SVG_SUN : SVG_MOON;
-      try{ localStorage.setItem('theme', next); }catch(e){ if(typeof showToast==='function') showToast('⚠️ ไม่สามารถบันทึกธีมได้', 2500, 'warn'); }
+      try{ localStorage.setItem('theme', next); }catch(e){ if(typeof showToast==='function') showToast('ไม่สามารถบันทึกธีมได้', 2500, 'warn'); }
     });
   })();
 
@@ -5595,7 +5595,7 @@ async function applyCharFromURL(){
         fixedLink = window.jewels.find(j => j.id === linkId);
       }
       if (!fixedLink){
-        window.showToast(`⚠️ ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}`, 3500, 'warn');
+        window.showToast(`ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}`, 3500, 'warn');
         return;
       }
 
@@ -5609,7 +5609,7 @@ async function applyCharFromURL(){
       const otherCand = buildCandidates(desired, otherSource, unwanted, _limit);
 
       if (otherCand.length < 3){
-        window.showToast('⚠️ จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น', 3500, 'warn');
+        window.showToast('จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น', 3500, 'warn');
         return;
       }
 
