@@ -244,15 +244,221 @@
   .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4e73df,#1cc88a)}
   .note{font-size:12px;color:#666;margin-top:6px}
 
+.toast{
+  position:fixed;
+  left:50%;
+  top:calc(var(--header-h, 0px) + 12px);
+  transform:translate(-50%, -10px);
+  width:min(440px, calc(100vw - 24px));
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--chip-border);
+  background:rgba(255,255,255,.98);
+  color:var(--text-strong);
+  box-shadow:0 10px 24px rgba(15,23,42,.12);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease, transform .22s ease;
+  z-index:3700;
+  text-align:left;
+  box-sizing:border-box;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%, 0);
+  pointer-events:auto;
+}
+
+.toast.hide{
+  opacity:0;
+  transform:translate(-50%, -8px);
+  pointer-events:none;
+}
+
+.toast__icon{
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:800;
+  background:#e2e8f0;
+  color:#334155;
+}
+
+.toast__content{
+  min-width:0;
+  flex:1;
+}
+
+.toast__message{
+  font-size:14px;
+  line-height:1.4;
+  font-weight:600;
+  color:inherit;
+  word-break:break-word;
+}
+
+.toast__actions{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+}
+
+.toast__action,
+.toast__close{
+  border:none;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+  border-radius:10px;
+  min-height:32px;
+}
+
+.toast__action{
+  padding:6px 10px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--primary-2);
+}
+
+.toast__action:hover{
+  background:#eef2ff;
+}
+
+.toast__close{
+  width:32px;
+  min-width:32px;
+  padding:0;
+  font-size:22px;
+  line-height:1;
+  color:#64748b;
+}
+
+.toast__close:hover{
+  background:#f1f5f9;
+  color:#334155;
+}
+
+.toast__action:focus-visible,
+.toast__close:focus-visible{
+  outline:var(--focus-ring);
+  outline-offset:2px;
+}
+
+.toast--success{
+  background:#f0fdf4;
+  border-color:#86efac;
+  color:#166534;
+}
+.toast--success .toast__icon{
+  background:#22c55e;
+  color:#fff;
+}
+
+.toast--info{
+  background:#ffffff;
+  border-color:#cbd5e1;
+  color:#1f2937;
+}
+.toast--info .toast__icon{
+  background:#e2e8f0;
+  color:#475569;
+}
+
+.toast--warn{
+  background:#fffbeb;
+  border-color:#fcd34d;
+  color:#92400e;
+}
+.toast--warn .toast__icon{
+  background:#f59e0b;
+  color:#fff;
+}
+
+.toast--error{
+  background:#fef2f2;
+  border-color:#fca5a5;
+  color:#b91c1c;
+}
+.toast--error .toast__icon{
+  background:#ef4444;
+  color:#fff;
+}
+
+html[data-theme="dark"] .toast{
+  background:rgba(15,23,42,.98);
+  border-color:#334155;
+  color:#e5e7eb;
+  box-shadow:0 12px 28px rgba(0,0,0,.45);
+}
+html[data-theme="dark"] .toast__icon{
+  background:#334155;
+  color:#e5e7eb;
+}
+html[data-theme="dark"] .toast__action{
+  color:#93c5fd;
+}
+html[data-theme="dark"] .toast__action:hover,
+html[data-theme="dark"] .toast__close:hover{
+  background:#1e293b;
+}
+html[data-theme="dark"] .toast__close{
+  color:#94a3b8;
+}
+html[data-theme="dark"] .toast--success{
+  background:#052e1b;
+  border-color:#166534;
+  color:#bbf7d0;
+}
+html[data-theme="dark"] .toast--success .toast__icon{
+  background:#16a34a;
+  color:#fff;
+}
+html[data-theme="dark"] .toast--warn{
+  background:#3a2a14;
+  border-color:#92400e;
+  color:#fde68a;
+}
+html[data-theme="dark"] .toast--warn .toast__icon{
+  background:#d97706;
+  color:#fff;
+}
+html[data-theme="dark"] .toast--error{
+  background:#3a0f14;
+  border-color:#7f1d1d;
+  color:#fecaca;
+}
+html[data-theme="dark"] .toast--error .toast__icon{
+  background:#dc2626;
+  color:#fff;
+}
+
+@media (max-width:640px){
   .toast{
-    position:fixed;left:50%;top:47%;transform:translateX(-50%) scale(0.95);
-    background:rgb(0, 0, 0,1);color:#ffffff;padding:20px 28px;border-radius:10px;
-    box-shadow:0 8px 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition: all .25s ease;backdrop-filter: blur(8px);
-    z-index: 3700;font-weight:700;
-    text-align:center;
+    width:min(92vw, 420px);
+    top:calc(var(--header-h, 0px) + 10px);
+    padding:10px 10px;
+    gap:10px;
   }
-  .toast.show{opacity:1;transform:translateX(-50%) scale(1)}
-  .toast.hide{opacity:0;transform:translateX(-50%) scale(0.9)}
+  .toast__message{
+    font-size:13px;
+  }
+  .toast__action{
+    padding:6px 8px;
+    font-size:12px;
+  }
+}
 
   .hint{margin:4px 0 4px 0;font-size:12px;display:flex;align-items:center;gap:8px}
   .hint .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
@@ -658,7 +864,6 @@ html[data-theme="dark"] .hint--ok{color:#86efac}
 html[data-theme="dark"] .hint-text{color:#94a3b8}
 html[data-theme="dark"] .card-info p strong,
 html[data-theme="dark"] .card-info p{color:#e5e7eb}
-html[data-theme="dark"] .toast{background:#4f5e76; color:#e5e7eb; box-shadow:0 8px 18px rgba(0,0,0,.6)}
 html[data-theme="dark"] .site-footer{background:#0b1020; color:#94a3b8; border-top-color:#334155}
 html[data-theme="dark"] .btn-copy{color:#cbd5e1}
 html[data-theme="dark"] .btn-copy:hover{background:#1e293b; border-color:#334155}
@@ -1222,6 +1427,13 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 .favorite-btn{font-size:14px;font-weight:800;background-color: rgba(58, 42, 20, 0.5);border-color: rgb(160, 111, 47);}
 .theme-toggle:hover,.help-btn:hover,.favorite-btn:hover{background:rgba(0,0,0,.55)}
 .theme-toggle:focus-visible,.help-btn:focus-visible,.favorite-btn:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+/* === Error banner === */
+.error-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fef2f2;border:1px solid #fecdd3;border-radius:var(--radius-md);padding:10px var(--space-7);margin-bottom:var(--space-5);color:#b91c1c;font-size:14px;grid-column:1/-1}
+.error-banner__text{flex:1}
+.error-banner__close{background:none;border:none;cursor:pointer;font-size:18px;color:#b91c1c;padding:0 4px;line-height:1}
+.error-banner__close:hover{color:#7f1d1d}
+html[data-theme="dark"] .error-banner{background:#3a0f14;border-color:#7f1d1d;color:#fca5a5}
+html[data-theme="dark"] .error-banner__close{color:#fca5a5}
 /* === Ghost-reset button === */
 .btn--ghost-reset{background:transparent;color:#dc2626;border:1.5px solid #fca5a5;box-shadow:none;font-size:18px;padding:16px 20px;min-height:44px}
 .btn--ghost-reset:hover{background:#fef2f2;border-color:#f87171}
@@ -1520,7 +1732,16 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
   </div>
 </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite">✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!</div>
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+  <span class="toast__icon" id="toastIcon" aria-hidden="true">✓</span>
+  <div class="toast__content">
+    <div class="toast__message" id="toastMessage">โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!</div>
+  </div>
+  <div class="toast__actions">
+    <button type="button" id="toastUndoBtn" class="toast__action" hidden>Undo</button>
+    <button type="button" id="toastCloseBtn" class="toast__close" aria-label="ปิดการแจ้งเตือน">×</button>
+  </div>
+</div>
 
 <main>
   <section>
@@ -1735,6 +1956,10 @@ const calcBtn = document.getElementById('calcBtn');
 const calcBtn2 = document.getElementById('calcBtn2');
 const topKInput = document.getElementById('topK');
 const toast = document.getElementById('toast');
+const toastMessage = document.getElementById('toastMessage');
+const toastIcon = document.getElementById('toastIcon');
+const toastUndoBtn = document.getElementById('toastUndoBtn');
+const toastCloseBtn = document.getElementById('toastCloseBtn');
 const resultTitle = document.getElementById('resultTitle');
 const minHint = document.getElementById('minHint');
 const darkOnly = document.getElementById('darkOnly');
@@ -1790,23 +2015,95 @@ function __formatETA(sec){
   return `${s} วินาที`;
 }
 let _toastTimers = [];
-function showToast(text, ms=3000, kind='info'){
+let _toastUndoHandler = null;
+
+function getToastIconByKind(kind){
+  if(kind === 'success') return '✓';
+  if(kind === 'warn') return '!';
+  if(kind === 'error') return '!';
+  return 'i';
+}
+
+function clearToastTimers(){
   _toastTimers.forEach(t => clearTimeout(t));
   _toastTimers = [];
-  toast.textContent = text;
-  toast.classList.remove('toast--error','toast--warn');
-  if (kind === 'error') toast.classList.add('toast--error');
-  else if (kind === 'warn') toast.classList.add('toast--warn');
+}
+
+function hideToast(immediate = false){
+  clearToastTimers();
+
+  if(immediate){
+    toast.classList.remove('show','hide','toast--success','toast--info','toast--warn','toast--error');
+    toast.hidden = true;
+    toastUndoBtn.hidden = true;
+    toastCloseBtn.hidden = false;
+    _toastUndoHandler = null;
+    return;
+  }
+
+  toast.classList.add('hide');
+  _toastTimers.push(setTimeout(()=>{
+    toast.classList.remove('show','hide','toast--success','toast--info','toast--warn','toast--error');
+    toast.hidden = true;
+    toastUndoBtn.hidden = true;
+    toastCloseBtn.hidden = false;
+    _toastUndoHandler = null;
+  }, 220));
+}
+
+function showToast(text, ms = 2600, kind = 'info', options = {}){
+  if(typeof options !== 'object' || options === null) options = {};
+
+  const {
+    actionLabel = '',
+    onAction = null,
+    closable = true
+  } = options;
+
+  clearToastTimers();
+
+  toast.hidden = false;
+  toastMessage.textContent = text || '';
+  toastIcon.textContent = getToastIconByKind(kind);
+
+  toast.classList.remove('hide','toast--success','toast--info','toast--warn','toast--error');
+  if(kind === 'error') toast.classList.add('toast--error');
+  else if(kind === 'warn') toast.classList.add('toast--warn');
+  else if(kind === 'success') toast.classList.add('toast--success');
+  else toast.classList.add('toast--info');
+
+  if(actionLabel && typeof onAction === 'function'){
+    _toastUndoHandler = onAction;
+    toastUndoBtn.textContent = actionLabel;
+    toastUndoBtn.hidden = false;
+  }else{
+    _toastUndoHandler = null;
+    toastUndoBtn.hidden = true;
+  }
+
+  toastCloseBtn.hidden = !closable;
   toast.classList.add('show');
 
-  // NEW: ยิง event เมื่อ toast โหลดชีตสำเร็จแสดง
   if (text && text.includes('โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย')) {
     document.dispatchEvent(new CustomEvent('sheetLoadSuccessToastShown'));
   }
 
-  _toastTimers.push(setTimeout(()=> toast.classList.add('hide'), Math.max(0, ms-250)));
-  _toastTimers.push(setTimeout(()=> { toast.classList.remove('show','hide'); }, ms));
+  const exitDelay = Math.max(0, ms - 220);
+  _toastTimers.push(setTimeout(()=> toast.classList.add('hide'), exitDelay));
+  _toastTimers.push(setTimeout(()=> hideToast(true), ms));
 }
+
+toastUndoBtn?.addEventListener('click', ()=>{
+  const handler = _toastUndoHandler;
+  hideToast(true);
+  if(typeof handler === 'function'){
+    handler();
+  }
+});
+
+toastCloseBtn?.addEventListener('click', ()=>{
+  hideToast();
+});
 function showErrorBanner(text){
   let el = document.getElementById('errorBanner');
   if (!el){
@@ -2510,7 +2807,7 @@ function togglePinnedResult(snapshot, btn){
 function copyText(text, successMessage){
   if(navigator.clipboard?.writeText){
     return navigator.clipboard.writeText(text)
-      .then(()=> showToast(successMessage || '✅ คัดลอกแล้ว'))
+      .then(()=> showToast(successMessage || 'คัดลอกแล้ว'),3000,'success')
       .catch(()=>{
         showToast('⚠️ ไม่สามารถคัดลอกอัตโนมัติได้', 3000, 'warn');
       });
@@ -2523,10 +2820,10 @@ function shareResultSnapshot(snapshot){
   const link = buildShareURL(snapshot.key, snapshot.filter || null, snapshot.names || []);
   if(navigator.share){
     navigator.share({ title: 'เซ็ตจี้ที่แนะนำ', text: 'เปิดดูเซ็ตจี้นี้', url: link }).catch(()=>{
-      copyText(link, '✅ คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
+      copyText(link, 'คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
     });
   }else{
-    copyText(link, '✅ คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
+    copyText(link, 'คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
     showQRModal(link);
   }
 }
@@ -2702,7 +2999,7 @@ actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
   e.stopPropagation();
   actionWrap.classList.remove('open');
 
-  if(action === 'copy-names') copyText(names.join(', '), '✅ คัดลอกชื่อจี้แล้ว');
+  if(action === 'copy-names') copyText(names.join(', '), 'คัดลอกชื่อจี้แล้ว');
   if(action === 'share-result') shareResultSnapshot(snapshot);
   if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
 });
@@ -2719,7 +3016,7 @@ actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
     if(highlighted){
       setTimeout(()=>{
         highlighted.scrollIntoView({behavior:'smooth', block:'center'});
-        showToast('✅ เปิดเซ็ตจี้ที่แชร์ไว้แล้ว', 2400);
+        showToast('เปิดเซ็ตจี้ที่แชร์ไว้แล้ว', 2400, 'success');
       }, 250);
     }else{
       showToast('⚠️ ไม่พบเซ็ตที่แชร์ในผลลัพธ์ชุดนี้ อาจมีข้อมูลเปลี่ยนไป', 3600, 'warn');
@@ -2861,9 +3158,14 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     setAbilityList(substats);
     setDataFreshness(new Date());
     hideLoading();
-    showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
-                               '❓ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
-    if(_keywordFailed) setTimeout(()=> showToast('ℹ️ ค้นสกิลด้วยชื่อตรงๆ ได้เลย (ไม่สามารถโหลดคำค้นหาเพิ่มเติมได้)', 4000), 2800);
+    showToast(
+      substats.length
+        ? 'โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!'
+        : 'โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต',
+      2500,
+      substats.length ? 'success' : 'warn'
+    );
+    if(_keywordFailed) setTimeout(()=>{showToast('ค้นสกิลด้วยชื่อตรงๆ ได้เลย (ไม่สามารถโหลดคำค้นหาเพิ่มเติมได้)', 4000, 'info');}, 2800);
     bindShareButtons();
     applyStateFromURL();
 
@@ -3142,7 +3444,7 @@ function bindShareButtons(){
   const onShare = ()=>{
     const link = buildShareURL();
     navigator.clipboard.writeText(link).then(()=>{
-      showToast('✅ คัดลอกลิงก์แชร์แล้ว');
+      showToast('คัดลอกลิงก์แชร์แล้ว', 2000, 'success');
       showQRModal(link);
     }).catch(()=>{
       showQRModal(link);
@@ -3229,7 +3531,7 @@ function applySkillAction(skillName, action){
   if(action === 'want'){
     const current = Array.isArray(window._chipSelected) ? window._chipSelected.slice() : [];
     if(current.includes(skillName)){
-      showToast('สกิลนี้อยู่ในรายการที่ต้องการแล้ว', 2000);
+      showToast('สกิลนี้อยู่ในรายการที่ต้องการแล้ว', 2000, 'info');
       hideSkillActionMenu();
       return;
     }
@@ -3244,7 +3546,9 @@ function applySkillAction(skillName, action){
       window.setUnwantedState(nextUnwanted);
     }
     updateCalcAvailability();
-    showToast('✅ เพิ่มไปยังสกิลที่ต้องการแล้ว', 2500);
+    showToast('เพิ่มไปยังสกิลที่ต้องการแล้ว', 2500, 'success');
+     hideSkillActionMenu();
+     return;
   }
   if(action === 'unwant'){
     if((window._chipSelected || []).includes(skillName)){
@@ -3253,19 +3557,19 @@ function applySkillAction(skillName, action){
       const nextUnwanted = Array.from(new Set([...(window._chipUnwanted || []), skillName]));
       if(typeof window.setUnwantedState === 'function') window.setUnwantedState(nextUnwanted);
       updateCalcAvailability();
-      showToast('✅ ย้ายไปยังสกิลที่ไม่ต้องการแล้ว', 2500);
+      showToast('ย้ายไปยังสกิลที่ไม่ต้องการแล้ว', 2500, 'success');
       hideSkillActionMenu();
       return;
     }
     const current = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [];
     if(current.includes(skillName)){
-      showToast('สกิลนี้อยู่ในรายการที่ไม่ต้องการแล้ว', 2000);
+      showToast('สกิลนี้อยู่ในรายการที่ไม่ต้องการแล้ว', 2000, 'warn');
       hideSkillActionMenu();
       return;
     }
     if(!current.includes(skillName) && typeof window.setUnwantedState === 'function') window.setUnwantedState(current.concat(skillName));
     updateCalcAvailability();
-    showToast('✅ เพิ่มไปยังสกิลที่ไม่ต้องการแล้ว', 2500);
+    showToast('เพิ่มไปยังสกิลที่ไม่ต้องการแล้ว', 2500, 'success');
   }
   hideSkillActionMenu();
 }
@@ -3358,7 +3662,7 @@ function saveResultSetSnapshot(snapshot, preferredName=''){
   }
   if(writeResultSetStore(store)){
     renderSavedResultSets();
-    showToast('✅ บันทึกเซ็ตจี้แล้ว', 2000);
+    showToast('บันทึกเซ็ตจี้แล้ว', 2000, 'success');
   }
 }
 
@@ -3382,19 +3686,30 @@ function renameSavedResultSet(id){
 
   if(writeResultSetStore(store)){
     renderSavedResultSets();
-    showToast('✅ เปลี่ยนชื่อเซ็ตจี้แล้ว', 1800);
+    showToast('เปลี่ยนชื่อเซ็ตจี้แล้ว', 1800, 'success');
   }
 }
 
 function deleteSavedResultSet(id){
   const store = readResultSetStore();
+  const previousStore = JSON.parse(JSON.stringify(store));
   const item = store.items.find(x=>x.id === id);
   if(!item) return;
   if(!confirm(`ลบเซ็ตจี้ "${item.name}"?`)) return;
+
   store.items = store.items.filter(x=>x.id !== id);
+
   if(writeResultSetStore(store)){
     renderSavedResultSets();
-    showToast('ลบเซ็ตจี้ที่บันทึกไว้แล้ว', 1800);
+    showToast(`ลบเซ็ตจี้ "${item.name}" แล้ว`, 5200, 'info', {
+      actionLabel: 'Undo',
+      onAction: ()=>{
+        if(writeResultSetStore(previousStore)){
+          renderSavedResultSets();
+          showToast('กู้คืนเซ็ตจี้แล้ว', 1800, 'success');
+        }
+      }
+    });
   }
 }
 
@@ -3721,59 +4036,80 @@ function renderSavedResultSets(){
   }
 
   function saveFavorite(){
-    const input = document.getElementById('favNameInput');
-    const name = (input?.value || '').trim();
-    if(!name){
-      showToast('⚠️ ใส่ชื่อชุด Filter ก่อนบันทึก', 2800, 'warn');
-      input?.focus();
-      return;
-    }
+  const input = document.getElementById('favNameInput');
+  const name = (input?.value || '').trim();
+  if(!name){
+    showToast('ใส่ชื่อชุด Filter ก่อนบันทึก', 2800, 'warn');
+    input?.focus();
+    return;
+  }
 
-    const store = readStore();
-    const now = new Date().toISOString();
+  const store = readStore();
+  const previousStore = JSON.parse(JSON.stringify(store));
+  const now = new Date().toISOString();
 
-    if(editingPresetId){
-      const preset = store.presets.find(p=>p.id===editingPresetId);
-      if(!preset) return;
-      const duplicate = store.presets.find(p=>p.id!==editingPresetId && p.name === name);
-      if(duplicate && !confirm(`มีชุดชื่อ "${name}" อยู่แล้ว ต้องการใช้ชื่อนี้ซ้ำไหม?`)) return;
-      preset.name = name;
-      preset.updatedAt = now;
-      if(writeStore(store)){
-        closeSavePanel();
-        renderFavorites();
-        showToast('✅ บันทึกชื่อชุด Filter แล้ว', 1800);
-      }
-      return;
-    }
+  if(editingPresetId){
+    const preset = store.presets.find(p=>p.id===editingPresetId);
+    if(!preset) return;
+    const duplicate = store.presets.find(p=>p.id!==editingPresetId && p.name === name);
+    if(duplicate && !confirm(`มีชุดชื่อ "${name}" อยู่แล้ว ต้องการใช้ชื่อนี้ซ้ำไหม?`)) return;
 
-    const state = getCurrentFavoriteState();
-    if(!hasMeaningfulFilter(state)){
-      showToast('⚠️ ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
-      return;
-    }
-
-    const sameName = store.presets.find(p=>p.name === name);
-    if(sameName){
-      if(!confirm(`มีชุดชื่อ "${name}" อยู่แล้ว ต้องการบันทึกทับไหม?`)) return;
-      sameName.state = state;
-      sameName.updatedAt = now;
-    }else{
-      store.presets.unshift({
-        id: 'preset_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8),
-        name,
-        state,
-        createdAt: now,
-        updatedAt: now
-      });
-    }
+    preset.name = name;
+    preset.updatedAt = now;
 
     if(writeStore(store)){
       closeSavePanel();
       renderFavorites();
-      showToast('✅ บันทึกชุด Filter แล้ว', 1800);
+      showToast('บันทึกชื่อชุด Filter แล้ว', 5200, 'success', {
+        actionLabel: 'Undo',
+        onAction: ()=>{
+          if(writeStore(previousStore)){
+            renderFavorites();
+            closeSavePanel();
+            showToast('ยกเลิกการเปลี่ยนชื่อแล้ว', 1800, 'info');
+          }
+        }
+      });
     }
+    return;
   }
+
+  const state = getCurrentFavoriteState();
+  if(!hasMeaningfulFilter(state)){
+    showToast('ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
+    return;
+  }
+
+  const sameName = store.presets.find(p=>p.name === name);
+  if(sameName){
+    if(!confirm(`มีชุดชื่อ "${name}" อยู่แล้ว ต้องการบันทึกทับไหม?`)) return;
+    sameName.state = state;
+    sameName.updatedAt = now;
+  }else{
+    store.presets.unshift({
+      id: 'preset_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8),
+      name,
+      state,
+      createdAt: now,
+      updatedAt: now
+    });
+  }
+
+  if(writeStore(store)){
+    closeSavePanel();
+    renderFavorites();
+    showToast('บันทึกชุด Filter แล้ว', 5200, 'success', {
+      actionLabel: 'Undo',
+      onAction: ()=>{
+        if(writeStore(previousStore)){
+          renderFavorites();
+          closeSavePanel();
+          showToast('ยกเลิกการบันทึกแล้ว', 1800, 'info');
+        }
+      }
+    });
+  }
+}
 
   function applyFavorite(id){
     const store = readStore();
@@ -3824,28 +4160,39 @@ function renderSavedResultSets(){
       if(missingChar) parts.push(`ไม่พบตัวละคร "${missingChar}"`);
       showToast('ใช้ชุด Filter แล้ว แต่' + parts.join(' และ '), 4000, 'warn');
     }else{
-      showToast('✅ ใช้ชุด Filter แล้ว กดค้นหาเพื่อดูผลลัพธ์', 3000);
+      showToast('ใช้ชุด Filter แล้ว กดค้นหาเพื่อดูผลลัพธ์', 3000, 'success');
     }
   }
 
-  function deleteFavorite(id){
-    const store = readStore();
-    const preset = store.presets.find(p=>p.id===id);
-    if(!preset) return;
-    if(!confirm(`ลบชุด "${preset.name}"?`)) return;
-    store.presets = store.presets.filter(p=>p.id!==id);
-    if(writeStore(store)){
-      renderFavorites();
-      closeSavePanel();
-      showToast('ลบชุด Filter แล้ว', 1800);
-    }
+function deleteFavorite(id){
+  const store = readStore();
+  const previousStore = JSON.parse(JSON.stringify(store));
+  const preset = store.presets.find(p=>p.id===id);
+  if(!preset) return;
+  if(!confirm(`ลบชุด "${preset.name}"?`)) return;
+
+  store.presets = store.presets.filter(p=>p.id!==id);
+
+  if(writeStore(store)){
+    renderFavorites();
+    closeSavePanel();
+    showToast(`ลบชุด "${preset.name}" แล้ว`, 5200, 'info', {
+      actionLabel: 'Undo',
+      onAction: ()=>{
+        if(writeStore(previousStore)){
+          renderFavorites();
+          showToast('กู้คืนชุด Filter แล้ว', 1800, 'success');
+        }
+      }
+    });
   }
+}
 
   function clearAllFavorites(){
     const store = readStore();
     const count = store.presets.length;
     if(!count){
-      showToast('ยังไม่มีชุด Filter ให้ลบ', 1800);
+      showToast('ยังไม่มีชุด Filter ให้ลบ', 1800, 'info');
       return;
     }
     const ok = confirm(`ลบชุด Filter ที่บันทึกไว้ทั้งหมด ${count} ชุด?\n\nโดยจะลบชุดทั้งหมด ไม่ใช่เฉพาะผลค้นหาที่แสดงอยู่ และย้อนกลับไม่ได้`);
@@ -3858,7 +4205,17 @@ function renderSavedResultSets(){
       }
       closeSavePanel();
       renderFavorites();
-      showToast(`ลบชุด Filter ทั้งหมด ${count} ชุดแล้ว`, 2200);
+      showToast(`ลบชุด Filter ทั้งหมด ${count} ชุดแล้ว`, 5200, 'info', {
+        actionLabel: 'Undo',
+        onAction: ()=>{
+          const previousStore = JSON.parse(JSON.stringify(store));
+          if(writeStore(previousStore)){
+            renderFavorites();
+            closeSavePanel();
+            showToast('กู้คืนชุด Filter ทั้งหมดแล้ว', 1800, 'success');
+          }
+        }
+      });
     }
   }
 
