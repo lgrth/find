@@ -3818,6 +3818,92 @@ document.addEventListener('DOMContentLoaded', ()=>{
   hideDonateSticky();
 });
 
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_cta_click', { placement: 'result_card' });
+    openDonateModal('result_card');
+  });
+
+  document.getElementById('donateFooterBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_cta_click', { placement: 'footer' });
+    openDonateModal('footer');
+  });
+
+  document.getElementById('donateStickyBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_cta_click', { placement: 'sticky_footer' });
+    openDonateModal('sticky_footer');
+  });
+
+  document.getElementById('donateClose')?.addEventListener('click', closeDonateModal);
+
+  document.getElementById('donateModal')?.addEventListener('click', (e)=>{
+    if(e.target?.id === 'donateModal') closeDonateModal();
+  });
+
+  document.getElementById('donateDownloadBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_qr_download_click', { placement: 'modal' });
+  });
+
+  initDonateOpenAppButton();
+});
+
+  function getMobileOS(){
+  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+  if (/android/i.test(ua)) return 'android';
+  if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
+  return 'other';
+}
+
+function initDonateOpenAppButton(){
+  const btn = document.getElementById('donateOpenAppBtn');
+  if(!btn) return;
+
+  const os = getMobileOS();
+  if(os !== 'android' && os !== 'ios'){
+    btn.hidden = true;
+    return;
+  }
+
+  btn.hidden = false;
+
+  btn.addEventListener('click', (e)=>{
+    e.preventDefault();
+
+    trackEvent('donate_open_app_click', {
+      placement: 'modal',
+      os
+    });
+
+    const FALLBACK_ANDROID = 'https://play.google.com/store/apps/details?id=th.co.truemoney.wallet';
+    const FALLBACK_IOS = 'https://apps.apple.com/th/app/truemoney-wallet/id663885752';
+
+    /**
+     * IMPORTANT:
+     * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
+     * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
+     */
+    const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+    const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+
+    const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
+    const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
+
+    if(!deepLink){
+      window.location.href = fallbackUrl;
+      return;
+    }
+
+    const start = Date.now();
+    window.location.href = deepLink;
+
+    setTimeout(()=>{
+  if(Date.now() - start < 1800){
+    window.location.href = fallbackUrl;
+  }
+}, 1200);
+  });
+}
+
 
 function trackSearchResults(searchTerm, resultCount, topK, extra = {}) {
   if (!window.gtag) return;
