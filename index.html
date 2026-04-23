@@ -2115,6 +2115,296 @@ html[data-theme="dark"] .donate-modal__footnote{
     font-size:20px;
   }
 }
+
+/* ===== Guided tutorial ===== */
+.guided-tour{
+  position:fixed;
+  inset:0;
+  z-index:3800;
+  display:none;
+  pointer-events:none;
+}
+
+.guided-tour.show{
+  display:block;
+}
+
+.guided-tour__scrim{
+  position:absolute;
+  inset:0;
+  background:transparent;
+  z-index:0;
+}
+
+.guided-tour__spotlight{
+  position:absolute;
+  z-index:1;
+  border-radius:16px;
+  background:transparent;
+  box-shadow:
+    0 0 0 9999px rgba(2, 6, 23, 0.5),
+    0 0 0 3px rgba(255,255,255,.98),
+    0 10px 30px rgba(0,0,0,.22);
+  transition:
+    top .24s ease,
+    left .24s ease,
+    width .24s ease,
+    height .24s ease,
+    border-radius .24s ease;
+}
+
+.guided-tour__card{
+  position:absolute;
+  z-index:2;
+  width:min(360px, calc(100vw - 24px));
+  max-height:calc(100vh - 24px);
+  overflow:auto;
+  background:#fff;
+  color:#111827;
+  border-radius:18px;
+  box-shadow:0 18px 48px rgba(0,0,0,.30);
+  padding:14px 14px 12px;
+  pointer-events:auto;
+  transition:top .24s ease, left .24s ease;
+}
+
+.guided-tour__eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:800;
+  color:#1d4ed8;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  border-radius:999px;
+  padding:4px 8px;
+  margin-bottom:10px;
+}
+
+.guided-tour__title{
+  margin:0 0 6px 0;
+  font-size:18px;
+  line-height:1.3;
+  color:#0f172a;
+}
+
+.guided-tour__desc{
+  margin:0;
+  font-size:14px;
+  line-height:1.55;
+  color:#334155;
+}
+
+.guided-tour__status{
+  margin-top:10px;
+  font-size:12px;
+  line-height:1.45;
+  border-radius:10px;
+  padding:8px 10px;
+  background:#f8fafc;
+  color:#475569;
+  border:1px solid #e2e8f0;
+}
+
+.guided-tour__status.is-waiting{
+  background:#fff7ed;
+  color:#9a3412;
+  border-color:#fdba74;
+}
+
+.guided-tour__status.is-ready{
+  background:#f0fdf4;
+  color:#166534;
+  border-color:#86efac;
+}
+
+.guided-tour__actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+.guided-tour__btn{
+  appearance:none;
+  border:none;
+  border-radius:12px;
+  min-height:40px;
+  padding:8px 12px;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.guided-tour__btn--primary{
+  background:#1d4ed8;
+  color:#fff;
+}
+
+.guided-tour__btn--primary:hover{
+  background:#1e40af;
+}
+
+.guided-tour__btn--secondary{
+  background:#e2e8f0;
+  color:#0f172a;
+}
+
+.guided-tour__btn--secondary:hover{
+  background:#cbd5e1;
+}
+
+.guided-tour__btn--ghost{
+  background:transparent;
+  color:#64748b;
+  border:1px solid #cbd5e1;
+}
+
+.guided-tour__btn--ghost:hover{
+  background:#f8fafc;
+}
+
+.guided-tour__target-ring{
+  position:relative;
+  z-index:5;
+  box-shadow:0 0 0 4px rgba(59,130,246,.95), 0 0 0 8px rgba(59,130,246,.20) !important;
+  border-radius:16px !important;
+}
+
+html[data-theme="dark"] .guided-tour__card{
+  background:#000000;
+  color:#e5e7eb;
+  box-shadow:0 18px 48px rgba(0,0,0,.45);
+  border: 1px solid #4e596c;
+}
+
+html[data-theme="dark"] .guided-tour__title{
+  color:#f8fafc;
+}
+
+html[data-theme="dark"] .guided-tour__desc{
+  color:#cbd5e1;
+}
+
+html[data-theme="dark"] .guided-tour__eyebrow{
+  background:#172554;
+  color:#bfdbfe;
+  border-color:#1d4ed8;
+}
+
+html[data-theme="dark"] .guided-tour__status{
+  background:#111827;
+  color:#cbd5e1;
+  border-color:#334155;
+}
+
+html[data-theme="dark"] .guided-tour__status.is-waiting{
+  background:#3a2a14;
+  color:#fdba74;
+  border-color:#92400e;
+}
+
+html[data-theme="dark"] .guided-tour__status.is-ready{
+  background:#052e1b;
+  color:#bbf7d0;
+  border-color:#166534;
+}
+
+html[data-theme="dark"] .guided-tour__btn--secondary{
+  background:#334155;
+  color:#f8fafc;
+}
+
+html[data-theme="dark"] .guided-tour__btn--secondary:hover{
+  background:#475569;
+}
+
+html[data-theme="dark"] .guided-tour__btn--ghost{
+  background:transparent;
+  color:#cbd5e1;
+  border-color:#475569;
+}
+
+html[data-theme="dark"] .guided-tour__btn--ghost:hover{
+  background:#1e293b;
+}
+
+@media (max-width:640px){
+  .guided-tour__card{
+    width:min(92vw, 360px);
+    padding:12px 12px 10px;
+  }
+
+  .guided-tour__title{
+    font-size:17px;
+  }
+
+  .guided-tour__desc{
+    font-size:13px;
+  }
+}
+
+/* ===== Help chooser modal ===== */
+.help-choice-modal{
+  position:fixed;
+  inset:0;
+  z-index:3750;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.62);
+  padding:16px;
+  box-sizing:border-box;
+  backdrop-filter:blur(2px)
+}
+
+.help-choice-modal.show{
+  display:flex;
+}
+
+.help-choice-modal__dialog{
+  width:min(420px, 100%);
+  background:var(--surface);
+  color:var(--text);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+
+.help-choice-modal__title{
+  margin:0 0 6px 0;
+  font-size:20px;
+  font-weight:700;
+  color:var(--primary-2);
+}
+
+.help-choice-modal__desc{
+  margin:0 0 14px 0;
+  font-size:14px;
+  line-height:1.6;
+  color:var(--text-soft);
+}
+
+.help-choice-modal__actions{
+  display:grid;
+  gap:10px;
+}
+
+.help-choice-modal__btn{
+  width:100%;
+}
+
+.help-choice-modal__close{
+  margin-top:12px;
+  width:100%;
+}
+
+html[data-theme="dark"] .help-choice-modal__dialog{
+  background:#111827;
+  color:#e5e7eb;
+}
+
 </style>
 
 </head>
@@ -2223,6 +2513,41 @@ html[data-theme="dark"] .donate-modal__footnote{
     </ol>
     <p class="tutorial-tip">💡 Tip: แตะที่ชื่อจี้ในผลลัพธ์เพื่อดูความสามารถเต็มของแต่ละจี้</p>
     <button id="tutorialClose" type="button" class="btn btn--primary tutorial-sheet__close">เข้าใจแล้ว</button>
+  </div>
+</div>
+
+<!-- Guided tutorial -->
+<div id="guidedTour" class="guided-tour" aria-hidden="true">
+  <div class="guided-tour__scrim"></div>
+  <div id="guidedSpotlight" class="guided-tour__spotlight"></div>
+
+  <div id="guidedCard" class="guided-tour__card" role="dialog" aria-modal="true" aria-labelledby="guidedTitle">
+    <div id="guidedEyebrow" class="guided-tour__eyebrow">สอนใช้งานทีละขั้น</div>
+    <h3 id="guidedTitle" class="guided-tour__title">เริ่มใช้งาน</h3>
+    <p id="guidedDesc" class="guided-tour__desc">เดี๋ยวพาใช้งานทีละขั้น</p>
+    <div id="guidedStatus" class="guided-tour__status is-waiting">กำลังรอให้คุณลองกดตามขั้นตอนนี้</div>
+
+    <div class="guided-tour__actions">
+  <button type="button" id="guidedBackBtn" class="guided-tour__btn guided-tour__btn--secondary">ย้อนกลับ</button>
+  <button type="button" id="guidedStepSkipBtn" class="guided-tour__btn guided-tour__btn--ghost" hidden>ข้ามขั้นนี้</button>
+  <button type="button" id="guidedNextBtn" class="guided-tour__btn guided-tour__btn--primary" disabled>ถัดไป</button>
+  <button type="button" id="guidedSkipBtn" class="guided-tour__btn guided-tour__btn--ghost">จบทัวร์</button>
+</div>
+  </div>
+</div>
+
+<!-- Help choice modal -->
+<div id="helpChoiceModal" class="help-choice-modal" aria-hidden="true">
+  <div class="help-choice-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="helpChoiceTitle">
+    <h3 id="helpChoiceTitle" class="help-choice-modal__title">วิธีใช้งาน</h3>
+    <p class="help-choice-modal__desc">เลือกได้ว่าจะดูแบบสรุปเร็ว ๆ หรือให้ระบบพาใช้งานทีละขั้น</p>
+
+    <div class="help-choice-modal__actions">
+      <button type="button" id="helpChoiceSummary" class="btn btn--secondary help-choice-modal__btn">ดูวิธีใช้งานแบบสรุป</button>
+      <button type="button" id="helpChoiceGuided" class="btn btn--primary help-choice-modal__btn">พาใช้งานทีละขั้น</button>
+    </div>
+
+    <button type="button" id="helpChoiceClose" class="btn btn--ghost-reset help-choice-modal__close">ปิด</button>
   </div>
 </div>
 
@@ -3761,6 +4086,8 @@ if(action === 'copy-names'){
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.querySelectorAll('.result-card').forEach(el => el.style.opacity = '1');
   }
+
+  document.dispatchEvent(new CustomEvent('guidedSearchCompleted'));
 
   setTimeout(()=> updateExtraOverflowToggles(container), 0);
   showDonateSticky();
@@ -5836,71 +6163,114 @@ const DEFAULT_TOPK = 10;
 </script>
 
 <script>
-// --- Tutorial bottom sheet ---
+// --- Tutorial bottom sheet + Guided first-run tutorial ---
 (function(){
   const TUTORIAL_KEY = 'tutorial_autoshown_once_v1';
   const sheet = document.getElementById('tutorialSheet');
   const dialog = sheet?.querySelector('.tutorial-sheet__dialog');
-  const IDLE_GUIDE_MS = 15000; // 10 วินาที
+
+  const guidedRoot = document.getElementById('guidedTour');
+  const guidedSpotlight = document.getElementById('guidedSpotlight');
+  const guidedCard = document.getElementById('guidedCard');
+  const guidedTitle = document.getElementById('guidedTitle');
+  const guidedDesc = document.getElementById('guidedDesc');
+  const guidedStatus = document.getElementById('guidedStatus');
+  const guidedEyebrow = document.getElementById('guidedEyebrow');
+  const guidedBackBtn = document.getElementById('guidedBackBtn');
+const guidedNextBtn = document.getElementById('guidedNextBtn');
+const guidedSkipBtn = document.getElementById('guidedSkipBtn');
+const guidedStepSkipBtn = document.getElementById('guidedStepSkipBtn');
+
+const helpChoiceModal = document.getElementById('helpChoiceModal');
+const helpChoiceSummary = document.getElementById('helpChoiceSummary');
+const helpChoiceGuided = document.getElementById('helpChoiceGuided');
+const helpChoiceClose = document.getElementById('helpChoiceClose');
+
+  const IDLE_GUIDE_MS = 15000;
+  const IDLE_TUTORIAL_MS = 120000;
+
   const chipSearchBox = document.querySelector('#chipSearch')?.closest('.chip-search-box');
   const calcBtn = document.getElementById('calcBtn');
   const calcBtn2 = document.getElementById('calcBtn2');
-  const IDLE_TUTORIAL_MS = 120000; // ปรับ idle time
+
   let idleGuideTimer = null;
   let idleTimer = null;
   let pendingAutoShow = false;
 
-  function show(){
+  let guidedActive = false;
+  let guidedIndex = 0;
+  let guidedStartedAtLeastOnce = false;
+  let actionSearchPickedDuringStep = false;
+  let actionUnwantedOpenedDuringStep = false;
+  let actionTopKPickedDuringStep = false;
+  let waitingSearchResult = false;
+  let lastHighlightedEl = null;
+
+  function showSheet(){
     if(!sheet) return;
     sheet.classList.remove('hiding');
     sheet.classList.add('show');
     sheet.setAttribute('aria-hidden','false');
   }
 
- function hide(){
-  if(!sheet) return;
-  if (sheet.classList.contains('hiding')) return;
+  function hideSheet(){
+    if(!sheet) return;
+    if (sheet.classList.contains('hiding')) return;
 
-  sheet.classList.remove('show');
-  sheet.classList.add('hiding');
-  sheet.setAttribute('aria-hidden','true');
+    sheet.classList.remove('show');
+    sheet.classList.add('hiding');
+    sheet.setAttribute('aria-hidden','true');
 
-  setTimeout(()=>{
-    sheet.classList.remove('hiding');
-  }, 500);
+    setTimeout(()=>{
+      sheet.classList.remove('hiding');
+    }, 500);
 
-  // เริ่มนับ idle ใหม่หลังปิด
-  resetIdleTutorialTimer();
+    resetIdleTutorialTimer();
+  }
+
+  function showHelpChoice(){
+  if(!helpChoiceModal) return;
+  helpChoiceModal.classList.add('show');
+  helpChoiceModal.setAttribute('aria-hidden', 'false');
 }
+
+function hideHelpChoice(){
+  if(!helpChoiceModal) return;
+  helpChoiceModal.classList.remove('show');
+  helpChoiceModal.setAttribute('aria-hidden', 'true');
+}
+
+  function getVisibleCalcButton(){
+    return (calcBtn2 && calcBtn2.offsetParent !== null) ? calcBtn2 :
+           (calcBtn && calcBtn.offsetParent !== null) ? calcBtn :
+           (calcBtn2 || calcBtn);
+  }
 
   function playIdleGuide(){
-  if (sheet?.classList.contains('show')) return;
+    if (sheet?.classList.contains('show')) return;
+    if (guidedActive) return;
 
-  const desiredCount = Array.isArray(window._chipSelected) ? window._chipSelected.length : 0;
-  const visibleCalcBtn =
-  (calcBtn2 && calcBtn2.offsetParent !== null) ? calcBtn2 :
-  (calcBtn && calcBtn.offsetParent !== null) ? calcBtn :
-  calcBtn2 || calcBtn;
+    const desiredCount = Array.isArray(window._chipSelected) ? window._chipSelected.length : 0;
+    const targetEl = desiredCount < 4 ? chipSearchBox : getVisibleCalcButton();
+    if (!targetEl) return;
 
-const targetEl = desiredCount < 4 ? chipSearchBox : visibleCalcBtn;
+    const rect = targetEl.getBoundingClientRect();
+    if (rect.bottom < 0 || rect.top > window.innerHeight) return;
 
-  if (!targetEl) return;
+    chipSearchBox?.classList.remove('is-idle-guide');
+    calcBtn?.classList.remove('is-idle-guide');
+    calcBtn2?.classList.remove('is-idle-guide');
 
-  const rect = targetEl.getBoundingClientRect();
-  if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+    void targetEl.offsetWidth;
+    targetEl.classList.add('is-idle-guide');
+  }
 
-  chipSearchBox?.classList.remove('is-idle-guide');
-  calcBtn?.classList.remove('is-idle-guide');
-  calcBtn2?.classList.remove('is-idle-guide');
+  function stopIdleGuide(){
+    chipSearchBox?.classList.remove('is-idle-guide');
+    calcBtn?.classList.remove('is-idle-guide');
+    calcBtn2?.classList.remove('is-idle-guide');
+  }
 
-  void targetEl.offsetWidth;
-  targetEl.classList.add('is-idle-guide');
-}
-function stopIdleGuide(){
-  chipSearchBox?.classList.remove('is-idle-guide');
-  calcBtn?.classList.remove('is-idle-guide');
-  calcBtn2?.classList.remove('is-idle-guide');
-}
   function startIdleGuideTimer(){
     clearTimeout(idleGuideTimer);
     idleGuideTimer = setTimeout(()=>{
@@ -5909,17 +6279,16 @@ function stopIdleGuide(){
   }
 
   function resetIdleGuideTimer(){
-  clearTimeout(idleGuideTimer);
-  stopIdleGuide();
-  startIdleGuideTimer();
-}
+    clearTimeout(idleGuideTimer);
+    stopIdleGuide();
+    startIdleGuideTimer();
+  }
 
   function startIdleTutorialTimer(){
     clearTimeout(idleTimer);
     idleTimer = setTimeout(()=>{
-      // เด้งอีกครั้งเฉพาะตอนยังไม่มี interaction นานพอ และ sheet ยังไม่เปิดอยู่
-      if (!sheet?.classList.contains('show')) {
-        show();
+      if (!sheet?.classList.contains('show') && !guidedActive) {
+        showSheet();
       }
     }, IDLE_TUTORIAL_MS);
   }
@@ -5939,110 +6308,532 @@ function stopIdleGuide(){
     return localStorage.getItem(TUTORIAL_KEY) !== '1';
   }
 
-  function showAutoTutorialOnce(){
-    if (!shouldAutoShow()) return;
-    show();
-    markAutoShown();
+  function getTargetRect(el){
+    const rect = el.getBoundingClientRect();
+    const pad = 8;
+    return {
+      top: Math.max(8, rect.top - pad),
+      left: Math.max(8, rect.left - pad),
+      width: Math.min(window.innerWidth - 16, rect.width + pad * 2),
+      height: rect.height + pad * 2,
+      bottom: rect.bottom + pad
+    };
   }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_cta_click', { placement: 'result_card' });
-    openDonateModal('result_card');
-  });
+  function clearTargetHighlight(){
+    if (lastHighlightedEl){
+      lastHighlightedEl.classList.remove('guided-tour__target-ring');
+      lastHighlightedEl = null;
+    }
+  }
 
-  document.getElementById('donateFooterBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_cta_click', { placement: 'footer' });
-    openDonateModal('footer');
-  });
+  function applyTargetHighlight(el){
+    clearTargetHighlight();
+    if (!el) return;
+    el.classList.add('guided-tour__target-ring');
+    lastHighlightedEl = el;
+  }
 
-  document.getElementById('donateStickyBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_cta_click', { placement: 'sticky_footer' });
-    openDonateModal('sticky_footer');
-  });
+  function moveSpotlightAndCard(el){
+  if (!el || !guidedSpotlight || !guidedCard) return;
 
-  document.getElementById('donateClose')?.addEventListener('click', closeDonateModal);
+  const rect = getTargetRect(el);
+  guidedSpotlight.style.top = rect.top + 'px';
+  guidedSpotlight.style.left = rect.left + 'px';
+  guidedSpotlight.style.width = rect.width + 'px';
+  guidedSpotlight.style.height = rect.height + 'px';
 
-  document.getElementById('donateModal')?.addEventListener('click', (e)=>{
-    if(e.target?.id === 'donateModal') closeDonateModal();
-  });
+  const steps = getSteps();
+  const step = steps[guidedIndex] || {};
+  const placeBelow = step.id === 'result' || step.id === 'favorite';
 
-  document.getElementById('donateDownloadBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_qr_download_click', { placement: 'modal' });
-  });
+  const cardWidth = Math.min(360, window.innerWidth - 24);
+  const gap = 14;
+  const viewportPad = 12;
+  const cardHeight = guidedCard.offsetHeight || 220;
 
-  initDonateOpenAppButton();
-});
+  let cardLeft = rect.left;
+  if (cardLeft + cardWidth > window.innerWidth - viewportPad){
+    cardLeft = window.innerWidth - cardWidth - viewportPad;
+  }
+  if (cardLeft < viewportPad) cardLeft = viewportPad;
 
-  function getMobileOS(){
-  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
-  if (/android/i.test(ua)) return 'android';
-  if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
-  return 'other';
+  let cardTop;
+
+  if (placeBelow){
+    // Step 6-7: วางด้านล่าง spotlight เป็นค่า default
+    cardTop = rect.bottom + gap;
+
+    // ถ้าด้านล่างล้นจอ ค่อยดันขึ้นเท่าที่จำเป็น
+    if (cardTop + cardHeight > window.innerHeight - viewportPad){
+      cardTop = Math.max(viewportPad, window.innerHeight - cardHeight - viewportPad);
+    }
+  } else {
+    // Step 1-5: วางด้านบน spotlight เป็นค่า default
+    cardTop = rect.top - cardHeight - gap;
+
+    // ถ้าด้านบนไม่พอ ค่อยชิดบนสุดของ viewport
+    if (cardTop < viewportPad){
+      cardTop = viewportPad;
+    }
+
+    // กันกรณี step ช่องค้นหาสกิลไม่ให้ card ลงไปทับผลลัพธ์เลือกสกิล
+    const chipResultWrap = document.getElementById('chipAllWrap');
+    const chipResultList = document.getElementById('chipAll');
+    const isSearchStepTarget =
+      el.id === 'chipSearch' ||
+      el.id === 'chipSearchBox' ||
+      el.closest?.('#chipSearchBox');
+
+    if (isSearchStepTarget && chipResultWrap && !chipResultWrap.hidden && chipResultList){
+      const chipRect = chipResultList.getBoundingClientRect();
+      const cardBottom = cardTop + cardHeight;
+      const overlapsChipList = cardTop < chipRect.bottom && cardBottom > chipRect.top;
+
+      if (overlapsChipList){
+        cardTop = Math.max(viewportPad, chipRect.top - cardHeight - gap);
+      }
+    }
+  }
+
+  guidedCard.style.top = cardTop + 'px';
+  guidedCard.style.left = cardLeft + 'px';
 }
 
-function initDonateOpenAppButton(){
-  const btn = document.getElementById('donateOpenAppBtn');
-  if(!btn) return;
+  function scrollTargetIntoView(el){
+  if (!el) return;
 
-  const os = getMobileOS();
-  if(os !== 'android' && os !== 'ios'){
-    btn.hidden = true;
+  const headerOffset = 90;
+  const viewportPad = 12;
+  const cardHeight = guidedCard?.offsetHeight || 220;
+  const gap = 14;
+
+  // เผื่อพื้นที่ด้านบนสำหรับ card ตั้งแต่แรก
+  const desiredTopOffset = headerOffset + cardHeight + gap + viewportPad;
+
+  const rect = el.getBoundingClientRect();
+  const targetTop = window.scrollY + rect.top - desiredTopOffset;
+
+  window.scrollTo({
+    top: Math.max(0, targetTop),
+    behavior: 'smooth'
+  });
+}
+
+  function getCharValue(){
+  const sel = document.getElementById('charSelect');
+  if (!sel) return '';
+
+  const value = sel.tomselect
+    ? (sel.tomselect.getValue() || '')
+    : (sel.value || '');
+
+  return String(value).trim();
+}
+
+  function getTopKValue(){
+    const input = document.getElementById('topK');
+    return (input?.value || '').trim();
+  }
+
+  function isWantedStepReady(){
+    return Array.isArray(window._chipSelected) && window._chipSelected.length >= 4;
+  }
+
+  function isUnwantedStepReady(){
+    return !!document.getElementById('chipUnwantedBody')?.classList.contains('open');
+  }
+
+  function isCharacterStepReady(){
+    return !!getCharValue();
+  }
+
+  function isTopKStepReady(){
+    return !!actionTopKPickedDuringStep;
+  }
+
+  function getSteps(){
+  return [
+    {
+      id: 'wanted',
+      eyebrow: 'Step 1/7 • จำเป็น',
+      title: 'เลือกสกิลที่ต้องการอย่างน้อย 4 สกิล',
+      desc: 'พิมพ์ค้นหาสกิลในช่องนี้ แล้วกดเลือกสกิลที่ต้องการจากผลลัพธ์ด้านล่าง (เช่น หมวก, ป้องกัน)',
+      target: () => document.getElementById('chipSearchBox') || document.getElementById('chipSearch'),
+      ready: () => isWantedStepReady(),
+      statusWaiting: `เลือกแล้ว ${Array.isArray(window._chipSelected) ? window._chipSelected.length : 0}/4 อัน — ต้องเลือกอย่างน้อย 4 สกิล`,
+      statusReady: 'สกิลที่ต้องการขั้นต่ำ 4 สกิลแล้ว ไปต่อได้',
+      optional: false,
+      nextLabel: 'ถัดไป'
+    },
+    {
+      id: 'unwanted',
+      eyebrow: 'Step 2/7 • ไม่จำเป็น',
+      title: 'กดแสดงส่วน “สกิลที่ไม่ต้องการ”',
+      desc: 'ลองกดหัวข้อนี้เพื่อเปิด panel ก่อน คุณยังไม่จำเป็นต้องเลือกสกิลก็ได้ แค่ลองเปิดให้เห็นว่าฟีเจอร์นี้อยู่ตรงไหน',
+      target: () => document.getElementById('chipUnwantedHeader'),
+      ready: () => isUnwantedStepReady() || actionUnwantedOpenedDuringStep,
+      statusWaiting: 'กำลังรอให้คุณกดเปิดหัวข้อนี้',
+      statusReady: 'แสดงส่วนสกิลที่ไม่ต้องการแล้ว ไปต่อได้',
+      optional: true,
+      nextLabel: 'ถัดไป'
+    },
+    {
+      id: 'character',
+      eyebrow: 'Step 3/7 • ไม่จำเป็น',
+      title: 'ลองเลือกตัวละครได้จากตรงนี้',
+      desc: 'ถ้าเลือกตัวละคร ระบบจะล็อกจี้ [ลิงก์] ให้อัตโนมัติ 1 ช่อง ขั้นตอนนี้ไม่บังคับ จะกดปุ่ม “ข้ามขั้นนี้” ก็ได้',
+      target: () => document.querySelector('#charSelect + .ts-wrapper') || document.getElementById('charSelect'),
+      ready: () => isCharacterStepReady(),
+      statusWaiting: 'ยังไม่เลือกตัวละคร — จะข้ามขั้นนี้ก็ได้',
+      statusReady: 'เลือกตัวละครแล้ว',
+      optional: true,
+      nextLabel: 'ถัดไป'
+    },
+    {
+      id: 'topk',
+      eyebrow: 'Step 4/7 • จำเป็น',
+      title: 'เลือกจำนวนเซ็ตที่ต้องการ',
+      desc: 'ลองแตะปุ่มจำนวนเซ็ตสัก 1 อัน เช่น 10 หรือ 20 เพื่อให้คุ้นกับตำแหน่งการตั้งค่าจุดนี้',
+      target: () => document.querySelector('.topk-presets'),
+      ready: () => isTopKStepReady(),
+      statusWaiting: 'กำลังรอให้คุณกดเลือกจำนวนเซ็ต',
+      statusReady: `ตั้งจำนวนเซ็ตแล้ว (${getTopKValue() || '-'}) เซ็ต`,
+      optional: false,
+      nextLabel: 'ถัดไป'
+    },
+    {
+      id: 'search',
+      eyebrow: 'Step 5/7 • จำเป็น',
+      title: 'กดค้นหาเซ็ตจี้จริง',
+      desc: 'ตอนนี้ลองกดปุ่มนี้ได้เลย ระบบจะเริ่มค้นหาเซ็ตจี้จากสิ่งที่คุณเลือกไว้ และจะไปขั้นถัดไปเมื่อผลลัพธ์ขึ้นแล้ว',
+      target: () => getVisibleCalcButton(),
+      ready: () => false,
+      statusWaiting: 'กำลังรอให้คุณกดปุ่ม “ค้นหาเซ็ตจี้”',
+      statusReady: 'กำลังรอผลลัพธ์...',
+      optional: false,
+      nextLabel: 'ถัดไป',
+      manualAdvance: true
+    },
+    {
+      id: 'result',
+      eyebrow: 'Step 6/7',
+      title: 'ผลลัพธ์จะขึ้นตรงนี้',
+      desc: 'หลังค้นหาเสร็จ ระบบจะแสดงเซ็ตจี้ที่ดีที่สุดในส่วนนี้ ให้ดูอันดับ เซ็ตจี้ และข้อมูลสรุปของแต่ละชุดจากตรงนี้เป็นหลัก',
+      target: () => document.getElementById('resultTitle') || document.getElementById('result'),
+      ready: () => true,
+      statusWaiting: 'นี่คือพื้นที่แสดงผลลัพธ์หลักของเว็บ',
+      statusReady: 'เห็นจุดแสดงผลลัพธ์แล้ว ไปต่อได้',
+      optional: false,
+      nextLabel: 'ถัดไป'
+    },
+    {
+      id: 'favorite',
+      eyebrow: 'Step 7/7',
+      title: 'ตรงนี้คือปุ่มบันทึก Filter',
+      desc: 'ถ้าตั้งค่าแล้วชอบ สามารถกดปุ่ม ★ มุมขวาบน เพื่อบันทึก Filter หรือเซ็ตจี้ไว้ใช้ครั้งหน้าได้',
+      target: () => document.getElementById('favoriteBtn'),
+      ready: () => true,
+      statusWaiting: 'จบทัวร์แล้ว ตอนนี้คุณใช้งานต่อได้เลย',
+      statusReady: 'พร้อมใช้งานแล้ว',
+      optional: true,
+      nextLabel: 'เสร็จสิ้น'
+    }
+  ];
+}
+
+  function updateGuidedButtons(step){
+  if (!guidedBackBtn || !guidedNextBtn || !guidedStepSkipBtn) return;
+
+  guidedBackBtn.disabled = guidedIndex === 0;
+
+  const canSkipStep = step.id === 'character';
+  guidedStepSkipBtn.hidden = !canSkipStep;
+
+  if (step.id === 'search'){
+    guidedNextBtn.disabled = true;
+    guidedNextBtn.textContent = 'รอกดค้นหา';
     return;
   }
 
-  btn.hidden = false;
+  const ready = !!step.ready();
 
-  btn.addEventListener('click', (e)=>{
-    e.preventDefault();
+  if (canSkipStep){
+    guidedNextBtn.disabled = !ready;
+    guidedNextBtn.textContent = ready ? (step.nextLabel || 'ถัดไป') : 'เลือกแล้วค่อยไปต่อ';
+    return;
+  }
 
-    trackEvent('donate_open_app_click', {
-      placement: 'modal',
-      os
-    });
+  guidedNextBtn.disabled = !ready;
+  guidedNextBtn.textContent = step.nextLabel || 'ถัดไป';
+}
 
-    const FALLBACK_ANDROID = 'https://play.google.com/store/apps/details?id=th.co.truemoney.wallet';
-    const FALLBACK_IOS = 'https://apps.apple.com/th/app/truemoney-wallet/id663885752';
+  function updateGuidedStatus(step){
+    if (!guidedStatus) return;
+    const ready = !!step.ready();
 
-    /**
-     * IMPORTANT:
-     * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
-     * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
-     */
-    const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
-    const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+    guidedStatus.classList.remove('is-ready','is-waiting');
+    guidedStatus.classList.add(ready ? 'is-ready' : 'is-waiting');
 
-    const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
-    const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
-
-    if(!deepLink){
-      window.location.href = fallbackUrl;
+    if (step.id === 'character' && !ready){
+      guidedStatus.textContent = step.statusWaiting;
       return;
     }
 
-    const start = Date.now();
-    window.location.href = deepLink;
+    if (step.id === 'search' && waitingSearchResult){
+      guidedStatus.classList.remove('is-ready','is-waiting');
+      guidedStatus.classList.add('is-ready');
+      guidedStatus.textContent = 'กดค้นหาแล้ว กำลังรอผลลัพธ์ขึ้น...';
+      return;
+    }
+
+    guidedStatus.textContent = ready ? step.statusReady : step.statusWaiting;
+  }
+
+  function renderGuidedStep(){
+    if (!guidedActive) return;
+
+    const steps = getSteps();
+    const step = steps[guidedIndex];
+    if (!step) return;
+
+    const target = step.target();
+    if (!target){
+      if (guidedIndex < steps.length - 1){
+        guidedIndex += 1;
+        renderGuidedStep();
+      }
+      return;
+    }
+
+    guidedEyebrow.textContent = step.eyebrow;
+    guidedTitle.textContent = step.title;
+    guidedDesc.textContent = step.desc;
+
+    applyTargetHighlight(target);
+    scrollTargetIntoView(target);
 
     setTimeout(()=>{
-  if(Date.now() - start < 1800){
-    window.location.href = fallbackUrl;
+      if (!guidedActive) return;
+      moveSpotlightAndCard(target);
+    }, 260);
+
+    updateGuidedStatus(step);
+    updateGuidedButtons(step);
   }
-}, 1200);
-  });
+
+  function openGuided(){
+    if (!guidedRoot) return;
+    guidedActive = true;
+    guidedRoot.classList.add('show');
+    guidedRoot.setAttribute('aria-hidden', 'false');
+    stopIdleGuide();
+    clearTimeout(idleGuideTimer);
+    clearTimeout(idleTimer);
+  }
+
+  function closeGuided(options = {}){
+    guidedActive = false;
+    waitingSearchResult = false;
+    guidedRoot?.classList.remove('show');
+    guidedRoot?.setAttribute('aria-hidden', 'true');
+    clearTargetHighlight();
+
+    if (options.markDone){
+      markAutoShown();
+    }
+
+    resetIdleTutorialTimer();
+  }
+
+  function startGuidedTutorial(){
+    const steps = getSteps();
+    if (!steps.length) return;
+
+    guidedStartedAtLeastOnce = true;
+    actionSearchPickedDuringStep = false;
+    actionUnwantedOpenedDuringStep = false;
+    actionTopKPickedDuringStep = false;
+    waitingSearchResult = false;
+
+    guidedIndex = 0;
+    openGuided();
+    renderGuidedStep();
+
+    if (typeof trackEvent === 'function'){
+      trackEvent('guided_tutorial_start', {
+        source: 'first_visit'
+      });
+    }
+  }
+
+  function finishGuidedTutorial(){
+    closeGuided({ markDone: true });
+
+    if (typeof showToast === 'function'){
+      showToast('พร้อมแล้ว ลองใช้งานต่อได้เลย', 2200, 'success');
+    }
+
+    if (typeof trackEvent === 'function'){
+      trackEvent('guided_tutorial_complete', {
+        completed: true
+      });
+    }
+  }
+
+  function skipGuidedTutorial(){
+    closeGuided({ markDone: true });
+
+    if (typeof trackEvent === 'function'){
+      trackEvent('guided_tutorial_skip', {
+        step_index: guidedIndex + 1
+      });
+    }
+  }
+
+  function goNext(){
+  const steps = getSteps();
+  const step = steps[guidedIndex];
+  if (!step) return;
+
+  if (guidedIndex >= steps.length - 1){
+    finishGuidedTutorial();
+    return;
+  }
+
+  guidedIndex += 1;
+  renderGuidedStep();
 }
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.getElementById('tutorialClose')?.addEventListener('click', ()=> hide());
-    sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hide(); });
+  function goBack(){
+    if (guidedIndex <= 0) return;
+    guidedIndex -= 1;
+    waitingSearchResult = false;
+    renderGuidedStep();
+  }
 
-    // Swipe down to dismiss
+  function skipCurrentStep(){
+  const steps = getSteps();
+  const step = steps[guidedIndex];
+  if (!step) return;
+
+  if (step.id !== 'character') return;
+
+  if (guidedIndex >= steps.length - 1){
+    finishGuidedTutorial();
+    return;
+  }
+
+  guidedIndex += 1;
+  renderGuidedStep();
+}
+
+  function onWantedSelectionChanged(){
+    if (!guidedActive) return;
+    const step = getSteps()[guidedIndex];
+    if (!step || step.id !== 'wanted') return;
+    updateGuidedStatus(step);
+    updateGuidedButtons(step);
+  }
+
+  function onUnwantedPanelOpened(){
+    if (!guidedActive) return;
+    actionUnwantedOpenedDuringStep = true;
+    const step = getSteps()[guidedIndex];
+    if (!step || step.id !== 'unwanted') return;
+    updateGuidedStatus(step);
+    updateGuidedButtons(step);
+  }
+
+  function onTopKPicked(){
+    if (!guidedActive) return;
+    actionTopKPickedDuringStep = true;
+    const step = getSteps()[guidedIndex];
+    if (!step || step.id !== 'topk') return;
+    updateGuidedStatus(step);
+    updateGuidedButtons(step);
+  }
+
+  function onCharacterPicked(){
+  if (!guidedActive) return;
+  const step = getSteps()[guidedIndex];
+  if (!step || step.id !== 'character') return;
+
+  updateGuidedStatus(step);
+  updateGuidedButtons(step);
+}
+
+  function onSearchClicked(){
+    if (!guidedActive) return;
+    const step = getSteps()[guidedIndex];
+    if (!step || step.id !== 'search') return;
+
+    waitingSearchResult = true;
+    updateGuidedStatus(step);
+  }
+
+  function onSearchCompleted(){
+    if (!guidedActive) return;
+    const step = getSteps()[guidedIndex];
+    if (!step || step.id !== 'search') return;
+
+    waitingSearchResult = false;
+    guidedIndex += 1;
+    renderGuidedStep();
+  }
+
+  function showAutoTutorialOnce(){
+    if (!shouldAutoShow()) return;
+    startGuidedTutorial();
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('tutorialClose')?.addEventListener('click', ()=> hideSheet());
+    sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hideSheet(); });
+
     let touchStartY = 0;
     dialog?.addEventListener('touchstart', (e)=>{ touchStartY = e.touches[0].clientY; }, {passive:true});
     dialog?.addEventListener('touchend', (e)=>{
-      if(e.changedTouches[0].clientY - touchStartY > 80) hide();
+      if(e.changedTouches[0].clientY - touchStartY > 80) hideSheet();
     }, {passive:true});
 
-    // เปิดเองหลัง consent + หลัง toast โหลด sheet สำเร็จ
+    guidedBackBtn?.addEventListener('click', goBack);
+    guidedNextBtn?.addEventListener('click', goNext);
+    guidedSkipBtn?.addEventListener('click', skipGuidedTutorial);
+    guidedStepSkipBtn?.addEventListener('click', skipCurrentStep);
+
+    helpChoiceSummary?.addEventListener('click', ()=>{
+  hideHelpChoice();
+  showSheet();
+
+  if (typeof trackEvent === 'function'){
+    trackEvent('open_tutorial_summary', {
+      source: 'help_choice'
+    });
+  }
+});
+
+helpChoiceGuided?.addEventListener('click', ()=>{
+  hideHelpChoice();
+  startGuidedTutorial();
+
+  if (typeof trackEvent === 'function'){
+    trackEvent('open_tutorial_guided', {
+      source: 'help_choice'
+    });
+  }
+});
+
+helpChoiceClose?.addEventListener('click', ()=>{
+  hideHelpChoice();
+});
+
+helpChoiceModal?.addEventListener('click', (e)=>{
+  if(e.target === helpChoiceModal){
+    hideHelpChoice();
+  }
+});
+
     document.addEventListener('queueFirstVisitTutorial', ()=>{
       pendingAutoShow = true;
     });
@@ -6053,85 +6844,146 @@ function initDonateOpenAppButton(){
         setTimeout(()=>{
           showAutoTutorialOnce();
           resetIdleTutorialTimer();
-        }, 2600); // รอให้ toast success แสดงจบก่อน
+        }, 2600);
         return;
       }
 
-      // กรณีไม่ใช่ first visit แต่โหลดเสร็จแล้ว ให้เริ่ม idle timer ตรงนี้
       resetIdleTutorialTimer();
     });
-    // Idle detection: ถ้าไม่มี action เลยนาน ๆ ให้เด้ง tutorial อีกครั้ง
+
     const idleEvents = ['click','touchstart','keydown','input','change'];
-idleEvents.forEach((eventName)=>{
-  document.addEventListener(eventName, () => {
-    stopIdleGuide();          // ⛔ หยุด shake
-    resetIdleTutorialTimer(); // 🔁 reset timer
-  }, { passive: true });
-});
+    idleEvents.forEach((eventName)=>{
+      document.addEventListener(eventName, () => {
+        if (!guidedActive){
+          stopIdleGuide();
+          resetIdleTutorialTimer();
+        }
+      }, { passive: true });
+    });
 
-// fallback: ถ้า event โหลดชีตสำเร็จไม่ถูกจับ อย่างน้อยให้เริ่ม timer หลังหน้าโหลดเสร็จ
-setTimeout(()=>{
-  resetIdleTutorialTimer();
-}, 3500);
+    setTimeout(()=>{
+      resetIdleTutorialTimer();
+    }, 3500);
 
-// Tutorial opens on demand via help button
-document.getElementById('helpBtn')?.addEventListener('click', ()=>{
-  trackEvent('open_tutorial', {
-    source: 'help_button'
-  });
-  show();
-});
-  });
-})();
-
-// --- Consent gate: show toast and delay data loading until acknowledged ---
-(function(){
-  const STORAGE_KEY = 'consent_ack_v2'; // v2: single flag "acknowledged"
-  const acknowledged = localStorage.getItem(STORAGE_KEY) === '1';
-  const panel = document.getElementById('consentToast');
-  const okBtn = document.getElementById('consentOk');
-  const rememberBox = document.getElementById('consentRemember');
-
-  const __origFetchGVizJSONP = window.fetchGVizJSONP;
-  if (typeof __origFetchGVizJSONP !== 'function') return;
-
-  let waitingResolvers = [];
-  let asked = false;
-
-  window.fetchGVizJSONP = function(){
-    if (localStorage.getItem(STORAGE_KEY) === '1') return __origFetchGVizJSONP();
-    if (!asked){ asked = true; if (panel) panel.classList.remove('hidden'); }
-    return new Promise((resolve, reject)=> waitingResolvers.push({resolve, reject}));
-  };
-
-  function startNow(){
-    if (panel) panel.classList.add('hidden');
-    __origFetchGVizJSONP().then(data=>{
-      waitingResolvers.forEach(q => q.resolve(data));
-      waitingResolvers = [];
-    }).catch(err=>{
-      waitingResolvers.forEach(q => q.reject(err));
-      waitingResolvers = [];
+    document.getElementById('helpBtn')?.addEventListener('click', ()=>{
+  if (typeof trackEvent === 'function'){
+    trackEvent('open_tutorial_menu', {
+      source: 'help_button'
     });
   }
+  showHelpChoice();
+});
 
-  if (okBtn){
-  okBtn.addEventListener('click', ()=>{
-    if (rememberBox?.checked) localStorage.setItem(STORAGE_KEY, '1');
+    document.getElementById('chipSearch')?.addEventListener('input', ()=>{
+  onWantedSelectionChanged();
 
-    // NEW: คิวไว้ว่า ถ้าเป็นการเข้าครั้งแรก ให้รอเปิด tutorial หลัง toast โหลด sheet สำเร็จ
-    if (localStorage.getItem('tutorial_autoshown_once_v1') !== '1') {
-      document.dispatchEvent(new CustomEvent('queueFirstVisitTutorial'));
+  if (guidedActive){
+    const step = getSteps()[guidedIndex];
+    const target = step?.target?.();
+    if (target){
+      setTimeout(()=> moveSpotlightAndCard(target), 30);
     }
-
-    startNow();
-  });
-}
-
-  if (acknowledged){
-    if (panel) panel.classList.add('hidden');
-    window.fetchGVizJSONP = __origFetchGVizJSONP;
   }
+
+  if (guidedActive){
+    const step = getSteps()[guidedIndex];
+    const target = step?.target?.();
+    if (target){
+      setTimeout(()=> moveSpotlightAndCard(target), 30);
+    }
+  }
+});
+
+const bindCharacterStepListener = () => {
+  const sel = document.getElementById('charSelect');
+  if (!sel) return false;
+
+  if (sel.tomselect) {
+    if (!sel.tomselect.__guidedCharacterBound) {
+      sel.tomselect.on('change', () => {
+        onCharacterPicked();
+      });
+      sel.tomselect.__guidedCharacterBound = true;
+    }
+    return true;
+  }
+
+  if (!sel.__guidedCharacterBound) {
+    sel.addEventListener('change', () => {
+      onCharacterPicked();
+    });
+    sel.__guidedCharacterBound = true;
+  }
+  return true;
+};
+
+bindCharacterStepListener();
+
+let bindCharacterStepTry = 0;
+const bindCharacterStepInterval = setInterval(() => {
+  bindCharacterStepTry++;
+  if (bindCharacterStepListener() || bindCharacterStepTry > 40) {
+    clearInterval(bindCharacterStepInterval);
+  }
+}, 250);
+
+    document.getElementById('chipUnwantedHeader')?.addEventListener('click', ()=>{
+      onUnwantedPanelOpened();
+    });
+
+    document.querySelectorAll('.topk-preset').forEach((btn)=>{
+      btn.addEventListener('click', ()=>{
+        onTopKPicked();
+      });
+    });
+
+    getVisibleCalcButton()?.addEventListener('click', ()=>{
+      onSearchClicked();
+    });
+
+    document.getElementById('calcBtn')?.addEventListener('click', ()=>{
+      onSearchClicked();
+    });
+
+    document.getElementById('calcBtn2')?.addEventListener('click', ()=>{
+      onSearchClicked();
+    });
+
+    document.addEventListener('guidedSearchCompleted', ()=>{
+      onSearchCompleted();
+    });
+
+    window.addEventListener('resize', ()=>{
+      if (guidedActive){
+        renderGuidedStep();
+      }
+    });
+
+    window.addEventListener('scroll', ()=>{
+      if (guidedActive){
+        const steps = getSteps();
+        const step = steps[guidedIndex];
+        const target = step?.target?.();
+        if (target){
+          moveSpotlightAndCard(target);
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('click', ()=>{
+      onWantedSelectionChanged();
+    }, { passive: true });
+
+    document.addEventListener('keydown', (e)=>{
+      if (!guidedActive) return;
+      if (e.key === 'Escape'){
+        skipGuidedTutorial();
+      }
+    });
+  });
+
+  // expose for future use if needed
+  window.startGuidedTutorial = startGuidedTutorial;
 })();
 </script>
 
