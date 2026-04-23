@@ -832,6 +832,76 @@ header .brand{ padding-top:6px; }
   --shadow-danger:0 6px 16px rgba(231,74,59,.35); --shadow-danger-hover:0 8px 18px rgba(192,57,43,.4);
   --focus-ring:3px solid #7aa2ff; --focus-ring-danger:3px solid #fca5a5; --overlay:rgba(0,0,0,.75);
 }
+/* ===== Mobile global scale tuning ===== */
+:root{
+  --mobile-ui-scale: 1;
+}
+
+@media (max-width: 390px){
+  :root{
+    --mobile-ui-scale: 0.90;
+  }
+}
+
+@media (min-width: 391px) and (max-width: 430px){
+  :root{
+    --mobile-ui-scale: 0.93;
+  }
+}
+
+@media (min-width: 431px) and (max-width: 768px){
+  :root{
+    --mobile-ui-scale: 0.96;
+  }
+}
+
+/* ปรับ base typography + spacing ทั้งหน้าแบบปลอดภัยกว่า scale ทั้ง body */
+@media (max-width: 768px){
+  html{
+    font-size: calc(16px * var(--mobile-ui-scale));
+  }
+
+  :root{
+    --space-1: calc(4px * var(--mobile-ui-scale));
+    --space-2: calc(6px * var(--mobile-ui-scale));
+    --space-3: calc(8px * var(--mobile-ui-scale));
+    --space-4: calc(10px * var(--mobile-ui-scale));
+    --space-5: calc(12px * var(--mobile-ui-scale));
+    --space-6: calc(14px * var(--mobile-ui-scale));
+    --space-7: calc(16px * var(--mobile-ui-scale));
+    --space-8: calc(20px * var(--mobile-ui-scale));
+
+    --radius-xs: calc(6px * var(--mobile-ui-scale));
+    --radius-sm: calc(8px * var(--mobile-ui-scale));
+    --radius-md: calc(10px * var(--mobile-ui-scale));
+    --radius-lg: calc(12px * var(--mobile-ui-scale));
+    --radius-xl: calc(14px * var(--mobile-ui-scale));
+  }
+}
+@media (max-width: 768px){
+  main{
+    max-width: calc(100% * var(--mobile-ui-scale));
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  section{
+    padding: calc(var(--space-6)) calc(var(--space-7));
+  }
+
+  .btn{
+    font-size: calc(15px * var(--mobile-ui-scale)) !important;
+  }
+
+  .result-card{
+    font-size: calc(13px * var(--mobile-ui-scale)) !important;
+  }
+
+  .result-card h3{
+    font-size: calc(15px * var(--mobile-ui-scale)) !important;
+  }
+}
+
 html[data-theme="dark"]{
   --bg:#0f172a; --surface:#1e293b; --surface-2:#1e293b; --surface-muted:#1e293b;
   --text:#e5e7eb; --text-strong:#e5e7eb; --text-muted:#94a3b8; --text-soft:#94a3b8;
