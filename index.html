@@ -1129,25 +1129,54 @@ html[data-theme="dark"] .qr-modal__dialog{background:#111827;color:var(--text)}
 html[data-theme="dark"] .qr-modal__title{color:var(--primary-2)}
 html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1}
 
-/* ===== Favorite filter modal ===== */
-.fav-modal{position:fixed;inset:0;z-index:3600;display:none;align-items:center;justify-content:center;background:var(--overlay);padding:var(--space-7);box-sizing:border-box;backdrop-filter: blur(2px)}
-.fav-modal.show{display:flex}
+/* ===== Favorite / Inventory drawer ===== */
+.fav-modal{
+  position:fixed;
+  inset:0;
+  z-index:3600;
+  background:rgba(0,0,0,.75);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  opacity:0;
+  backdrop-filter:blur(2px);
+}
+
+.fav-modal.show{
+  display:flex;
+  animation:fade-in 0.25s ease-out forwards;
+}
+
+.fav-modal.hiding{
+  display:flex;
+  animation:fade-out 0.25s ease-out forwards;
+}
+
 .fav-modal__dialog{
   background:var(--surface);
-  border-radius:var(--radius-xl);
-  width:min(560px,90vw);
-  max-height:min(620px,92vh);
+  border-radius:20px 20px 0 0;
+  width:100%;
+  max-width:700px;
+  max-height:min(85vh, 680px);
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  box-shadow:var(--shadow-modal);
+  box-shadow:0 -8px 32px rgba(0,0,0,.18);
   font-family:var(--font-ui);
-  animation: modal-show 0.25s ease-out;
+}
+
+.fav-modal.show .fav-modal__dialog{
+  animation:sheet-up 0.5s cubic-bezier(.22,.61,.36,1);
+}
+
+.fav-modal.hiding .fav-modal__dialog{
+  animation:sheet-down 0.5s cubic-bezier(.22,.61,.36,1) forwards;
 }
 
 @media (max-width:640px){
   .fav-modal__dialog{
-    max-height:min(520px,92vh);
+    max-height:85vh;
+    padding-bottom:env(safe-area-inset-bottom);
   }
 }
 
@@ -1179,7 +1208,7 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
   display:flex;
   gap:var(--space-2);
   margin:0;
-  padding:var(--space-6) 0 var(--space-4) 0;
+  padding:var(--space-2) 0 var(--space-4) 0;
   background:var(--surface);
   border:none;
   border-bottom:1px solid var(--chip-border);
@@ -1199,7 +1228,7 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
   align-items:center;
   gap:var(--space-3);
   position:sticky;
-  top:64px;
+  top:54px;
   z-index:19;
   background:var(--surface);
   padding:var(--space-4) 0 var(--space-3) 0;
@@ -1295,13 +1324,18 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
 .fav-empty{padding:18px var(--space-5);border:1px dashed var(--border-strong);border-radius:var(--radius-md);text-align:center;color:var(--text-soft);background:var(--surface-muted);font-size: 13px;}
 .fav-item{border:1px solid var(--chip-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);background:var(--surface)}
 .fav-item__name{font-weight:600;color:var(--primary);font-size:15px;margin-bottom:4px}
-.fav-item__meta{font-size:12px;color:var(--text-soft);line-height:1.45;margin-bottom:var(--space-4)}
+.fav-item__meta{font-size:12px;color:var(--text-soft);line-height:1.25;margin-bottom:var(--space-4)}
 .saved-result-jewels{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin:var(--space-3) 0}
-.saved-result-jewel{border:1px solid var(--chip-border);border-radius:var(--radius-sm);background:var(--surface-muted);padding:var(--space-3);font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.15;text-align: center;display:flex;align-items:center;justify-content:center}
+.saved-result-jewel{border:1px solid var(--chip-border);border-radius:var(--radius-sm);background:var(--surface-muted);padding:var(--space-1);font-size:13px;font-weight:600;color:var(--text-strong);line-height:1.15;text-align: center;display:flex;align-items:center;justify-content:center}
 .saved-result-metrics{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-4)}
 .saved-result-metric{border:1px solid var(--chip-border);border-radius:var(--radius-pill);background:var(--surface-muted);color:var(--text-soft);padding:2px var(--space-3);font-size:12px;font-weight:400}
 .fav-actions{display:flex;gap:var(--space-3);flex-wrap:wrap}
 .fav-btn{border:none;border-radius:var(--radius-md);padding:var(--space-3) var(--space-5);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;min-height:36px}
+/* NOTENOTE*/
+@media (max-width:768px){
+  .fav-btn{padding:var(--space-1) var(--space-4);font-size:13px;min-height:30px}
+  .fav-item__name{font-size:14px}
+}
 .fav-btn--primary{background:var(--primary);color:#fff}
 .fav-btn--primary:hover{background:var(--primary-2)}
 .fav-btn--ghost{background:var(--secondary-soft-2);color:#334155}
@@ -1431,7 +1465,7 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 @media (max-width:640px){
   .tutorial-sheet__dialog{
     padding:12px 14px calc(14px + env(safe-area-inset-bottom)) 14px;
-    max-height:72vh;
+    max-height:85vh;
   }
 }
 
@@ -1613,8 +1647,22 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 .inventory-section{margin-top:14px}
 .inventory-section__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .inventory-section__title{font-size:14px;font-weight:700;color:#334155}.inventory-section__meta{font-size:12px;color:var(--text-soft);font-weight:600}
-.inventory-chip-list{max-height:min(34vh,280px);overflow:auto;padding:4px}
-.inventory-chip-list--owned{max-height:none;overflow:visible;min-height:42px}.inventory-chip{min-height:36px}
+.inventory-chip-list{
+  max-height:min(50vh,700px);
+  overflow:auto;
+  padding:4px;
+}
+
+.inventory-chip{
+  min-height:30px;
+  padding:4px 10px;
+  font-size:12px;
+  line-height:1.2;
+}
+
+.inventory-chip .chip-x{
+  font-size:14px;
+}
 .inventory-chip.is-owned{background:#166534;color:#fff;border-color:#166534;font-weight:700}
 .inventory-chip.is-owned:hover{background:#15803d;border-color:#15803d}
 .inventory-empty{padding:12px;border:1px dashed var(--border-strong);border-radius:10px;background:var(--surface-muted);color:var(--text-soft);font-size:13px;text-align:center}html[data-theme="dark"] .inventory-section__title{color:#e5e7eb}html[data-theme="dark"] .inventory-chip.is-owned{background:#166534;border-color:#22c55e}
@@ -2138,12 +2186,13 @@ html[data-theme="dark"] .donate-sticky__link:hover{
 @media (max-width: 768px) {
   .donate-modal__actions {
     flex-direction: column; /* เปลี่ยนจากเรียงแนวนอนเป็นแนวตั้ง */
-    width: 95%;
+    width: 100%;
   }
   
   .donate-modal__action {
     width: 95%; /* ให้ปุ่มกว้างเต็มพื้นที่ */
     text-align: center;
+    max-width: 300px;
   }
 }
 
@@ -3011,6 +3060,7 @@ html[data-theme="dark"] .help-choice-modal__dialog{
         <button type="button" class="fav-modal__close" id="favClose" aria-label="ปิด">×</button>
       </div>
       <div class="fav-modal__body">
+        <p class="inventory-help">ข้อมูล Filter และเซ็ตจี้ที่บันทึกไว้ จะถูกเก็บไว้เฉพาะบนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น</p>
         <div class="fav-tabs" role="tablist" aria-label="ประเภทที่บันทึกไว้">
           <button type="button" class="fav-tab active" id="favFilterTab" role="tab" aria-selected="true" aria-controls="favFilterPanel">Filter</button>
           <button type="button" class="fav-tab" id="favResultTab" role="tab" aria-selected="false" aria-controls="favResultPanel">เซ็ตจี้</button>
@@ -3051,10 +3101,8 @@ html[data-theme="dark"] .help-choice-modal__dialog{
     </div>
   </div>
 
-  <div id="inventoryModal" class="fav-modal inventory-modal" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle" aria-hidden="true"><div class="fav-modal__dialog inventory-modal__dialog"><div class="fav-modal__header"><h3 id="inventoryTitle" class="fav-modal__title">📦 คลังจี้ของฉัน <span id="inventoryCount" class="fav-count">(0)</span></h3><button type="button" class="fav-modal__close" id="inventoryClose" aria-label="ปิด">×</button></div><div class="fav-modal__body"><p class="inventory-help">เพิ่มจี้ที่คุณมีอยู่ เพื่อดูว่าเซ็ตไหนใช้ได้จริง โดยจะแสดงผลเป็นสีเขียวในผลลัพธ์เซ็ตจี้ที่ค้นหา (เก็บข้อมูลเฉพาะอุปกรณ์นี้เท่านั้น)</p>
+  <div id="inventoryModal" class="fav-modal inventory-modal" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle" aria-hidden="true"><div class="fav-modal__dialog inventory-modal__dialog"><div class="fav-modal__header"><h3 id="inventoryTitle" class="fav-modal__title">📦 คลังจี้ของฉัน <span id="inventoryCount" class="fav-count">(0)</span></h3><button type="button" class="fav-modal__close" id="inventoryClose" aria-label="ปิด">×</button></div><div class="fav-modal__body"><p class="inventory-help">เพิ่มจี้ที่คุณมีอยู่ โดยจะแสดงผลเป็นสีเขียวในผลลัพธ์เซ็ตจี้ที่ค้นหา (ข้อมูลคลังจี้จะถูกเก็บไว้เฉพาะบนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น)</p>
   <div class="fav-search-wrap"><input id="inventorySearchInput" class="fav-search" type="search" placeholder="ค้นหาชื่อจี้..." autocomplete="off"><button type="button" class="fav-search-clear" id="inventorySearchClear" aria-label="ล้างการค้นหา" hidden>✕</button></div>
-  <div class="inventory-section"><div class="inventory-section__head"><div class="inventory-section__title">มีอยู่แล้ว</div><div class="inventory-section__meta" id="inventoryOwnedMeta">0 ชิ้น</div></div><div id="inventoryOwnedList" class="chip-list inventory-chip-list inventory-chip-list--owned"></div></div>
-  <div class="section-divider" aria-hidden="true" style="margin-top:16px;"><div class="section-divider__line"></div></div>
   <div class="inventory-section"><div class="inventory-section__head"><div class="inventory-section__title">จี้ทั้งหมด</div><div class="inventory-section__meta" id="inventoryAllMeta">0 รายการ</div></div><div id="inventoryAllList" class="chip-list inventory-chip-list"></div></div><div class="fav-actions" style="margin-top:16px"><button type="button" class="fav-btn fav-btn--danger" id="inventoryClearAll">ล้างทั้งหมด</button><button type="button" class="fav-btn fav-btn--ghost" id="inventoryDone">ปิด</button></div></div></div></div>
 </main>
 
@@ -3099,8 +3147,15 @@ function computeResultOwnership(result){const ids=Array.isArray(result?.ids)?res
 function filterResultsByInventory(results){const mode=window._inventoryResultFilterMode||'all';const list=Array.isArray(results)?results:[];if(mode==='buildable') return list.filter(r=>computeResultOwnership(r).isBuildable);if(mode==='missing1') return list.filter(r=>computeResultOwnership(r).isMissingOnly1);return list;}
 function syncInventoryResultFilterUI(){const wrap=document.getElementById('inventoryResultFilters'); if(!wrap) return; wrap.querySelectorAll('.inventory-result-filter').forEach(btn=>btn.classList.toggle('active', btn.dataset.filter === (window._inventoryResultFilterMode||'all')));}
 function updateInventoryMenuMeta(){const meta=document.getElementById('menuInventoryMeta'); if(meta) meta.textContent=`${getOwnedCount()} ชิ้น`;}
-function updateInventoryCountUI(filteredCount){const count=getOwnedCount(); const countEl=document.getElementById('inventoryCount'); const ownedMeta=document.getElementById('inventoryOwnedMeta'); const allMeta=document.getElementById('inventoryAllMeta'); if(countEl) countEl.textContent=`(${count})`; if(ownedMeta) ownedMeta.textContent=`${count} ชิ้น`; if(allMeta) allMeta.textContent=`${filteredCount} รายการ`; updateInventoryMenuMeta();}
-function makeInventoryChip(name, owned){
+function updateInventoryCountUI(filteredCount){
+  const count = getOwnedCount();
+  const countEl = document.getElementById('inventoryCount');
+  const allMeta = document.getElementById('inventoryAllMeta');
+
+  if(countEl) countEl.textContent = `(${count})`;
+  if(allMeta) allMeta.textContent = `${filteredCount} รายการ`;
+  updateInventoryMenuMeta();
+}function makeInventoryChip(name, owned){
   return `
     <button
       type="button"
@@ -3115,7 +3170,25 @@ function makeInventoryChip(name, owned){
     </button>
   `;
 }
-function renderInventoryLists(){const ownedWrap=document.getElementById('inventoryOwnedList'); const allWrap=document.getElementById('inventoryAllList'); if(!ownedWrap||!allWrap) return; const query=(document.getElementById('inventorySearchInput')?.value||'').trim().toLowerCase(); const names=Array.from(new Set((jewels||[]).map(j=>(j.id||'').trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'th')); const ownedNames=names.filter(name=>window._ownedJewelIds?.has(name)); const visibleNames=query ? names.filter(name=>name.toLowerCase().includes(query)) : names; ownedWrap.innerHTML=ownedNames.length ? ownedNames.map(name=>makeInventoryChip(name, true)).join('') : '<div class="inventory-empty">ยังไม่ได้เพิ่มจี้ที่มีอยู่</div>'; allWrap.innerHTML=visibleNames.length ? visibleNames.map(name=>makeInventoryChip(name, window._ownedJewelIds?.has(name))).join('') : '<div class="inventory-empty">ไม่พบจี้ที่ค้นหา</div>'; updateInventoryCountUI(visibleNames.length);}
+function renderInventoryLists(){
+  const allWrap = document.getElementById('inventoryAllList');
+  if(!allWrap) return;
+
+  const query = (document.getElementById('inventorySearchInput')?.value || '').trim().toLowerCase();
+  const names = Array.from(
+    new Set((jewels || []).map(j => (j.id || '').trim()).filter(Boolean))
+  ).sort((a,b)=>a.localeCompare(b,'th'));
+
+  const visibleNames = query
+    ? names.filter(name => name.toLowerCase().includes(query))
+    : names;
+
+  allWrap.innerHTML = visibleNames.length
+    ? visibleNames.map(name => makeInventoryChip(name, window._ownedJewelIds?.has(name))).join('')
+    : '<div class="inventory-empty">ไม่พบจี้ที่ค้นหา</div>';
+
+  updateInventoryCountUI(visibleNames.length);
+}
 function refreshResultsForInventory(){syncInventoryResultFilterUI(); const wrap=document.getElementById('inventoryResultFilters'); if(wrap){const hasResults=Array.isArray(window._latestComputedResults) && window._latestComputedResults.length>0; const hasOwned=getOwnedCount()>0; wrap.hidden=!(hasResults && hasOwned);} if(Array.isArray(window._latestComputedResults) && window._latestComputedResults.length && typeof window.renderResults==='function'){window.renderResults(window._latestComputedResults, {skipTracking:true});}}
 function toggleOwnedJewel(id){
   const name = String(id || '').trim();
@@ -4895,10 +4968,32 @@ function bindShareButtons(){
   document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
 
-function setDialogVisible(modal, isVisible){
-  if (!modal) return;
-  modal.classList.toggle('show', isVisible);
-  modal.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+function setDialogVisible(dialog, visible){
+  if(!dialog) return;
+
+  if(visible){
+    dialog.classList.remove('hiding');
+    dialog.hidden = false;
+    dialog.classList.add('show');
+    dialog.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
+  dialog.classList.remove('show');
+  dialog.classList.add('hiding');
+  dialog.setAttribute('aria-hidden', 'true');
+
+  const onEnd = () => {
+    dialog.classList.remove('hiding');
+    dialog.hidden = true;
+    if(!document.querySelector('.fav-modal.show, .tutorial-sheet.show, .donate-modal.show, .qr-modal.show')){
+      document.body.style.overflow = '';
+    }
+    dialog.removeEventListener('animationend', onEnd);
+  };
+
+  dialog.addEventListener('animationend', onEnd);
 }
 
 function showQRModal(url){
