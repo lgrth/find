@@ -1417,7 +1417,16 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   background:#fff;border-radius:20px 20px 0 0;
   padding:16px 20px calc(28px + env(safe-area-inset-bottom)) 20px;
   width:100%;max-width:560px;
+  max-height:min(75vh, 680px);
+  overflow:auto;
   box-shadow:0 -8px 32px rgba(0,0,0,.18);
+}
+
+@media (max-width:640px){
+  .tutorial-sheet__dialog{
+    padding:12px 14px calc(14px + env(safe-area-inset-bottom)) 14px;
+    max-height:72vh;
+  }
 }
 
 .tutorial-sheet.show .tutorial-sheet__dialog{
@@ -1437,7 +1446,65 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   from{transform:translateY(0)}
   to{transform:translateY(100%)}
 }
-.tutorial-sheet__title{margin:0 0 16px 0;font-size:20px;font-weight:700;color:#1e3a8a;text-align:center}
+.tutorial-sheet__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 16px 0;
+}
+
+.tutorial-sheet__title{
+  margin:0;
+  font-size:20px;
+  font-weight:700;
+  color:#1e3a8a;
+  text-align:left;
+}
+
+.tutorial-sheet__guided-link{
+  appearance:none;
+  border:none;
+  background:transparent;
+  color:var(--primary-2);
+  font:inherit;
+  font-size:14px;
+  font-weight:700;
+  padding:0;
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  white-space:nowrap;
+}
+
+.tutorial-sheet__guided-link:hover{
+  color:var(--primary);
+}
+
+.tutorial-sheet__guided-link:focus-visible{
+  outline:var(--focus-ring);
+  outline-offset:3px;
+  border-radius:6px;
+}
+
+html[data-theme="dark"] .tutorial-sheet__title{
+  color:#60a5fa;
+}
+
+html[data-theme="dark"] .tutorial-sheet__guided-link{
+  color:#93c5fd;
+}
+
+@media (max-width:640px){
+  .tutorial-sheet__header{
+    align-items:flex-start;
+  }
+
+  .tutorial-sheet__guided-link{
+    font-size:13px;
+    padding-top:2px;
+  }
+}
 .tutorial-steps{list-style:none;margin:0 0 14px 0;padding:0;display:flex;flex-direction:column;gap:10px}
 .tutorial-steps li{display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:12px;padding:10px 12px;border-left:4px solid #e2e8f0}
 .tutorial-step-icon{font-size:26px;line-height:1;flex-shrink:0;width:34px;text-align:center;padding-top:2px}
@@ -1451,7 +1518,12 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
   font-size:13px;color:#7c96bb;background:#f1f5f9;
   border-radius:10px;padding:8px 12px;margin:0 0 16px 0;
 }
-.tutorial-sheet__close{width:100%;margin-top:4px}
+.tutorial-sheet__close{
+  width:100%;
+  margin-top:8px;
+  position:sticky;
+  bottom:0;
+}
 /* chip-unwanted hint — hides when panel is open */
 .chip-unwanted-hint{font-size:12px;color:#9ca3af;padding-left:2px}
 #chipUnwantedBody.open + .chip-unwanted-hint{display:none}
@@ -2001,6 +2073,7 @@ html[data-theme="dark"] .donate-sticky__link:hover{
   margin:18px 0 14px 0;
   display:flex;
   justify-content:center;
+  width:70%;
 }
 
 .donate-modal__qr{
@@ -2180,6 +2253,52 @@ html[data-theme="dark"] .donate-modal__footnote{
   border-radius:999px;
   padding:4px 8px;
   margin-bottom:10px;
+}
+.guided-tour__topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.guided-tour__eyebrow{
+  margin-bottom:0;
+}
+
+.guided-tour__top-close{
+  appearance:none;
+  border:none;
+  background:transparent;
+  color:#94a3b8;
+  padding:0;
+  min-height:auto;
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.2;
+  cursor:pointer;
+  white-space:nowrap;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+
+.guided-tour__top-close:hover{
+  color:#64748b;
+}
+
+.guided-tour__top-close:focus-visible{
+  outline:var(--focus-ring);
+  outline-offset:2px;
+  border-radius:4px;
+}
+
+html[data-theme="dark"] .guided-tour__top-close{
+  color:#94a3b8;
+}
+
+html[data-theme="dark"] .guided-tour__top-close:hover{
+  color:#cbd5e1;
 }
 
 .guided-tour__title{
@@ -2414,7 +2533,10 @@ html[data-theme="dark"] .help-choice-modal__dialog{
 <div id="tutorialSheet" class="tutorial-sheet" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" aria-hidden="true">
   <div class="tutorial-sheet__dialog">
     <div class="tutorial-sheet__handle"></div>
-    <h3 id="tutorialTitle" class="tutorial-sheet__title">วิธีใช้งาน</h3>
+    <div class="tutorial-sheet__header">
+  <h3 id="tutorialTitle" class="tutorial-sheet__title">วิธีใช้งาน</h3>
+  <button type="button" id="tutorialGuidedLink" class="tutorial-sheet__guided-link">เริ่มทัวร์ทีละขั้นตอน</button>
+</div>
     <ol class="tutorial-steps">
       <li style="border-left-color:#16a34a">
         <span class="tutorial-step-icon" aria-hidden="true">
@@ -2522,16 +2644,19 @@ html[data-theme="dark"] .help-choice-modal__dialog{
   <div id="guidedSpotlight" class="guided-tour__spotlight"></div>
 
   <div id="guidedCard" class="guided-tour__card" role="dialog" aria-modal="true" aria-labelledby="guidedTitle">
-    <div id="guidedEyebrow" class="guided-tour__eyebrow">สอนใช้งานทีละขั้น</div>
-    <h3 id="guidedTitle" class="guided-tour__title">เริ่มใช้งาน</h3>
-    <p id="guidedDesc" class="guided-tour__desc">เดี๋ยวพาใช้งานทีละขั้น</p>
-    <div id="guidedStatus" class="guided-tour__status is-waiting">กำลังรอให้คุณลองกดตามขั้นตอนนี้</div>
+    <div class="guided-tour__topbar">
+  <div id="guidedEyebrow" class="guided-tour__eyebrow">สอนใช้งานทีละขั้น</div>
+  <button type="button" id="guidedSkipBtn" class="guided-tour__top-close">จบทัวร์</button>
+</div>
 
-    <div class="guided-tour__actions">
+<h3 id="guidedTitle" class="guided-tour__title">เริ่มใช้งาน</h3>
+<p id="guidedDesc" class="guided-tour__desc">เดี๋ยวพาใช้งานทีละขั้น</p>
+<div id="guidedStatus" class="guided-tour__status is-waiting">กำลังรอให้คุณลองกดตามขั้นตอนนี้</div>
+
+<div class="guided-tour__actions">
   <button type="button" id="guidedBackBtn" class="guided-tour__btn guided-tour__btn--secondary">ย้อนกลับ</button>
   <button type="button" id="guidedStepSkipBtn" class="guided-tour__btn guided-tour__btn--ghost" hidden>ข้ามขั้นนี้</button>
   <button type="button" id="guidedNextBtn" class="guided-tour__btn guided-tour__btn--primary" disabled>ถัดไป</button>
-  <button type="button" id="guidedSkipBtn" class="guided-tour__btn guided-tour__btn--ghost">จบทัวร์</button>
 </div>
   </div>
 </div>
@@ -6875,6 +7000,16 @@ function hideHelpChoice(){
 
   document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('tutorialClose')?.addEventListener('click', ()=> hideSheet());
+    document.getElementById('tutorialGuidedLink')?.addEventListener('click', ()=>{
+  hideSheet();
+  startGuidedTutorial();
+
+  if (typeof trackEvent === 'function'){
+    trackEvent('open_tutorial_guided', {
+      source: 'tutorial_sheet'
+    });
+  }
+});
     sheet?.addEventListener('click', (e)=>{ if(e.target === sheet) hideSheet(); });
 
     let touchStartY = 0;
@@ -6957,7 +7092,7 @@ helpChoiceModal?.addEventListener('click', (e)=>{
       source: 'help_button'
     });
   }
-  showHelpChoice();
+  showSheet();
 });
 
     document.getElementById('chipSearch')?.addEventListener('input', ()=>{
