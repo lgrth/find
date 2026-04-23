@@ -2069,11 +2069,13 @@ html[data-theme="dark"] .donate-sticky__link:hover{
   color:var(--text-soft);
 }
 
-.donate-modal__qr-wrap{
-  margin:18px 0 14px 0;
-  display:flex;
-  justify-content:center;
-  width:70%;
+.donate-modal__qr-wrap {
+  margin-block: 18px 14px;
+  margin-inline: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
 }
 
 .donate-modal__qr{
@@ -2092,11 +2094,24 @@ html[data-theme="dark"] .donate-sticky__link:hover{
   text-align:center;
 }
 
-.donate-modal__actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:16px;
+.donate-modal__actions {
+  display: flex;
+  justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน */
+  align-items: center;     /* จัดให้อยู่ตรงกลางแนวตั้ง (ถ้าจำเป็น) */
+  gap: 12px;               /* เพิ่มระยะห่างระหว่างปุ่ม (กรณีที่มี 2 ปุ่มในอนาคต) */
+  margin-top: 20px;        /* เว้นระยะห่างจากรูป QR ด้านบน */
+}
+
+@media (max-width: 768px) {
+  .donate-modal__actions {
+    flex-direction: column; /* เปลี่ยนจากเรียงแนวนอนเป็นแนวตั้ง */
+    width: 100%;
+  }
+  
+  .donate-modal__action {
+    width: 100%; /* ให้ปุ่มกว้างเต็มพื้นที่ */
+    text-align: center;
+  }
 }
 
 .donate-modal__action{
