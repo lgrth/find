@@ -6009,8 +6009,8 @@ function initDonateOpenAppButton(){
      * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
      * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
      */
-    const DEEP_LINK_ANDROID = 'tmn://wallet.truemoney.com/scanner';
-    const DEEP_LINK_IOS = 'tmn://wallet.truemoney.com/scanner';
+    const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+    const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
 
     const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
     const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
