@@ -3423,10 +3423,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   hideDonateSticky();
 });
 
-document.getElementById('donateStickyBtn')?.addEventListener('click', ()=>{
-  trackEvent('donate_cta_click', { placement: 'sticky_footer' });
-  openDonateModal('sticky_footer');
-});
 
 function trackSearchResults(searchTerm, resultCount, topK, extra = {}) {
   if (!window.gtag) return;
@@ -5890,6 +5886,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
     openDonateModal('footer');
   });
 
+  document.getElementById('donateStickyBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_cta_click', { placement: 'sticky_footer' });
+    openDonateModal('sticky_footer');
+  });
+
   document.getElementById('donateClose')?.addEventListener('click', closeDonateModal);
 
   document.getElementById('donateModal')?.addEventListener('click', (e)=>{
@@ -5953,13 +5954,12 @@ function initDonateOpenAppButton(){
     window.location.href = deepLink;
 
     setTimeout(()=>{
-      if(Date.now() - start < 1800){
-        window.location.href = fallbackUrl;
-      }
-    }, 1200);
+  if(Date.now() - start < 1800){
+    window.location.href = fallbackUrl;
+  }
+}, 1200);
   });
 }
-});
 
   document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('tutorialClose')?.addEventListener('click', ()=> hide());
@@ -6011,6 +6011,7 @@ document.getElementById('helpBtn')?.addEventListener('click', ()=>{
   });
   show();
 });
+  });
 })();
 
 // --- Consent gate: show toast and delay data loading until acknowledged ---
@@ -6520,8 +6521,6 @@ async function applyCharFromURL(){
     </button>
   </div>
 </div>
-</body>
-
 <footer class="site-footer">
   <div class="donate-footer">
     <div class="donate-footer__inner">
@@ -6532,4 +6531,5 @@ async function applyCharFromURL(){
     </div>
   </div>
   </footer>
+</body>
 </html>
