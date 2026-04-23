@@ -34,6 +34,17 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R02HXHW7NX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R02HXHW7NX');
+</script>
+
 <script>
 /* Force light mode before first paint (no FOUC) */
 (function(){
@@ -715,7 +726,7 @@ header .brand{ padding-top:6px; }
 .jewel-columns{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .jewel-column{
   background:#f1f3f5; border-radius:10px; padding:4px;
-  text-align:center; font-weight:600; font-size:14px; line-height:1.0;
+  text-align:center; font-weight:600; font-size:14px; line-height:1.3;
   min-height:32px; display:flex; align-items:center; justify-content:center;
   position:relative; cursor:default;
 }
@@ -1250,7 +1261,7 @@ html[data-theme="dark"] .fav-search-clear:hover{background:#1e293b;color:#e5e7eb
 /* ===== Result product features ===== */
 .data-freshness{display:inline-flex;align-items:center;gap:var(--space-1);margin:0 0 0 2px;color:var(--text-soft);font-size:12px;font-weight:400}
 .result-utility-row{display:flex;flex-direction:column;gap:var(--space-3);margin:0 0 var(--space-4)}
-.compare-tray{display:none;border:1px solid var(--chip-border);border-radius:var(--radius-xl);background:var(--surface-muted);padding:var(--space-5)}
+.compare-tray{display:none;border:1px solid var(--chip-border);border-radius:var(--radius-xl);background:#e4f2ff;padding:var(--space-5)}
 .compare-tray.show{display:block}
 .compare-tray__head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-4)}
 .compare-tray__title{font-weight:600;color:#1e3a8a;font-size:15px}
@@ -1289,7 +1300,7 @@ html[data-theme="dark"] .data-freshness{color:#94a3b8}
 html[data-theme="dark"] .compare-tray,
 html[data-theme="dark"] .result-menu,
 html[data-theme="dark"] .skill-action-menu{background:#111827;border-color:#334155}
-html[data-theme="dark"] .compare-tray{background:#0f172a}
+html[data-theme="dark"] .compare-tray{background:#01206a}
 html[data-theme="dark"] .compare-tray__title{color:#60a5fa}
 html[data-theme="dark"] .compare-item{background:#1e293b;border-color:#334155}
 html[data-theme="dark"] .compare-jewel,
@@ -2795,12 +2806,19 @@ function togglePinnedResult(snapshot, btn){
     btn?.classList.add('is-active');
   }
   renderCompareTray();
+  trackEvent('toggle_compare_pin', {
+  result_rank: Number(snapshot.rank) || 0,
+  result_key: snapshot.key || '',
+  pinned_count: _pinnedResults.size
+});
 }
 
 function copyText(text, successMessage){
   if(navigator.clipboard?.writeText){
     return navigator.clipboard.writeText(text)
-      .then(()=> showToast(successMessage || 'คัดลอกแล้ว'),3000,'success')
+      .then(()=>{
+        showToast(successMessage || 'คัดลอกแล้ว', 3000, 'success');
+      })
       .catch(()=>{
         showToast('ไม่สามารถคัดลอกอัตโนมัติได้', 3000, 'warn');
       });
@@ -2809,13 +2827,51 @@ function copyText(text, successMessage){
   return Promise.resolve();
 }
 
+function trackEvent(eventName, params = {}) {
+  if (!window.gtag) return;
+  gtag('event', eventName, params);
+}
+
+function trackSearchResults(searchTerm, resultCount, topK, extra = {}) {
+  if (!window.gtag) return;
+  gtag('event', 'search', {
+    search_term: searchTerm || '(empty)',
+    result_count: Number(resultCount) || 0,
+    requested_top_k: Number(topK) || 0,
+    ...extra
+  });
+}
+
 function shareResultSnapshot(snapshot){
   const link = buildShareURL(snapshot.key, snapshot.filter || null, snapshot.names || []);
+
+  trackEvent('share_result_click', {
+    result_rank: Number(snapshot.rank) || 0,
+    jewel_count: Array.isArray(snapshot.names) ? snapshot.names.length : 0
+  });
+
   if(navigator.share){
-    navigator.share({ title: 'เซ็ตจี้ที่แนะนำ', text: 'กดเข้าไปดูเซ็ตจี้เกมเศรษฐีที่คัดมาได้เลย >>', url: link }).catch(()=>{
+    navigator.share({
+      title: 'เซ็ตจี้ที่แนะนำ',
+      text: 'กดเข้าไปดูเซ็ตจี้เกมเศรษฐีที่คัดมาได้เลย >>',
+      url: link
+    }).then(()=>{
+      trackEvent('share_result_success', {
+        method: 'native_share',
+        result_rank: Number(snapshot.rank) || 0
+      });
+    }).catch(()=>{
+      trackEvent('share_result_fallback', {
+        method: 'clipboard',
+        result_rank: Number(snapshot.rank) || 0
+      });
       copyText(link, 'คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
     });
   }else{
+    trackEvent('share_result_fallback', {
+      method: 'clipboard_qr',
+      result_rank: Number(snapshot.rank) || 0
+    });
     copyText(link, 'คัดลอกลิงก์แชร์เซ็ตนี้แล้ว');
     showQRModal(link);
   }
@@ -2853,6 +2909,19 @@ function renderResults(best){
   const desired = getDesired()||[];
   const topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10) || DEFAULT_TOPK;
   const shownCount = Math.min(best.length, topK);
+
+  trackSearchResults(
+    desired.join(', '),
+    shownCount,
+    topK,
+    {
+      selected_skill_count: desired.length,
+      unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0,
+      dark_only: !!(document.getElementById('darkOnly')?.checked),
+      has_character: !!getCharSelectValue()
+    }
+  );
+
   ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=(shownCount === 0); });
 
   if(resultTitle){
@@ -2992,7 +3061,13 @@ actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
   e.stopPropagation();
   actionWrap.classList.remove('open');
 
-  if(action === 'copy-names') copyText(names.join(', '), 'คัดลอกชื่อจี้แล้ว');
+if(action === 'copy-names'){
+  trackEvent('copy_jewel_names', {
+    result_rank: Number(snapshot.rank) || 0,
+    jewel_count: names.length
+  });
+  copyText(names.join(', '), 'คัดลอกชื่อจี้แล้ว');
+}
   if(action === 'share-result') shareResultSnapshot(snapshot);
   if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
 });
@@ -3043,6 +3118,10 @@ actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
 
 /* resetAll */
 function resetAll(){
+  trackEvent('reset_filters', {
+  selected_skill_count: Array.isArray(window._chipSelected) ? window._chipSelected.length : 0,
+  unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
+});
   // ล้าง chip state (includes unwanted)
   if (typeof window.clearChipState === 'function') window.clearChipState();
 
@@ -3435,14 +3514,26 @@ function bindShareButtons(){
   if (window.__shareButtonsBound) return;
   window.__shareButtonsBound = true;
   const onShare = ()=>{
-    const link = buildShareURL();
-    navigator.clipboard.writeText(link).then(()=>{
-      showToast('คัดลอกลิงก์แชร์แล้ว', 2000, 'success');
-      showQRModal(link);
-    }).catch(()=>{
-      showQRModal(link);
+  const link = buildShareURL();
+
+  trackEvent('share_filters_click', {
+    selected_skill_count: (getDesired() || []).length,
+    unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
+  });
+
+  navigator.clipboard.writeText(link).then(()=>{
+    trackEvent('share_filters_success', {
+      method: 'clipboard'
     });
-  };
+    showToast('คัดลอกลิงก์แชร์แล้ว', 2000, 'success');
+    showQRModal(link);
+  }).catch(()=>{
+    trackEvent('share_filters_fallback', {
+      method: 'qr_only'
+    });
+    showQRModal(link);
+  });
+};
   document.getElementById('shareBtn')?.addEventListener('click', onShare);
   document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
@@ -3454,6 +3545,7 @@ function setDialogVisible(modal, isVisible){
 }
 
 function showQRModal(url){
+  trackEvent('open_qr_modal');
   const modal = document.getElementById('qrModal');
   const canvas = document.getElementById('qrCanvas');
   const urlEl = document.getElementById('qrUrl');
@@ -3656,6 +3748,7 @@ function saveResultSetSnapshot(snapshot, preferredName=''){
   if(writeResultSetStore(store)){
     renderSavedResultSets();
     showToast('บันทึกเซ็ตจี้แล้ว', 2000, 'success');
+    trackEvent('save_result_set_success', {result_rank: Number(snapshot.rank) || 0,jewel_count: Array.isArray(snapshot.names) ? snapshot.names.length : 0});
   }
 }
 
@@ -3764,17 +3857,18 @@ function renderSavedResultSets(){
     // });
     const actions = document.createElement('div');
     actions.className = 'fav-actions';
-    const renameBtn = document.createElement('button');
-    renameBtn.type = 'button';
-    renameBtn.className = 'fav-btn fav-btn--primary';
-    renameBtn.textContent = 'เปลี่ยนชื่อ';
-    renameBtn.addEventListener('click', ()=> renameSavedResultSet(item.id));
 
     const shareBtn = document.createElement('button');
     shareBtn.type = 'button';
-    shareBtn.className = 'fav-btn fav-btn--ghost';
+    shareBtn.className = 'fav-btn fav-btn--primary';
     shareBtn.textContent = 'แชร์เซ็ตจี้';
     shareBtn.addEventListener('click', ()=> shareResultSnapshot(snapshot));
+
+    const renameBtn = document.createElement('button');
+    renameBtn.type = 'button';
+    renameBtn.className = 'fav-btn fav-btn--ghost';
+    renameBtn.textContent = 'เปลี่ยนชื่อ';
+    renameBtn.addEventListener('click', ()=> renameSavedResultSet(item.id));
 
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
@@ -3782,7 +3876,7 @@ function renderSavedResultSets(){
     deleteBtn.textContent = 'ลบ';
     deleteBtn.addEventListener('click', ()=> deleteSavedResultSet(item.id));
 
-    actions.append(renameBtn, shareBtn, deleteBtn);
+    actions.append(shareBtn, renameBtn, deleteBtn);
     row.append(name, jewels, actions);
     list.appendChild(row);
   });
@@ -4063,6 +4157,11 @@ function renderSavedResultSets(){
           }
         }
       });
+      trackEvent('save_filter_success', {
+    selected_skill_count: Array.isArray(window._chipSelected) ? window._chipSelected.length : 0,
+    unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0,
+    has_character: !!getCharSelectValue()
+  });
     }
     return;
   }
@@ -4223,7 +4322,7 @@ function deleteFavorite(id){
         }
       });
     }
-    document.getElementById('favoriteBtn')?.addEventListener('click', openFavModal);
+    document.getElementById('favoriteBtn')?.addEventListener('click', ()=>{trackEvent('open_favorites', {source: 'favorite_button'});openFavModal();});
     document.getElementById('favClose')?.addEventListener('click', closeFavModal);
     document.getElementById('favModal')?.addEventListener('click', e=>{ if(e.target?.id === 'favModal') closeFavModal(); });
     document.getElementById('favSaveCurrent')?.addEventListener('click', ()=> openSavePanel());
@@ -4586,7 +4685,12 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
     const $submit   = $form.querySelector('button[type="submit"]');
     const $closeEls = $modal.querySelectorAll('[data-fb-close]');
 
-    function open(){ setDialogVisible($modal, true); }
+    function open(){
+  trackEvent('open_feedback_form', {
+    source: 'fb_button'
+  });
+  setDialogVisible($modal, true);
+}
     function close(){ setDialogVisible($modal, false); if($note) $note.textContent=''; }
 
     $btn.addEventListener('click', open);
@@ -4656,6 +4760,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
   const msg = (fd.get('message') || '').toString().trim();
   if (!msg){
+    trackEvent('submit_feedback_validation_error', {field: 'message'});
     showToast('กรุณากรอกข้อความก่อนส่ง', 2600, 'error');
     return;
   }
@@ -4671,11 +4776,16 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
       mode: 'no-cors',
       body: fd
     });
-
+    trackEvent('submit_feedback_success', {
+  category: (fd.get('category') || '').toString(),
+  has_contact: !!(fd.get('contact') || '').toString().trim(),
+  message_length: ((fd.get('message') || '').toString().trim()).length
+});
     $form.reset();
     close();
     showToast('ส่งเรียบร้อย ขอบคุณมาก!', 2200, 'success');
   }catch(err){
+    trackEvent('submit_feedback_error', {category: (fd.get('category') || '').toString()});
     showToast('ส่งไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 2600, 'error');
   }finally{
     if ($submit) $submit.disabled = false;
@@ -4990,11 +5100,16 @@ const DEFAULT_TOPK = 10;
     if(saved==='dark'||saved==='light'){ document.documentElement.setAttribute('data-theme',saved); }
     btn.innerHTML = document.documentElement.getAttribute('data-theme')==='dark' ? SVG_SUN : SVG_MOON;
     btn.addEventListener('click', function(){
-      var next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      btn.innerHTML = next==='dark' ? SVG_SUN : SVG_MOON;
-      try{ localStorage.setItem('theme', next); }catch(e){ if(typeof showToast==='function') showToast('ไม่สามารถบันทึกธีมได้', 2500, 'warn'); }
-    });
+  var next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  btn.innerHTML = next==='dark' ? SVG_SUN : SVG_MOON;
+
+  trackEvent('toggle_theme', {
+    theme: next
+  });
+
+  try{ localStorage.setItem('theme', next); }catch(e){ if(typeof showToast==='function') showToast('ไม่สามารถบันทึกธีมได้', 2500, 'warn'); }
+});
   })();
 
   window.applySkillFilter = function(){}; // no-op (feature removed)
@@ -5208,7 +5323,12 @@ setTimeout(()=>{
 }, 3500);
 
 // Tutorial opens on demand via help button
-document.getElementById('helpBtn')?.addEventListener('click', show);
+document.getElementById('helpBtn')?.addEventListener('click', ()=>{
+  trackEvent('open_tutorial', {
+    source: 'help_button'
+  });
+  show();
+});
   });
 })();
 
