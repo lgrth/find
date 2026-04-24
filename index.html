@@ -1650,7 +1650,7 @@ html[data-theme="dark"] .header-menu{background:#111827;border-color:#334155;box
 .inventory-help{margin:10px 0 10px 0;color:var(--text-soft);font-size:13px;line-height:1.25}
 .inventory-section{margin-top:14px}
 .inventory-section__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.inventory-section__title{font-size:14px;font-weight:700;color:#334155}.inventory-section__meta{font-size:12px;color:var(--text-soft);font-weight:600}
+.inventory-section__title{font-size:16px;font-weight:700;color:#334155}.inventory-section__meta{font-size:12px;color:var(--text-soft);font-weight:600}
 .inventory-chip-list{
   max-height:min(50vh,700px);
   overflow:auto;
@@ -1684,21 +1684,40 @@ html[data-theme="dark"] .header-menu{background:#111827;border-color:#334155;box
 
 .transfer-summary{
   display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
   margin:10px 0 14px 0;
 }
 
 .transfer-summary__item{
   display:flex;
+  flex-direction:column;
   align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:10px 12px;
+  justify-content:center;
+  text-align:center;
+  gap:6px;
+  min-height:70px;
+  padding:14px 12px;
   border:1px solid var(--chip-border);
-  border-radius:12px;
+  border-radius:16px;
   background:var(--surface-muted);
   font-size:13px;
+}
+
+.transfer-summary__item strong{
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.35;
+  color:var(--text);
+}
+
+.transfer-summary__item span{
+  display:block;
+  font-size:22px;
+  font-weight:800;
+  line-height:1.2;
+  color:var(--primary);
 }
 
 .transfer-section{
@@ -1722,6 +1741,34 @@ html[data-theme="dark"] .header-menu{background:#111827;border-color:#334155;box
 html[data-theme="dark"] .transfer-summary__item{
   background:#1e293b;
   border-color:#334155;
+}
+
+html[data-theme="dark"] .transfer-summary__item strong{
+  color:#f8fafc;
+}
+
+html[data-theme="dark"] .transfer-summary__item span{
+  color:#93c5fd;
+}
+
+@media (max-width:640px){
+  .transfer-summary{
+    gap:8px;
+  }
+
+  .transfer-summary__item{
+    min-height:60px;
+    padding:12px 8px;
+    border-radius:14px;
+  }
+
+  .transfer-summary__item strong{
+    font-size:13px;
+  }
+
+  .transfer-summary__item span{
+    font-size:18px;
+  }
 }
 
 /* === Error banner === */
@@ -3176,34 +3223,46 @@ html[data-theme="dark"] .help-choice-modal__dialog{
 
     <div class="fav-modal__body">
       <p class="inventory-help">
-        สำรองหรือกู้คืนข้อมูลของคุณ ได้แก่ คลังจี้ของฉัน, Filter ที่บันทึกไว้ และเซ็ตจี้ที่บันทึกไว้
+        สำรองหรือกู้คืนข้อมูลของคุณ ในกรณีที่ย้ายอุปกรณ์หรือเปลี่ยนเบราว์เซอร์ ข้อมูลที่เก็บไว้ ได้แก่ คลังจี้ของฉัน, Filter ที่บันทึกไว้ และเซ็ตจี้ที่บันทึกไว้
       </p>
 
       <div class="transfer-summary" id="transferSummary">
         <div class="transfer-summary__item">
+          <svg width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z"/>
+        </svg>
           <strong>คลังจี้ของฉัน</strong>
           <span id="transferInventoryCount">0 รายการ</span>
         </div>
         <div class="transfer-summary__item">
+          <svg width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
+  <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+</svg>
           <strong>Filter ที่บันทึกไว้</strong>
           <span id="transferFavoriteCount">0 รายการ</span>
         </div>
         <div class="transfer-summary__item">
+          <svg width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
+  <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+</svg>
           <strong>เซ็ตจี้ที่บันทึกไว้</strong>
           <span id="transferResultSetCount">0 รายการ</span>
         </div>
       </div>
 
+         <div class="section-divider" aria-hidden="true" style="margin-top:16px;margin-bottom:16px;">
+        <div class="section-divider__line"></div>
+      </div>
       <div class="transfer-section">
         <div class="inventory-section__head">
-          <div class="inventory-section__title">ส่งออกข้อมูล</div>
+          <div class="inventory-section__title">ดาวน์โหลดข้อมูล</div>
         </div>
         <div class="fav-actions">
           <button type="button" class="fav-btn fav-btn--primary" id="exportAllBtn">Export ทั้งหมด</button>
         </div>
       </div>
 
-      <div class="section-divider" aria-hidden="true" style="margin-top:16px;">
+      <div class="section-divider" aria-hidden="true" style="margin-top:16px;margin-bottom:16px;">
         <div class="section-divider__line"></div>
       </div>
 
@@ -3219,7 +3278,7 @@ html[data-theme="dark"] .help-choice-modal__dialog{
         <input id="importFileInput" type="file" accept="application/json,.json" hidden>
 
         <div class="fav-actions">
-          <button type="button" class="fav-btn fav-btn--ghost" id="importPickBtn">เลือกไฟล์</button>
+          <button type="button" class="fav-btn fav-btn--ghost" id="importPickBtn" style="width: 100px;">เลือกไฟล์</button>
           <button type="button" class="fav-btn fav-btn--primary" id="importMergeBtn" disabled>Import แบบรวมกับข้อมูลเดิม</button>
           <button type="button" class="fav-btn fav-btn--danger" id="importReplaceBtn" disabled>Import แบบแทนที่ทั้งหมด</button>
         </div>
@@ -5471,38 +5530,54 @@ function applyImportedPayload(payload, mode){
 
   if(!writeResultSetStore(nextResultSetStore)) return false;
 
-  renderInventoryLists?.();
-  renderFavorites?.();
-  renderSavedResultSets?.();
-  updateInventoryMenuMeta?.();
-  refreshResultsForInventory?.();
+  try{
+  if(typeof renderInventoryLists === 'function') renderInventoryLists();
+  if(typeof window.renderFavoritesForTransfer === 'function') window.renderFavoritesForTransfer();
+  if(typeof renderSavedResultSets === 'function') renderSavedResultSets();
+  if(typeof updateInventoryMenuMeta === 'function') updateInventoryMenuMeta();
+  if(typeof refreshResultsForInventory === 'function') refreshResultsForInventory();
+  if(typeof updateTransferSummaryUI === 'function') updateTransferSummaryUI();
+}catch(err){
+  console.error('[transfer][refresh after import]', err);
+  showToast(`นำเข้าข้อมูลแล้ว แต่รีเฟรชหน้าจอไม่สำเร็จ: ${err?.message || err}`, 4200, 'warn');
+  return false;
+}
 
-  showToast(
-    mode === 'replace' ? 'นำเข้าข้อมูลแบบแทนที่ทั้งหมดแล้ว' : 'นำเข้าข้อมูลแบบรวมกับข้อมูลเดิมแล้ว',
-    5200,
-    'success',
-    {
-      actionLabel: 'Undo',
-      onAction: ()=>{
+showToast(
+  mode === 'replace' ? 'นำเข้าข้อมูลแบบแทนที่ทั้งหมดแล้ว' : 'นำเข้าข้อมูลแบบรวมกับข้อมูลเดิมแล้ว',
+  5200,
+  'success',
+  {
+    actionLabel: 'Undo',
+    onAction: ()=>{
+      try{
         window._ownedJewelIds = new Set(previousOwnedIds);
+
         if(typeof saveOwnedJewelIds === 'function'){
           saveOwnedJewelIds();
-        }else if(typeof writeOwnedJewelIds === 'function'){
-          writeOwnedJewelIds(window._ownedJewelIds);
         }
+
         if(typeof window.writeFavoriteStoreForTransfer === 'function'){
           window.writeFavoriteStoreForTransfer(previousFavStore);
         }
+
         writeResultSetStore(previousResultSetStore);
-        renderInventoryLists?.();
-        renderFavorites?.();
-        renderSavedResultSets?.();
-        updateInventoryMenuMeta?.();
-        refreshResultsForInventory?.();
+
+        if(typeof renderInventoryLists === 'function') renderInventoryLists();
+        if(typeof window.renderFavoritesForTransfer === 'function') window.renderFavoritesForTransfer();
+        if(typeof renderSavedResultSets === 'function') renderSavedResultSets();
+        if(typeof updateInventoryMenuMeta === 'function') updateInventoryMenuMeta();
+        if(typeof refreshResultsForInventory === 'function') refreshResultsForInventory();
+        if(typeof updateTransferSummaryUI === 'function') updateTransferSummaryUI();
+
         showToast('กู้คืนข้อมูลเดิมแล้ว', 2200, 'success');
+      }catch(err){
+        console.error('[transfer][undo import]', err);
+        showToast(`กู้คืนข้อมูลไม่สำเร็จ: ${err?.message || err}`, 4200, 'error');
       }
     }
-  );
+  }
+);
 
   return true;
 }
@@ -5957,6 +6032,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
       list.appendChild(item);
     });
   }
+  window.renderFavoritesForTransfer = renderFavorites;
 
   function openFavModal(){
     const modal = document.getElementById('favModal');
@@ -7140,28 +7216,40 @@ document.getElementById('importFileInput')?.addEventListener('change', async (e)
 });
 
 document.getElementById('importMergeBtn')?.addEventListener('click', ()=>{
-  if(!pendingImportPayload){
-    showToast('กรุณาเลือกไฟล์ก่อน', 1800, 'warn');
-    return;
-  }
-  const ok = confirm('นำเข้าข้อมูลแบบรวมกับข้อมูลเดิม?');
-  if(!ok) return;
-  if(applyImportedPayload(pendingImportPayload, 'merge')){
-    updateTransferSummaryUI();
-    closeTransferModal();
+  try{
+    if(!pendingImportPayload){
+      showToast('กรุณาเลือกไฟล์ก่อน', 1800, 'warn');
+      return;
+    }
+    const ok = confirm('นำเข้าข้อมูลแบบรวมกับข้อมูลเดิม?');
+    if(!ok) return;
+
+    if(applyImportedPayload(pendingImportPayload, 'merge')){
+      updateTransferSummaryUI();
+      closeTransferModal();
+    }
+  }catch(err){
+    console.error('[transfer][merge import]', err);
+    showToast(`Import ไม่สำเร็จ: ${err?.message || err}`, 4200, 'error');
   }
 });
 
 document.getElementById('importReplaceBtn')?.addEventListener('click', ()=>{
-  if(!pendingImportPayload){
-    showToast('กรุณาเลือกไฟล์ก่อน', 1800, 'warn');
-    return;
-  }
-  const ok = confirm('นำเข้าข้อมูลแบบแทนที่ทั้งหมด?\n\nข้อมูลเดิมในเครื่องนี้จะถูกแทนที่ทั้งหมด');
-  if(!ok) return;
-  if(applyImportedPayload(pendingImportPayload, 'replace')){
-    updateTransferSummaryUI();
-    closeTransferModal();
+  try{
+    if(!pendingImportPayload){
+      showToast('กรุณาเลือกไฟล์ก่อน', 1800, 'warn');
+      return;
+    }
+    const ok = confirm('นำเข้าข้อมูลแบบแทนที่ทั้งหมด?\n\nข้อมูลเดิมในเครื่องนี้จะถูกแทนที่ทั้งหมด');
+    if(!ok) return;
+
+    if(applyImportedPayload(pendingImportPayload, 'replace')){
+      updateTransferSummaryUI();
+      closeTransferModal();
+    }
+  }catch(err){
+    console.error('[transfer][replace import]', err);
+    showToast(`Import ไม่สำเร็จ: ${err?.message || err}`, 4200, 'error');
   }
 });
   });
