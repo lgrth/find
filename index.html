@@ -3442,7 +3442,21 @@ function updateInventoryCountUI(filteredCount){
   if(countEl) countEl.textContent = `(${count})`;
   if(allMeta) allMeta.textContent = `${filteredCount} รายการ`;
   updateInventoryMenuMeta();
-}function makeInventoryChip(name, owned){
+}
+
+function getInventoryVisibleNames(){
+  const query = (document.getElementById('inventorySearchInput')?.value || '').trim().toLowerCase();
+
+  const names = Array.from(
+    new Set((jewels || []).map(j => (j.id || '').trim()).filter(Boolean))
+  ).sort((a,b)=>a.localeCompare(b,'th'));
+
+  return query
+    ? names.filter(name => name.toLowerCase().includes(query))
+    : names;
+}
+
+function makeInventoryChip(name, owned){
   return `
     <button
       type="button"
@@ -3461,14 +3475,7 @@ function renderInventoryLists(){
   const allWrap = document.getElementById('inventoryAllList');
   if(!allWrap) return;
 
-  const query = (document.getElementById('inventorySearchInput')?.value || '').trim().toLowerCase();
-  const names = Array.from(
-    new Set((jewels || []).map(j => (j.id || '').trim()).filter(Boolean))
-  ).sort((a,b)=>a.localeCompare(b,'th'));
-
-  const visibleNames = query
-    ? names.filter(name => name.toLowerCase().includes(query))
-    : names;
+  const visibleNames = getInventoryVisibleNames();
 
   allWrap.innerHTML = visibleNames.length
     ? visibleNames.map(name => makeInventoryChip(name, window._ownedJewelIds?.has(name))).join('')
@@ -3476,6 +3483,7 @@ function renderInventoryLists(){
 
   updateInventoryCountUI(visibleNames.length);
 }
+
 function refreshResultsForInventory(){syncInventoryResultFilterUI(); const wrap=document.getElementById('inventoryResultFilters'); if(wrap){const hasResults=Array.isArray(window._latestComputedResults) && window._latestComputedResults.length>0; const hasOwned=getOwnedCount()>0; wrap.hidden=!(hasResults && hasOwned);} if(Array.isArray(window._latestComputedResults) && window._latestComputedResults.length && typeof window.renderResults==='function'){window.renderResults(window._latestComputedResults, {skipTracking:true});}}
 function toggleOwnedJewel(id){
   const name = String(id || '').trim();
@@ -7473,26 +7481,33 @@ window.closeTransferModal = closeTransferModal;
     document.getElementById('inventoryClose')?.addEventListener('click', closeInventoryModal);
     document.getElementById('inventoryModal')?.addEventListener('click',(e)=>{ if(e.target?.id==='inventoryModal') closeInventoryModal(); });
     document.getElementById('inventorySelectAll')?.addEventListener('click',()=>{
-  const allJewelIds = Array.from(
-    new Set((jewels || []).map(j => (j.id || '').trim()).filter(Boolean))
-  );
+  const visibleJewelIds = getInventoryVisibleNames();
 
-  if(!allJewelIds.length){
-    showToast('ยังไม่มีรายการจี้ให้เลือก', 1800, 'info');
+  if(!visibleJewelIds.length){
+    showToast('ไม่พบจี้จากคำค้นหานี้ให้เลือก', 1800, 'info');
     return;
   }
 
   const previousOwnedIds = Array.from(window._ownedJewelIds || []);
-  const previousCount = previousOwnedIds.length;
+  const previousOwnedSet = new Set(previousOwnedIds);
 
-  window._ownedJewelIds = new Set(allJewelIds);
+  visibleJewelIds.forEach(id => {
+    window._ownedJewelIds.add(id);
+  });
+
+  const addedCount = visibleJewelIds.filter(id => !previousOwnedSet.has(id)).length;
+
+  if(addedCount === 0){
+    showToast(`จี้จากผลค้นหานี้ถูกเลือกไว้ครบแล้ว (${visibleJewelIds.length} ชิ้น)`, 2200, 'info');
+    return;
+  }
+
   saveOwnedJewelIds();
   renderInventoryLists();
   refreshResultsForInventory();
   updateTransferSummaryUI();
 
-  const addedCount = allJewelIds.length - previousCount;
-  showToast(`เลือกจี้ทั้งหมดแล้ว (${allJewelIds.length} ชิ้น)`, 4200, 'success', {
+  showToast(`เลือกจี้จากผลค้นหาแล้ว ${addedCount} ชิ้น`, 4200, 'success', {
     actionLabel: 'Undo',
     onAction: () => {
       window._ownedJewelIds = new Set(previousOwnedIds);
@@ -7500,7 +7515,7 @@ window.closeTransferModal = closeTransferModal;
       renderInventoryLists();
       refreshResultsForInventory();
       updateTransferSummaryUI();
-      showToast('ย้อนกลับการเลือกทั้งหมดแล้ว', 2200, 'success');
+      showToast('ย้อนกลับการเลือกจากผลค้นหาแล้ว', 2200, 'success');
     }
   });
 });
