@@ -2980,22 +2980,79 @@ html[data-theme="dark"] .help-choice-modal__dialog{
   font-size:13px;
 }
 
+.site-footer__details{
+  padding:4px 10px 8px;
+  text-align:center;
+  color:	rgb(148,163,184,0.01);
+  font-size:1px;
+  font-weight: 100;
+  line-height:1;
+}
+
+.site-footer__details summary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:rgb(148,163,184,0.01);
+  font-size:8px;
+  font-weight:100;
+  list-style:none;
+  user-select:none;
+}
+
+.site-footer__details summary::-webkit-details-marker{
+  display:none;
+}
+
+.site-footer__details summary::after{
+  content:"";
+  margin-left:5px;
+  font-size:8px;
+  opacity:.75;
+}
+
+.site-footer__details[open] summary::after{
+  content:"";
+}
+
+.site-footer__details summary:hover{
+  color:rgb(148,163,184,0.01);
+}
+
 .site-footer__meta{
-  margin-top:8px;
-  padding:8px 10px 10px;
-  color:#64748b;
-  font-size:12px;
-  line-height:1.6;
+  margin-top:6px;
+  padding:0;
+  color:rgb(148,163,184,0.01);
+  font-size:8px;
+  line-height:1;
+  text-align:center;
 }
 
 .site-footer__meta a{
   color:var(--primary-2);
-  font-weight:700;
+  font-weight:600;
   text-decoration:none;
 }
 
 .site-footer__meta a:hover{
   text-decoration:underline;
+}
+
+html[data-theme="dark"] .site-footer__details{
+  color:#94a3b8;
+}
+
+html[data-theme="dark"] .site-footer__details summary{
+  color:#94a3b8;
+}
+
+html[data-theme="dark"] .site-footer__details summary:hover{
+  color:#93c5fd;
+}
+
+html[data-theme="dark"] .site-footer__meta{
+  color:#94a3b8;
 }
 
 html[data-theme="dark"] .seo-section{
@@ -3046,6 +3103,69 @@ html[data-theme="dark"] .site-footer__meta{
   .seo-section ol{
     font-size:13px;
   }
+}
+
+/* ===== Collapsed SEO section ===== */
+.seo-section--collapsed{
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+  border-radius:0;
+}
+
+.seo-details{
+  max-width:960px;
+  margin:0 auto;
+  padding:6px 12px 10px;
+  text-align:center;
+  color:var(--text-soft);
+  font-size:12px;
+}
+
+.seo-details > summary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:#94a3b8;
+  font-size:12px;
+  font-weight:600;
+  list-style:none;
+  user-select:none;
+}
+
+.seo-details > summary::-webkit-details-marker{
+  display:none;
+}
+
+.seo-details > summary::after{
+  content:"⌄";
+  margin-left:6px;
+  font-size:12px;
+  opacity:.7;
+}
+
+.seo-details[open] > summary::after{
+  content:"⌃";
+}
+
+.seo-details > summary:hover{
+  color:var(--primary-2);
+}
+
+.seo-details .seo-section__inner{
+  margin-top:12px;
+  padding:18px;
+  text-align:left;
+  background:var(--surface);
+  border:1px solid var(--chip-border);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-card);
+}
+
+html[data-theme="dark"] .seo-details .seo-section__inner{
+  background:var(--surface);
+  border-color:#334155;
 }
 
 </style>
@@ -3627,89 +3747,6 @@ html[data-theme="dark"] .site-footer__meta{
     </div>
   </div>
 </div>
-
-<section class="seo-section" aria-labelledby="seoTitle">
-  <div class="seo-section__inner">
-    <h2 id="seoTitle">เว็บช่วยค้นหาเซ็ตจี้เกมเศรษฐีที่เหมาะกับคุณ</h2>
-    <p>
-      Get Rich Pendant Finder เป็นเว็บช่วยจัดเซ็ตจี้เครื่องรางเกมเศรษฐีสำหรับผู้เล่นที่ต้องการหาเซ็ตจี้เครื่องรางจากสกิลที่ต้องการ
-      เลือกตัวละคร ระบุสกิลที่ไม่ต้องการ และดูผลลัพธ์เซ็ตจี้เครื่องรางที่เหมาะกับเงื่อนไขของตัวเองได้ง่ายขึ้น
-    </p>
-    <p>
-      เหมาะสำหรับคนที่ต้องการเปรียบเทียบจี้หลายชุด วางแผนก่อนลงเล่นจริง บันทึกจี้ที่มีอยู่ในคลัง
-      หรือแชร์เซ็ตจี้ให้เพื่อนดูผ่านลิงก์และ QR Code
-    </p>
-
-    <div class="seo-keyword-chips" aria-label="คำค้นหาที่เกี่ยวข้อง">
-      <span class="seo-keyword-chip">เซ็ตจี้เกมเศรษฐี</span>
-      <span class="seo-keyword-chip">หาเซ็ตจี้เครื่องรางเกมเศรษฐี</span>
-      <span class="seo-keyword-chip">จัดเซ็ตจี้เครื่องราง</span>
-      <span class="seo-keyword-chip">เกมเศรษฐี จี้เครื่องราง</span>
-      <span class="seo-keyword-chip">Get Rich Pendant Finder</span>
-    </div>
-
-    <h3>วิธีใช้งานเว็บหาเซ็ตจี้</h3>
-    <ol>
-      <li>เลือกสกิลที่ต้องการอย่างน้อย 4 สกิล</li>
-      <li>เลือกสกิลที่ไม่ต้องการ หากมีสกิลที่อยากหลีกเลี่ยง</li>
-      <li>เลือกตัวละคร เพื่อให้ระบบล็อกจี้ลิงก์ที่เกี่ยวข้องโดยอัตโนมัติ</li>
-      <li>เลือกจำนวนเซ็ตที่ต้องการ แล้วกดค้นหาเซ็ตจี้</li>
-      <li>ดูผลลัพธ์ เปรียบเทียบเซ็ต บันทึก Filter หรือแชร์เซ็ตจี้ให้เพื่อนได้</li>
-    </ol>
-
-    <h3>ฟีเจอร์หลักของเว็บไซต์</h3>
-    <ul>
-      <li>ค้นหาเซ็ตจี้จากสกิลที่ต้องการ</li>
-      <li>ระบุสกิลที่ไม่ต้องการ เพื่อช่วยคัดเซ็ตที่ไม่ตรงใจออก</li>
-      <li>เลือกตัวละครและล็อกจี้ลิงก์ที่เกี่ยวข้อง</li>
-      <li>บันทึกคลังจี้ของฉัน เพื่อดูว่าเซ็ตไหนมีครบหรือขาดจี้กี่ชิ้น</li>
-      <li>บันทึก Filter และเซ็ตจี้ที่ชอบไว้ในเครื่อง</li>
-      <li>นำเข้าและส่งออกข้อมูลสำหรับสำรองหรือย้ายอุปกรณ์</li>
-    </ul>
-
-    <div class="seo-faq" aria-labelledby="seoFaqTitle">
-      <h2 id="seoFaqTitle">คำถามที่พบบ่อย</h2>
-
-      <details>
-        <summary>เว็บนี้ใช้ทำอะไร?</summary>
-        <p>
-          เว็บนี้ใช้ช่วยค้นหาและจัดเซ็ตจี้เครื่องรางเกมเศรษฐี โดยเลือกสกิลที่ต้องการ ตัวละคร และเงื่อนไขอื่น ๆ
-          แล้วระบบจะแนะนำเซ็ตจี้ที่เหมาะกับเงื่อนไขนั้น
-        </p>
-      </details>
-
-      <details>
-        <summary>ต้องสมัครสมาชิกก่อนใช้งานไหม?</summary>
-        <p>
-          ไม่ต้องสมัครสมาชิก สามารถใช้งานได้ทันที ข้อมูลที่บันทึกจะเก็บไว้เฉพาะบนอุปกรณ์และเบราว์เซอร์ที่ใช้งาน
-        </p>
-      </details>
-
-      <details>
-        <summary>บันทึกคลังจี้และเซ็ตจี้ได้ไหม?</summary>
-        <p>
-          บันทึกได้ทั้งคลังจี้ Filter และเซ็ตจี้เครื่องรางที่ชอบ โดยข้อมูลจะอยู่ใน localStorage ของเบราว์เซอร์
-          และสามารถ Export เป็นไฟล์สำรองได้
-        </p>
-      </details>
-
-      <details>
-        <summary>ข้อมูลที่บันทึกถูกส่งไปที่อื่นไหม?</summary>
-        <p>
-          ข้อมูลคลังจี้ Filter และเซ็ตจี้ที่บันทึกไว้จะอยู่เฉพาะในเครื่องของผู้ใช้ ไม่ได้ถูกส่งไปยังเซิร์ฟเวอร์ของเว็บไซต์
-        </p>
-      </details>
-
-      <details>
-        <summary>ถ้าเปลี่ยนเครื่อง ข้อมูลจะหายไหม?</summary>
-        <p>
-          ถ้าเปลี่ยนเครื่องหรือเปลี่ยนเบราว์เซอร์ ข้อมูลเดิมจะไม่ตามไปอัตโนมัติ ควรใช้เมนูนำเข้า / ส่งออกข้อมูลเพื่อสำรองไฟล์ไว้ก่อน
-        </p>
-      </details>
-    </div>
-  </div>
-</section>
-
 </main>
 
 <script>
@@ -9243,14 +9280,11 @@ async function applyCharFromURL(){
       <button type="button" id="donateFooterBtn" class="donate-footer__link">เปิด QR สนับสนุน</button>
     </div>
   </div>
-
-  <div class="site-footer__meta">
-    <strong>Get Rich Pendant Finder</strong> — เว็บช่วยค้นหาและจัดเซ็ตจี้เกมเศรษฐี
-    <br>
-    <a href="https://lgrth.github.io/find/" rel="home">หน้าแรก</a>
-    <span aria-hidden="true"> · </span>
-    <a href="https://lgrth.github.io/find/sitemap.xml">Sitemap</a>
-  </div>
+<details class="site-footer__details">
+    <summary>เกี่ยวกับเว็บ</summary>
+    <div class="site-footer__meta">
+      <strong>Get Rich Pendant Finder</strong> — เว็บช่วยค้นหาและจัดเซ็ตจี้เกมเศรษฐี เลือกสกิลที่ต้องการ เลือกตัวละคร ระบุสกิลที่ไม่ต้องการ บันทึกคลังจี้ และแชร์เซ็ตจี้ให้เพื่อนได้ ข้อมูลที่บันทึกไว้จะอยู่เฉพาะบนอุปกรณ์และเบราว์เซอร์นี้
+  </details>
 </footer>
 </body>
 </html>
