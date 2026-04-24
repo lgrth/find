@@ -1157,7 +1157,7 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
   border-radius:20px 20px 0 0;
   width:100%;
   max-width:700px;
-  max-height:min(85vh, 680px);
+  height:82vh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -1175,7 +1175,7 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
 
 @media (max-width:640px){
   .fav-modal__dialog{
-    max-height:85vh;
+    height:82vh;
     padding-bottom:env(safe-area-inset-bottom);
   }
 }
@@ -1642,7 +1642,11 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 .menu-btn{background:rgba(10,29,85,.5);border:1px solid rgba(78,114,223,1);border-radius:999px;color:#fff;cursor:pointer;line-height:1;padding:4px 8px;min-height:38px;min-width:38px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(10,29,85,.18);transition:background .15s ease,transform .15s ease,box-shadow .15s ease}
 .menu-btn:hover{background:rgba(0,0,0,.55);transform:translateY(-1px);box-shadow:0 10px 22px rgba(10,29,85,.28)}
 .menu-btn:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
-.header-menu{position:fixed;top:calc(var(--header-h,0px) + 10px);right:12px;z-index:3550;width:min(300px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--chip-border);border-radius:18px;box-shadow:0 22px 46px rgba(15,23,42,.24);padding:10px;display:none;overflow:hidden}.header-menu.show{display:block;animation:fade-in .18s ease-out forwards}.header-menu__list{display:flex;flex-direction:column;gap:8px}.header-menu__item{width:100%;border:none;background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:700;text-align:left;border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:background .15s ease,transform .15s ease}.header-menu__item:hover{background:var(--surface-muted);transform:translateX(1px)}.header-menu__item:focus-visible{outline:var(--focus-ring);outline-offset:2px}.header-menu__item-main{display:flex;align-items:center;gap:12px;min-width:0}.header-menu__icon{width:34px;height:34px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:var(--primary-soft);color:var(--primary-2);flex:0 0 34px}.header-menu__icon svg{width:18px;height:18px;display:block}.header-menu__text{display:flex;flex-direction:column;gap:2px;min-width:0}.header-menu__label{font-size:14px;font-weight:700;color:var(--text);line-height:1.2}.header-menu__hint{font-size:12px;color:var(--text-soft);font-weight:500;line-height:1.2}.header-menu__meta{font-size:12px;color:var(--text-soft);font-weight:700}.header-menu__backdrop{position:fixed;inset:0;z-index:3540;display:none;background:transparent}.header-menu__backdrop.show{display:block}html[data-theme="dark"] .header-menu{background:#111827;border-color:#334155;box-shadow:0 18px 48px rgba(0,0,0,.45)}html[data-theme="dark"] .header-menu__item:hover{background:#1e293b}html[data-theme="dark"] .header-menu__icon{background:#1e293b;color:#93c5fd}html[data-theme="dark"] .header-menu__label{color:#e5e7eb}
+.header-menu{position:fixed;top:calc(var(--header-h,0px) + 10px);right:12px;z-index:3550;width:min(350px,calc(80vw - 40px));background:var(--surface);border:1px solid var(--chip-border);border-radius:18px;box-shadow:0 22px 46px rgba(15,23,42,.24);padding:10px;display:none;overflow:hidden}.header-menu.show{display:block;animation:fade-in .18s ease-out forwards}.header-menu__list{display:flex;flex-direction:column;gap:8px}.header-menu__item{width:100%;border:none;background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:700;text-align:left;border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:background .15s ease,transform .15s ease}.header-menu__item:hover{background:var(--surface-muted);transform:translateX(1px)}.header-menu__item:focus-visible{outline:var(--focus-ring);outline-offset:2px}.header-menu__item-main{display:flex;align-items:center;gap:12px;min-width:0}.header-menu__icon{width:34px;height:34px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:var(--primary-soft);color:var(--primary-2);flex:0 0 34px}.header-menu__icon svg{width:18px;height:18px;display:block}.header-menu__text{display:flex;flex-direction:column;gap:2px;min-width:0}.header-menu__label{font-size:14px;font-weight:700;color:var(--text);line-height:1.2}.header-menu__hint{font-size:12px;color:var(--text-soft);font-weight:500;line-height:1.2}.header-menu__meta{font-size:12px;color:var(--text-soft);font-weight:700}.header-menu__backdrop{position:fixed;inset:0;z-index:3540;display:none;background:transparent}.header-menu__backdrop.show{display:block}
+@media (max-width:640px){
+  .header-menu{width:min(250px,calc(80vw - 40px))}
+}
+html[data-theme="dark"] .header-menu{background:#111827;border-color:#334155;box-shadow:0 18px 48px rgba(0,0,0,.45)}html[data-theme="dark"] .header-menu__item:hover{background:#1e293b}html[data-theme="dark"] .header-menu__icon{background:#1e293b;color:#93c5fd}html[data-theme="dark"] .header-menu__label{color:#e5e7eb}
 .inventory-help{margin:10px 0 10px 0;color:var(--text-soft);font-size:13px;line-height:1.25}
 .inventory-section{margin-top:14px}
 .inventory-section__head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
@@ -1663,7 +1667,7 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 .inventory-chip .chip-x{
   font-size:14px;
 }
-.inventory-chip.is-owned{background:#166534;color:#fff;border-color:#166534;font-weight:700}
+.inventory-chip.is-owned{background:#166534;color:#fff;border-color:#166534;font-weight:500}
 .inventory-chip.is-owned:hover{background:#15803d;border-color:#15803d}
 .inventory-empty{padding:12px;border:1px dashed var(--border-strong);border-radius:10px;background:var(--surface-muted);color:var(--text-soft);font-size:13px;text-align:center}html[data-theme="dark"] .inventory-section__title{color:#e5e7eb}html[data-theme="dark"] .inventory-chip.is-owned{background:#166534;border-color:#22c55e}
 .inventory-result-filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.inventory-result-filter{border:1px solid var(--border-strong);background:var(--surface);color:#334155;font:inherit;font-size:13px;font-weight:700;border-radius:999px;padding:6px 12px;cursor:pointer;min-height:30px;min-width: 80px;}.inventory-result-filter:hover{background:var(--primary-soft);border-color:#93a7e0}.inventory-result-filter.active{background:var(--primary);color:#fff;border-color:var(--primary-2)}.inventory-result-filter:focus-visible{outline:var(--focus-ring);outline-offset:2px}html[data-theme="dark"] .inventory-result-filter{background:var(--surface);color:var(--text);border-color:var(--border-strong)}html[data-theme="dark"] .inventory-result-filter:hover{background:#1e2d53;border-color:#6679b1;color:#fff}
@@ -1676,6 +1680,48 @@ html[data-theme="dark"] .section-divider__text{color:#64748b}
 
 .inventory-chip__label{
   min-width:0;
+}
+
+.transfer-summary{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin:10px 0 14px 0;
+}
+
+.transfer-summary__item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border:1px solid var(--chip-border);
+  border-radius:12px;
+  background:var(--surface-muted);
+  font-size:13px;
+}
+
+.transfer-section{
+  margin-top:8px;
+}
+
+.transfer-import-note{
+  font-size:12px;
+  color:var(--text-soft);
+  margin-bottom:10px;
+}
+
+.transfer-preview-counts{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:13px;
+  color:var(--text-soft);
+}
+
+html[data-theme="dark"] .transfer-summary__item{
+  background:#1e293b;
+  border-color:#334155;
 }
 
 /* === Error banner === */
@@ -2816,6 +2862,19 @@ html[data-theme="dark"] .help-choice-modal__dialog{
 </svg>
 </span><span class="header-menu__text"><span class="header-menu__label">การบันทึกของคุณ</span>
 <span class="header-menu__hint">Filter และเซ็ตจี้ที่บันทึกไว้</span></span></span></button>
+<button type="button" id="menuTransferBtn" class="header-menu__item" role="menuitem">
+  <span class="header-menu__item-main">
+    <span class="header-menu__icon" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 120 120" fill="currentColor">
+  <path d="M29.73,17.66H0V47.79H29.73V59.28c.21,5,3.88,6.78,8.42,5.25a2.47,2.47,0,0,0,.7-.37c11.47-9,19.37-18,30.84-27l.16-.13c3.49-3.18,2.46-6.8-.93-9.47L40.81,2.61A13.25,13.25,0,0,0,36.65.28C34-.51,31.54.37,30.41,3a10,10,0,0,0-.68,3.93c0,3.57-.05,7.16,0,10.73ZM93.15,64h29.73V94.16H93.15v11.48c-.21,5-3.88,6.79-8.42,5.25a2.24,2.24,0,0,1-.7-.37c-11.47-9-19.37-18-30.84-27L53,83.38c-3.49-3.17-2.46-6.8.93-9.46L82.07,49a13,13,0,0,1,4.16-2.32c2.66-.8,5.11.08,6.24,2.71a10,10,0,0,1,.68,3.94c0,3.56.06,7.16,0,10.72Z"/></svg>
+    </span>
+    <span class="header-menu__text">
+      <span class="header-menu__label">จัดการข้อมูล</span>
+      <span class="header-menu__hint">นำเข้า / ส่งออกข้อมูลของคุณ</span>
+    </span>
+  </span>
+</button>
+
 <button type="button" id="menuTutorialBtn" class="header-menu__item" role="menuitem">
   <span class="header-menu__item-main"><span class="header-menu__icon" aria-hidden="true">
     <svg width="16" height="16" fill="currentColor" class="bi bi-book-fill" viewBox="0 0 16 16">
@@ -3094,6 +3153,9 @@ html[data-theme="dark"] .help-choice-modal__dialog{
               <input id="savedResultSearchInput" class="fav-search" type="search" placeholder="ค้นหาเซ็ตจี้ที่บันทึกไว้..." autocomplete="off">
               <button type="button" class="fav-search-clear" id="savedResultSearchClear" aria-label="ล้างการค้นหา" hidden>✕</button>
             </div>
+            <div class="fav-toolbar__actions">
+            <button type="button" class="fav-btn fav-btn--danger" id="savedResultClearAll">ลบทั้งหมด</button>
+          </div>
           </div>
           <div id="savedResultList" class="fav-list"></div>
         </div>
@@ -3103,7 +3165,75 @@ html[data-theme="dark"] .help-choice-modal__dialog{
 
   <div id="inventoryModal" class="fav-modal inventory-modal" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle" aria-hidden="true"><div class="fav-modal__dialog inventory-modal__dialog"><div class="fav-modal__header"><h3 id="inventoryTitle" class="fav-modal__title">📦 คลังจี้ของฉัน <span id="inventoryCount" class="fav-count">(0)</span></h3><button type="button" class="fav-modal__close" id="inventoryClose" aria-label="ปิด">×</button></div><div class="fav-modal__body"><p class="inventory-help">เพิ่มจี้ที่คุณมีอยู่ โดยจะแสดงผลเป็นสีเขียวในผลลัพธ์เซ็ตจี้ที่ค้นหา (ข้อมูลคลังจี้จะถูกเก็บไว้เฉพาะบนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น)</p>
   <div class="fav-search-wrap"><input id="inventorySearchInput" class="fav-search" type="search" placeholder="ค้นหาชื่อจี้..." autocomplete="off"><button type="button" class="fav-search-clear" id="inventorySearchClear" aria-label="ล้างการค้นหา" hidden>✕</button></div>
-  <div class="inventory-section"><div class="inventory-section__head"><div class="inventory-section__title">จี้ทั้งหมด</div><div class="inventory-section__meta" id="inventoryAllMeta">0 รายการ</div></div><div id="inventoryAllList" class="chip-list inventory-chip-list"></div></div><div class="fav-actions" style="margin-top:16px"><button type="button" class="fav-btn fav-btn--danger" id="inventoryClearAll">ล้างทั้งหมด</button><button type="button" class="fav-btn fav-btn--ghost" id="inventoryDone">ปิด</button></div></div></div></div>
+  <div class="inventory-section"><div class="inventory-section__head"><div class="inventory-section__title">จี้ทั้งหมด</div><div class="inventory-section__meta" id="inventoryAllMeta">0 รายการ</div></div><div id="inventoryAllList" class="chip-list inventory-chip-list"></div></div><div class="fav-actions" style="margin-top:16px"><button type="button" class="fav-btn fav-btn--danger" id="inventoryClearAll">ล้างทั้งหมด</button></div></div></div></div>
+
+  <div id="transferModal" class="fav-modal transfer-modal" role="dialog" aria-modal="true" aria-labelledby="transferTitle" aria-hidden="true" hidden>
+  <div class="fav-modal__dialog transfer-modal__dialog">
+    <div class="fav-modal__header">
+      <h3 id="transferTitle" class="fav-modal__title">นำเข้า / ส่งออกข้อมูล</h3>
+      <button type="button" class="fav-modal__close" id="transferClose" aria-label="ปิด">×</button>
+    </div>
+
+    <div class="fav-modal__body">
+      <p class="inventory-help">
+        สำรองหรือกู้คืนข้อมูลของคุณ ได้แก่ คลังจี้ของฉัน, Filter ที่บันทึกไว้ และเซ็ตจี้ที่บันทึกไว้
+      </p>
+
+      <div class="transfer-summary" id="transferSummary">
+        <div class="transfer-summary__item">
+          <strong>คลังจี้ของฉัน</strong>
+          <span id="transferInventoryCount">0 รายการ</span>
+        </div>
+        <div class="transfer-summary__item">
+          <strong>Filter ที่บันทึกไว้</strong>
+          <span id="transferFavoriteCount">0 รายการ</span>
+        </div>
+        <div class="transfer-summary__item">
+          <strong>เซ็ตจี้ที่บันทึกไว้</strong>
+          <span id="transferResultSetCount">0 รายการ</span>
+        </div>
+      </div>
+
+      <div class="transfer-section">
+        <div class="inventory-section__head">
+          <div class="inventory-section__title">ส่งออกข้อมูล</div>
+        </div>
+        <div class="fav-actions">
+          <button type="button" class="fav-btn fav-btn--primary" id="exportAllBtn">Export ทั้งหมด</button>
+        </div>
+      </div>
+
+      <div class="section-divider" aria-hidden="true" style="margin-top:16px;">
+        <div class="section-divider__line"></div>
+      </div>
+
+      <div class="transfer-section">
+        <div class="inventory-section__head">
+          <div class="inventory-section__title">นำเข้าข้อมูล</div>
+        </div>
+
+        <div class="transfer-import-note">
+          รองรับไฟล์ .json จากระบบนี้เท่านั้น
+        </div>
+
+        <input id="importFileInput" type="file" accept="application/json,.json" hidden>
+
+        <div class="fav-actions">
+          <button type="button" class="fav-btn fav-btn--ghost" id="importPickBtn">เลือกไฟล์</button>
+          <button type="button" class="fav-btn fav-btn--primary" id="importMergeBtn" disabled>Import แบบรวมกับข้อมูลเดิม</button>
+          <button type="button" class="fav-btn fav-btn--danger" id="importReplaceBtn" disabled>Import แบบแทนที่ทั้งหมด</button>
+        </div>
+
+        <div id="importPreviewBox" class="fav-save-panel" style="margin-top:12px;">
+          <div class="fav-field">ไฟล์ที่เลือก</div>
+          <p id="importPreviewMeta" class="fav-summary"></p>
+          <div id="importPreviewCounts" class="transfer-preview-counts"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -5165,6 +5295,274 @@ function writeResultSetStore(store){
   }
 }
 
+const TRANSFER_FILE_APP = 'lgrth-find';
+const TRANSFER_FILE_VERSION = 1;
+
+let pendingImportPayload = null;
+
+function getFavoriteStoreForTransfer(){
+  const store = typeof window.readFavoriteStoreForTransfer === 'function'
+    ? window.readFavoriteStoreForTransfer()
+    : { version: 1, presets: [] };
+
+  return {
+    version: Number(store?.version) || 1,
+    presets: Array.isArray(store?.presets) ? store.presets : []
+  };
+}
+
+function getInventoryStoreForTransfer(){
+  const ids = Array.from(window._ownedJewelIds || readOwnedJewelIds?.() || []);
+  return {
+    version: 1,
+    ids: ids.filter(Boolean)
+  };
+}
+
+function buildTransferPayload(){
+  return {
+    app: TRANSFER_FILE_APP,
+    version: TRANSFER_FILE_VERSION,
+    exportedAt: new Date().toISOString(),
+    inventory: getInventoryStoreForTransfer(),
+    favorites: getFavoriteStoreForTransfer(),
+    resultSets: readResultSetStore()
+  };
+}
+
+function downloadJSONFile(filename, data){
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function normalizeTransferPayload(payload){
+  if(!payload || typeof payload !== 'object'){
+    throw new Error('ไฟล์ไม่ถูกต้อง');
+  }
+
+  if(payload.app !== TRANSFER_FILE_APP){
+    throw new Error('ไฟล์นี้ไม่ใช่ข้อมูลจากระบบนี้');
+  }
+
+  const inventory = payload.inventory && typeof payload.inventory === 'object'
+    ? payload.inventory
+    : { version: 1, ids: [] };
+
+  const favorites = payload.favorites && typeof payload.favorites === 'object'
+    ? payload.favorites
+    : { version: 1, presets: [] };
+
+  const resultSets = payload.resultSets && typeof payload.resultSets === 'object'
+    ? payload.resultSets
+    : { version: 1, items: [] };
+
+  return {
+    app: payload.app,
+    version: Number(payload.version) || 1,
+    exportedAt: payload.exportedAt || '',
+    inventory: {
+      version: Number(inventory.version) || 1,
+      ids: Array.isArray(inventory.ids) ? inventory.ids.filter(Boolean) : []
+    },
+    favorites: {
+      version: Number(favorites.version) || 1,
+      presets: Array.isArray(favorites.presets) ? favorites.presets : []
+    },
+    resultSets: {
+      version: Number(resultSets.version) || 1,
+      items: Array.isArray(resultSets.items) ? resultSets.items : []
+    }
+  };
+}
+
+function mergeByKey(list, getKey){
+  const map = new Map();
+  list.forEach(item=>{
+    const key = getKey(item);
+    if(!key) return;
+    map.set(key, item);
+  });
+  return Array.from(map.values());
+}
+
+function makeResultSetMergeKey(item){
+  return item?.key || item?.snapshot?.key || item?.id || '';
+}
+
+function summarizeTransferPayload(payload){
+  return {
+    inventoryCount: payload.inventory.ids.length,
+    favoriteCount: payload.favorites.presets.length,
+    resultSetCount: payload.resultSets.items.length
+  };
+}
+
+function exportAllUserData(){
+  const payload = buildTransferPayload();
+  const d = new Date();
+  const stamp = [
+    d.getFullYear(),
+    String(d.getMonth()+1).padStart(2,'0'),
+    String(d.getDate()).padStart(2,'0'),
+    '-',
+    String(d.getHours()).padStart(2,'0'),
+    String(d.getMinutes()).padStart(2,'0')
+  ].join('');
+  downloadJSONFile(`backup-${stamp}.json`, payload);
+  showToast('Export ข้อมูลเรียบร้อยแล้ว', 2200, 'success');
+}
+
+function applyImportedPayload(payload, mode){
+  const previousOwnedIds = Array.from(window._ownedJewelIds || []);
+  const previousFavStore = getFavoriteStoreForTransfer();
+  const previousResultSetStore = readResultSetStore();
+
+  const incoming = normalizeTransferPayload(payload);
+
+  let nextOwnedIds;
+  let nextFavStore;
+  let nextResultSetStore;
+
+  if(mode === 'replace'){
+    nextOwnedIds = incoming.inventory.ids;
+    nextFavStore = { version: 1, presets: incoming.favorites.presets.slice() };
+    nextResultSetStore = { version: 1, items: incoming.resultSets.items.slice() };
+  }else{
+    nextOwnedIds = Array.from(new Set([
+      ...previousOwnedIds,
+      ...incoming.inventory.ids
+    ]));
+
+    nextFavStore = {
+      version: 1,
+      presets: mergeByKey(
+        [...previousFavStore.presets, ...incoming.favorites.presets],
+        item => item?.id || item?.name || JSON.stringify(item?.state || {})
+      )
+    };
+
+    nextResultSetStore = {
+      version: 1,
+      items: mergeByKey(
+        [...previousResultSetStore.items, ...incoming.resultSets.items],
+        makeResultSetMergeKey
+      )
+    };
+  }
+
+  window._ownedJewelIds = new Set(nextOwnedIds);
+
+  if(typeof saveOwnedJewelIds === 'function'){
+    saveOwnedJewelIds();
+  }else if(typeof writeOwnedJewelIds === 'function'){
+    writeOwnedJewelIds(window._ownedJewelIds);
+  }
+
+  if(typeof window.writeFavoriteStoreForTransfer === 'function'){
+    if(!window.writeFavoriteStoreForTransfer(nextFavStore)) return false;
+  }
+
+  if(!writeResultSetStore(nextResultSetStore)) return false;
+
+  renderInventoryLists?.();
+  renderFavorites?.();
+  renderSavedResultSets?.();
+  updateInventoryMenuMeta?.();
+  refreshResultsForInventory?.();
+
+  showToast(
+    mode === 'replace' ? 'นำเข้าข้อมูลแบบแทนที่ทั้งหมดแล้ว' : 'นำเข้าข้อมูลแบบรวมกับข้อมูลเดิมแล้ว',
+    5200,
+    'success',
+    {
+      actionLabel: 'Undo',
+      onAction: ()=>{
+        window._ownedJewelIds = new Set(previousOwnedIds);
+        if(typeof saveOwnedJewelIds === 'function'){
+          saveOwnedJewelIds();
+        }else if(typeof writeOwnedJewelIds === 'function'){
+          writeOwnedJewelIds(window._ownedJewelIds);
+        }
+        if(typeof window.writeFavoriteStoreForTransfer === 'function'){
+          window.writeFavoriteStoreForTransfer(previousFavStore);
+        }
+        writeResultSetStore(previousResultSetStore);
+        renderInventoryLists?.();
+        renderFavorites?.();
+        renderSavedResultSets?.();
+        updateInventoryMenuMeta?.();
+        refreshResultsForInventory?.();
+        showToast('กู้คืนข้อมูลเดิมแล้ว', 2200, 'success');
+      }
+    }
+  );
+
+  return true;
+}
+
+function updateTransferSummaryUI(){
+  const inventoryCountEl = document.getElementById('transferInventoryCount');
+  const favoriteCountEl = document.getElementById('transferFavoriteCount');
+  const resultSetCountEl = document.getElementById('transferResultSetCount');
+
+  const inventoryCount = Array.from(window._ownedJewelIds || []).length;
+  const favoriteCount = getFavoriteStoreForTransfer().presets.length;
+  const resultSetCount = readResultSetStore().items.length;
+
+  if(inventoryCountEl) inventoryCountEl.textContent = `${inventoryCount} รายการ`;
+  if(favoriteCountEl) favoriteCountEl.textContent = `${favoriteCount} รายการ`;
+  if(resultSetCountEl) resultSetCountEl.textContent = `${resultSetCount} รายการ`;
+}
+
+function resetImportPreview(){
+  pendingImportPayload = null;
+  const fileInput = document.getElementById('importFileInput');
+  const previewBox = document.getElementById('importPreviewBox');
+  const previewMeta = document.getElementById('importPreviewMeta');
+  const previewCounts = document.getElementById('importPreviewCounts');
+  const mergeBtn = document.getElementById('importMergeBtn');
+  const replaceBtn = document.getElementById('importReplaceBtn');
+
+  if(fileInput) fileInput.value = '';
+  if(previewBox) previewBox.classList.remove('show');
+  if(previewMeta) previewMeta.textContent = '';
+  if(previewCounts) previewCounts.innerHTML = '';
+  if(mergeBtn) mergeBtn.disabled = true;
+  if(replaceBtn) replaceBtn.disabled = true;
+}
+
+function showImportPreview(payload, filename){
+  pendingImportPayload = normalizeTransferPayload(payload);
+  const previewBox = document.getElementById('importPreviewBox');
+  const previewMeta = document.getElementById('importPreviewMeta');
+  const previewCounts = document.getElementById('importPreviewCounts');
+  const mergeBtn = document.getElementById('importMergeBtn');
+  const replaceBtn = document.getElementById('importReplaceBtn');
+
+  const summary = summarizeTransferPayload(pendingImportPayload);
+
+  if(previewBox) previewBox.classList.add('show');
+  if(previewMeta){
+    previewMeta.textContent = `ไฟล์: ${filename || 'backup.json'}${pendingImportPayload.exportedAt ? ` • ส่งออกเมื่อ ${new Date(pendingImportPayload.exportedAt).toLocaleString('th-TH')}` : ''}`;
+  }
+  if(previewCounts){
+    previewCounts.innerHTML = `
+      <div>คลังจี้ของฉัน: ${summary.inventoryCount} รายการ</div>
+      <div>Filter ที่บันทึกไว้: ${summary.favoriteCount} รายการ</div>
+      <div>เซ็ตจี้ที่บันทึกไว้: ${summary.resultSetCount} รายการ</div>
+    `;
+  }
+  if(mergeBtn) mergeBtn.disabled = false;
+  if(replaceBtn) replaceBtn.disabled = false;
+}
+
 function resultSetDefaultName(snapshot){
   const first = (snapshot.names || [])[0] || 'เซ็ตจี้';
   return `อันดับ ${snapshot.rank || '-'} - `;
@@ -5251,10 +5649,46 @@ function deleteSavedResultSet(id){
   }
 }
 
+function clearAllSavedResultSets(){
+  const store = readResultSetStore();
+  const count = store.items.length;
+
+  if(!count){
+    showToast('ยังไม่มีเซ็ตจี้ให้ลบ', 1800, 'info');
+    return;
+  }
+
+  const previousStore = JSON.parse(JSON.stringify(store));
+  const ok = confirm(`ลบเซ็ตจี้ที่บันทึกไว้ทั้งหมด ${count} เซ็ต?\n\nโดยจะลบทั้งหมด ไม่ใช่เฉพาะผลค้นหาที่แสดงอยู่`);
+  if(!ok) return;
+
+  if(writeResultSetStore({ version: 1, items: [] })){
+    const search = document.getElementById('savedResultSearchInput');
+    if(search){
+      search.value = '';
+      search.dispatchEvent(new Event('input'));
+    }
+
+    renderSavedResultSets();
+    showToast(`ลบเซ็ตจี้ทั้งหมด ${count} เซ็ตแล้ว`, 5200, 'info', {
+      actionLabel: 'Undo',
+      onAction: ()=>{
+        if(writeResultSetStore(previousStore)){
+          renderSavedResultSets();
+          showToast('กู้คืนเซ็ตจี้ทั้งหมดแล้ว', 1800, 'success');
+        }
+      }
+    });
+  }
+}
+
 function renderSavedResultSets(){
   const list = document.getElementById('savedResultList');
   if(!list) return;
   const store = readResultSetStore();
+  const clearAllBtn = document.getElementById('savedResultClearAll');
+  if(clearAllBtn) clearAllBtn.disabled = store.items.length === 0;
+
   const q = (document.getElementById('savedResultSearchInput')?.value || '').trim().toLowerCase();
   const items = q
     ? store.items.filter(item=>`${item.name || ''} ${(item.snapshot?.names || []).join(' ')}`.toLowerCase().includes(q))
@@ -5356,6 +5790,9 @@ function renderSavedResultSets(){
       return false;
     }
   }
+  window.readFavoriteStoreForTransfer = readStore;
+window.writeFavoriteStoreForTransfer = writeStore;
+window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
 
   function getCurrentFavoriteState(){
     return {
@@ -5528,6 +5965,7 @@ function renderSavedResultSets(){
     renderFavorites();
     renderSavedResultSets();
     closeSavePanel();
+    updateTransferSummaryUI();
     setDialogVisible(modal, true);
   }
 
@@ -5785,6 +6223,7 @@ function deleteFavorite(id){
     document.getElementById('favFilterTab')?.addEventListener('click', ()=> switchFavoriteTab('filter'));
     document.getElementById('favResultTab')?.addEventListener('click', ()=> switchFavoriteTab('result'));
     document.getElementById('favClearAll')?.addEventListener('click', clearAllFavorites);
+    document.getElementById('savedResultClearAll')?.addEventListener('click', clearAllSavedResultSets);
     document.getElementById('favCancelSave')?.addEventListener('click', closeSavePanel);
     document.getElementById('favConfirmSave')?.addEventListener('click', saveFavorite);
     document.getElementById('favNameInput')?.addEventListener('keydown', e=>{
@@ -6638,6 +7077,21 @@ const DEFAULT_TOPK = 10;
   function openInventoryModal(){ const modal=document.getElementById('inventoryModal'); if(!modal) return; renderInventoryLists(); setDialogVisible(modal, true); setTimeout(()=>document.getElementById('inventorySearchInput')?.focus(),0); if(typeof trackEvent==='function') trackEvent('inventory_open',{owned_count:getOwnedCount()}); }
   function closeInventoryModal(){ const modal=document.getElementById('inventoryModal'); if(!modal) return; setDialogVisible(modal, false); }
   window.openHeaderMenu=openHeaderMenu; window.closeHeaderMenu=closeHeaderMenu; window.isHeaderMenuOpen=isHeaderMenuOpen; window.openInventoryModal=openInventoryModal; window.closeInventoryModal=closeInventoryModal;
+  function openTransferModal(){
+  const modal = document.getElementById('transferModal');
+  if(!modal) return;
+  updateTransferSummaryUI();
+  resetImportPreview();
+  setDialogVisible(modal, true);
+}
+function closeTransferModal(){
+  const modal = document.getElementById('transferModal');
+  if(!modal) return;
+  setDialogVisible(modal, false);
+}
+window.openTransferModal = openTransferModal;
+window.closeTransferModal = closeTransferModal;
+
   document.addEventListener('DOMContentLoaded',()=>{ window._ownedJewelIds=readOwnedJewelIds(); updateInventoryMenuMeta(); syncInventoryResultFilterUI();
     document.getElementById('menuBtn')?.addEventListener('click',(e)=>{ e.stopPropagation(); toggleHeaderMenu(); });
     document.getElementById('headerMenuBackdrop')?.addEventListener('click', closeHeaderMenu);
@@ -6645,17 +7099,71 @@ const DEFAULT_TOPK = 10;
     document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && isHeaderMenuOpen()) closeHeaderMenu(); });
     document.getElementById('menuInventoryBtn')?.addEventListener('click',()=>{ closeHeaderMenu(); openInventoryModal(); });
     document.getElementById('menuFavoritesBtn')?.addEventListener('click',()=>{ closeHeaderMenu(); document.getElementById('favoriteBtn')?.click(); });
+    document.getElementById('menuTransferBtn')?.addEventListener('click',()=>{closeHeaderMenu();openTransferModal();});
     document.getElementById('menuTutorialBtn')?.addEventListener('click',()=>{ closeHeaderMenu(); document.getElementById('helpBtn')?.click(); });
     document.getElementById('menuThemeBtn')?.addEventListener('click',()=>{ document.getElementById('themeToggle')?.click(); closeHeaderMenu(); });
     document.getElementById('inventoryClose')?.addEventListener('click', closeInventoryModal);
-    document.getElementById('inventoryDone')?.addEventListener('click', closeInventoryModal);
     document.getElementById('inventoryModal')?.addEventListener('click',(e)=>{ if(e.target?.id==='inventoryModal') closeInventoryModal(); });
-    document.getElementById('inventoryClearAll')?.addEventListener('click',()=>{ if(!getOwnedCount()){ showToast('ยังไม่มีจี้ในคลังให้ล้าง',1800,'info'); return; } if(!confirm('ล้างจี้ที่มีอยู่ทั้งหมดในคลัง?')) return; const previousOwnedIds = Array.from(window._ownedJewelIds || []); window._ownedJewelIds=new Set(); saveOwnedJewelIds(); renderInventoryLists(); refreshResultsForInventory(); showToast('ล้างคลังจี้แล้ว',4200,'success',{ actionLabel:'Undo', onAction:()=>{ window._ownedJewelIds = new Set(previousOwnedIds); saveOwnedJewelIds(); renderInventoryLists(); refreshResultsForInventory(); showToast('กู้คืนคลังจี้แล้ว',2200,'success'); } }); });
+    document.getElementById('inventoryClearAll')?.addEventListener('click',()=>{ if(!getOwnedCount()){ showToast('ยังไม่มีจี้ในคลังให้ล้าง',1800,'info'); return; } if(!confirm('ล้างจี้ที่มีอยู่ทั้งหมดในคลัง?')) return; const previousOwnedIds = Array.from(window._ownedJewelIds || []); window._ownedJewelIds=new Set(); saveOwnedJewelIds(); renderInventoryLists(); refreshResultsForInventory(); updateTransferSummaryUI(); showToast('ล้างคลังจี้แล้ว',4200,'success',{ actionLabel:'Undo', onAction:()=>{ window._ownedJewelIds = new Set(previousOwnedIds); saveOwnedJewelIds(); renderInventoryLists(); refreshResultsForInventory(); updateTransferSummaryUI(); showToast('กู้คืนคลังจี้แล้ว',2200,'success'); } }); });
     document.getElementById('inventorySearchInput')?.addEventListener('input',(e)=>{ const clearBtn=document.getElementById('inventorySearchClear'); if(clearBtn) clearBtn.hidden=!e.target.value; renderInventoryLists(); });
     document.getElementById('inventorySearchClear')?.addEventListener('click',()=>{ const input=document.getElementById('inventorySearchInput'); const clearBtn=document.getElementById('inventorySearchClear'); if(input) input.value=''; if(clearBtn) clearBtn.hidden=true; renderInventoryLists(); input?.focus(); });
     document.getElementById('inventoryOwnedList')?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-jewel-id]'); if(btn) toggleOwnedJewel(btn.dataset.jewelId); });
     document.getElementById('inventoryAllList')?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-jewel-id]'); if(btn) toggleOwnedJewel(btn.dataset.jewelId); });
     document.getElementById('inventoryResultFilters')?.addEventListener('click',(e)=>{ const btn=e.target.closest('.inventory-result-filter'); if(!btn) return; window._inventoryResultFilterMode=btn.dataset.filter||'all'; syncInventoryResultFilterUI(); if(Array.isArray(window._latestComputedResults) && window._latestComputedResults.length && typeof window.renderResults==='function'){ window.renderResults(window._latestComputedResults,{skipTracking:true}); } });
+    document.getElementById('transferClose')?.addEventListener('click', closeTransferModal);
+document.getElementById('transferModal')?.addEventListener('click',(e)=>{
+  if(e.target?.id === 'transferModal') closeTransferModal();
+});
+
+document.getElementById('exportAllBtn')?.addEventListener('click', exportAllUserData);
+
+document.getElementById('importPickBtn')?.addEventListener('click', ()=>{
+  document.getElementById('importFileInput')?.click();
+});
+
+document.getElementById('importFileInput')?.addEventListener('change', async (e)=>{
+  const file = e.target?.files?.[0];
+  if(!file){
+    resetImportPreview();
+    return;
+  }
+
+  try{
+    const text = await file.text();
+    const payload = JSON.parse(text);
+    showImportPreview(payload, file.name);
+    showToast('อ่านไฟล์สำเร็จ เลือกรูปแบบการนำเข้าได้เลย', 2200, 'success');
+  }catch(err){
+    resetImportPreview();
+    showToast('ไฟล์ JSON ไม่ถูกต้องหรือไม่รองรับ', 3200, 'error');
+  }
+});
+
+document.getElementById('importMergeBtn')?.addEventListener('click', ()=>{
+  if(!pendingImportPayload){
+    showToast('กรุณาเลือกไฟล์ก่อน', 1800, 'warn');
+    return;
+  }
+  const ok = confirm('นำเข้าข้อมูลแบบรวมกับข้อมูลเดิม?');
+  if(!ok) return;
+  if(applyImportedPayload(pendingImportPayload, 'merge')){
+    updateTransferSummaryUI();
+    closeTransferModal();
+  }
+});
+
+document.getElementById('importReplaceBtn')?.addEventListener('click', ()=>{
+  if(!pendingImportPayload){
+    showToast('กรุณาเลือกไฟล์ก่อน', 1800, 'warn');
+    return;
+  }
+  const ok = confirm('นำเข้าข้อมูลแบบแทนที่ทั้งหมด?\n\nข้อมูลเดิมในเครื่องนี้จะถูกแทนที่ทั้งหมด');
+  if(!ok) return;
+  if(applyImportedPayload(pendingImportPayload, 'replace')){
+    updateTransferSummaryUI();
+    closeTransferModal();
+  }
+});
   });
 })();
 </script>
