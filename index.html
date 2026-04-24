@@ -832,26 +832,57 @@ header .brand{ padding-top:6px; }
   --shadow-danger:0 6px 16px rgba(231,74,59,.35); --shadow-danger-hover:0 8px 18px rgba(192,57,43,.4);
   --focus-ring:3px solid #7aa2ff; --focus-ring-danger:3px solid #fca5a5; --overlay:rgba(0,0,0,.75);
 }
-/* ===== Mobile global scale tuning ===== */
+
+
+/* ===== Mobile density auto tuning ===== */
 :root{
   --mobile-ui-scale: 1;
+  --mobile-card-scale: 1;
+  --mobile-modal-scale: 1;
 }
 
-@media (max-width: 390px){
+/* จอเล็กมาก เช่น iPhone SE / Android จอแคบ */
+@media (max-width: 375px){
   :root{
     --mobile-ui-scale: 0.90;
+    --mobile-card-scale: 0.92;
+    --mobile-modal-scale: 0.92;
   }
 }
 
+/* จอมือถือทั่วไปขนาดเล็ก */
+@media (min-width: 376px) and (max-width: 390px){
+  :root{
+    --mobile-ui-scale: 0.92;
+    --mobile-card-scale: 0.94;
+    --mobile-modal-scale: 0.94;
+  }
+}
+
+/* iPhone 12/13/14/15/16 ปกติ และ Android ส่วนใหญ่ */
 @media (min-width: 391px) and (max-width: 430px){
   :root{
-    --mobile-ui-scale: 0.93;
+    --mobile-ui-scale: 0.95;
+    --mobile-card-scale: 0.96;
+    --mobile-modal-scale: 0.96;
   }
 }
 
+/* มือถือจอใหญ่ / tablet เล็ก */
 @media (min-width: 431px) and (max-width: 768px){
   :root{
-    --mobile-ui-scale: 0.96;
+    --mobile-ui-scale: 0.98;
+    --mobile-card-scale: 1;
+    --mobile-modal-scale: 1;
+  }
+}
+
+/* จอเตี้ยเป็นพิเศษ เช่น landscape หรือมือถือที่ browser bar กินพื้นที่ */
+@media (max-height: 700px) and (max-width: 768px){
+  :root{
+    --mobile-ui-scale: 0.90;
+    --mobile-card-scale: 0.92;
+    --mobile-modal-scale: 0.90;
   }
 }
 
@@ -870,33 +901,70 @@ header .brand{ padding-top:6px; }
     --space-6: calc(14px * var(--mobile-ui-scale));
     --space-7: calc(16px * var(--mobile-ui-scale));
     --space-8: calc(20px * var(--mobile-ui-scale));
-
-    --radius-xs: calc(6px * var(--mobile-ui-scale));
-    --radius-sm: calc(8px * var(--mobile-ui-scale));
-    --radius-md: calc(10px * var(--mobile-ui-scale));
-    --radius-lg: calc(12px * var(--mobile-ui-scale));
-    --radius-xl: calc(14px * var(--mobile-ui-scale));
   }
-}
-@media (max-width: 768px){
+
   main{
-    max-width: calc(100% * var(--mobile-ui-scale));
-    margin-left: auto;
-    margin-right: auto;
+    width:100%;
+    max-width:100%;
+    padding-left:calc(8px * var(--mobile-ui-scale));
+    padding-right:calc(8px * var(--mobile-ui-scale));
+    margin-left:0;
+    margin-right:0;
+    box-sizing:border-box;
   }
 
   section{
-    padding: calc(var(--space-6)) calc(var(--space-7));
+    padding:calc(14px * var(--mobile-ui-scale)) calc(16px * var(--mobile-ui-scale));
+    border-radius:calc(14px * var(--mobile-ui-scale));
+  }
+
+  .brand-title{
+    font-size:calc(18px * var(--mobile-ui-scale)) !important;
   }
 
   .btn{
-    font-size: calc(15px * var(--mobile-ui-scale)) !important;
+    font-size:calc(15px * var(--mobile-ui-scale)) !important;
+    min-height:calc(40px * var(--mobile-ui-scale)) !important;
+    padding:calc(10px * var(--mobile-ui-scale)) calc(12px * var(--mobile-ui-scale)) !important;
+  }
+
+  .chip{
+    font-size:calc(13px * var(--mobile-ui-scale));
+    padding:calc(8px * var(--mobile-ui-scale)) calc(12px * var(--mobile-ui-scale));
   }
 
   .result-card{
-    font-size: calc(13px * var(--mobile-ui-scale)) !important;
+    padding:calc(12px * var(--mobile-card-scale));
+    gap:calc(8px * var(--mobile-card-scale));
+    border-radius:calc(14px * var(--mobile-card-scale));
   }
 
+  .jewel-column{
+    min-height:calc(32px * var(--mobile-card-scale));
+    font-size:calc(13px * var(--mobile-card-scale));
+    padding:calc(5px * var(--mobile-card-scale));
+  }
+
+  .card-info{
+    font-size:calc(12.5px * var(--mobile-card-scale)) !important;
+    padding:calc(8px * var(--mobile-card-scale));
+  }
+
+  .fav-modal__dialog,
+  .tutorial-sheet__dialog{
+    max-height:calc(86vh * var(--mobile-modal-scale));
+  }
+
+  .fav-modal__header,
+  .fav-modal__body,
+  .tutorial-sheet__dialog{
+    padding-left:calc(14px * var(--mobile-modal-scale));
+    padding-right:calc(14px * var(--mobile-modal-scale));
+  }
+}
+
+
+@media (max-width: 768px){
   .result-card h3{
     font-size: calc(15px * var(--mobile-ui-scale)) !important;
   }
@@ -4902,8 +4970,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
     setTimeout(()=>{
       hideLoading();
-      showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
-                                 'ℹ️ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+      showToast(substats.length ? 'โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
+                                 'โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
     }, 180);
 
     bindShareButtons();       // ผูกอีเวนต์ปุ่มแชร์
