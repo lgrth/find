@@ -5302,6 +5302,15 @@ darkOnly?.addEventListener('change', ()=>{
 // ถ้าไม่มี sheet หรือ fetch ล้มเหลว → ใช้ map ว่าง (ค้นหาปกติยังทำงาน)
 const KEYWORD_GID = '850304016'; // ← ใส่ gid ของ sheet "Keywords" ที่นี่ เช่น '123456789'
 
+function normalizeSearchText(value){
+  return String(value || '')
+    .normalize('NFC')
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 let _keywordFailed = false;
 function fetchKeywordSheet(){
   if (!KEYWORD_GID) return Promise.resolve(new Map());
@@ -5321,7 +5330,12 @@ function fetchKeywordSheet(){
           const ability = (cells[0]?.v ?? '').toString().trim();
           const raw     = (cells[1]?.v ?? '').toString().trim();
           if (!ability) return;
-          const kws = raw.split(',').map(k=>k.trim().toLowerCase()).filter(Boolean);
+
+          const kws = raw
+            .split(/[,，\n]/)
+            .map(k => normalizeSearchText(k))
+            .filter(Boolean);
+
           if (kws.length) map.set(ability, kws);
         });
         resolve(map);
@@ -5340,9 +5354,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
     startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
     jewels = await fetchGVizJSONP();
-    stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
 
-    const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
+try{
+  window._abilityKeywords = await fetchKeywordSheet();
+}catch(e){
+  console.warn('Keyword sheet load failed:', e);
+  window._abilityKeywords = new Map();
+  _keywordFailed = true;
+}
+
+stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
+
+const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
 
     setProgress(100, 'กำลังเตรียมตัวเลือก...');
     await makeTomSelects(substats);
@@ -5482,10 +5505,18 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   const unwanted = Array.isArray(filterState?.unwanted) ? filterState.unwanted : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
   const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
 
-  const state = {
+  const cleanDesired = sanitizeStringArray(desired, MAX_SELECTS, 120);
+const cleanUnwanted = sanitizeStringArray(unwanted, MAX_SELECTS, 120);
+
+const state = {
   v: SHARE_STATE_VERSION,
-  s: toAbilityIndices(sanitizeStringArray(desired, MAX_SELECTS, 120)),
-  u: toAbilityIndices(sanitizeStringArray(unwanted, MAX_SELECTS, 120)),
+  s: toAbilityIndices(cleanDesired),
+  u: toAbilityIndices(cleanUnwanted),
+
+  // fallback กันกรณี _abilityList ยังไม่พร้อม หรือ index map ไม่ได้
+  sn: cleanDesired,
+  un: cleanUnwanted,
+
   k: String(clampNumber(
     filterState?.topK != null ? filterState.topK : topKInput?.value,
     3,
@@ -5502,6 +5533,8 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   // ตัด field ว่างออกเพื่อลดขนาด payload
   if (!state.s.length) delete state.s;
   if (!state.u.length) delete state.u;
+  if (!state.sn.length) delete state.sn;
+if (!state.un.length) delete state.un;
   if (!state.k) delete state.k;
   if (!state.m) delete state.m;
   if (!state.c) delete state.c;
@@ -5546,16 +5579,31 @@ function parseCompressedStateFromURL(){
     const parsed = JSON.parse(json);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
 
-    return {
-      sels: fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []),
-      unwanted: fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []),
-      k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
-      dark: parsed.m === 1 ? '1' : '',
-      auto: parsed.a === 1 ? '1' : '',
-      char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
-      resultKey: parsed.r != null ? sanitizePlainString(parsed.r, 260) : '',
-      resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
-    };
+    const decodedSels = fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []);
+const decodedUnwanted = fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []);
+
+const fallbackSels = sanitizeStringArray(
+  Array.isArray(parsed.sn) ? parsed.sn.slice(0, MAX_SELECTS) : [],
+  MAX_SELECTS,
+  120
+);
+
+const fallbackUnwanted = sanitizeStringArray(
+  Array.isArray(parsed.un) ? parsed.un.slice(0, MAX_SELECTS) : [],
+  MAX_SELECTS,
+  120
+);
+
+return {
+  sels: decodedSels.length ? decodedSels : fallbackSels,
+  unwanted: decodedUnwanted.length ? decodedUnwanted : fallbackUnwanted,
+  k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
+  dark: parsed.m === 1 ? '1' : '',
+  auto: parsed.a === 1 ? '1' : '',
+  char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
+  resultKey: parsed.r != null ? sanitizePlainString(parsed.r, 260) : '',
+  resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
+};
   }catch(err){
     console.warn('Compressed share URL parse failed, fallback to legacy params.', err);
     return null;
@@ -7493,7 +7541,7 @@ const DEFAULT_TOPK = 10;
     const wrap = document.getElementById('chipAll');
     const allWrap = document.getElementById('chipAllWrap');
     if (!wrap) return;
-    const q = (document.getElementById('chipSearch')?.value || '').trim().toLowerCase();
+    const q = normalizeSearchText(document.getElementById('chipSearch')?.value || '');
     // แสดง "ทั้งหมด" เฉพาะตอนมีคำค้นหา
     if (allWrap){
       if (q) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden','');
@@ -7503,8 +7551,12 @@ const DEFAULT_TOPK = 10;
     const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
     const atMax = window._chipSelected.length >= max;
     ALL_ABILITIES.forEach(name => {
-      const nameMatch = name.toLowerCase().includes(q);
-      const kwMatch = (window._abilityKeywords?.get(name) || []).some(k => k.includes(q));
+      const normalizedName = normalizeSearchText(name);
+      const keywords = window._abilityKeywords?.get(name) || [];
+
+      const nameMatch = normalizedName.includes(q);
+      const kwMatch = keywords.some(k => k.includes(q) || q.includes(k));
+
       if (!nameMatch && !kwMatch) return;
       const isSel = window._chipSelected.includes(name);
       const b = document.createElement('button');
@@ -7526,9 +7578,14 @@ const DEFAULT_TOPK = 10;
   function refreshChips(){ renderSelected(); renderAll(); }
 
   window.buildChipPicker = function(options){
-    ALL_ABILITIES = Array.from(options || []).sort();
-    refreshChips();
-  };
+  ALL_ABILITIES = Array.from(options || []).sort();
+
+  if (typeof setAbilityList === 'function'){
+    setAbilityList(ALL_ABILITIES);
+  }
+
+  refreshChips();
+};
   window.refreshChipPicker = refreshChips;
 
   // expose setChipState for applyStateFromURL
@@ -7600,12 +7657,17 @@ const DEFAULT_TOPK = 10;
     const wrap=document.getElementById('chipUnwantedAll');
     const allWrap=document.getElementById('chipUnwantedAllWrap');
     if(!wrap) return;
-    const q=(document.getElementById('chipUnwantedSearch')?.value||'').trim().toLowerCase();
+    const q = normalizeSearchText(document.getElementById('chipUnwantedSearch')?.value || '');
     if(allWrap){ if(q) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden',''); }
     wrap.innerHTML='';
     if(!q) return;
     ALL_ABILITIES.forEach(name=>{
-      if(!name.toLowerCase().includes(q) && !(window._abilityKeywords?.get(name)||[]).some(k=>k.includes(q))) return;
+      const normalizedName = normalizeSearchText(name);
+const keywords = window._abilityKeywords?.get(name) || [];
+const nameMatch = normalizedName.includes(q);
+const kwMatch = keywords.some(k => k.includes(q) || q.includes(k));
+
+if(!nameMatch && !kwMatch) return;
       if(window._chipSelected.includes(name)) return; // skip already-wanted
       const isSel=window._chipUnwanted.includes(name);
       const b=document.createElement('button');
