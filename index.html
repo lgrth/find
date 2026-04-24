@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://docs.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+
 <title>เว็บไซต์ค้นหาเซ็ตจี้เกมเศรษฐีที่ใช่</title>
 <meta name="description" content="รวมเซ็ตจี้แนะนำ กดเข้าเว็บไซต์เลย">
 
@@ -19,7 +24,7 @@
 <meta name="twitter:description" content="รวมเซ็ตจี้แนะนำ กดเข้าเว็บไซต์เลย">
 <meta name="twitter:image" content="https://lgrth.github.io/find/og-cover.png">
 
-<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
 <style>
 /* override ตรงนี้ */
 .ts-control .clear-button {
@@ -31,7 +36,7 @@
   justify-content: center;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
 
@@ -3535,7 +3540,17 @@ function hideLoading(){
   updateCalcAvailability();
 }
     
-function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.innerHTML = msg;; }
+function setProgress(p, msg, options = {}){
+  progressBar.style.width = Math.max(0, Math.min(100, p)) + '%';
+
+  if(!msg) return;
+
+  if(options.trustedHtml === true){
+    progressText.innerHTML = msg;
+  }else{
+    progressText.textContent = msg;
+  }
+}
 /* ===== ETA helpers for progress ===== */
 let __etaState = { start: 0, smoothSec: null };
 
@@ -4087,7 +4102,7 @@ function recreateWorker(){
       let etaSec=f>0?Math.max(0,elapsed/f-elapsed):0;
       if(__etaState.smoothSec==null) __etaState.smoothSec=etaSec;
       else __etaState.smoothSec=__etaState.smoothSec*0.7+etaSec*0.3;
-      setCalcProgress(1+Math.round(p),`กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
+      setCalcProgress(1+Math.round(p),`กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`,{ trustedHtml: true });
     }else if(msg.type==='result'){
       try{
         setProgress(100, 'จัดเซ็ตเสร็จแล้ว');
@@ -5104,16 +5119,21 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
 
   const state = {
-    v: SHARE_STATE_VERSION,               // version
-    s: toAbilityIndices(desired),         // selected abilities
-    u: toAbilityIndices(unwanted),        // unwanted abilities
-    k: filterState?.topK != null ? String(filterState.topK) : (topKInput?.value ? String(topKInput.value) : ''),
-    m: (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0,         // darkOnly mode
-    a: 1,                                 // auto-run
-    c: charVal || '',                     // character
-    r: resultKey || '',                   // result highlight key
-    t: canonicalResultNames(resultNames)  // target result jewel names
-  };
+  v: SHARE_STATE_VERSION,
+  s: toAbilityIndices(sanitizeStringArray(desired, MAX_SELECTS, 120)),
+  u: toAbilityIndices(sanitizeStringArray(unwanted, MAX_SELECTS, 120)),
+  k: String(clampNumber(
+    filterState?.topK != null ? filterState.topK : topKInput?.value,
+    3,
+    50,
+    10
+  )),
+  m: (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0,
+  a: 1,
+  c: sanitizePlainString(charVal || '', 120),
+  r: sanitizePlainString(resultKey || '', 260),
+  t: canonicalResultNames(resultNames).slice(0, 4)
+};
 
   // ตัด field ว่างออกเพื่อลดขนาด payload
   if (!state.s.length) delete state.s;
@@ -5145,22 +5165,32 @@ function parseCompressedStateFromURL(){
   const packed = params.get('d');
   if (!packed || typeof LZString?.decompressFromEncodedURIComponent !== 'function') return null;
 
+  if(packed.length > MAX_SHARE_PACKED_LENGTH){
+    console.warn('Compressed share URL ignored: packed state is too large.');
+    return null;
+  }
+
   try{
     const json = LZString.decompressFromEncodedURIComponent(packed);
     if (!json) return null;
 
+    if(json.length > MAX_SHARE_JSON_LENGTH){
+      console.warn('Compressed share URL ignored: decompressed state is too large.');
+      return null;
+    }
+
     const parsed = JSON.parse(json);
-    if (!parsed || typeof parsed !== 'object') return null;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
 
     return {
-      sels: fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s : []),
-      unwanted: fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u : []),
-      k: parsed.k != null ? String(parsed.k) : '',
+      sels: fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []),
+      unwanted: fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []),
+      k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
       dark: parsed.m === 1 ? '1' : '',
       auto: parsed.a === 1 ? '1' : '',
-      char: parsed.c != null ? String(parsed.c) : '',
-      resultKey: parsed.r != null ? String(parsed.r) : '',
-      resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t) : []
+      char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
+      resultKey: parsed.r != null ? sanitizePlainString(parsed.r, 260) : '',
+      resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
     };
   }catch(err){
     console.warn('Compressed share URL parse failed, fallback to legacy params.', err);
@@ -5189,14 +5219,14 @@ function parseLegacyStateFromURL(){
     : [];
 
   return {
-    sels,
-    unwanted,
-    k: params.get('k') || '',
-    dark: params.get('d') || params.get('dark') || '',
-    auto: params.get('a') || params.get('auto') || '',
-    char: params.get('char') || '',
-    resultKey: params.get('r') || '',
-    resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')) : []
+    sels: sanitizeStringArray(sels, MAX_SELECTS, 120),
+    unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
+    k: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
+    dark: (params.get('d') || params.get('dark')) === '1' ? '1' : '',
+    auto: (params.get('a') || params.get('auto')) === '1' ? '1' : '',
+    char: sanitizePlainString(params.get('char') || '', 120),
+    resultKey: sanitizePlainString(params.get('r') || '', 260),
+    resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')).slice(0, 4) : []
   };
 }
 
@@ -5475,7 +5505,49 @@ function writeResultSetStore(store){
 const TRANSFER_FILE_APP = 'lgrth-find';
 const TRANSFER_FILE_VERSION = 1;
 
+const MAX_IMPORT_FILE_SIZE = 200 * 1024; // 200KB
+const MAX_IMPORT_INVENTORY_ITEMS = 1500;
+const MAX_IMPORT_FAVORITES = 150;
+const MAX_IMPORT_RESULT_SETS = 150;
+const MAX_SAFE_STRING_LENGTH = 180;
+const MAX_SHARE_PACKED_LENGTH = 2500;
+const MAX_SHARE_JSON_LENGTH = 12000;
+
 let pendingImportPayload = null;
+
+function clampNumber(value, min, max, fallback){
+  const n = Number(value);
+  if(!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(n)));
+}
+
+function sanitizePlainString(value, maxLen = MAX_SAFE_STRING_LENGTH){
+  return String(value ?? '')
+    .replace(/[\u0000-\u001F\u007F]/g, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
+function sanitizeStringArray(list, maxItems = 100, maxLen = MAX_SAFE_STRING_LENGTH){
+  if(!Array.isArray(list)) return [];
+  return Array.from(new Set(
+    list
+      .map(v => sanitizePlainString(v, maxLen))
+      .filter(Boolean)
+  )).slice(0, maxItems);
+}
+
+function sanitizeIsoDateString(value){
+  const text = sanitizePlainString(value, 40);
+  if(!text) return '';
+  const d = new Date(text);
+  return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+}
+
+function sanitizePlainObject(value){
+  if(!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return value;
+}
 
 function getFavoriteStoreForTransfer(){
   const store = typeof window.readFavoriteStoreForTransfer === 'function'
@@ -5508,19 +5580,101 @@ function buildTransferPayload(){
 }
 
 function downloadJSONFile(filename, data){
+  const safeFilename = sanitizePlainString(filename || 'lgrfind-backup.json', 120)
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, '-');
+
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+
   a.href = url;
-  a.download = filename;
+  a.download = safeFilename.endsWith('.json') ? safeFilename : `${safeFilename}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
+
   URL.revokeObjectURL(url);
 }
 
+function cryptoRandomId(prefix = 'id'){
+  try{
+    const arr = new Uint32Array(2);
+    crypto.getRandomValues(arr);
+    return `${prefix}_${arr[0].toString(36)}${arr[1].toString(36)}`;
+  }catch(_){
+    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+}
+
+function normalizeFavoritePreset(item){
+  const src = sanitizePlainObject(item);
+  const state = sanitizePlainObject(src.state);
+
+  const selected = sanitizeStringArray(
+    Array.isArray(src.selected) ? src.selected : state.selected,
+    MAX_SELECTS,
+    120
+  );
+
+  const unwanted = sanitizeStringArray(
+    Array.isArray(src.unwanted) ? src.unwanted : state.unwanted,
+    MAX_SELECTS,
+    120
+  );
+
+  const topK = clampNumber(src.topK ?? state.topK, 3, 50, 10);
+
+  return {
+    id: sanitizePlainString(src.id || cryptoRandomId('fav'), 80),
+    name: sanitizePlainString(src.name || 'Filter ที่บันทึกไว้', 80),
+    createdAt: sanitizeIsoDateString(src.createdAt) || new Date().toISOString(),
+    selected,
+    unwanted,
+    topK,
+    darkOnly: !!(src.darkOnly ?? state.darkOnly),
+    char: sanitizePlainString(src.char ?? state.char ?? '', 120),
+    state: {
+      selected,
+      unwanted,
+      topK,
+      darkOnly: !!(src.darkOnly ?? state.darkOnly),
+      char: sanitizePlainString(src.char ?? state.char ?? '', 120)
+    }
+  };
+}
+
+function normalizeResultSetItem(item){
+  const src = sanitizePlainObject(item);
+  const snapshot = sanitizePlainObject(src.snapshot);
+
+  const names = sanitizeStringArray(
+    Array.isArray(src.names) ? src.names : snapshot.names,
+    4,
+    160
+  );
+
+  const key = sanitizePlainString(src.key || snapshot.key || names.join('|'), 260);
+
+  return {
+    id: sanitizePlainString(src.id || cryptoRandomId('set'), 80),
+    name: sanitizePlainString(src.name || 'เซ็ตจี้ที่บันทึกไว้', 100),
+    key,
+    createdAt: sanitizeIsoDateString(src.createdAt) || new Date().toISOString(),
+    snapshot: {
+      key,
+      names,
+      rank: clampNumber(snapshot.rank, 1, 999, 0),
+      matchedCount: clampNumber(snapshot.matchedCount, 0, 99, 0),
+      missingCount: clampNumber(snapshot.missingCount, 0, 99, 0),
+      extraCount: clampNumber(snapshot.extraCount, 0, 999, 0),
+      totalValue: Number.isFinite(Number(snapshot.totalValue)) ? Number(snapshot.totalValue) : 0
+    }
+  };
+}
+
 function normalizeTransferPayload(payload){
-  if(!payload || typeof payload !== 'object'){
+  if(!payload || typeof payload !== 'object' || Array.isArray(payload)){
     throw new Error('ไฟล์ไม่ถูกต้อง');
   }
 
@@ -5528,49 +5682,61 @@ function normalizeTransferPayload(payload){
     throw new Error('ไฟล์นี้ไม่ใช่ข้อมูลจากระบบนี้');
   }
 
-  const inventory = payload.inventory && typeof payload.inventory === 'object'
-    ? payload.inventory
-    : { version: 1, ids: [] };
+  const inventory = sanitizePlainObject(payload.inventory);
+  const favorites = sanitizePlainObject(payload.favorites);
+  const resultSets = sanitizePlainObject(payload.resultSets);
 
-  const favorites = payload.favorites && typeof payload.favorites === 'object'
-    ? payload.favorites
-    : { version: 1, presets: [] };
+  const safeInventoryIds = sanitizeStringArray(
+    inventory.ids,
+    MAX_IMPORT_INVENTORY_ITEMS,
+    160
+  );
 
-  const resultSets = payload.resultSets && typeof payload.resultSets === 'object'
-    ? payload.resultSets
-    : { version: 1, items: [] };
+  const safeFavorites = Array.isArray(favorites.presets)
+    ? favorites.presets
+        .slice(0, MAX_IMPORT_FAVORITES)
+        .map(normalizeFavoritePreset)
+        .filter(item => item.name || item.selected.length || item.state.selected.length)
+    : [];
+
+  const safeResultSets = Array.isArray(resultSets.items)
+    ? resultSets.items
+        .slice(0, MAX_IMPORT_RESULT_SETS)
+        .map(normalizeResultSetItem)
+        .filter(item => item.snapshot.names.length)
+    : [];
 
   return {
-    app: payload.app,
-    version: Number(payload.version) || 1,
-    exportedAt: payload.exportedAt || '',
+    app: TRANSFER_FILE_APP,
+    version: clampNumber(payload.version, 1, 99, 1),
+    exportedAt: sanitizeIsoDateString(payload.exportedAt),
     inventory: {
-      version: Number(inventory.version) || 1,
-      ids: Array.isArray(inventory.ids) ? inventory.ids.filter(Boolean) : []
+      version: clampNumber(inventory.version, 1, 99, 1),
+      ids: safeInventoryIds
     },
     favorites: {
-      version: Number(favorites.version) || 1,
-      presets: Array.isArray(favorites.presets) ? favorites.presets : []
+      version: clampNumber(favorites.version, 1, 99, 1),
+      presets: safeFavorites
     },
     resultSets: {
-      version: Number(resultSets.version) || 1,
-      items: Array.isArray(resultSets.items) ? resultSets.items : []
+      version: clampNumber(resultSets.version, 1, 99, 1),
+      items: safeResultSets
     }
   };
 }
 
-function mergeByKey(list, getKey){
+function mergeByKey(list, getKey, maxItems = 1000){
   const map = new Map();
   list.forEach(item=>{
-    const key = getKey(item);
+    const key = sanitizePlainString(getKey(item), 1000);
     if(!key) return;
     map.set(key, item);
   });
-  return Array.from(map.values());
+  return Array.from(map.values()).slice(0, maxItems);
 }
 
 function makeResultSetMergeKey(item){
-  return item?.key || item?.snapshot?.key || item?.id || '';
+  return sanitizePlainString(item?.key || item?.snapshot?.key || item?.id || '', 1000);
 }
 
 function summarizeTransferPayload(payload){
@@ -5582,7 +5748,7 @@ function summarizeTransferPayload(payload){
 }
 
 function exportAllUserData(){
-  const payload = buildTransferPayload();
+  const payload = normalizeTransferPayload(buildTransferPayload());
   const d = new Date();
   const stamp = [
     d.getFullYear(),
@@ -5618,18 +5784,20 @@ function applyImportedPayload(payload, mode){
     ]));
 
     nextFavStore = {
-      version: 1,
-      presets: mergeByKey(
-        [...previousFavStore.presets, ...incoming.favorites.presets],
-        item => item?.id || item?.name || JSON.stringify(item?.state || {})
-      )
-    };
+    version: 1,
+    presets: mergeByKey(
+      [...previousFavStore.presets, ...incoming.favorites.presets],
+      item => item?.id || item?.name || JSON.stringify(item?.state || {}),
+      MAX_IMPORT_FAVORITES
+    )
+  };
 
     nextResultSetStore = {
       version: 1,
       items: mergeByKey(
         [...previousResultSetStore.items, ...incoming.resultSets.items],
-        makeResultSetMergeKey
+        makeResultSetMergeKey,
+        MAX_IMPORT_RESULT_SETS
       )
     };
   }
@@ -5726,7 +5894,7 @@ function resetImportPreview(){
   if(fileInput) fileInput.value = '';
   if(previewBox) previewBox.classList.remove('show');
   if(previewMeta) previewMeta.textContent = '';
-  if(previewCounts) previewCounts.innerHTML = '';
+  if(previewCounts) previewCounts.textContent = '';
   if(mergeBtn) mergeBtn.disabled = true;
   if(replaceBtn) replaceBtn.disabled = true;
 }
@@ -5746,12 +5914,18 @@ function showImportPreview(payload, filename){
     previewMeta.textContent = `ไฟล์: ${filename || 'backup.json'}${pendingImportPayload.exportedAt ? ` • ส่งออกเมื่อ ${new Date(pendingImportPayload.exportedAt).toLocaleString('th-TH')}` : ''}`;
   }
   if(previewCounts){
-    previewCounts.innerHTML = `
-      <div>คลังจี้ของฉัน: ${summary.inventoryCount} รายการ</div>
-      <div>Filter ที่บันทึกไว้: ${summary.favoriteCount} รายการ</div>
-      <div>เซ็ตจี้ที่บันทึกไว้: ${summary.resultSetCount} รายการ</div>
-    `;
-  }
+  previewCounts.textContent = '';
+
+  [
+    ['คลังจี้ของฉัน', summary.inventoryCount],
+    ['Filter ที่บันทึกไว้', summary.favoriteCount],
+    ['เซ็ตจี้ที่บันทึกไว้', summary.resultSetCount]
+  ].forEach(([label, count])=>{
+    const row = document.createElement('div');
+    row.textContent = `${label}: ${count} รายการ`;
+    previewCounts.appendChild(row);
+  });
+}
   if(mergeBtn) mergeBtn.disabled = false;
   if(replaceBtn) replaceBtn.disabled = false;
 }
@@ -7355,13 +7529,31 @@ document.getElementById('importFileInput')?.addEventListener('change', async (e)
   }
 
   try{
+    const filename = sanitizePlainString(file.name || 'backup.json', 120).toLowerCase();
+
+    if(!filename.endsWith('.json')){
+      throw new Error('รองรับเฉพาะไฟล์ .json');
+    }
+
+    if(file.size > MAX_IMPORT_FILE_SIZE){
+      throw new Error('ไฟล์ใหญ่เกินไป');
+    }
+
     const text = await file.text();
-    const payload = JSON.parse(text);
+
+    if(text.length > MAX_IMPORT_FILE_SIZE * 2){
+      throw new Error('ไฟล์ใหญ่เกินไป');
+    }
+
+    const rawPayload = JSON.parse(text);
+    const payload = normalizeTransferPayload(rawPayload);
+
     showImportPreview(payload, file.name);
     showToast('อ่านไฟล์สำเร็จ เลือกรูปแบบการนำเข้าได้เลย', 2200, 'success');
   }catch(err){
+    console.error('[transfer][read import]', err);
     resetImportPreview();
-    showToast('ไฟล์ JSON ไม่ถูกต้องหรือไม่รองรับ', 3200, 'error');
+    showToast(`ไฟล์ JSON ไม่ถูกต้องหรือไม่รองรับ: ${err?.message || err}`, 3600, 'error');
   }
 });
 
