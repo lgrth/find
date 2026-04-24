@@ -1,0 +1,19 @@
+{
+  "name": "Get Rich Pendant Finder",
+  "short_name": "Pendant Finder",
+  "description": "เว็บช่วยค้นหาและจัดเซ็ตจี้เกมเศรษฐี",
+  "start_url": "/find/",
+  "scope": "/find/",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#1f4ac5",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "og-cover.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
