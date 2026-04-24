@@ -5476,7 +5476,7 @@ function buildLegacyShareURL(url, resultKey='', filterState=null, resultNames=[]
   }
 
   const topKValue = filterState?.topK != null ? String(filterState.topK) : (topKInput?.value ? String(topKInput.value) : '');
-  if (topKValue) params.set('k', topKValue);
+  if (topKValue && topKValue !== '10') params.set('k', topKValue);
   const darkValue = filterState ? !!filterState.darkOnly : !!darkOnly?.checked;
   if (darkValue) params.set('d', '1');
 
@@ -5489,7 +5489,6 @@ function buildLegacyShareURL(url, resultKey='', filterState=null, resultNames=[]
   const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
   if (charVal) params.set('char', charVal);
 
-  params.set('a', '1');
   if (resultKey) params.set('r', resultKey);
   const targetNames = canonicalResultNames(resultNames);
   if (targetNames.length) params.set('rn', targetNames.join('||'));
@@ -5501,45 +5500,41 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   const url = new URL(location.href);
   url.search = '';
 
-  const desired = Array.isArray(filterState?.selected) ? filterState.selected : getDesired();
-  const unwanted = Array.isArray(filterState?.unwanted) ? filterState.unwanted : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
-  const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
-
   const cleanDesired = sanitizeStringArray(desired, MAX_SELECTS, 120);
 const cleanUnwanted = sanitizeStringArray(unwanted, MAX_SELECTS, 120);
 
-const state = {
-  v: SHARE_STATE_VERSION,
-  s: toAbilityIndices(cleanDesired),
-  u: toAbilityIndices(cleanUnwanted),
+const desiredIdx = toAbilityIndices(cleanDesired);
+const unwantedIdx = toAbilityIndices(cleanUnwanted);
 
-  // fallback กันกรณี _abilityList ยังไม่พร้อม หรือ index map ไม่ได้
-  sn: cleanDesired,
-  un: cleanUnwanted,
+const topKValue = String(clampNumber(
+  filterState?.topK != null ? filterState.topK : topKInput?.value,
+  3,
+  50,
+  10
+));
 
-  k: String(clampNumber(
-    filterState?.topK != null ? filterState.topK : topKInput?.value,
-    3,
-    50,
-    10
-  )),
-  m: (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0,
-  a: 1,
-  c: sanitizePlainString(charVal || '', 120),
-  r: sanitizePlainString(resultKey || '', 260),
-  t: canonicalResultNames(resultNames).slice(0, 4)
-};
+const darkValue = (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0;
+const cleanChar = sanitizePlainString(charVal || '', 120);
+const cleanResultKey = sanitizePlainString(resultKey || '', 260);
+const cleanResultNames = canonicalResultNames(resultNames).slice(0, 4);
 
-  // ตัด field ว่างออกเพื่อลดขนาด payload
-  if (!state.s.length) delete state.s;
-  if (!state.u.length) delete state.u;
-  if (!state.sn.length) delete state.sn;
-if (!state.un.length) delete state.un;
-  if (!state.k) delete state.k;
-  if (!state.m) delete state.m;
-  if (!state.c) delete state.c;
-  if (!state.r) delete state.r;
-  if (!state.t.length) delete state.t;
+const state = {};
+
+if (desiredIdx.length) state.s = desiredIdx;
+if (unwantedIdx.length) state.u = unwantedIdx;
+
+// ไม่ต้องเก็บ topK ถ้าเป็นค่า default 10
+if (topKValue && topKValue !== '10') state.k = topKValue;
+
+if (darkValue) state.m = 1;
+
+// ไม่ต้องเก็บ a:1 เพราะตอน parse ให้ default auto เป็น 1 ได้
+if (cleanChar) state.c = cleanChar;
+if (cleanResultKey) state.r = cleanResultKey;
+
+// เก็บชื่อจี้เฉพาะตอนแชร์เซ็ตจี้เท่านั้น
+if (cleanResultKey && cleanResultNames.length) state.t = cleanResultNames;
+
 
   if (typeof LZString?.compressToEncodedURIComponent === 'function'){
     try{
@@ -5599,7 +5594,7 @@ return {
   unwanted: decodedUnwanted.length ? decodedUnwanted : fallbackUnwanted,
   k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
   dark: parsed.m === 1 ? '1' : '',
-  auto: parsed.a === 1 ? '1' : '',
+  auto: parsed.a === 0 ? '' : '1',
   char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
   resultKey: parsed.r != null ? sanitizePlainString(parsed.r, 260) : '',
   resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
