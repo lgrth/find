@@ -3095,7 +3095,7 @@ html[data-theme="dark"] .help-choice-modal__dialog{
   </div>
 </div>
 
-    <div id="resultLocalOverlay" class="overlay" style="position:absolute;display:none" aria-hidden="true">
+    <div id="resultLocalOverlay" class="overlay" style="position:absolute;display:none;align-items: flex-start;padding-top:50px" aria-hidden="true">
       <div class="loader">
         <div id="progressTextLocal" style="color:#fff" role="status" aria-live="polite">กำลังค้นหา…</div>
         <div class="bar"><span id="progressBarLocal"></span></div>
@@ -3229,22 +3229,22 @@ html[data-theme="dark"] .help-choice-modal__dialog{
       <div class="transfer-summary" id="transferSummary">
         <div class="transfer-summary__item">
           <svg width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z"/>
+          <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139q.323-.119.684-.12h5.396z"/>
         </svg>
           <strong>คลังจี้ของฉัน</strong>
           <span id="transferInventoryCount">0 รายการ</span>
         </div>
         <div class="transfer-summary__item">
           <svg width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
-  <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
-</svg>
+          <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+        </svg>
           <strong>Filter ที่บันทึกไว้</strong>
           <span id="transferFavoriteCount">0 รายการ</span>
         </div>
         <div class="transfer-summary__item">
           <svg width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
-  <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-</svg>
+          <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+        </svg>
           <strong>เซ็ตจี้ที่บันทึกไว้</strong>
           <span id="transferResultSetCount">0 รายการ</span>
         </div>
@@ -3413,7 +3413,7 @@ function showLoading(msg){
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
   overlay.setAttribute('aria-busy','true');
-  setProgress(10,msg||'');
+  setProgress(0, msg || 'กำลังโหลดข้อมูล...');
 
   const setBusy = (btn)=>{
     if(!btn) return;
@@ -3425,9 +3425,9 @@ function showLoading(msg){
   setBusy(calcBtn);
   setBusy(calcBtn2);
 }
-    
 
 function hideLoading(){
+  stopProgressSimulation(false);
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden','true');
   overlay.setAttribute('aria-busy','false');
@@ -3445,6 +3445,35 @@ function hideLoading(){
 function setProgress(p,msg){ progressBar.style.width = Math.max(0,Math.min(100,p))+'%'; if(msg) progressText.innerHTML = msg;; }
 /* ===== ETA helpers for progress ===== */
 let __etaState = { start: 0, smoothSec: null };
+
+let __progressSimTimer = null;
+let __progressSimValue = 0;
+
+function startProgressSimulation(start = 12, max = 92, label = 'กำลังโหลดข้อมูลอัปเดตล่าสุด...'){
+  stopProgressSimulation(false);
+  __progressSimValue = start;
+  setProgress(__progressSimValue, label);
+
+  __progressSimTimer = setInterval(()=>{
+    if(__progressSimValue >= max) return;
+    const remaining = max - __progressSimValue;
+    const step = remaining > 30 ? 4 : remaining > 15 ? 2 : 1;
+    __progressSimValue = Math.min(max, __progressSimValue + step);
+    setProgress(__progressSimValue, label);
+  }, 220);
+}
+
+function stopProgressSimulation(complete = true, label = 'โหลดข้อมูลสำเร็จ'){
+  if(__progressSimTimer){
+    clearInterval(__progressSimTimer);
+    __progressSimTimer = null;
+  }
+
+  if(complete){
+    __progressSimValue = 100;
+    setProgress(100, label);
+  }
+}
 
 function __formatETA(sec){
   sec = Math.max(0, Math.round(sec)); // ปัดเป็นวินาที
@@ -3968,7 +3997,9 @@ function recreateWorker(){
       setCalcProgress(1+Math.round(p),`กำลังประมวลผล…<br>เสร็จภายใน ${__formatETA(__etaState.smoothSec)}`);
     }else if(msg.type==='result'){
       try{
-        renderResults(msg.best);
+        setProgress(100, 'จัดเซ็ตเสร็จแล้ว');
+      renderResults(msg.best);
+      setTimeout(()=>hideLoading(), 180);
       }catch(err){
         console.error('renderResults error:', err);
         showErrorBanner('เกิดข้อผิดพลาดในการแสดงผลลัพธ์: ' + (err?.message || err));
@@ -3998,8 +4029,9 @@ async function calculate(){
     clearPinnedResults()
     if (!jewels || jewels.length === 0){
       showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
+      startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
       jewels = await fetchGVizJSONP();
-      hideLoading();
+      stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
     }
     if(runId !== _activeCalcRun) return;
 
@@ -4834,36 +4866,29 @@ function fetchKeywordSheet(){
 document.addEventListener('DOMContentLoaded', async ()=>{
   try{
     showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
-    // โหลดข้อมูลจี้ + keyword map พร้อมกัน
-    const [fetchedJewels, keywordMap] = await Promise.all([
-      fetchGVizJSONP(),
-      fetchKeywordSheet(),
-    ]);
-    jewels = fetchedJewels;
-    window.jewels = jewels;
-    window._abilityKeywords = keywordMap; // Map<ability, string[]>
+    startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
+    jewels = await fetchGVizJSONP();
+    stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
+
     const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
 
+    setProgress(100, 'กำลังเตรียมตัวเลือก...');
     await makeTomSelects(substats);
-    setAbilityList(substats);
-    setDataFreshness(new Date());
-    hideLoading();
-    renderInventoryLists();
-    showToast(
-      substats.length
-        ? 'โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!'
-        : 'โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต',
-      2500,
-      substats.length ? 'success' : 'warn'
-    );
-    if(_keywordFailed) setTimeout(()=>{showToast('ค้นสกิลด้วยชื่อตรงๆ ได้เลย (ไม่สามารถโหลดคำค้นหาเพิ่มเติมได้)', 4000, 'info');}, 2800);
-    bindShareButtons();
-    applyStateFromURL();
+
+    setTimeout(()=>{
+      hideLoading();
+      showToast(substats.length ? '✅ โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
+                                 'ℹ️ โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+    }, 180);
+
+    bindShareButtons();       // ผูกอีเวนต์ปุ่มแชร์
+    applyStateFromURL(); 
 
   }catch(err){
+    stopProgressSimulation(false);
     hideLoading();
     console.warn('Fetch error:', err);
-    showErrorBanner('ไม่สามารถโหลดข้อมูลได้: ' + (err?.message || err) + ' — ตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer"');
+    alert('ไม่สามารถโหลดข้อมูล ได้: ' + (err?.message || err) + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
     await makeTomSelects([]);
   }
 
@@ -5474,7 +5499,7 @@ function exportAllUserData(){
     String(d.getHours()).padStart(2,'0'),
     String(d.getMinutes()).padStart(2,'0')
   ].join('');
-  downloadJSONFile(`backup-${stamp}.json`, payload);
+  downloadJSONFile(`lgrfind-${stamp}.json`, payload);
   showToast('Export ข้อมูลเรียบร้อยแล้ว', 2200, 'success');
 }
 
@@ -7226,7 +7251,6 @@ document.getElementById('importMergeBtn')?.addEventListener('click', ()=>{
 
     if(applyImportedPayload(pendingImportPayload, 'merge')){
       updateTransferSummaryUI();
-      closeTransferModal();
     }
   }catch(err){
     console.error('[transfer][merge import]', err);
@@ -7245,7 +7269,6 @@ document.getElementById('importReplaceBtn')?.addEventListener('click', ()=>{
 
     if(applyImportedPayload(pendingImportPayload, 'replace')){
       updateTransferSummaryUI();
-      closeTransferModal();
     }
   }catch(err){
     console.error('[transfer][replace import]', err);
