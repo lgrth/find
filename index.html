@@ -5500,41 +5500,50 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   const url = new URL(location.href);
   url.search = '';
 
+  const desired = Array.isArray(filterState?.selected)
+    ? filterState.selected
+    : getDesired();
+
+  const unwanted = Array.isArray(filterState?.unwanted)
+    ? filterState.unwanted
+    : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
+
+  const charVal = filterState?.char != null
+    ? String(filterState.char)
+    : getCharSelectValue();
+
   const cleanDesired = sanitizeStringArray(desired, MAX_SELECTS, 120);
-const cleanUnwanted = sanitizeStringArray(unwanted, MAX_SELECTS, 120);
+  const cleanUnwanted = sanitizeStringArray(unwanted, MAX_SELECTS, 120);
 
-const desiredIdx = toAbilityIndices(cleanDesired);
-const unwantedIdx = toAbilityIndices(cleanUnwanted);
+  const desiredIdx = toAbilityIndices(cleanDesired);
+  const unwantedIdx = toAbilityIndices(cleanUnwanted);
 
-const topKValue = String(clampNumber(
-  filterState?.topK != null ? filterState.topK : topKInput?.value,
-  3,
-  50,
-  10
-));
+  const topKValue = String(clampNumber(
+    filterState?.topK != null ? filterState.topK : topKInput?.value,
+    3,
+    50,
+    10
+  ));
 
-const darkValue = (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0;
-const cleanChar = sanitizePlainString(charVal || '', 120);
-const cleanResultKey = sanitizePlainString(resultKey || '', 260);
-const cleanResultNames = canonicalResultNames(resultNames).slice(0, 4);
+  const darkValue = (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0;
+  const cleanChar = sanitizePlainString(charVal || '', 120);
+  const cleanResultKey = sanitizePlainString(resultKey || '', 260);
+  const cleanResultNames = canonicalResultNames(resultNames).slice(0, 4);
 
-const state = {};
+  const state = {};
 
-if (desiredIdx.length) state.s = desiredIdx;
-if (unwantedIdx.length) state.u = unwantedIdx;
+  if (desiredIdx.length) state.s = desiredIdx;
+  if (unwantedIdx.length) state.u = unwantedIdx;
 
-// ไม่ต้องเก็บ topK ถ้าเป็นค่า default 10
-if (topKValue && topKValue !== '10') state.k = topKValue;
+  // ไม่ต้องเก็บ topK ถ้าเป็นค่า default 10
+  if (topKValue && topKValue !== '10') state.k = topKValue;
 
-if (darkValue) state.m = 1;
+  if (darkValue) state.m = 1;
+  if (cleanChar) state.c = cleanChar;
+  if (cleanResultKey) state.r = cleanResultKey;
 
-// ไม่ต้องเก็บ a:1 เพราะตอน parse ให้ default auto เป็น 1 ได้
-if (cleanChar) state.c = cleanChar;
-if (cleanResultKey) state.r = cleanResultKey;
-
-// เก็บชื่อจี้เฉพาะตอนแชร์เซ็ตจี้เท่านั้น
-if (cleanResultKey && cleanResultNames.length) state.t = cleanResultNames;
-
+  // เก็บชื่อจี้เฉพาะตอนแชร์เซ็ตจี้เท่านั้น
+  if (cleanResultKey && cleanResultNames.length) state.t = cleanResultNames;
 
   if (typeof LZString?.compressToEncodedURIComponent === 'function'){
     try{
@@ -5630,7 +5639,7 @@ function parseLegacyStateFromURL(){
     unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
     k: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
     dark: (params.get('d') || params.get('dark')) === '1' ? '1' : '',
-    auto: (params.get('a') || params.get('auto')) === '1' ? '1' : '',
+    auto: (params.get('a') || params.get('auto')) === '0' ? '' : '1',
     char: sanitizePlainString(params.get('char') || '', 120),
     resultKey: sanitizePlainString(params.get('r') || '', 260),
     resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')).slice(0, 4) : []
@@ -5687,27 +5696,56 @@ async function applyStateFromURL(){
 function bindShareButtons(){
   if (window.__shareButtonsBound) return;
   window.__shareButtonsBound = true;
+
   const onShare = ()=>{
-  const link = buildShareURL();
+    let link = '';
 
-  trackEvent('share_filters_click', {
-    selected_skill_count: (getDesired() || []).length,
-    unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
-  });
+    try{
+      link = buildShareURL();
+    }catch(err){
+      console.error('Share URL build failed:', err);
+      trackEvent('share_filters_error', {
+        reason: 'build_share_url_failed'
+      });
+      showToast('ไม่สามารถสร้างลิงก์แชร์ได้ กรุณาลองใหม่อีกครั้ง', 3000, 'error');
+      return;
+    }
 
-  navigator.clipboard.writeText(link).then(()=>{
-    trackEvent('share_filters_success', {
-      method: 'clipboard'
+    if(!link){
+      trackEvent('share_filters_error', {
+        reason: 'empty_share_url'
+      });
+      showToast('ไม่สามารถสร้างลิงก์แชร์ได้ กรุณาลองใหม่อีกครั้ง', 3000, 'error');
+      return;
+    }
+
+    trackEvent('share_filters_click', {
+      selected_skill_count: (getDesired() || []).length,
+      unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
     });
-    showToast('คัดลอกลิงก์แชร์แล้ว', 2000, 'success');
-    showQRModal(link);
-  }).catch(()=>{
+
+    if(navigator.clipboard?.writeText){
+      navigator.clipboard.writeText(link).then(()=>{
+        trackEvent('share_filters_success', {
+          method: 'clipboard'
+        });
+        showToast('คัดลอกลิงก์แชร์แล้ว', 2000, 'success');
+        showQRModal(link);
+      }).catch(()=>{
+        trackEvent('share_filters_fallback', {
+          method: 'qr_only'
+        });
+        showQRModal(link);
+      });
+      return;
+    }
+
     trackEvent('share_filters_fallback', {
-      method: 'qr_only'
+      method: 'qr_only_no_clipboard'
     });
     showQRModal(link);
-  });
-};
+  };
+
   document.getElementById('shareBtn')?.addEventListener('click', onShare);
   document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
