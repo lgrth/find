@@ -1175,7 +1175,7 @@ html[data-theme="dark"] .qr-modal__url{background:var(--surface-2);color:#cbd5e1
 
 @media (max-width:640px){
   .fav-modal__dialog{
-    height:82vh;
+    height:77vh;
     padding-bottom:env(safe-area-inset-bottom);
   }
 }
@@ -1465,7 +1465,7 @@ html[data-theme="dark"] kbd{background:#1e293b;border-color:#475569;color:#cbd5e
 @media (max-width:640px){
   .tutorial-sheet__dialog{
     padding:12px 14px calc(14px + env(safe-area-inset-bottom)) 14px;
-    max-height:85vh;
+    max-height:77vh;
   }
 }
 
@@ -1680,6 +1680,30 @@ html[data-theme="dark"] .header-menu{background:#111827;border-color:#334155;box
 
 .inventory-chip__label{
   min-width:0;
+}
+
+.inventory-bulk-actions{
+  display:flex;
+  gap:var(--space-3);
+  flex-wrap:wrap;
+}
+
+.inventory-bulk-actions .fav-btn{
+  flex:1;
+  min-width:120px;
+}
+
+@media (max-width:520px){
+  .inventory-bulk-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:var(--space-3);
+  }
+
+  .inventory-bulk-actions .fav-btn{
+    width:100%;
+    min-width:0;
+  }
 }
 
 .transfer-summary{
@@ -2641,12 +2665,12 @@ html[data-theme="dark"] .guided-tour__btn--ghost:hover{
 
 @media (max-width:640px){
   .guided-tour__card{
-    width:min(92vw, 360px);
+    width:min(85vw, 360px);
     padding:12px 12px 10px;
   }
 
   .guided-tour__title{
-    font-size:17px;
+    font-size:16px;
   }
 
   .guided-tour__desc{
@@ -3212,7 +3236,8 @@ html[data-theme="dark"] .help-choice-modal__dialog{
 
   <div id="inventoryModal" class="fav-modal inventory-modal" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle" aria-hidden="true"><div class="fav-modal__dialog inventory-modal__dialog"><div class="fav-modal__header"><h3 id="inventoryTitle" class="fav-modal__title">📦 คลังจี้ของฉัน <span id="inventoryCount" class="fav-count">(0)</span></h3><button type="button" class="fav-modal__close" id="inventoryClose" aria-label="ปิด">×</button></div><div class="fav-modal__body"><p class="inventory-help">เพิ่มจี้ที่คุณมีอยู่ โดยจะแสดงผลเป็นสีเขียวในผลลัพธ์เซ็ตจี้ที่ค้นหา (ข้อมูลคลังจี้จะถูกเก็บไว้เฉพาะบนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น)</p>
   <div class="fav-search-wrap"><input id="inventorySearchInput" class="fav-search" type="search" placeholder="ค้นหาชื่อจี้..." autocomplete="off"><button type="button" class="fav-search-clear" id="inventorySearchClear" aria-label="ล้างการค้นหา" hidden>✕</button></div>
-  <div class="inventory-section"><div class="inventory-section__head"><div class="inventory-section__title">จี้ทั้งหมด</div><div class="inventory-section__meta" id="inventoryAllMeta">0 รายการ</div></div><div id="inventoryAllList" class="chip-list inventory-chip-list"></div></div><div class="fav-actions" style="margin-top:16px"><button type="button" class="fav-btn fav-btn--danger" id="inventoryClearAll">ล้างทั้งหมด</button></div></div></div></div>
+  <div class="inventory-section"><div class="inventory-section__head"><div class="inventory-section__title">จี้ทั้งหมด</div><div class="inventory-section__meta" id="inventoryAllMeta">0 รายการ</div></div><div id="inventoryAllList" class="chip-list inventory-chip-list"></div></div>
+  <div class="fav-actions" style="margin-top:16px"><button type="button" class="fav-btn fav-btn--primary" id="inventorySelectAll">เลือกทั้งหมด</button><button type="button" class="fav-btn fav-btn--danger" id="inventoryClearAll">ล้างทั้งหมด</button></div></div></div></div>
 
   <div id="transferModal" class="fav-modal transfer-modal" role="dialog" aria-modal="true" aria-labelledby="transferTitle" aria-hidden="true" hidden>
   <div class="fav-modal__dialog transfer-modal__dialog">
@@ -7205,6 +7230,38 @@ window.closeTransferModal = closeTransferModal;
     document.getElementById('menuThemeBtn')?.addEventListener('click',()=>{ document.getElementById('themeToggle')?.click(); closeHeaderMenu(); });
     document.getElementById('inventoryClose')?.addEventListener('click', closeInventoryModal);
     document.getElementById('inventoryModal')?.addEventListener('click',(e)=>{ if(e.target?.id==='inventoryModal') closeInventoryModal(); });
+    document.getElementById('inventorySelectAll')?.addEventListener('click',()=>{
+  const allJewelIds = Array.from(
+    new Set((jewels || []).map(j => (j.id || '').trim()).filter(Boolean))
+  );
+
+  if(!allJewelIds.length){
+    showToast('ยังไม่มีรายการจี้ให้เลือก', 1800, 'info');
+    return;
+  }
+
+  const previousOwnedIds = Array.from(window._ownedJewelIds || []);
+  const previousCount = previousOwnedIds.length;
+
+  window._ownedJewelIds = new Set(allJewelIds);
+  saveOwnedJewelIds();
+  renderInventoryLists();
+  refreshResultsForInventory();
+  updateTransferSummaryUI();
+
+  const addedCount = allJewelIds.length - previousCount;
+  showToast(`เลือกจี้ทั้งหมดแล้ว (${allJewelIds.length} ชิ้น)`, 4200, 'success', {
+    actionLabel: 'Undo',
+    onAction: () => {
+      window._ownedJewelIds = new Set(previousOwnedIds);
+      saveOwnedJewelIds();
+      renderInventoryLists();
+      refreshResultsForInventory();
+      updateTransferSummaryUI();
+      showToast('ย้อนกลับการเลือกทั้งหมดแล้ว', 2200, 'success');
+    }
+  });
+});
     document.getElementById('inventoryClearAll')?.addEventListener('click',()=>{ if(!getOwnedCount()){ showToast('ยังไม่มีจี้ในคลังให้ล้าง',1800,'info'); return; } if(!confirm('ล้างจี้ที่มีอยู่ทั้งหมดในคลัง?')) return; const previousOwnedIds = Array.from(window._ownedJewelIds || []); window._ownedJewelIds=new Set(); saveOwnedJewelIds(); renderInventoryLists(); refreshResultsForInventory(); updateTransferSummaryUI(); showToast('ล้างคลังจี้แล้ว',4200,'success',{ actionLabel:'Undo', onAction:()=>{ window._ownedJewelIds = new Set(previousOwnedIds); saveOwnedJewelIds(); renderInventoryLists(); refreshResultsForInventory(); updateTransferSummaryUI(); showToast('กู้คืนคลังจี้แล้ว',2200,'success'); } }); });
     document.getElementById('inventorySearchInput')?.addEventListener('input',(e)=>{ const clearBtn=document.getElementById('inventorySearchClear'); if(clearBtn) clearBtn.hidden=!e.target.value; renderInventoryLists(); });
     document.getElementById('inventorySearchClear')?.addEventListener('click',()=>{ const input=document.getElementById('inventorySearchInput'); const clearBtn=document.getElementById('inventorySearchClear'); if(input) input.value=''; if(clearBtn) clearBtn.hidden=true; renderInventoryLists(); input?.focus(); });
