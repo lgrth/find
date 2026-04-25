@@ -4528,6 +4528,21 @@ function recreateWorker(){
   };
 }
 
+function scrollToResultSection(){
+  if (window.innerWidth >= 768) return;
+
+  const resultEl = document.getElementById('resultTitle');
+  const targetEl = resultEl?.closest('section') || resultEl;
+  if (!targetEl) return;
+
+  requestAnimationFrame(()=>{
+    const headerHeight = document.querySelector('header')?.offsetHeight || 50;
+    const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+}
+
+
 /* ====== คำนวณ ====== */
 async function calculate(){
   const runId = beginCalcRun();
@@ -4536,6 +4551,8 @@ async function calculate(){
     showToast(`กรุณาเลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่างก่อน`, 3000, 'warn');
     return;
   }
+
+  scrollToResultSection();
 
   try{
     clearPinnedResults()
