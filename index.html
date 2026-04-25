@@ -3431,8 +3431,6 @@ html[data-theme="dark"] .seo-details .seo-section__inner{
         <span class="sel-progress__label">0/14</span>
       </span>
     </h2>
-    <div id="dataFreshness" class="data-freshness" aria-live="polite">ข้อมูล: กำลังโหลด...</div>
-
     <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
       <div class="chip-selected-row">
         <div class="chip-selected-title">✅ สกิลที่ต้องการ</div>
@@ -4838,17 +4836,6 @@ function setCalcProgress(pct, msg){
 let _lastDataLoadedAt = null;
 let _currentResultSnapshots = new Map();
 let _pinnedResults = new Map();
-
-function setDataFreshness(date=new Date()){
-  _lastDataLoadedAt = date;
-  const el = document.getElementById('dataFreshness');
-  if(!el) return;
-  const text = date.toLocaleString('th-TH', {
-    day:'2-digit', month:'short', year:'numeric',
-    hour:'2-digit', minute:'2-digit'
-  });
-  el.textContent = `• ข้อมูลอัปเดตล่าสุด: ${text} น.`;
-}
 
 function getCurrentFilterSnapshot(){
   return {
