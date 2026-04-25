@@ -3921,7 +3921,7 @@ function showLoading(msg){
     if(!btn) return;
     if(!btn.dataset.original){ btn.dataset.original = btn.innerHTML; }
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> กำลังคำนวณ…';
+    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> ค้นหาเซ็ตจี้';
     btn.setAttribute('aria-live','assertive');
   };
   setBusy(calcBtn);
@@ -4004,11 +4004,26 @@ function __formatETA(sec){
   return `${s} วินาที`;
 }
 
-function __getEtaMessage(sec){
-  sec = Math.max(1, Math.ceil(sec));
+function __getEtaMessage(sec, isOvertime = false){
+  if (isOvertime){
+    return `กำลังประมวลผลต่อ…<br>อาจใช้เวลานานกว่าปกติเล็กน้อย`;
+  }
 
+  sec = Math.max(1, Math.ceil(sec));
   if (sec <= 1) return 'ใกล้เสร็จแล้ว…';
+
   return `กำลังประมวลผล…<br>เหลือประมาณ ${__formatETA(sec)}`;
+}
+
+function __clampPct(pct, min = 0, max = 100){
+  return Math.max(min, Math.min(max, Number(pct) || 0));
+}
+
+function __paintCalcProgress(msg){
+  setCalcProgress(
+    Math.round(__etaState.visualPct || __etaState.lastPct || 10),
+    msg
+  );
 }
 
 function __resetCalcETA(){
@@ -4019,10 +4034,17 @@ function __resetCalcETA(){
   __etaState = {
     start: performance.now(),
     deadline: 0,
+    initialSec: 0,
+
+    // progress จริงจาก worker
     lastPct: 0,
+
+    // progress ที่ user เห็น ให้เดินเองได้
+    visualPct: 0,
+
     lastLabelSec: null,
     timer: null,
-    locked: false
+    isOvertime: false
   };
 }
 
@@ -4032,31 +4054,62 @@ function __startCalcCountdown(initialSec = 8){
   }
 
   const now = performance.now();
-  const safeInitialSec = Math.max(3, Math.min(60, Math.ceil(initialSec)));
+  const safeInitialSec = Math.max(3, Math.min(20, Math.ceil(initialSec)));
 
+  __etaState.start = now;
   __etaState.deadline = now + safeInitialSec * 1000;
-  __etaState.locked = true;
+  __etaState.initialSec = safeInitialSec;
+  __etaState.lastPct = 5;
+  __etaState.visualPct = 5;
   __etaState.lastLabelSec = safeInitialSec;
+  __etaState.isOvertime = false;
 
-  setCalcProgress(
-    10,
-    __getEtaMessage(safeInitialSec),
-    { trustedHtml: true }
-  );
+  __paintCalcProgress(__getEtaMessage(safeInitialSec));
 
   __etaState.timer = setInterval(()=>{
-    const remainingSec = Math.max(1, Math.ceil((__etaState.deadline - performance.now()) / 1000));
+    const now = performance.now();
+    const remainingSec = Math.ceil((__etaState.deadline - now) / 1000);
 
-    // อัปเดตเฉพาะตอนเลขวินาทีเปลี่ยนจริง ๆ กันข้อความสั่น/รีเฟรชถี่เกิน
-    if (remainingSec !== __etaState.lastLabelSec){
-      __etaState.lastLabelSec = remainingSec;
-      setCalcProgress(
-        Math.max(10, Math.min(96, __etaState.lastPct || 10)),
-        __getEtaMessage(remainingSec),
-        { trustedHtml: true }
+    if (remainingSec > 0){
+      // ช่วง countdown: ให้หลอดค่อย ๆ วิ่งจาก 10% ไปประมาณ 82%
+      const elapsedMs = now - __etaState.start;
+      const totalMs = Math.max(1, __etaState.initialSec * 1000);
+      const ratio = __clampPct(elapsedMs / totalMs, 0, 1);
+
+      const countdownTargetPct = 1 + ratio * 59; // 1 -> 60
+      __etaState.visualPct = Math.max(
+        __etaState.visualPct || 1,
+        __etaState.lastPct || 1,
+        countdownTargetPct
       );
+
+      if (remainingSec !== __etaState.lastLabelSec){
+        __etaState.lastLabelSec = remainingSec;
+      }
+
+      __paintCalcProgress(__getEtaMessage(remainingSec));
+      return;
     }
-  }, 250);
+
+    // ถ้าเกินเวลาประมาณแล้ว ให้เปลี่ยนเป็น overtime
+    if (!__etaState.isOvertime){
+      __etaState.isOvertime = true;
+      __etaState.lastLabelSec = 0;
+      __etaState.visualPct = Math.max(__etaState.visualPct || 0, __etaState.lastPct || 0, 60);
+    }
+
+    // ช่วง overtime: หลอดยังต้องขยับต่อ แต่ค่อย ๆ ช้าลง และไม่เต็ม 100 จนกว่าจะเสร็จจริง
+    const overtimeMax = 98; // cap progress ตอน overtime ไว้ที่ 98% เพื่อกันไม่ให้ดูเหมือนค้างตอน 99%
+    const current = __etaState.visualPct || 70;
+    const remainingToMax = overtimeMax - current;
+
+    if (remainingToMax > 0.15){
+      const step = Math.max(0.02, remainingToMax * 0.02);
+      __etaState.visualPct = Math.min(overtimeMax, current + step);
+    }
+
+    __paintCalcProgress(__getEtaMessage(0, true));
+  }, 200);
 }
 
 function __stopCalcCountdown(){
@@ -4067,55 +4120,46 @@ function __stopCalcCountdown(){
 }
 
 function __updateCalcETAFromProgress(rawPct){
-  const pct = Math.max(0, Math.min(99, Number(rawPct) || 0));
+  const workerPct = __clampPct(rawPct, 0, 99);
+
+  // worker progress ช่วยดันหลอดไปข้างหน้าได้ แต่ห้ามทำให้หลอดถอยหลัง
+  __etaState.lastPct = Math.max(__etaState.lastPct || 0, workerPct);
+
   const now = performance.now();
+  const remainingSec = Math.ceil((__etaState.deadline - now) / 1000);
 
-  // progress bar ไม่ควรถอยหลัง
-  __etaState.lastPct = Math.max(__etaState.lastPct || 0, pct);
+  if (__etaState.isOvertime || remainingSec <= 0){
+    __etaState.isOvertime = true;
 
-  const elapsedSec = Math.max(0.1, (now - (__etaState.start || now)) / 1000);
-  const fraction = pct / 100;
-
-  // ช่วงแรก progress ยังไม่นิ่ง อย่าเพิ่งเอามาคำนวณ ETA
-  if (elapsedSec < 0.8 || pct < 3){
-    setCalcProgress(
-      Math.max(10, Math.round(__etaState.lastPct)),
-      __getEtaMessage(Math.max(1, Math.ceil((__etaState.deadline - now) / 1000))),
-      { trustedHtml: true }
+    // ถ้า worker ส่ง progress สูงกว่า visual ก็ให้ดันขึ้น แต่ยัง cap ที่ 96
+    __etaState.visualPct = Math.max(
+      __etaState.visualPct || 60,
+      Math.min(99, __etaState.lastPct || 60)
     );
+
+    __paintCalcProgress(__getEtaMessage(0, true));
     return;
   }
 
-  const estimatedTotalSec = elapsedSec / fraction;
-  const estimatedRemainSec = Math.max(1, estimatedTotalSec - elapsedSec);
-
-  // จำกัดไม่ให้ estimate เพี้ยนเกินจริง
-  const boundedRemainSec = Math.max(1, Math.min(90, estimatedRemainSec));
-  const currentRemainSec = Math.max(1, (__etaState.deadline - now) / 1000);
-
-  let nextRemainSec = currentRemainSec;
-
-  if (boundedRemainSec < currentRemainSec){
-    // ถ้างานเร็วขึ้น ให้ลดเวลาได้ แต่ลดแบบค่อย ๆ
-    nextRemainSec = currentRemainSec * 0.65 + boundedRemainSec * 0.35;
-  }else{
-    // ถ้างานช้ากว่าที่คิด ให้เพิ่มได้เล็กน้อย ไม่ให้เวลาเด้งมั่ว
-    const maxIncrease = Math.max(1, currentRemainSec * 0.15);
-    nextRemainSec = Math.min(currentRemainSec + maxIncrease, boundedRemainSec);
-  }
-
-  __etaState.deadline = now + nextRemainSec * 1000;
-
-  setCalcProgress(
-    Math.max(10, Math.min(96, Math.round(__etaState.lastPct))),
-    __getEtaMessage(Math.ceil(nextRemainSec)),
-    { trustedHtml: true }
+  // ก่อน overtime: ใช้ค่าที่มากที่สุดระหว่าง visual timer กับ worker จริง
+  __etaState.visualPct = Math.max(
+    __etaState.visualPct || 1,
+    Math.min(99, __etaState.lastPct || 1)
   );
+
+  __paintCalcProgress(__getEtaMessage(remainingSec));
 }
+
+function __completeCalcProgress(){
+  __stopCalcCountdown();
+  setCalcProgress(100, 'จัดเซ็ตเสร็จแล้ว');
+}
+
 window.__resetCalcETA = __resetCalcETA;
 window.__startCalcCountdown = __startCalcCountdown;
 window.__stopCalcCountdown = __stopCalcCountdown;
 window.__updateCalcETAFromProgress = __updateCalcETAFromProgress;
+window.__completeCalcProgress = __completeCalcProgress;
 
 let _toastTimers = [];
 let _toastUndoHandler = null;
@@ -4623,7 +4667,9 @@ function recreateWorker(){
   __updateCalcETAFromProgress(msg.p);
     }else if(msg.type==='result'){
       try{
-        setProgress(100, 'จัดเซ็ตเสร็จแล้ว');
+        if (typeof __completeCalcProgress === 'function'){
+      __completeCalcProgress();
+    }
       renderResults(msg.best);
       setTimeout(()=>hideLoading(), 180);
       }catch(err){
@@ -4712,7 +4758,7 @@ async function calculate(){
     document.getElementById('result').innerHTML = '';
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     __resetCalcETA();
-    __startCalcCountdown(8);
+    __startCalcCountdown(15);
 
     // ยกเลิก Worker เก่าแล้วสร้างใหม่ทุกครั้ง เพื่อป้องกันผลลัพธ์ค้างจากการค้นหาก่อนหน้า
     recreateWorker();
@@ -8272,7 +8318,7 @@ const helpChoiceSummary = document.getElementById('helpChoiceSummary');
 const helpChoiceGuided = document.getElementById('helpChoiceGuided');
 const helpChoiceClose = document.getElementById('helpChoiceClose');
 
-  const IDLE_GUIDE_MS = 15000;
+  const IDLE_GUIDE_MS = 30000;
   const IDLE_TUTORIAL_MS = 120000;
 
   const chipSearchBox = document.querySelector('#chipSearch')?.closest('.chip-search-box');
@@ -8955,7 +9001,7 @@ helpChoiceModal?.addEventListener('click', (e)=>{
       resetIdleTutorialTimer();
     });
 
-    const idleEvents = ['click','touchstart','keydown','input','change'];
+    const idleEvents = ['pointerdown','touchstart','keydown','input','change','focusin','wheel'];
     idleEvents.forEach((eventName)=>{
       document.addEventListener(eventName, () => {
         if (!guidedActive){
@@ -9374,7 +9420,7 @@ async function applyCharFromURL(){
       document.getElementById('result').innerHTML = '';
       if (typeof window.showCalcOverlay === 'function') window.showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
       if (typeof window.__resetCalcETA === 'function') window.__resetCalcETA();
-      if (typeof window.__startCalcCountdown === 'function') window.__startCalcCountdown(6);
+      if (typeof window.__startCalcCountdown === 'function') window.__startCalcCountdown(10);
 
       // ใช้ buildWorkerCode ที่เป็น single source of truth สำหรับทั้งสองเส้นทาง
       _fixedWorkerBlobUrl = URL.createObjectURL(new Blob([window.buildWorkerCode('3combo')],{type:'application/javascript'}));
@@ -9388,11 +9434,18 @@ async function applyCharFromURL(){
     window.__updateCalcETAFromProgress(e.data.p);
   }
 } else if (e.data.type === 'result'){
-          if (typeof window.renderResults === 'function') window.renderResults(e.data.best);
-          if (typeof window.hideCalcOverlay === 'function') window.hideCalcOverlay();
-          if (typeof window.hideLoading === 'function') window.hideLoading();
-          cleanupFixedWorker();
-        }
+  if (typeof window.__completeCalcProgress === 'function'){
+    window.__completeCalcProgress();
+  }
+
+  if (typeof window.renderResults === 'function') window.renderResults(e.data.best);
+
+  setTimeout(()=>{
+    if (typeof window.hideCalcOverlay === 'function') window.hideCalcOverlay();
+    if (typeof window.hideLoading === 'function') window.hideLoading();
+    cleanupFixedWorker();
+  }, 300);
+}
       };
       _fixedWorker.onerror = function(err){
         if(runId !== _activeCalcRun) return;
