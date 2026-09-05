@@ -6,7 +6,7 @@
 
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://docs.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://docs.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
 
 <title>ค้นหาเซ็ตจี้เกมเศรษฐี | จัดเซ็ตจี้เครื่องรางที่ใช่ได้ง่าย ๆ</title>
 <meta name="description" content="ค้นหาและจัดเซ็ตจี้เครื่องรางเกมเศรษฐีได้ง่าย เลือกสกิลที่ต้องการ เลือกตัวละคร แล้วระบบช่วยหาเซ็ตจี้ที่เหมาะกับคุณ พร้อมบันทึกคลังจี้และแชร์เซ็ตได้">
@@ -126,9 +126,11 @@
 </script>
 
 <script>
-/* Force light mode before first paint (no FOUC) */
+/* Apply saved theme before first paint (no FOUC) */
 (function(){
-  document.documentElement.setAttribute('data-theme', 'light');
+  var t = 'light';
+  try{ var s = localStorage.getItem('theme'); if(s === 'dark' || s === 'light') t = s; }catch(e){}
+  document.documentElement.setAttribute('data-theme', t);
 })();
 </script>
 <style>
@@ -4993,7 +4995,7 @@ function openDonateModal(source = 'unknown'){
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
+  syncBodyScrollLock();
 
   trackEvent('donate_modal_open', {
     source
@@ -5006,7 +5008,7 @@ function closeDonateModal(){
 
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
+  syncBodyScrollLock();
 }
 
 function showDonateCard(){
@@ -5970,32 +5972,54 @@ function bindShareButtons(){
   document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
 
+// Single source of truth for the body scroll-lock across every blocking modal.
+const MODAL_OPEN_SELECTOR = '.fav-modal.show, .qr-modal.show, .donate-modal.show, .fb-modal.show, .fb-confirm.show';
+function syncBodyScrollLock(){
+  document.body.style.overflow = document.querySelector(MODAL_OPEN_SELECTOR) ? 'hidden' : '';
+}
+
 function setDialogVisible(dialog, visible){
   if(!dialog) return;
+
+  // Abort any pending close-cleanup from a previous toggle (prevents a stale
+  // hide from clobbering a dialog that was just re-opened).
+  if(dialog.__closeCleanup){ dialog.__closeCleanup(); dialog.__closeCleanup = null; }
 
   if(visible){
     dialog.classList.remove('hiding');
     dialog.hidden = false;
     dialog.classList.add('show');
     dialog.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    syncBodyScrollLock();
     return;
   }
 
   dialog.classList.remove('show');
   dialog.classList.add('hiding');
   dialog.setAttribute('aria-hidden', 'true');
+  // The dialog no longer counts as open, so recompute the lock right away
+  // instead of waiting for an animation that may never fire.
+  syncBodyScrollLock();
 
-  const onEnd = () => {
+  let timer = null;
+  let cleared = false;
+  const finish = (e) => {
+    // Ignore animationend bubbling up from child elements.
+    if(e && e.target !== dialog) return;
+    if(cleared) return;
+    cleared = true;
+    clearTimeout(timer);
+    dialog.removeEventListener('animationend', finish);
+    dialog.__closeCleanup = null;
     dialog.classList.remove('hiding');
     dialog.hidden = true;
-    if(!document.querySelector('.fav-modal.show, .tutorial-sheet.show, .donate-modal.show, .qr-modal.show')){
-      document.body.style.overflow = '';
-    }
-    dialog.removeEventListener('animationend', onEnd);
+    syncBodyScrollLock();
   };
-
-  dialog.addEventListener('animationend', onEnd);
+  // Whichever comes first: the close animation ending, or a fixed fallback so a
+  // modal with no `.hiding` animation still gets cleaned up (bug: stuck scroll).
+  timer = setTimeout(finish, 600);
+  dialog.addEventListener('animationend', finish);
+  dialog.__closeCleanup = () => { cleared = true; clearTimeout(timer); dialog.removeEventListener('animationend', finish); };
 }
 
 function showQRModal(url){
