@@ -6,7 +6,7 @@
 
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://docs.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://docs.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
 
 <title>ค้นหาเซ็ตจี้เกมเศรษฐี | จัดเซ็ตจี้เครื่องรางที่ใช่ได้ง่าย ๆ</title>
 <meta name="description" content="ค้นหาและจัดเซ็ตจี้เครื่องรางเกมเศรษฐีได้ง่าย เลือกสกิลที่ต้องการ เลือกตัวละคร แล้วระบบช่วยหาเซ็ตจี้ที่เหมาะกับคุณ พร้อมบันทึกคลังจี้และแชร์เซ็ตได้">
@@ -126,9 +126,11 @@
 </script>
 
 <script>
-/* Force light mode before first paint (no FOUC) */
+/* Apply saved theme before first paint (no FOUC) */
 (function(){
-  document.documentElement.setAttribute('data-theme', 'light');
+  var t = 'light';
+  try{ var s = localStorage.getItem('theme'); if(s === 'dark' || s === 'light') t = s; }catch(e){}
+  document.documentElement.setAttribute('data-theme', t);
 })();
 </script>
 <style>
@@ -3567,6 +3569,7 @@ html[data-theme="dark"] .seo-details .seo-section__inner{
       <div class="loader">
         <div id="progressTextLocal" style="color:#fff" role="status" aria-live="polite">กำลังค้นหา…</div>
         <div class="bar"><span id="progressBarLocal"></span></div>
+        <button type="button" id="calcCancelBtn" class="btn" style="margin-top:16px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.55)">ยกเลิกการค้นหา</button>
       </div>
     </div>
   </section>
@@ -3770,6 +3773,7 @@ const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/
 
 const MAX_SELECTS = 14;
 const MIN_SELECTS = 4;
+const DEFAULT_TOPK = 10;
 const DARK_PREFIX = "[ดาร์ค]";
 
 let jewels = [];
@@ -3879,6 +3883,38 @@ function refreshResultsForInventory(){
   }
 }
 
+function updateInventoryChipState(name){
+  const list = document.getElementById('inventoryAllList');
+  if(!list || typeof CSS === 'undefined' || !CSS.escape) return false;
+  const chip = list.querySelector('.inventory-chip[data-jewel-id="' + CSS.escape(name) + '"]');
+  if(!chip) return false;
+  const owned = !!(window._ownedJewelIds && window._ownedJewelIds.has(name));
+  chip.classList.toggle('is-owned', owned);
+  chip.setAttribute('aria-pressed', owned ? 'true' : 'false');
+  chip.setAttribute('aria-label', owned ? ('เอา ' + name + ' ออกจากคลัง') : ('เพิ่ม ' + name + ' เข้าคลัง'));
+  chip.setAttribute('title', owned ? 'กดเพื่อลบออกจากคลัง' : 'กดเพื่อเพิ่มเข้าคลัง');
+  let x = chip.querySelector('.chip-x');
+  if(owned && !x){
+    x = document.createElement('span'); x.className = 'chip-x'; x.setAttribute('aria-hidden','true'); x.textContent = '×';
+    chip.appendChild(x);
+  } else if(!owned && x){
+    x.remove();
+  }
+  return true;
+}
+
+// Toggling one jewel used to re-render the whole 1042-chip list; update just the
+// affected chip (and the counter) when it is already in the DOM, and fall back
+// to a full render only when it isn't (e.g. filtered out by the search box).
+function refreshInventoryChip(name){
+  if(updateInventoryChipState(name)){
+    const list = document.getElementById('inventoryAllList');
+    updateInventoryCountUI(list ? list.querySelectorAll('.inventory-chip').length : getOwnedCount());
+  } else {
+    renderInventoryLists();
+  }
+}
+
 function toggleOwnedJewel(id){
   const name = String(id || '').trim();
   if(!name) return;
@@ -3888,7 +3924,7 @@ function toggleOwnedJewel(id){
   if(hadBefore){
     window._ownedJewelIds.delete(name);
     saveOwnedJewelIds();
-    renderInventoryLists();
+    refreshInventoryChip(name);
     refreshResultsForInventory();
 
     showToast(`ลบจี้ "${name}" ออกจากคลังของฉันแล้ว`, 5000, 'info', {
@@ -3896,7 +3932,7 @@ function toggleOwnedJewel(id){
       onAction: () => {
         window._ownedJewelIds.add(name);
         saveOwnedJewelIds();
-        renderInventoryLists();
+        refreshInventoryChip(name);
         refreshResultsForInventory();
         showToast(`กู้คืนจี้ "${name}" กลับเข้าคลังแล้ว`, 2200, 'success');
       }
@@ -3906,7 +3942,7 @@ function toggleOwnedJewel(id){
 
   window._ownedJewelIds.add(name);
   saveOwnedJewelIds();
-  renderInventoryLists();
+  refreshInventoryChip(name);
   refreshResultsForInventory();
 }
 function showLoading(msg){
@@ -4471,7 +4507,7 @@ function computeJewelPool(){
   return jewels.slice();
 }
 
-const SPEED_CFG = { CANDIDATE_LIMIT: 1500, FIXED_LINK_LIMIT: 3000 };
+const SPEED_CFG = { CANDIDATE_LIMIT: 120, FIXED_LINK_LIMIT: 200, PER_MASK: 6 };
 const _popcount = x => { let c=0; while(x){c+=x&1;x>>>=1;} return c; };
 function compareCandidates(a,b){
   return (_popcount(b.mask)-_popcount(a.mask)) ||
@@ -4502,16 +4538,33 @@ function buildCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.CAN
   }).filter(m=>m.mask!==0)
     .sort(compareCandidates);
 
+  // Collapse near-duplicate jewels that cover the exact same desired-skill mask:
+  // keep only the few best representatives per mask. `all` is already sorted by
+  // compareCandidates — (popcount desc, unwanted asc, extra desc, score desc) —
+  // and within a single mask popcount is constant, so the first PER_MASK entries
+  // seen for each mask are precisely its best representatives. This shrinks the
+  // pool from ~800 to ~150 with no observed change to the top-K results, turning
+  // the worker's O(n^4) search from minutes into well under a second.
+  const perMask = SPEED_CFG.PER_MASK || 6;
+  const maskSeen = new Map();
+  const pruned = [];
+  for(const c of all){
+    const seen = maskSeen.get(c.mask) || 0;
+    if(seen >= perMask) continue;
+    maskSeen.set(c.mask, seen + 1);
+    pruned.push(c);
+  }
+
   // Guarantee at least one candidate per desired-skill bit before truncation
   const guaranteedIds = new Set();
   const guaranteed = [];
   for(let bit=0; bit<desired.length; bit++){
     const bitMask = 1<<bit;
-    const best = all.find(c=>(c.mask&bitMask)!==0);
+    const best = pruned.find(c=>(c.mask&bitMask)!==0);
     if(best && !guaranteedIds.has(best.id)){ guaranteedIds.add(best.id); guaranteed.push(best); }
   }
   const slots = Math.max(0, limit - guaranteed.length);
-  const rest = all.filter(c=>!guaranteedIds.has(c.id)).slice(0, slots);
+  const rest = pruned.filter(c=>!guaranteedIds.has(c.id)).slice(0, slots);
   // re-sort หลัง merge เพื่อให้ suffixOr pruning ทำงานถูกต้อง
   return [...guaranteed, ...rest].sort(compareCandidates);
 }
@@ -4527,11 +4580,11 @@ self.onmessage = function(e){
   ${is3 ? 'var fixed = e.data.fixed;' : ''}
   var n = cand.length;
   var desiredMaskAll = (1 << desired.length) - 1;
-  var totalCombos = ${is3 ? 'n*(n-1)*(n-2)/6' : 'n*(n-1)*(n-2)*(n-3)/24'};
-  var done = 0, lastEmit = 0;
-  function emitProgress(){
-    if(done-lastEmit>5000){ lastEmit=done; self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)}); }
-  }
+  // Progress is driven by the outermost loop index so it advances monotonically
+  // to ~100% regardless of how many inner branches get pruned (the old
+  // done/totalCombos ratio undercounted every pruned branch and never reached 100).
+  var outerN = ${is3 ? '(n-2)' : '(n-3)'};
+  function emitOuter(a){ self.postMessage({type:'progress', p: outerN>0 ? Math.min(99, Math.round(a/outerN*100)) : 99}); }
 
   // sort: fewer missing → fewer unwanted → more extras → higher value
   function cmp(a,b){
@@ -4574,6 +4627,7 @@ self.onmessage = function(e){
 
   ${is3 ? `
   for(var a=0;a<n-2;a++){
+    emitOuter(a);
     var sA=namesets[a],skip=false;
     for(var _nm of sA){ if(fixedSet.has(_nm)){skip=true;break;} } if(skip) continue;
     for(var b=a+1;b<n-1;b++){
@@ -4582,14 +4636,14 @@ self.onmessage = function(e){
       for(var c=b+1;c<n;c++){
         var sC=namesets[c]; skip=false;
         for(var _nm of sC){ if(fixedSet.has(_nm)||sA.has(_nm)||sB.has(_nm)){skip=true;break;} }
-        if(skip){ done++; emitProgress(); continue; }
+        if(skip){ continue; }
         pushTop(makeResult([fixed,cand[a],cand[b],cand[c]]));
-        done++; emitProgress();
       }
     }
   }
   ` : `
   for(var a=0;a<n-3;a++){
+    emitOuter(a);
     if(best.length===topK){
       if(popcount(desiredMaskAll&(~(cand[a].mask|suffixOr[a+1])))>best[best.length-1].notMiss) continue;
     }
@@ -4611,9 +4665,8 @@ self.onmessage = function(e){
         for(var d=c+1;d<n;d++){
           var sD=namesets[d]; skip=false;
           for(var _nm of sD){ if(sA.has(_nm)||sB.has(_nm)||sC.has(_nm)){skip=true;break;} }
-          if(skip){ done++; emitProgress(); continue; }
+          if(skip){ continue; }
           pushTop(makeResult([cand[a],cand[b],cand[c],cand[d]]));
-          done++; emitProgress();
         }
       }
     }
@@ -4756,7 +4809,7 @@ async function calculate(){
     document.getElementById('result').innerHTML = '';
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     __resetCalcETA();
-    __startCalcCountdown(15);
+    __startCalcCountdown(5);
 
     // ยกเลิก Worker เก่าแล้วสร้างใหม่ทุกครั้ง เพื่อป้องกันผลลัพธ์ค้างจากการค้นหาก่อนหน้า
     recreateWorker();
@@ -4816,6 +4869,19 @@ function showCalcOverlay(msg){
   if (tx) tx.innerHTML = (msg || 'กำลังค้นหา…').replace(/\n/g,'<br>');
   if (ov){ ov.style.display = 'flex'; ov.classList.add('show'); ov.setAttribute('aria-hidden','false'); }
 }
+function cancelCalculation(){
+  // Stop any running worker and invalidate late results, then reset the view.
+  if(typeof beginCalcRun === 'function') beginCalcRun();
+  hideCalcOverlay();
+  hideLoading();
+  restoreEmptyState();
+  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=true; });
+  if(typeof showToast === 'function') showToast('ยกเลิกการค้นหาแล้ว', 2000, 'info');
+}
+window.cancelCalculation = cancelCalculation;
+document.getElementById('calcCancelBtn')?.addEventListener('click', cancelCalculation);
+
 function hideCalcOverlay(){
   __stopCalcCountdown();
 
@@ -4993,7 +5059,7 @@ function openDonateModal(source = 'unknown'){
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
+  syncBodyScrollLock();
 
   trackEvent('donate_modal_open', {
     source
@@ -5006,7 +5072,7 @@ function closeDonateModal(){
 
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
+  syncBodyScrollLock();
 }
 
 function showDonateCard(){
@@ -5453,6 +5519,9 @@ function resetAll(){
   selected_skill_count: Array.isArray(window._chipSelected) ? window._chipSelected.length : 0,
   unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
 });
+  // stop any in-flight search so a late worker result can't repaint the page
+  if(typeof beginCalcRun === 'function') beginCalcRun();
+  hideCalcOverlay();
   window._hasSearchedResults = false;
 window._inventoryResultFilterMode = 'all';
 
@@ -5603,7 +5672,7 @@ const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort
     stopProgressSimulation(false);
     hideLoading();
     console.warn('Fetch error:', err);
-    alert('ไม่สามารถโหลดข้อมูล ได้: ' + (err?.message || err) + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
+    showErrorBanner('ไม่สามารถโหลดข้อมูลได้: ' + (err?.message || err) + ' — ตรวจสิทธิ์แชร์ชีตเป็น "Anyone with the link – Viewer" และหัวคอลัมน์ให้ถูกต้อง');
     await makeTomSelects([]);
   }
 
@@ -5755,6 +5824,12 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   if (desiredIdx.length) state.s = desiredIdx;
   if (unwantedIdx.length) state.u = unwantedIdx;
 
+  // Store skill NAMES too, as the authoritative source. The positional indices
+  // above shift whenever the sheet gains or drops a skill, which would silently
+  // decode old links to the wrong skills; names survive re-ordering.
+  if (cleanDesired.length) state.sn = cleanDesired;
+  if (cleanUnwanted.length) state.un = cleanUnwanted;
+
   // ไม่ต้องเก็บ topK ถ้าเป็นค่า default 10
   if (topKValue && topKValue !== '10') state.k = topKValue;
 
@@ -5803,29 +5878,25 @@ function parseCompressedStateFromURL(){
     const parsed = JSON.parse(json);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
 
-    const decodedSels = fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []);
-const decodedUnwanted = fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []);
+    // Names are authoritative; positional indices are only a fallback for older
+    // links that predate name storage.
+    const nameSels = sanitizeStringArray(Array.isArray(parsed.sn) ? parsed.sn.slice(0, MAX_SELECTS) : [], MAX_SELECTS, 120);
+const nameUnwanted = sanitizeStringArray(Array.isArray(parsed.un) ? parsed.un.slice(0, MAX_SELECTS) : [], MAX_SELECTS, 120);
+const idxSels = fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []);
+const idxUnwanted = fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []);
 
-const fallbackSels = sanitizeStringArray(
-  Array.isArray(parsed.sn) ? parsed.sn.slice(0, MAX_SELECTS) : [],
-  MAX_SELECTS,
-  120
-);
-
-const fallbackUnwanted = sanitizeStringArray(
-  Array.isArray(parsed.un) ? parsed.un.slice(0, MAX_SELECTS) : [],
-  MAX_SELECTS,
-  120
-);
+const resultKey = parsed.r != null ? sanitizePlainString(parsed.r, 260) : '';
 
 return {
-  sels: decodedSels.length ? decodedSels : fallbackSels,
-  unwanted: decodedUnwanted.length ? decodedUnwanted : fallbackUnwanted,
+  sels: nameSels.length ? nameSels : idxSels,
+  unwanted: nameUnwanted.length ? nameUnwanted : idxUnwanted,
   k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
   dark: parsed.m === 1 ? '1' : '',
-  auto: parsed.a === 0 ? '' : '1',
+  // Auto-run only when a specific result set was shared; a plain filter link
+  // just fills the form and lets the user press search themselves.
+  auto: resultKey ? '1' : '',
   char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
-  resultKey: parsed.r != null ? sanitizePlainString(parsed.r, 260) : '',
+  resultKey: resultKey,
   resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
 };
   }catch(err){
@@ -5859,7 +5930,7 @@ function parseLegacyStateFromURL(){
     unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
     k: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
     dark: (params.get('d') || params.get('dark')) === '1' ? '1' : '',
-    auto: (params.get('a') || params.get('auto')) === '0' ? '' : '1',
+    auto: params.get('r') ? '1' : '',
     char: sanitizePlainString(params.get('char') || '', 120),
     resultKey: sanitizePlainString(params.get('r') || '', 260),
     resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')).slice(0, 4) : []
@@ -5970,32 +6041,54 @@ function bindShareButtons(){
   document.getElementById('shareBtn2')?.addEventListener('click', onShare);
 }
 
+// Single source of truth for the body scroll-lock across every blocking modal.
+const MODAL_OPEN_SELECTOR = '.fav-modal.show, .qr-modal.show, .donate-modal.show, .fb-modal.show, .fb-confirm.show';
+function syncBodyScrollLock(){
+  document.body.style.overflow = document.querySelector(MODAL_OPEN_SELECTOR) ? 'hidden' : '';
+}
+
 function setDialogVisible(dialog, visible){
   if(!dialog) return;
+
+  // Abort any pending close-cleanup from a previous toggle (prevents a stale
+  // hide from clobbering a dialog that was just re-opened).
+  if(dialog.__closeCleanup){ dialog.__closeCleanup(); dialog.__closeCleanup = null; }
 
   if(visible){
     dialog.classList.remove('hiding');
     dialog.hidden = false;
     dialog.classList.add('show');
     dialog.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    syncBodyScrollLock();
     return;
   }
 
   dialog.classList.remove('show');
   dialog.classList.add('hiding');
   dialog.setAttribute('aria-hidden', 'true');
+  // The dialog no longer counts as open, so recompute the lock right away
+  // instead of waiting for an animation that may never fire.
+  syncBodyScrollLock();
 
-  const onEnd = () => {
+  let timer = null;
+  let cleared = false;
+  const finish = (e) => {
+    // Ignore animationend bubbling up from child elements.
+    if(e && e.target !== dialog) return;
+    if(cleared) return;
+    cleared = true;
+    clearTimeout(timer);
+    dialog.removeEventListener('animationend', finish);
+    dialog.__closeCleanup = null;
     dialog.classList.remove('hiding');
     dialog.hidden = true;
-    if(!document.querySelector('.fav-modal.show, .tutorial-sheet.show, .donate-modal.show, .qr-modal.show')){
-      document.body.style.overflow = '';
-    }
-    dialog.removeEventListener('animationend', onEnd);
+    syncBodyScrollLock();
   };
-
-  dialog.addEventListener('animationend', onEnd);
+  // Whichever comes first: the close animation ending, or a fixed fallback so a
+  // modal with no `.hiding` animation still gets cleaned up (bug: stuck scroll).
+  timer = setTimeout(finish, 600);
+  dialog.addEventListener('animationend', finish);
+  dialog.__closeCleanup = () => { cleared = true; clearTimeout(timer); dialog.removeEventListener('animationend', finish); };
 }
 
 function showQRModal(url){
@@ -6257,9 +6350,9 @@ function downloadJSONFile(filename, data){
   a.download = safeFilename.endsWith('.json') ? safeFilename : `${safeFilename}.json`;
   document.body.appendChild(a);
   a.click();
-  a.remove();
-
-  URL.revokeObjectURL(url);
+  // Defer cleanup: some browsers (Safari/Firefox) cancel the download if the
+  // object URL is revoked in the same tick as the click.
+  setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 0);
 }
 
 function cryptoRandomId(prefix = 'id'){
@@ -7728,7 +7821,6 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
 <script>
 /* ===== UX v4: Chip picker — เป็นเจ้าของ state ผ่าน window._chipSelected ===== */
-const DEFAULT_TOPK = 10;
 (function(){
   let ALL_ABILITIES = [];
   // source of truth — array ของชื่อความสามารถที่เลือก (สูงสุด MAX_SELECTS)
@@ -9407,7 +9499,7 @@ async function applyCharFromURL(){
       document.getElementById('result').innerHTML = '';
       if (typeof window.showCalcOverlay === 'function') window.showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
       if (typeof window.__resetCalcETA === 'function') window.__resetCalcETA();
-      if (typeof window.__startCalcCountdown === 'function') window.__startCalcCountdown(10);
+      if (typeof window.__startCalcCountdown === 'function') window.__startCalcCountdown(5);
 
       // ใช้ buildWorkerCode ที่เป็น single source of truth สำหรับทั้งสองเส้นทาง
       _fixedWorkerBlobUrl = URL.createObjectURL(new Blob([window.buildWorkerCode('3combo')],{type:'application/javascript'}));
