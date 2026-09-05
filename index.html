@@ -3569,6 +3569,7 @@ html[data-theme="dark"] .seo-details .seo-section__inner{
       <div class="loader">
         <div id="progressTextLocal" style="color:#fff" role="status" aria-live="polite">กำลังค้นหา…</div>
         <div class="bar"><span id="progressBarLocal"></span></div>
+        <button type="button" id="calcCancelBtn" class="btn" style="margin-top:16px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.55)">ยกเลิกการค้นหา</button>
       </div>
     </div>
   </section>
@@ -4546,11 +4547,11 @@ self.onmessage = function(e){
   ${is3 ? 'var fixed = e.data.fixed;' : ''}
   var n = cand.length;
   var desiredMaskAll = (1 << desired.length) - 1;
-  var totalCombos = ${is3 ? 'n*(n-1)*(n-2)/6' : 'n*(n-1)*(n-2)*(n-3)/24'};
-  var done = 0, lastEmit = 0;
-  function emitProgress(){
-    if(done-lastEmit>5000){ lastEmit=done; self.postMessage({type:'progress',p:Math.round(done/totalCombos*100)}); }
-  }
+  // Progress is driven by the outermost loop index so it advances monotonically
+  // to ~100% regardless of how many inner branches get pruned (the old
+  // done/totalCombos ratio undercounted every pruned branch and never reached 100).
+  var outerN = ${is3 ? '(n-2)' : '(n-3)'};
+  function emitOuter(a){ self.postMessage({type:'progress', p: outerN>0 ? Math.min(99, Math.round(a/outerN*100)) : 99}); }
 
   // sort: fewer missing → fewer unwanted → more extras → higher value
   function cmp(a,b){
@@ -4593,6 +4594,7 @@ self.onmessage = function(e){
 
   ${is3 ? `
   for(var a=0;a<n-2;a++){
+    emitOuter(a);
     var sA=namesets[a],skip=false;
     for(var _nm of sA){ if(fixedSet.has(_nm)){skip=true;break;} } if(skip) continue;
     for(var b=a+1;b<n-1;b++){
@@ -4601,14 +4603,14 @@ self.onmessage = function(e){
       for(var c=b+1;c<n;c++){
         var sC=namesets[c]; skip=false;
         for(var _nm of sC){ if(fixedSet.has(_nm)||sA.has(_nm)||sB.has(_nm)){skip=true;break;} }
-        if(skip){ done++; emitProgress(); continue; }
+        if(skip){ continue; }
         pushTop(makeResult([fixed,cand[a],cand[b],cand[c]]));
-        done++; emitProgress();
       }
     }
   }
   ` : `
   for(var a=0;a<n-3;a++){
+    emitOuter(a);
     if(best.length===topK){
       if(popcount(desiredMaskAll&(~(cand[a].mask|suffixOr[a+1])))>best[best.length-1].notMiss) continue;
     }
@@ -4630,9 +4632,8 @@ self.onmessage = function(e){
         for(var d=c+1;d<n;d++){
           var sD=namesets[d]; skip=false;
           for(var _nm of sD){ if(sA.has(_nm)||sB.has(_nm)||sC.has(_nm)){skip=true;break;} }
-          if(skip){ done++; emitProgress(); continue; }
+          if(skip){ continue; }
           pushTop(makeResult([cand[a],cand[b],cand[c],cand[d]]));
-          done++; emitProgress();
         }
       }
     }
@@ -4775,7 +4776,7 @@ async function calculate(){
     document.getElementById('result').innerHTML = '';
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     __resetCalcETA();
-    __startCalcCountdown(15);
+    __startCalcCountdown(5);
 
     // ยกเลิก Worker เก่าแล้วสร้างใหม่ทุกครั้ง เพื่อป้องกันผลลัพธ์ค้างจากการค้นหาก่อนหน้า
     recreateWorker();
@@ -4835,6 +4836,19 @@ function showCalcOverlay(msg){
   if (tx) tx.innerHTML = (msg || 'กำลังค้นหา…').replace(/\n/g,'<br>');
   if (ov){ ov.style.display = 'flex'; ov.classList.add('show'); ov.setAttribute('aria-hidden','false'); }
 }
+function cancelCalculation(){
+  // Stop any running worker and invalidate late results, then reset the view.
+  if(typeof beginCalcRun === 'function') beginCalcRun();
+  hideCalcOverlay();
+  hideLoading();
+  restoreEmptyState();
+  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=true; });
+  if(typeof showToast === 'function') showToast('ยกเลิกการค้นหาแล้ว', 2000, 'info');
+}
+window.cancelCalculation = cancelCalculation;
+document.getElementById('calcCancelBtn')?.addEventListener('click', cancelCalculation);
+
 function hideCalcOverlay(){
   __stopCalcCountdown();
 
@@ -5472,6 +5486,9 @@ function resetAll(){
   selected_skill_count: Array.isArray(window._chipSelected) ? window._chipSelected.length : 0,
   unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
 });
+  // stop any in-flight search so a late worker result can't repaint the page
+  if(typeof beginCalcRun === 'function') beginCalcRun();
+  hideCalcOverlay();
   window._hasSearchedResults = false;
 window._inventoryResultFilterMode = 'all';
 
@@ -9448,7 +9465,7 @@ async function applyCharFromURL(){
       document.getElementById('result').innerHTML = '';
       if (typeof window.showCalcOverlay === 'function') window.showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
       if (typeof window.__resetCalcETA === 'function') window.__resetCalcETA();
-      if (typeof window.__startCalcCountdown === 'function') window.__startCalcCountdown(10);
+      if (typeof window.__startCalcCountdown === 'function') window.__startCalcCountdown(5);
 
       // ใช้ buildWorkerCode ที่เป็น single source of truth สำหรับทั้งสองเส้นทาง
       _fixedWorkerBlobUrl = URL.createObjectURL(new Blob([window.buildWorkerCode('3combo')],{type:'application/javascript'}));
