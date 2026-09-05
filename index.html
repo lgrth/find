@@ -5791,6 +5791,12 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   if (desiredIdx.length) state.s = desiredIdx;
   if (unwantedIdx.length) state.u = unwantedIdx;
 
+  // Store skill NAMES too, as the authoritative source. The positional indices
+  // above shift whenever the sheet gains or drops a skill, which would silently
+  // decode old links to the wrong skills; names survive re-ordering.
+  if (cleanDesired.length) state.sn = cleanDesired;
+  if (cleanUnwanted.length) state.un = cleanUnwanted;
+
   // ไม่ต้องเก็บ topK ถ้าเป็นค่า default 10
   if (topKValue && topKValue !== '10') state.k = topKValue;
 
@@ -5839,29 +5845,25 @@ function parseCompressedStateFromURL(){
     const parsed = JSON.parse(json);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
 
-    const decodedSels = fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []);
-const decodedUnwanted = fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []);
+    // Names are authoritative; positional indices are only a fallback for older
+    // links that predate name storage.
+    const nameSels = sanitizeStringArray(Array.isArray(parsed.sn) ? parsed.sn.slice(0, MAX_SELECTS) : [], MAX_SELECTS, 120);
+const nameUnwanted = sanitizeStringArray(Array.isArray(parsed.un) ? parsed.un.slice(0, MAX_SELECTS) : [], MAX_SELECTS, 120);
+const idxSels = fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []);
+const idxUnwanted = fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []);
 
-const fallbackSels = sanitizeStringArray(
-  Array.isArray(parsed.sn) ? parsed.sn.slice(0, MAX_SELECTS) : [],
-  MAX_SELECTS,
-  120
-);
-
-const fallbackUnwanted = sanitizeStringArray(
-  Array.isArray(parsed.un) ? parsed.un.slice(0, MAX_SELECTS) : [],
-  MAX_SELECTS,
-  120
-);
+const resultKey = parsed.r != null ? sanitizePlainString(parsed.r, 260) : '';
 
 return {
-  sels: decodedSels.length ? decodedSels : fallbackSels,
-  unwanted: decodedUnwanted.length ? decodedUnwanted : fallbackUnwanted,
+  sels: nameSels.length ? nameSels : idxSels,
+  unwanted: nameUnwanted.length ? nameUnwanted : idxUnwanted,
   k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
   dark: parsed.m === 1 ? '1' : '',
-  auto: parsed.a === 0 ? '' : '1',
+  // Auto-run only when a specific result set was shared; a plain filter link
+  // just fills the form and lets the user press search themselves.
+  auto: resultKey ? '1' : '',
   char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
-  resultKey: parsed.r != null ? sanitizePlainString(parsed.r, 260) : '',
+  resultKey: resultKey,
   resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
 };
   }catch(err){
@@ -5895,7 +5897,7 @@ function parseLegacyStateFromURL(){
     unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
     k: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
     dark: (params.get('d') || params.get('dark')) === '1' ? '1' : '',
-    auto: (params.get('a') || params.get('auto')) === '0' ? '' : '1',
+    auto: params.get('r') ? '1' : '',
     char: sanitizePlainString(params.get('char') || '', 120),
     resultKey: sanitizePlainString(params.get('r') || '', 260),
     resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')).slice(0, 4) : []
