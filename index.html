@@ -3773,6 +3773,7 @@ const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/
 
 const MAX_SELECTS = 14;
 const MIN_SELECTS = 4;
+const DEFAULT_TOPK = 10;
 const DARK_PREFIX = "[ดาร์ค]";
 
 let jewels = [];
@@ -3882,6 +3883,38 @@ function refreshResultsForInventory(){
   }
 }
 
+function updateInventoryChipState(name){
+  const list = document.getElementById('inventoryAllList');
+  if(!list || typeof CSS === 'undefined' || !CSS.escape) return false;
+  const chip = list.querySelector('.inventory-chip[data-jewel-id="' + CSS.escape(name) + '"]');
+  if(!chip) return false;
+  const owned = !!(window._ownedJewelIds && window._ownedJewelIds.has(name));
+  chip.classList.toggle('is-owned', owned);
+  chip.setAttribute('aria-pressed', owned ? 'true' : 'false');
+  chip.setAttribute('aria-label', owned ? ('เอา ' + name + ' ออกจากคลัง') : ('เพิ่ม ' + name + ' เข้าคลัง'));
+  chip.setAttribute('title', owned ? 'กดเพื่อลบออกจากคลัง' : 'กดเพื่อเพิ่มเข้าคลัง');
+  let x = chip.querySelector('.chip-x');
+  if(owned && !x){
+    x = document.createElement('span'); x.className = 'chip-x'; x.setAttribute('aria-hidden','true'); x.textContent = '×';
+    chip.appendChild(x);
+  } else if(!owned && x){
+    x.remove();
+  }
+  return true;
+}
+
+// Toggling one jewel used to re-render the whole 1042-chip list; update just the
+// affected chip (and the counter) when it is already in the DOM, and fall back
+// to a full render only when it isn't (e.g. filtered out by the search box).
+function refreshInventoryChip(name){
+  if(updateInventoryChipState(name)){
+    const list = document.getElementById('inventoryAllList');
+    updateInventoryCountUI(list ? list.querySelectorAll('.inventory-chip').length : getOwnedCount());
+  } else {
+    renderInventoryLists();
+  }
+}
+
 function toggleOwnedJewel(id){
   const name = String(id || '').trim();
   if(!name) return;
@@ -3891,7 +3924,7 @@ function toggleOwnedJewel(id){
   if(hadBefore){
     window._ownedJewelIds.delete(name);
     saveOwnedJewelIds();
-    renderInventoryLists();
+    refreshInventoryChip(name);
     refreshResultsForInventory();
 
     showToast(`ลบจี้ "${name}" ออกจากคลังของฉันแล้ว`, 5000, 'info', {
@@ -3899,7 +3932,7 @@ function toggleOwnedJewel(id){
       onAction: () => {
         window._ownedJewelIds.add(name);
         saveOwnedJewelIds();
-        renderInventoryLists();
+        refreshInventoryChip(name);
         refreshResultsForInventory();
         showToast(`กู้คืนจี้ "${name}" กลับเข้าคลังแล้ว`, 2200, 'success');
       }
@@ -3909,7 +3942,7 @@ function toggleOwnedJewel(id){
 
   window._ownedJewelIds.add(name);
   saveOwnedJewelIds();
-  renderInventoryLists();
+  refreshInventoryChip(name);
   refreshResultsForInventory();
 }
 function showLoading(msg){
@@ -5639,7 +5672,7 @@ const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort
     stopProgressSimulation(false);
     hideLoading();
     console.warn('Fetch error:', err);
-    alert('ไม่สามารถโหลดข้อมูล ได้: ' + (err?.message || err) + '\n\nตรวจสิทธิ์แชร์เป็น "Anyone with the link – Viewer" และว่ามีหัวคอลัมน์ตามที่กำหนด');
+    showErrorBanner('ไม่สามารถโหลดข้อมูลได้: ' + (err?.message || err) + ' — ตรวจสิทธิ์แชร์ชีตเป็น "Anyone with the link – Viewer" และหัวคอลัมน์ให้ถูกต้อง');
     await makeTomSelects([]);
   }
 
@@ -6317,9 +6350,9 @@ function downloadJSONFile(filename, data){
   a.download = safeFilename.endsWith('.json') ? safeFilename : `${safeFilename}.json`;
   document.body.appendChild(a);
   a.click();
-  a.remove();
-
-  URL.revokeObjectURL(url);
+  // Defer cleanup: some browsers (Safari/Firefox) cancel the download if the
+  // object URL is revoked in the same tick as the click.
+  setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 0);
 }
 
 function cryptoRandomId(prefix = 'id'){
@@ -7788,7 +7821,6 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
 <script>
 /* ===== UX v4: Chip picker — เป็นเจ้าของ state ผ่าน window._chipSelected ===== */
-const DEFAULT_TOPK = 10;
 (function(){
   let ALL_ABILITIES = [];
   // source of truth — array ของชื่อความสามารถที่เลือก (สูงสุด MAX_SELECTS)
