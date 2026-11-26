@@ -110,6 +110,7 @@ function normalizeFavoritePreset(item){
     selected: Array.isArray(src.selected) ? src.selected : state.selected,
     unwanted: Array.isArray(src.unwanted) ? src.unwanted : state.unwanted,
     topK: src.topK ?? state.topK,
+    jewelTypes: src.jewelTypes ?? state.jewelTypes,
     darkOnly: src.darkOnly ?? state.darkOnly,
     char: src.char ?? state.char ?? ''
   });
@@ -928,7 +929,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
     applyFilterState({
       selected: validSelected,
       unwanted: validUnwanted,
-      darkOnly: !!state.darkOnly,
+      jewelTypes: normalizeFilterState(state).jewelTypes,
       topK: state.topK || DEFAULT_TOPK,
       char: missingChar ? '' : char
     });

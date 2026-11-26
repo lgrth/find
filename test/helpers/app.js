@@ -116,7 +116,7 @@ async function runSearch(page, scenario) {
   return page.evaluate(async (s) => {
     window.setChipState(s.selected || []);
     window.setUnwantedState(s.unwanted || []);
-    document.getElementById('darkOnly').checked = !!s.darkOnly;
+    applyFilterState({ jewelTypes: s.jewelTypes || [] });
     const ts = document.getElementById('charSelect').tomselect;
     if (s.char) setCharSelectValue(s.char); else ts.clear(true);
     document.getElementById('topK').value = String(s.topK || 10);
@@ -144,7 +144,7 @@ async function readForm(page) {
   return page.evaluate(() => ({
     selected: (window._chipSelected || []).slice(),
     unwanted: (window._chipUnwanted || []).slice(),
-    darkOnly: !!document.getElementById('darkOnly')?.checked,
+    jewelTypes: readFilterState().jewelTypes,
     topK: document.getElementById('topK')?.value,
     char: getCharSelectValue(),
   }));

@@ -3,7 +3,7 @@
  *   { selected: string[],  // wanted skills (max MAX_SELECTS)
  *     unwanted: string[],  // unwanted skills
  *     char:     string,    // character name, '' = none
- *     darkOnly: boolean,
+ *     jewelTypes: string[],  // subset of 'dark' | 'white' | 'other'; [] = every pendant
  *     topK:     string }   // '3'–'50' (stored as string, as in saved presets)
  *
  * Every feature that reads, writes, saves or shares the filter goes through here:
@@ -34,6 +34,57 @@ function sanitizeStringArray(list, maxItems = 100, maxLen = MAX_SAFE_STRING_LENG
       .map(v => sanitizePlainString(v, maxLen))
       .filter(Boolean)
   )).slice(0, maxItems);
+}
+
+/* ---- pendant-type filter: [ดาร์ค] / [ไวท์] / อื่น ๆ (multi-select) ---- */
+
+const JEWEL_TYPE_FILTERS = [
+  { type: 'dark',  label: '[ดาร์ค]', bit: 1 },
+  { type: 'white', label: '[ไวท์]',  bit: 2 },
+  { type: 'other', label: 'อื่น ๆ',   bit: 4 }   // no prefix, or any other prefix
+];
+
+/** Valid, de-duplicated, in display order. */
+function normalizeJewelTypes(list){
+  const set = new Set(Array.isArray(list) ? list : []);
+  return JEWEL_TYPE_FILTERS.map(f => f.type).filter(t => set.has(t));
+}
+
+function jewelTypesToBits(types){
+  return normalizeJewelTypes(types).reduce((bits, t) => bits | JEWEL_TYPE_FILTERS.find(f => f.type === t).bit, 0);
+}
+
+function bitsToJewelTypes(bits){
+  const n = Number(bits) || 0;
+  return JEWEL_TYPE_FILTERS.filter(f => n & f.bit).map(f => f.type);
+}
+
+/** true when the filter lets every pendant through */
+function isAllJewelTypes(types){
+  const t = normalizeJewelTypes(types);
+  return t.length === 0 || t.length === JEWEL_TYPE_FILTERS.length;
+}
+
+function jewelTypesLabel(types){
+  if(isAllJewelTypes(types)) return 'ทุกจี้';
+  return normalizeJewelTypes(types).map(t => JEWEL_TYPE_FILTERS.find(f => f.type === t).label).join(' + ');
+}
+
+function jewelTypeButtons(){
+  return Array.from(document.querySelectorAll('#jewelTypeFilter .jewel-type'));
+}
+
+function readJewelTypesUI(){
+  return normalizeJewelTypes(jewelTypeButtons().filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.type));
+}
+
+function setJewelTypesUI(types){
+  const set = new Set(normalizeJewelTypes(types));
+  jewelTypeButtons().forEach(b => {
+    const on = set.has(b.dataset.type);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.classList.toggle('active', on);
+  });
 }
 
 /* ---- character select (TomSelect or native <select>) ---- */
@@ -72,7 +123,7 @@ function readFilterState(){
     selected: getDesired(),
     unwanted: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [],
     char: getCharSelectValue(),
-    darkOnly: !!darkOnly?.checked,
+    jewelTypes: readJewelTypesUI(),
     topK: topKInput?.value ? String(topKInput.value) : String(DEFAULT_TOPK)
   };
 }
@@ -82,7 +133,7 @@ function applyFilterState(partial){
   const p = partial || {};
   if('selected' in p) window.setChipState(p.selected || []);
   if('unwanted' in p) window.setUnwantedState(p.unwanted || []);
-  if('darkOnly' in p && darkOnly) darkOnly.checked = !!p.darkOnly;
+  if('jewelTypes' in p) setJewelTypesUI(p.jewelTypes);
   if('topK' in p){
     if(topKInput) topKInput.value = String(p.topK || DEFAULT_TOPK);
     document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(topKInput?.value || DEFAULT_TOPK)));
@@ -92,14 +143,15 @@ function applyFilterState(partial){
   }
 }
 
-/** Clean an untrusted filter (saved preset, import file). */
+/** Clean an untrusted filter (saved preset, import file).
+ *  Older data has `darkOnly: true` instead of `jewelTypes`; it becomes ['dark']. */
 function normalizeFilterState(raw){
   const src = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
   return {
     selected: sanitizeStringArray(src.selected, MAX_SELECTS, 120),
     unwanted: sanitizeStringArray(src.unwanted, MAX_SELECTS, 120),
     topK: clampNumber(src.topK, 3, 50, 10),
-    darkOnly: !!src.darkOnly,
+    jewelTypes: Array.isArray(src.jewelTypes) ? normalizeJewelTypes(src.jewelTypes) : (src.darkOnly ? ['dark'] : []),
     char: sanitizePlainString(src.char ?? '', 120)
   };
 }
@@ -109,7 +161,7 @@ function hasMeaningfulFilter(state){
     state.selected.length ||
     state.unwanted.length ||
     state.char ||
-    state.darkOnly ||
+    (state.jewelTypes || []).length ||
     String(state.topK || '') !== String(DEFAULT_TOPK)
   );
 }
@@ -119,14 +171,15 @@ function summarizeFilterState(state){
     `${(state.selected || []).length} สกิลที่ต้องการ`,
     `${(state.unwanted || []).length} สกิลที่ไม่ต้องการ`,
     state.char ? state.char : 'ไม่เลือกตัวละคร',
-    state.darkOnly ? '[ดาร์ค] เท่านั้น' : 'ทุกจี้',
+    isAllJewelTypes(state.jewelTypes) ? 'ทุกจี้' : `${jewelTypesLabel(state.jewelTypes)} เท่านั้น`,
     `${state.topK || DEFAULT_TOPK} เซ็ต`
   ].join(' • ');
 }
 
 /* ---- share-link codec (compressed ?d=… payload) ----
  * Keys: s/u = skill indices (old links), sn/un = skill names (authoritative),
- *       k = topK (omitted when 10), m = 1 for darkOnly, c = character.
+ *       k = topK (omitted when 10), ty = pendant types as bits (dark 1, white 2,
+ *       other 4), c = character. Old links used m = 1 for "[ดาร์ค] only".
  * The positional indices shift whenever the sheet gains or drops a skill, so
  * names are written too and win when present.                                    */
 
@@ -142,7 +195,8 @@ function filterStateToShareParams(state){
   if (selected.length) out.sn = selected;
   if (unwanted.length) out.un = unwanted;
   if (topK !== '10') out.k = topK;
-  if (state.darkOnly) out.m = 1;
+  const ty = jewelTypesToBits(state.jewelTypes);
+  if (ty) out.ty = ty;
   if (char) out.c = char;
   return out;
 }
@@ -157,7 +211,7 @@ function shareParamsToFilterState(parsed){
     selected: nameSels.length ? nameSels : idxSels,
     unwanted: nameUnwanted.length ? nameUnwanted : idxUnwanted,
     topK: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
-    darkOnly: parsed.m === 1,
+    jewelTypes: parsed.ty != null ? bitsToJewelTypes(parsed.ty) : (parsed.m === 1 ? ['dark'] : []),
     char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : ''
   };
 }

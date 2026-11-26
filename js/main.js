@@ -5,7 +5,6 @@ const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/
 const MAX_SELECTS = 14;
 const MIN_SELECTS = 4;
 const DEFAULT_TOPK = 10;
-const DARK_PREFIX = "[ดาร์ค]";
 const LINK_PREFIX = "[ลิงก์]";
 
 let jewels = [];
@@ -26,7 +25,6 @@ const toastUndoBtn = document.getElementById('toastUndoBtn');
 const toastCloseBtn = document.getElementById('toastCloseBtn');
 const resultTitle = document.getElementById('resultTitle');
 const minHint = document.getElementById('minHint');
-const darkOnly = document.getElementById('darkOnly');
 const selectedProgress = document.getElementById('selectedProgress');
 const selectedProgressFill = selectedProgress?.querySelector('.sel-progress__fill');
 const selectedProgressLabel = selectedProgress?.querySelector('.sel-progress__label');
@@ -645,8 +643,9 @@ function isLinkId(id){
 }
 
 function computeJewelPool(){
-  if(readFilterState().darkOnly){
-    return jewels.filter(j => j.type === 'dark');
+  const types = readFilterState().jewelTypes;
+  if(!isAllJewelTypes(types)){
+    return jewels.filter(j => types.includes(j.type));
   }
   return jewels.slice();
 }
@@ -782,7 +781,8 @@ async function calculate(){
       // ไม่เลือกตัวละคร → ตัดจี้ [ลิงก์] ทั้งหมดออก
       jewelPool = jewelPool.filter(j => !isLinkId(j.id));
       if(jewelPool.length < 4){
-        const filterMsg = darkOnly.checked ? `ภายใต้การกรองชื่อขึ้นต้น "${DARK_PREFIX}"` : '';
+        const types = readFilterState().jewelTypes;
+        const filterMsg = isAllJewelTypes(types) ? '' : `ภายใต้ประเภทจี้ ${jewelTypesLabel(types)}`;
         showToast(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`, 3500, 'warn');
         return;
       }
@@ -923,7 +923,7 @@ function buildGuidanceItems({shownCount, topK, isEmpty=false}){
   const items = [];
   const selectedCount = (typeof getDesired === 'function') ? getDesired().length : 0;
   const unwantedCount = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0;
-  if(darkOnly?.checked) items.push('ลองปิด “เฉพาะจี้ [ดาร์ค]” เพื่อให้มีจี้ตัวเลือกมากขึ้น');
+  if(!isAllJewelTypes(readFilterState().jewelTypes)) items.push('ลองเลือกประเภทจี้เพิ่ม หรือไม่เลือกเลย (= ทุกจี้) เพื่อให้มีจี้ตัวเลือกมากขึ้น');
   if(unwantedCount) items.push('ลองลดสกิลที่ไม่ต้องการบางสกิลออกไป เพื่อให้ค้นหาเซ็ตจี้ได้มากขึ้น');
   if(selectedCount > MIN_SELECTS) items.push('ลองลดจำนวนสกิลที่ต้องการ หรือเลือกเฉพาะสกิลสำคัญที่สุดก่อน');
   if(!isEmpty && shownCount < topK) items.push('ลองลดจำนวนเซ็ตที่ต้องการหรือแก้ไขสกิล เพื่อให้ค้นหาเซ็ตจี้ได้มากขึ้น');
@@ -1282,7 +1282,7 @@ function renderResults(best, options){
       {
         selected_skill_count: desired.length,
         unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0,
-        dark_only: readFilterState().darkOnly,
+        jewel_types: readFilterState().jewelTypes.join(',') || 'all',
         has_character: !!getCharSelectValue()
       }
     );
@@ -1520,7 +1520,7 @@ syncInventoryResultFilterUI();
   const unwantedAllWrap = document.getElementById('chipUnwantedAllWrap');
   if (unwantedAllWrap) unwantedAllWrap.hidden = true;
   if (typeof window.refreshUnwantedChips === 'function') window.refreshUnwantedChips();
-  applyFilterState({ darkOnly: false });
+  applyFilterState({ jewelTypes: [] });
 
   if (topKInput){
     topKInput.value = String(DEFAULT_TOPK);
@@ -1558,9 +1558,23 @@ syncInventoryResultFilterUI();
 
 /* แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
 
-darkOnly?.addEventListener('change', ()=>{
+// ประเภทจี้: กดเพื่อเลือก/ยกเลิก (เลือกได้หลายอัน)
+jewelTypeButtons().forEach(btn => btn.addEventListener('click', ()=>{
+  const types = readJewelTypesUI();
+  const t = btn.dataset.type;
+  setJewelTypesUI(types.includes(t) ? types.filter(x => x !== t) : types.concat(t));
   invalidateResultsForCriteriaChange();
-});
+}));
+
+/** จำนวนจี้ของแต่ละประเภท (ไม่นับ [ลิงก์]) บนปุ่ม */
+function renderJewelTypeCounts(){
+  const counts = {};
+  jewels.forEach(j => { counts[j.type] = (counts[j.type] || 0) + 1; });
+  jewelTypeButtons().forEach(b => {
+    const el = b.querySelector('.jewel-type__count');
+    if(el) el.textContent = counts[b.dataset.type] ? `(${counts[b.dataset.type]})` : '';
+  });
+}
 
 // ===== Keyword map: ability → [alias, alias, ...] =====
 // ดึงจาก Sheet "Keywords" (gid ที่กำหนดใน KEYWORD_GID)
@@ -1630,6 +1644,7 @@ try{
 
 stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
 
+renderJewelTypeCounts();
 const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
 
     setProgress(100, 'กำลังเตรียมตัวเลือก...');

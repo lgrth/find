@@ -55,7 +55,8 @@ function buildLegacyShareURL(url, resultKey='', filterState=null, resultNames=[]
 
   const topKValue = f.topK != null ? String(f.topK) : '';
   if (topKValue && topKValue !== '10') params.set('k', topKValue);
-  if (f.darkOnly) params.set('d', '1');
+  const ty = jewelTypesToBits(f.jewelTypes);
+  if (ty) params.set('ty', String(ty));
 
   const unwantedSels = Array.isArray(f.unwanted) ? f.unwanted : [];
   if (_abilityList.length && unwantedSels.length){
@@ -161,7 +162,8 @@ function parseLegacyStateFromURL(){
       selected: sanitizeStringArray(sels, MAX_SELECTS, 120),
       unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
       topK: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
-      darkOnly: (params.get('d') || params.get('dark')) === '1',
+      jewelTypes: params.get('ty') ? bitsToJewelTypes(params.get('ty'))
+        : ((params.get('d') || params.get('dark')) === '1' ? ['dark'] : []),
       char: sanitizePlainString(params.get('char') || '', 120)
     },
     auto: params.get('r') ? '1' : '',
@@ -180,9 +182,9 @@ async function applyStateFromURL(){
   const f = state.filter;
   _urlStateApplied = true;
 
-  // darkOnly is always taken from the link; topK and character only when present.
+  // Pendant types are always taken from the link; topK and character only when present.
   applyFilterState({
-    darkOnly: f.darkOnly,
+    jewelTypes: f.jewelTypes,
     selected: f.selected,
     unwanted: f.unwanted,
     ...(f.topK ? { topK: f.topK } : {}),

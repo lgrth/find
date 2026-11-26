@@ -38,7 +38,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
           userAgent: navigator.userAgent,
           selectedAbilities: f.selected.join(', '),
           topK: f.topK ? Number(f.topK) : '',
-          darkOnly: f.darkOnly
+          jewelTypes: f.jewelTypes.join(',') || 'all'
         };
       }catch(_){
         return { pageURL: location.href, userAgent: navigator.userAgent };
@@ -84,7 +84,7 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
   fd.set('userAgent', ctx.userAgent || navigator.userAgent);
   if (ctx.selectedAbilities != null) fd.set('selectedAbilities', String(ctx.selectedAbilities));
   if (ctx.topK != null) fd.set('topK', String(ctx.topK));
-  if (ctx.darkOnly != null) fd.set('darkOnly', String(ctx.darkOnly));
+  if (ctx.jewelTypes != null) fd.set('jewelTypes', String(ctx.jewelTypes));
 
   const msg = (fd.get('message') || '').toString().trim();
   if (!msg){

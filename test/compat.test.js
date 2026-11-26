@@ -23,7 +23,8 @@ async function abilityIndices(names) {
   return withApp({}, ({ page }) => page.evaluate((n) => n.map((x) => _abilityList.indexOf(x)), names));
 }
 
-const EXPECTED = { selected: SEL, unwanted: UNW, darkOnly: true, topK: '20', char: CHAR };
+// Old links/presets said darkOnly; it must come back as the [ดาร์ค] type filter.
+const EXPECTED = { selected: SEL, unwanted: UNW, jewelTypes: ['dark'], topK: '20', char: CHAR };
 
 test('compressed share link with names (current format)', async () => {
   const search = packed({ s: [0], sn: SEL, un: UNW, k: '20', m: 1, c: CHAR });
@@ -55,7 +56,7 @@ test('legacy ?sel= link and ?dark=1 alias', async () => {
   await withApp({ search }, async ({ page }) => {
     const form = await readForm(page);
     assert.deepEqual(form.selected, SEL);
-    assert.equal(form.darkOnly, true);
+    assert.deepEqual(form.jewelTypes, ['dark']);
   });
 });
 
@@ -72,9 +73,9 @@ test('buildShareURL round-trips through a fresh page load', async () => {
   const url = await withApp({ search: packed({ sn: SEL, un: UNW, k: '20', m: 1, c: CHAR }) }, ({ page }) =>
     page.evaluate(() => buildShareURL()));
   const state = JSON.parse(LZString.decompressFromEncodedURIComponent(new URL(url).searchParams.get('d')));
-  assert.deepEqual(Object.keys(state).sort(), ['c', 'k', 'm', 'r', 's', 'sn', 'u', 'un'].filter((k) => k !== 'r').sort());
+  assert.deepEqual(Object.keys(state).sort(), ['c', 'k', 's', 'sn', 'ty', 'u', 'un']);
   assert.deepEqual(state.sn, SEL);
-  assert.equal(state.m, 1);
+  assert.equal(state.ty, 1);
   await withApp({ search: new URL(url).search }, async ({ page }) => {
     assert.deepEqual(await readForm(page), EXPECTED);
   });
@@ -100,9 +101,9 @@ test('persisted form controls (persist:*) are restored', async () => {
   await withApp({ localStorage: ls }, async ({ page }) => {
     const form = await readForm(page);
     assert.equal(form.topK, '30');
-    // Current behaviour: applyStateFromURL() always writes darkOnly from the URL,
-    // so a persisted darkOnly is overridden to false on a plain page load.
-    assert.equal(form.darkOnly, false);
+    // A persisted darkOnly checkbox was always overridden by the URL state on load;
+    // the type filter likewise starts empty (= every pendant).
+    assert.deepEqual(form.jewelTypes, []);
   });
 });
 
@@ -124,8 +125,8 @@ test('import file v1 is normalised the same way', async () => {
   assert.deepEqual(out.inventory, { version: 1, ids: ['a', 'b'] });
   assert.deepEqual(out.favorites.presets[0], {
     id: 'f1', name: 'n', createdAt: '2025-01-01T00:00:00.000Z',
-    selected: SEL, unwanted: [], topK: 50, darkOnly: true, char: CHAR,
-    state: { selected: SEL, unwanted: [], topK: 50, darkOnly: true, char: CHAR },
+    selected: SEL, unwanted: [], topK: 50, jewelTypes: ['dark'], char: CHAR,
+    state: { selected: SEL, unwanted: [], topK: 50, jewelTypes: ['dark'], char: CHAR },
   });
   assert.deepEqual(out.resultSets.items[0].snapshot, {
     key: 'x|y', names: ['x', 'y'], rank: 2, matchedCount: 0, missingCount: 0, extraCount: 0, totalValue: 120,
@@ -139,7 +140,7 @@ test('legacy (non-compressed) share URL builder still writes the old parameters'
     const idx = await page.evaluate((n) => n.map((x) => _abilityList.indexOf(x)).join(','), SEL);
     assert.equal(p.get('s'), idx);
     assert.equal(p.get('k'), '20');
-    assert.equal(p.get('d'), '1');
+    assert.equal(p.get('ty'), '1');
     assert.equal(p.get('char'), CHAR);
     assert.equal(p.get('r'), 'k1');
     assert.equal(p.get('rn'), 'a||b');
@@ -155,8 +156,47 @@ test('saving the current filter stores the same preset shape', async () => {
     const store = await page.evaluate(() => JSON.parse(localStorage.getItem('lgr_filter_favorites_v1')));
     assert.equal(store.presets.length, 1);
     assert.equal(store.presets[0].name, 'ชุดทดสอบ');
-    assert.deepEqual(store.presets[0].state, { selected: SEL, unwanted: UNW, char: CHAR, darkOnly: true, topK: '20' });
+    assert.deepEqual(store.presets[0].state, { selected: SEL, unwanted: UNW, char: CHAR, jewelTypes: ['dark'], topK: '20' });
     const meta = await page.locator('#favList .fav-item__meta').first().textContent();
     assert.equal(meta, '4 สกิลที่ต้องการ • 2 สกิลที่ไม่ต้องการ • โมเสส • [ดาร์ค] เท่านั้น • 20 เซ็ต');
+  });
+});
+
+test('new share link with several pendant types (ty bits)', async () => {
+  await withApp({ search: packed({ sn: SEL, ty: 6 }) }, async ({ page }) => {
+    assert.deepEqual((await readForm(page)).jewelTypes, ['white', 'other']);
+    const url = await page.evaluate(() => buildShareURL());
+    const state = JSON.parse(LZString.decompressFromEncodedURIComponent(new URL(url).searchParams.get('d')));
+    assert.equal(state.ty, 6);
+  });
+  await withApp({ search: '?sel=' + encodeURIComponent(SEL[0]) + '&ty=5' }, async ({ page }) => {
+    assert.deepEqual((await readForm(page)).jewelTypes, ['dark', 'other'], 'legacy query-string form');
+  });
+});
+
+test('type buttons toggle independently, show counts and filter the search', async () => {
+  await withApp({}, async ({ page }) => {
+    const btn = (t) => page.locator(`#jewelTypeFilter .jewel-type[data-type="${t}"]`);
+    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '(447)');
+    assert.equal(await btn('white').locator('.jewel-type__count').textContent(), '(15)');
+    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '(569)');
+    await btn('white').click();
+    await btn('other').click();
+    assert.deepEqual((await readForm(page)).jewelTypes, ['white', 'other']);
+    assert.equal(await btn('white').getAttribute('aria-pressed'), 'true');
+    await btn('white').click();
+    assert.deepEqual((await readForm(page)).jewelTypes, ['other']);
+    const types = await page.evaluate(() => [...new Set(computeJewelPool().map((j) => j.type))]);
+    assert.deepEqual(types, ['other']);
+  });
+});
+
+test('saved preset summary names the selected types', async () => {
+  const store = { version: 1, presets: [{ id: 'p', name: 'x', createdAt: '2025-01-01T00:00:00.000Z',
+    state: { selected: SEL, unwanted: [], topK: '10', jewelTypes: ['dark', 'white'], char: '' } }] };
+  await withApp({ localStorage: { lgr_filter_favorites_v1: JSON.stringify(store) } }, async ({ page }) => {
+    await page.evaluate(() => document.getElementById('favoriteBtn').click());
+    const meta = await page.locator('#favList .fav-item__meta').first().textContent();
+    assert.equal(meta, '4 สกิลที่ต้องการ • 0 สกิลที่ไม่ต้องการ • ไม่เลือกตัวละคร • [ดาร์ค] + [ไวท์] เท่านั้น • 10 เซ็ต');
   });
 });

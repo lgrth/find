@@ -431,7 +431,7 @@
 
     <div class="section-divider" aria-hidden="true"><div class="section-divider__line"></div></div>
 
-    <!-- จำนวนเซ็ต + ดาร์ค -->
+    <!-- จำนวนเซ็ต + ประเภทจี้ -->
     <div class="row-two-col">
       <div class="col">
         <label><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
@@ -448,10 +448,12 @@
         <input id="topK" class="simple" type="number" min="3" max="50" value="10" style="display:none">
       </div>
       <div class="col">
-        <label style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;min-height:44px">
-          <input type="checkbox" id="darkOnly" class="checkbox-lg" aria-label="แสดงเฉพาะจี้ดาร์ค">
-          <span>เฉพาะจี้ <span class="badge-neutral" title="แสดงเฉพาะจี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค]</span> (เร็วกว่า)</span>
-        </label>
+        <label><strong>ประเภทจี้:</strong> <span class="jewel-types__hint">เลือกได้หลายอัน · ไม่เลือก = ทุกจี้</span></label>
+        <div id="jewelTypeFilter" class="jewel-types" role="group" aria-label="กรองประเภทจี้ (เลือกได้หลายอัน)">
+          <button type="button" class="jewel-type" data-type="dark" aria-pressed="false" title="จี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค] <span class="jewel-type__count"></span></button>
+          <button type="button" class="jewel-type" data-type="white" aria-pressed="false" title="จี้ที่ชื่อขึ้นต้นด้วย [ไวท์]">[ไวท์] <span class="jewel-type__count"></span></button>
+          <button type="button" class="jewel-type" data-type="other" aria-pressed="false" title="จี้ที่ไม่มีคำนำหน้า หรือมีคำนำหน้าอื่น เช่น [ลิมิเต็ดเอดิชั่น] (ไม่รวม [ลิงก์])">อื่น ๆ <span class="jewel-type__count"></span></button>
+        </div>
       </div>
     </div>
 
@@ -705,8 +707,8 @@
 
 <script src="js/search-core.js"></script>
 <script src="js/data-model.js"></script>
-<script src="js/main.js"></script>
 <script src="js/filter-state.js"></script>
+<script src="js/main.js"></script>
 
 <script src="js/share.js"></script>
 

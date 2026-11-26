@@ -35,16 +35,20 @@ const SCENARIOS = {
   },
   'unwanted-2': { selected: [S.drone, S.superShield, S.invite, S.dice, S.jail], unwanted: [S.push, S.bubble] },
   'unwanted-5': { selected: [S.plan3, S.invite, S.dice, S.tollFree], unwanted: [S.drone, S.superShield, S.antiHazard, S.jail, S.bomb] },
-  'dark-only': { selected: [S.drone, S.superShield, S.antiHazard, S.plan3, S.invite], darkOnly: true },
-  'dark-only-unwanted': { selected: [S.dice, S.jail, S.bomb, S.exile, S.antiJail], unwanted: [S.push], darkOnly: true },
+  'dark-only': { selected: [S.drone, S.superShield, S.antiHazard, S.plan3, S.invite], jewelTypes: ['dark'] },
+  'dark-only-unwanted': { selected: [S.dice, S.jail, S.bomb, S.exile, S.antiJail], unwanted: [S.push], jewelTypes: ['dark'] },
   'rare-skills': { selected: [S.whiteShield, S.bike, S.scarecrow, S.toll4, S.blackhole] },
   'shields': { selected: [S.superShield, S.whiteShield, S.antiHazard, S.antiJail, S.antiMove] },
   'top3': { selected: [S.drone, S.dimension, S.push, S.cityMoney], topK: 3 },
   'top50': { selected: [S.drone, S.dimension, S.push, S.cityMoney, S.antiVictory], topK: 50 },
+  'white-only': { selected: [S.drone, S.superShield, S.antiHazard, S.invite], jewelTypes: ['white'] },
+  'dark-white': { selected: [S.drone, S.superShield, S.antiHazard, S.plan3, S.invite], jewelTypes: ['dark', 'white'] },
+  'other-only': { selected: [S.drone, S.superShield, S.invite, S.dice], jewelTypes: ['other'] },
+  'all-three-types': { selected: [S.drone, S.superShield, S.antiHazard, S.plan3], jewelTypes: ['dark', 'white', 'other'] },
   // Character scenarios: the [ลิงก์] pendant of the chosen character must be locked in.
   'char-moses': { selected: [S.bomb, S.tollFree, S.drone, S.superShield, S.invite], char: 'โมเสส' },
   'char-scorpion': { selected: [S.superShield, S.antiHazard, S.plan3, S.dice, S.jail, S.bomb], char: 'สกอร์เปียน' },
-  'char-sasha-dark': { selected: [S.antiJail, S.drone, S.invite, S.dice], char: 'ชาช่า', darkOnly: true },
+  'char-sasha-dark': { selected: [S.antiJail, S.drone, S.invite, S.dice], char: 'ชาช่า', jewelTypes: ['dark'] },
 };
 
 test('search results match golden master', async (t) => {
