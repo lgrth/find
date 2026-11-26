@@ -1,0 +1,15 @@
+{
+  "name": "lgrth-find",
+  "private": true,
+  "description": "Get Rich Pendant Finder — static site + test suite",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "test:update-golden": "UPDATE_GOLDEN=1 node --test --test-concurrency=1 test/*.test.js"
+  },
+  "devDependencies": {
+    "lz-string": "1.5.0",
+    "playwright": "1.63.0",
+    "qrcodejs": "1.0.0",
+    "tom-select": "2.4.3"
+  }
+}

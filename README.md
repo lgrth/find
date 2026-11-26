@@ -33,6 +33,25 @@ python3 -m http.server 8080
 # แล้วเปิด http://localhost:8080/
 ```
 
+## ทดสอบ (Tests)
+ชุดทดสอบใช้ Node 22 + Playwright (Chromium) และ mock ทุกอย่างที่ต่อเน็ต
+(Google Sheets ใช้ snapshot ใน `test/fixtures/`, ไลบรารี CDN ใช้จาก `node_modules`)
+
+```bash
+npm ci
+npx playwright install chromium   # ครั้งแรกครั้งเดียว
+npm test
+```
+
+| ไฟล์ | ตรวจอะไร |
+|------|---------|
+| `test/search.golden.test.js` | ผลค้นหา 16 สถานการณ์ต้องตรงกับ `test/golden/search-results.json` ทุกตัว |
+| `test/compat.test.js` | ลิงก์แชร์รูปแบบเก่า/ใหม่, Filter ที่บันทึก, คลังจี้, ไฟล์นำเข้า ยังใช้ได้ |
+| `test/smoke.test.js` | คลิกเลือกสกิล → ค้นหา → มีการ์ดผลลัพธ์ |
+
+- อัปเดตข้อมูล fixture จากชีตจริง: `node scripts/update-fixtures.js`
+- ตั้งใจเปลี่ยนผลการค้นหา: `npm run test:update-golden` แล้วตรวจ diff ของไฟล์ golden ก่อน commit
+
 ## ความเป็นส่วนตัว
 ข้อมูลคลังจี้ / Filter / เซ็ตจี้ที่บันทึก จะถูกเก็บไว้เฉพาะบนอุปกรณ์และเบราว์เซอร์ของผู้ใช้
 (`localStorage`) เท่านั้น ไม่ได้ถูกส่งไปยังเซิร์ฟเวอร์ของเว็บไซต์
