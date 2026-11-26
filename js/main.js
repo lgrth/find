@@ -721,6 +721,9 @@ function scrollToResultSection(){
 
 /* ====== คำนวณ ====== */
 
+/** ข้อมูลสกิลจากแท็บ Abilities (undefined = ใช้ค่าเริ่มต้น) */
+const abilityOf = (name)=> abilities.get(name);
+
 /** จี้ [ลิงก์] ของตัวละคร: ดูคอลัมน์ AllowedChars ในชีตหลักก่อน แล้วค่อยใช้ชีตตัวละคร */
 function findLinkJewelForChar(charName){
   if(!charName) return null;
@@ -771,14 +774,14 @@ async function calculate(){
         showToast(`ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}`, 3500, 'warn');
         return;
       }
-      const others = compatibleWith(fixedLink, jewelPool.filter(j => !isLinkId(j.id)));
-      const cand = buildCandidates(desired, others, unwanted, SPEED_CFG.FIXED_LINK_LIMIT)
-        .concat(buildFillerCandidates(desired, others, unwanted));
+      const others = compatibleWith(fixedLink, jewelPool.filter(j => !isLinkId(j.id)), abilityOf);
+      const cand = buildCandidates(desired, others, unwanted, SPEED_CFG.FIXED_LINK_LIMIT, abilityOf)
+        .concat(buildFillerCandidates(desired, others, unwanted, SPEED_CFG.FILLER_LIMIT, abilityOf));
       if(cand.length < 3){
         showToast('จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น', 3500, 'warn');
         return;
       }
-      job = { desired, cand, fixed: jewelToCandidate(fixedLink, desired, unwanted) };
+      job = { desired, cand, fixed: jewelToCandidate(fixedLink, desired, unwanted, abilityOf) };
     }else{
       // ไม่เลือกตัวละคร → ตัดจี้ [ลิงก์] ทั้งหมดออก
       jewelPool = jewelPool.filter(j => !isLinkId(j.id));
@@ -788,7 +791,7 @@ async function calculate(){
         showToast(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`, 3500, 'warn');
         return;
       }
-      const cand = buildCandidates(desired, jewelPool, unwanted);
+      const cand = buildCandidates(desired, jewelPool, unwanted, SPEED_CFG.CANDIDATE_LIMIT, abilityOf);
       if(cand.length < 4){
         showToast("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้", 3500, 'warn');
         return;

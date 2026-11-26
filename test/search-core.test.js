@@ -78,3 +78,21 @@ test('locked pendant is always in slot 1 and fillers make full sets possible', (
   }
   assert.equal(best[0].notMiss, 0);
 });
+
+test('stack_key: pendants whose skills share a stack key never pair (โล่ซูเปอร์ + โล่ขาว)', () => {
+  const abilityOf = (n) => (n === 'โล่ซูเปอร์' || n === 'โล่ขาว' ? { stackKey: 'โล่' } : undefined);
+  const desired = ['โล่ซูเปอร์', 'โล่ขาว', 'ป้องกันเอฟเฟคอันตราย', 'ป้องกันขังคุก', 'ป้องกันบังคับย้ายและดักจับ'];
+  const hasShield = (id) => jewels.find((j) => j.id === id).substats.some((s) => s.name === 'โล่ซูเปอร์' || s.name === 'โล่ขาว');
+
+  const without = core.searchCombos({ desired, cand: core.buildCandidates(desired, nonLink), topK: 10 });
+  assert.ok(without.some((r) => r.ids.filter(hasShield).length > 1), 'by name only, both shields can pair');
+
+  const cand = core.buildCandidates(desired, nonLink, [], 120, abilityOf);
+  const best = core.searchCombos({ desired, cand, topK: 10 });
+  assert.equal(best.length, 10);
+  for (const r of best) assert.ok(r.ids.filter(hasShield).length <= 1, r.ids.join(' + '));
+  assert.ok(best[0].notMiss >= 1, 'cannot have both shields any more');
+
+  const link = { id: 'L', substats: [{ name: 'โล่ขาว', value: 50 }] };
+  assert.ok(core.compatibleWith(link, nonLink, abilityOf).every((j) => !hasShield(j.id)));
+});

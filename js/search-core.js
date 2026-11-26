@@ -23,8 +23,16 @@ function compareCandidates(a,b){
          (b.score-a.score);
 }
 
-/** Describe one pendant relative to the wanted skills: bit i of `mask` = has desired[i]. */
-function jewelToCandidate(j, desired, unwanted=[]){
+/** Optional per-skill data (from the Abilities tab): name → { stackKey, maxValue, … } | undefined */
+const noAbilities = ()=> undefined;
+const stackKeyOf = (name, abilityOf)=> abilityOf(name)?.stackKey || name;
+
+/**
+ * Describe one pendant relative to the wanted skills: bit i of `mask` = has desired[i].
+ * `stackKeys`: two pendants sharing any key may not be in the same set
+ * (a skill's stack_key, or its name when it has none).
+ */
+function jewelToCandidate(j, desired, unwanted=[], abilityOf=noAbilities){
   const bitIndex = new Map(desired.map((n,i)=>[n,i]));
   const unwantedSet = new Set(unwanted);
   let mask=0, score=0, otherNames=[], unwantedCount=0, extraCount=0;
@@ -37,12 +45,13 @@ function jewelToCandidate(j, desired, unwanted=[]){
       else extraCount++;
     }
   }
-  return { id:j.id, mask, score, otherNames, unwantedCount, extraCount, allNames: j.substats.map(s=>s.name) };
+  return { id:j.id, mask, score, otherNames, unwantedCount, extraCount, allNames: j.substats.map(s=>s.name),
+           stackKeys: [...new Set(j.substats.map(s=>stackKeyOf(s.name, abilityOf)))] };
 }
 
-function buildCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.CANDIDATE_LIMIT){
+function buildCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.CANDIDATE_LIMIT, abilityOf=noAbilities){
   const all = sourceJewels.map(j=>{
-    return jewelToCandidate(j, desired, unwanted);
+    return jewelToCandidate(j, desired, unwanted, abilityOf);
   }).filter(m=>m.mask!==0)
     .sort(compareCandidates);
 
@@ -83,21 +92,22 @@ function buildCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.CAN
  * slots could only take pendants that add a wanted skill, and there may not be
  * enough of those that don't repeat a skill. Best first (compareCandidates).
  */
-function buildFillerCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.FILLER_LIMIT){
-  return sourceJewels.map(j=>jewelToCandidate(j, desired, unwanted))
+function buildFillerCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.FILLER_LIMIT, abilityOf=noAbilities){
+  return sourceJewels.map(j=>jewelToCandidate(j, desired, unwanted, abilityOf))
     .filter(c=>c.mask===0)
     .sort(compareCandidates)
     .slice(0, limit);
 }
 
-/** Jewels that share no skill name with `fixed` (only those can sit next to it in a set). */
-function compatibleWith(fixed, sourceJewels){
-  const names = new Set(fixed.substats.map(s=>s.name));
-  return sourceJewels.filter(j=>j.id!==fixed.id && !j.substats.some(s=>names.has(s.name)));
+/** Jewels that share no stack key with `fixed` (only those can sit next to it in a set). */
+function compatibleWith(fixed, sourceJewels, abilityOf=noAbilities){
+  const keys = new Set(fixed.substats.map(s=>stackKeyOf(s.name, abilityOf)));
+  return sourceJewels.filter(j=>j.id!==fixed.id && !j.substats.some(s=>keys.has(stackKeyOf(s.name, abilityOf))));
 }
 
 /**
- * Find the top-K 4-pendant sets. Two pendants in a set may not share any skill name.
+ * Find the top-K 4-pendant sets. Two pendants in a set may not share any stack key
+ * (= skill name unless the Abilities tab groups skills under one stack_key).
  * With `fixed`, that candidate is always slot 1 and only 3 more are chosen from `cand`.
  * Result order: fewer missing → fewer unwanted → more extras → higher value.
  */
@@ -137,11 +147,11 @@ function searchCombos({ desired, cand, topK, fixed = null, onProgress = null }){
     return {ids:ids,notMiss:notMiss,notIdx:notIdx,totalValue:tv,extraCount:extraCount,unwantedCount:uw};
   }
 
-  const namesets=cand.map(c=>new Set(c.allNames));
+  const namesets=cand.map(c=>new Set(c.stackKeys || c.allNames));
   const sharesName = (s, ...others)=>{ for(const nm of s){ for(const o of others){ if(o.has(nm)) return true; } } return false; };
 
   if(is3){
-    const fixedSet=new Set(fixed.allNames);
+    const fixedSet=new Set(fixed.stackKeys || fixed.allNames);
     for(let a=0;a<n-2;a++){
       emitOuter(a);
       const sA=namesets[a];
