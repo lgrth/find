@@ -1585,9 +1585,7 @@ function renderJewelTypeCounts(){
 }
 
 // ===== Keyword map: ability → [alias, alias, ...] =====
-// ดึงจาก Sheet "Keywords" (gid ที่กำหนดใน KEYWORD_GID)
-// ถ้าไม่มี sheet หรือ fetch ล้มเหลว → ใช้ map ว่าง (ค้นหาปกติยังทำงาน)
-const KEYWORD_GID = '850304016'; // ← ใส่ gid ของ sheet "Keywords" ที่นี่ เช่น '123456789'
+// มาจากคอลัมน์ keywords ในแท็บ Abilities (แท็บ Keywords เดิมเลิกใช้แล้ว)
 
 function normalizeSearchText(value){
   return String(value || '')
@@ -1632,52 +1630,14 @@ async function loadAbilityData(){
   if(problems.length) console.warn(`[sheet] Abilities: พบ ${problems.length} จุดที่ควรตรวจ:\n` + problems.join('\n'));
 }
 
-/** Merge search keywords from the Abilities tab into the Keywords-tab map (both stay supported). */
-function mergeAbilityKeywords(map){
+/** Search keywords from the Abilities tab → Map(skill name → normalised keywords). */
+function abilityKeywordMap(){
+  const map = new Map();
   abilities.forEach(a => {
-    const kws = a.keywords.map(normalizeSearchText).filter(Boolean);
-    if(!kws.length) return;
-    map.set(a.name, Array.from(new Set([...(map.get(a.name) || []), ...kws])));
+    const kws = Array.from(new Set(a.keywords.map(normalizeSearchText).filter(Boolean)));
+    if(kws.length) map.set(a.name, kws);
   });
   return map;
-}
-
-let _keywordFailed = false;
-function fetchKeywordSheet(){
-  if (!KEYWORD_GID) return Promise.resolve(new Map());
-  return new Promise((resolve)=>{
-    const cbName = '__KeywordsGViz_' + Date.now();
-    const timeout = setTimeout(()=>{ delete window[cbName]; _keywordFailed = true; resolve(new Map()); }, 6000);
-    window[cbName] = function(resp){
-      clearTimeout(timeout);
-      delete window[cbName];
-      try{
-        const table = resp && resp.table;
-        if (!table){ _keywordFailed = true; resolve(new Map()); return; }
-        const cols = (table.cols||[]).map(c=>(c.label||c.id||'').toString().trim());
-        const map = new Map();
-        (table.rows||[]).forEach(r=>{
-          const cells = (r.c||[]);
-          const ability = (cells[0]?.v ?? '').toString().trim();
-          const raw     = (cells[1]?.v ?? '').toString().trim();
-          if (!ability) return;
-
-          const kws = raw
-            .split(/[,，\n]/)
-            .map(k => normalizeSearchText(k))
-            .filter(Boolean);
-
-          if (kws.length) map.set(ability, kws);
-        });
-        resolve(map);
-      }catch(e){ _keywordFailed = true; resolve(new Map()); }
-    };
-    const tqx = encodeURIComponent(`out:json;responseHandler:${cbName}`);
-    const src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${KEYWORD_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
-    const sc = document.createElement('script'); sc.src = src;
-    sc.onerror = ()=>{ clearTimeout(timeout); _keywordFailed = true; resolve(new Map()); };
-    document.head.appendChild(sc);
-  });
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
@@ -1686,11 +1646,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
     jewels = await fetchGVizJSONP();
 
-const [keywordMap] = await Promise.all([
-  fetchKeywordSheet().catch(e => { console.warn('Keyword sheet load failed:', e); _keywordFailed = true; return new Map(); }),
-  loadAbilityData()
-]);
-window._abilityKeywords = mergeAbilityKeywords(keywordMap);
+await loadAbilityData();
+window._abilityKeywords = abilityKeywordMap();
 
 stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
 

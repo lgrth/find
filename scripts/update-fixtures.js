@@ -26,7 +26,6 @@ function findSheetId() {
 // file → query (gid=… or sheet=<tab name>)
 const TABS = {
   'sheet-main.json': '',
-  'sheet-keywords.json': 'gid=850304016',
   'sheet-chars.json': 'gid=513976173',
   'sheet-abilities.json': 'sheet=Abilities',
   'sheet-triggers.json': 'sheet=Triggers',

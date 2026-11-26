@@ -63,31 +63,31 @@ test('reports duplicate IDs, missing IDs and link pendants without AllowedChars'
 const { parseAbilitiesTable, parseTriggersTable, finalizeAbilities } = require('../js/data-model.js');
 const { abilityScore } = require('../js/search-core.js');
 const tbl = (labels, rows) => ({ cols: labels.map((label) => ({ label })), rows: rows.map((r) => ({ c: r.map(cell) })) });
-const AB = ['name', 'group', 'variant', 'trigger', 'stack_key', 'unit', 'max_value', 'max_stack', 'keywords', 'review'];
+const AB = ['name', 'group', 'variant', 'trigger', 'stack_key', 'unit', 'max_stack', 'keywords', 'review'];
 
 test('Abilities tab: defaults, stack_key, units, keywords', () => {
   const { abilities, problems } = parseAbilitiesTable(tbl(AB, [
-    ['โล่ซูเปอร์', 'โล่', 'โล่ซูเปอร์', '', 'โล่', 'chance', '100', '3', 'โล่ไฮเปอร์, บาเรีย', 'x'],
-    ['เพิ่มค่าผ่านทาง', 'เพิ่มค่าผ่านทาง', '', '', '', 'amount', '', '', '', ''],
-    ['ผลัก', '', '', '', '', '', '', '', '', ''],
-    ['ผิด', 'g', '', '', '', 'percent', 'abc', '', '', ''],
+    ['โล่ซูเปอร์', 'โล่', 'โล่ซูเปอร์', '', 'โล่', 'chance', '3', 'โล่ไฮเปอร์, บาเรีย', 'x'],
+    ['เพิ่มค่าผ่านทาง', 'เพิ่มค่าผ่านทาง', '', '', '', 'amount', '', '', ''],
+    ['ผลัก', '', '', '', '', '', '', '', ''],
+    ['ผิด', 'g', '', '', '', 'percent', '', '', ''],
   ]));
   assert.deepEqual(abilities.get('โล่ซูเปอร์'), {
     name: 'โล่ซูเปอร์', group: 'โล่', variant: 'โล่ซูเปอร์', trigger: '', stackKey: 'โล่', unit: 'chance',
-    maxValue: 100, maxStack: 3, keywords: ['โล่ไฮเปอร์', 'บาเรีย'],
+    maxValue: null, maxStack: 3, keywords: ['โล่ไฮเปอร์', 'บาเรีย'],
   });
   const push = abilities.get('ผลัก');
   assert.equal(push.group, 'อื่น ๆ');
   assert.equal(push.stackKey, 'ผลัก', 'blank stack_key = own name (old rule)');
   assert.equal(push.unit, 'chance');
-  assert.equal(problems.length, 2, problems.join('\n'));   // bad unit + bad max_value
+  assert.equal(problems.length, 1, problems.join('\n'));   // bad unit
 });
 
 test('finalizeAbilities fills max values from the pendants and reports problems', () => {
   const { abilities } = parseAbilitiesTable(tbl(AB, [
-    ['เพิ่มค่าผ่านทาง', 'ค่าผ่านทาง', '', '', '', 'amount', '', '', '', ''],
-    ['ผลัก', 'ผลัก', '', 'ทุกการทอย', '', 'chance', '', '', '', ''],
-    ['ไม่มีใครใช้', 'x', '', 'สะกดผิด', '', '', '', '', '', ''],
+    ['เพิ่มค่าผ่านทาง', 'ค่าผ่านทาง', '', '', '', 'amount', '', '', ''],
+    ['ผลัก', 'ผลัก', '', 'ทุกการทอย', '', 'chance', '', '', ''],
+    ['ไม่มีใครใช้', 'x', '', 'สะกดผิด', '', '', '', '', ''],
   ]));
   const jewels = [
     { id: 'a', substats: [{ name: 'เพิ่มค่าผ่านทาง', value: 250 }, { name: 'ผลัก', value: 60 }] },

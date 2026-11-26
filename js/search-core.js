@@ -45,9 +45,9 @@ function matchesAnyRequirement(reqs, name, abilityOf=noAbilities){
 }
 
 /**
- * Score of one skill value = % of that skill's max_value, capped at 100.
+ * Score of one skill value = % of that skill's maxValue, capped at 100.
  * Chance skills (max 100) keep their value; amount skills such as
- * เพิ่มค่าผ่านทาง (up to 250) no longer outweigh everything else.
+ * เพิ่มค่าผ่านทาง (up to 250 = the highest any pendant has) no longer outweigh everything else.
  * Without ability data the raw value is used.
  */
 function abilityScore(value, ability){

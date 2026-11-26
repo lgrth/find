@@ -43,7 +43,6 @@ function loadFixture(name) {
 
 const SHEETS = {
   main: loadFixture('sheet-main.json'),
-  '850304016': loadFixture('sheet-keywords.json'),
   '513976173': loadFixture('sheet-chars.json'),
   'sheet:Abilities': loadFixture('sheet-abilities.json'),
   'sheet:Triggers': loadFixture('sheet-triggers.json'),

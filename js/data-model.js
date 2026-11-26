@@ -93,14 +93,15 @@ function parseSheetTable(table){
 }
 
 /* ===== Abilities tab: one row per skill =====
- * name | group | variant | trigger | stack_key | unit | max_value | max_stack | keywords
- * (extra columns such as pendants / review are ignored)
+ * name | group | variant | trigger | stack_key | unit | max_stack | keywords
+ * (extra columns such as pendants / review / an old max_value are ignored)
  *
  * Ability object:
  *   { name, group ('อื่น ๆ' when blank), variant, trigger,
  *     stackKey   — skills with the same key may not share a set (blank → name),
  *     unit       — 'chance' (%, max 100) | 'amount' (can exceed 100),
- *     maxValue   — divisor for the score (blank → 100 for chance, highest value in the sheet for amount),
+ *     maxValue   — divisor for the score: 100 for chance, the highest value any pendant has for amount
+ *                  (set by finalizeAbilities, not read from the sheet),
  *     maxStack   — number | null (display only),
  *     keywords   — string[] (search aliases) }
  */
@@ -132,9 +133,6 @@ function parseAbilitiesTable(table){
     if(abilities.has(name)) problems.push(`Abilities แถว ${row}: ชื่อซ้ำ "${name}"`);
     let unit = String(r.unit ?? '').trim().toLowerCase() || 'chance';
     if(!ABILITY_UNITS.includes(unit)){ problems.push(`Abilities แถว ${row}: unit "${r.unit}" ไม่รู้จัก (ใช้ chance / amount)`); unit = 'chance'; }
-    const maxRaw = String(r.max_value ?? '').trim();
-    const maxValue = maxRaw ? parseNumber(maxRaw) : null;
-    if(maxRaw && !(maxValue > 0)) problems.push(`Abilities แถว ${row}: max_value "${maxRaw}" ไม่ใช่ตัวเลขที่มากกว่า 0`);
     const stackRaw = String(r.max_stack ?? '').trim();
     const maxStack = stackRaw ? parseNumber(stackRaw) : null;
     abilities.set(name, {
@@ -144,7 +142,7 @@ function parseAbilitiesTable(table){
       trigger: String(r.trigger ?? '').trim(),
       stackKey: String(r.stack_key ?? '').trim() || name,
       unit,
-      maxValue: maxValue > 0 ? maxValue : null,   // filled in by finalizeAbilities()
+      maxValue: null,   // filled in by finalizeAbilities()
       maxStack: maxStack > 0 ? maxStack : null,
       keywords: splitList(r.keywords)
     });
@@ -181,7 +179,7 @@ function finalizeAbilities(abilities, jewels, triggers = []){
   abilities.forEach(a => {
     const top = highest.get(a.name);
     if(top === undefined){ problems.push(`Abilities: "${a.name}" ไม่มีจี้ใช้`); }
-    if(a.maxValue == null) a.maxValue = a.unit === 'amount' ? Math.max(top ?? 0, 100) : 100;
+    a.maxValue = a.unit === 'amount' ? Math.max(top ?? 0, 100) : 100;
     if(a.unit === 'chance' && top > 100) problems.push(`"${a.name}" เป็นโอกาส (chance) แต่มีค่า ${top} > 100`);
     if(top === 0) problems.push(`"${a.name}" มีค่า 0 ในแท็บจี้`);
     if(a.trigger && knownTriggers.size && !knownTriggers.has(a.trigger)) problems.push(`"${a.name}": trigger "${a.trigger}" ไม่อยู่ในแท็บ Triggers`);
