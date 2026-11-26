@@ -10,8 +10,8 @@ const kw = require('../test/fixtures/sheet-keywords.json').table;
 
 // [group, regex, extra] — first match wins. Order matters (specific before general).
 const RULES = [
-  ['โล่', /^โล่ซูเปอร์/, { variant: 'โล่ซูเปอร์', stack_key: 'โล่' }],
-  ['โล่', /^โล่ขาว/, { variant: 'โล่ขาว', stack_key: 'โล่' }],
+  ['โล่', /^โล่ซูเปอร์/, { variant: 'โล่ซูเปอร์', stack_key: 'โล่', max_stack: 3 }],
+  ['โล่', /^โล่ขาว/, { variant: 'โล่ขาว', stack_key: 'โล่', max_stack: 2 }],
   ['ยกเว้นค่าผ่านทาง', /^ยกเว้นค่าผ่านทาง/],
   ['เพิ่มค่าผ่านทาง', /^เพิ่มค่าผ่านทาง|^ค่าผ่านทางที่แพงขึ้น|^ก่อสร้างแลนด์มาร์ค เพิ่มค่าผ่านทาง/],
   ['ไม่ให้ยกเว้นค่าผ่านทาง', /^ผนึกยกเว้นค่าผ่านทาง|^ละเว้นการยกเว้น|^เอฟเฟกต์ ไม่ได้รับการยกเว้น/],
@@ -40,9 +40,10 @@ const RULES = [
   ['ผนึก', /^ผนึก/],
   ['สิ่งติดตั้ง / อัญเชิญ', /^โดรนก๊อปปี้|^หุ่น|^ด่านตรวจ|^กับดัก|^บอทจับ|^เมล็ดพันธุ์|^แมงกะพรุน|^โลมา|^เงือก/],
 ];
-// Value is an amount (can exceed 100%), not a chance. From the owner: เพิ่มค่าผ่านทาง, ตกเมืองได้เงิน.
-const AMOUNT = new Set(['เพิ่มค่าผ่านทาง', 'ตกเมืองได้เงิน']);
-const AMOUNT_GUESS = new Set(['เริ่มเกมเพิ่มเงิน']);  // values 150–160: probably an amount, needs confirming
+// Value is an amount (can exceed 100%), not a chance — confirmed by the owner.
+const AMOUNT = new Set(['เพิ่มค่าผ่านทาง', 'ตกเมืองได้เงิน', 'เริ่มเกมเพิ่มเงิน']);
+// Skills the owner says have more than one trigger → split names in the pendant tab (phase 6).
+const MULTI_TRIGGER = new Set(['โล่ซูเปอร์', 'โล่ขาว', 'ผนึกการเคลื่อนย้าย']);
 
 const stats = new Map();
 for (const j of loadJewels()) for (const s of j.substats) {
@@ -57,16 +58,15 @@ const rows = [...stats.keys()].sort((a, b) => a.localeCompare(b, 'th')).map((nam
   const rule = RULES.find(([, re]) => re.test(name));
   const group = rule ? rule[0] : 'อื่น ๆ';
   const extra = (rule && rule[2]) || {};
-  const amount = AMOUNT.has(name) || AMOUNT_GUESS.has(name);
+  const amount = AMOUNT.has(name);
   const st = stats.get(name);
   const review = [];
-  if (!rule) review.push('ยังไม่มีกลุ่ม');
-  if (AMOUNT_GUESS.has(name)) review.push('ค่าเกิน 100 — เป็นจำนวน ไม่ใช่โอกาส?');
+  if (!rule) review.push('แอดมินจัดกลุ่มภายหลัง');
   if (!amount && st.max > 100) review.push('ค่าเกิน 100');
-  if (st.max === 0) review.push('ค่าเป็น 0 ในชีต');
-  if (extra.variant) review.push('ใส่ trigger และ max_stack');
+  if (st.max === 0) review.push('ค่าผิด (0) — แก้ Value ในแท็บจี้');
+  if (MULTI_TRIGGER.has(name)) review.push('มีหลายการแสดงผล — แยกชื่อในเฟส 6');
   return [name, group, extra.variant || '', '', extra.stack_key || '', amount ? 'amount' : 'chance',
-    amount ? st.max : 100, '', keywords.get(name) || '', st.n, review.join('; ')];
+    amount ? st.max : 100, extra.max_stack || '', keywords.get(name) || '', st.n, review.join('; ')];
 });
 const out = path.join(__dirname, '..', 'docs', 'abilities-draft.csv');
 fs.writeFileSync(out, '﻿' + [header, ...rows].map((r) => r.map(csv).join(',')).join('\n') + '\n');
