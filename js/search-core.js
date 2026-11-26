@@ -27,6 +27,23 @@ function compareCandidates(a,b){
 const noAbilities = ()=> undefined;
 const stackKeyOf = (name, abilityOf)=> abilityOf(name)?.stackKey || name;
 
+/* ---- Requirements: what the user picked as "wanted" / "unwanted" ----
+ * A requirement is a string: either one skill name, or a whole group written as
+ * GROUP_PREFIX + group name (e.g. 'กลุ่ม:โล่' = any shield). Keeping it a string
+ * lets saved filters, share links and the 14-item quota treat both alike.      */
+const GROUP_PREFIX = 'กลุ่ม:';
+const isGroupRequirement = (req)=> typeof req === 'string' && req.startsWith(GROUP_PREFIX);
+const groupOfRequirement = (req)=> isGroupRequirement(req) ? req.slice(GROUP_PREFIX.length) : '';
+const groupRequirement = (group)=> GROUP_PREFIX + group;
+
+function requirementMatches(req, name, abilityOf=noAbilities){
+  if(isGroupRequirement(req)) return abilityOf(name)?.group === groupOfRequirement(req);
+  return req === name;
+}
+function matchesAnyRequirement(reqs, name, abilityOf=noAbilities){
+  return (reqs || []).some(r => requirementMatches(r, name, abilityOf));
+}
+
 /**
  * Score of one skill value = % of that skill's max_value, capped at 100.
  * Chance skills (max 100) keep their value; amount skills such as
@@ -44,17 +61,20 @@ function abilityScore(value, ability){
  * (a skill's stack_key, or its name when it has none).
  */
 function jewelToCandidate(j, desired, unwanted=[], abilityOf=noAbilities){
-  const bitIndex = new Map(desired.map((n,i)=>[n,i]));
-  const unwantedSet = new Set(unwanted);
   let mask=0, score=0, otherNames=[], unwantedCount=0, extraCount=0;
-  for(const s of j.substats){
-    const idx=bitIndex.get(s.name);
-    if(idx!==undefined){ mask|=(1<<idx); score+=abilityScore(toNumber(s.value), abilityOf(s.name)); }
-    else{
-      otherNames.push(s.name);
-      if(unwantedSet.has(s.name)) unwantedCount++;
-      else extraCount++;
+  // bit i = the pendant has a skill matching desired[i]; it scores the best such skill (one per requirement)
+  desired.forEach((req, i)=>{
+    let best = -Infinity;
+    for(const s of j.substats){
+      if(requirementMatches(req, s.name, abilityOf)) best = Math.max(best, abilityScore(toNumber(s.value), abilityOf(s.name)));
     }
+    if(best > -Infinity){ mask |= (1<<i); score += best; }
+  });
+  for(const s of j.substats){
+    if(matchesAnyRequirement(desired, s.name, abilityOf)) continue;
+    otherNames.push(s.name);
+    if(matchesAnyRequirement(unwanted, s.name, abilityOf)) unwantedCount++;
+    else extraCount++;
   }
   return { id:j.id, mask, score, otherNames, unwantedCount, extraCount, allNames: j.substats.map(s=>s.name),
            stackKeys: [...new Set(j.substats.map(s=>stackKeyOf(s.name, abilityOf)))] };
@@ -212,5 +232,6 @@ function searchCombos({ desired, cand, topK, fixed = null, onProgress = null }){
 }
 
 if (typeof module === 'object' && module.exports){
-  module.exports = { SPEED_CFG, toNumber, popcount, abilityScore, compareCandidates, jewelToCandidate, buildCandidates, buildFillerCandidates, compatibleWith, searchCombos };
+  module.exports = { SPEED_CFG, GROUP_PREFIX, isGroupRequirement, groupOfRequirement, groupRequirement,
+    requirementMatches, matchesAnyRequirement, toNumber, popcount, abilityScore, compareCandidates, jewelToCandidate, buildCandidates, buildFillerCandidates, compatibleWith, searchCombos };
 }

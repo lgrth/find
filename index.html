@@ -382,9 +382,13 @@
           <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ..." autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
         </div>
+        <div id="chipGroupTabsWrap">
+          <div class="chip-group-tabs-label">หรือเลือกจากกลุ่ม</div>
+          <div id="chipGroupTabs" class="chip-group-tabs" role="group" aria-label="กลุ่มความสามารถ" hidden></div>
+        </div>
       </div>
       <div id="chipAllWrap" class="chip-all-wrap" hidden>
-        <div class="chip-unwanted-results-title" style="color: #7da0ca;">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
+        <div id="chipAllTitle" class="chip-unwanted-results-title" style="color: #7da0ca;">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
         <div id="chipAll" class="chip-list chip-list--all"></div>
       </div>
 

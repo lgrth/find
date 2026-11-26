@@ -13,14 +13,22 @@
     if (typeof updateCalcAvailability === 'function') updateCalcAvailability();
   }
 
+  function toast(msg){ if (typeof showToast === 'function') showToast(msg, 2800, 'warn'); }
+
   function addAbility(name){
-    const sel = window._chipSelected;
     const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
-    if (sel.includes(name) || sel.length >= max) return false;
-    sel.push(name);
-    // auto-remove from unwanted if overlapping
-    const uidx = window._chipUnwanted.indexOf(name);
-    if(uidx !== -1){ window._chipUnwanted.splice(uidx, 1); refreshUnwantedChips(); }
+    if (window._chipSelected.includes(name)) return false;
+    const coveredBy = window._chipSelected.find(r => isGroupRequirement(r) && requirementsOverlap(r, name));
+    if (coveredBy){ toast(`"${name}" อยู่ใน ${requirementLabel(coveredBy)} ที่เลือกไว้แล้ว`); return false; }
+    // D5: picking a whole group absorbs its skills that were picked one by one
+    const next = isGroupRequirement(name) ? window._chipSelected.filter(r => !requirementsOverlap(name, r)) : window._chipSelected.slice();
+    const merged = window._chipSelected.length - next.length;
+    if (next.length >= max) return false;
+    next.push(name);
+    window._chipSelected = next;
+    const unwanted = window._chipUnwanted.filter(u => !requirementsOverlap(u, name));
+    if (unwanted.length !== window._chipUnwanted.length){ window._chipUnwanted = unwanted; refreshUnwantedChips(); }
+    if (merged) toast(`รวม ${merged} สกิลเป็น "${requirementLabel(name)}" แล้ว`);
     return true;
   }
 
@@ -47,8 +55,8 @@
   window._chipSelected.forEach(name => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'chip is-selected chip-entering';
-    b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+    b.className = 'chip is-selected chip-entering' + (isGroupRequirement(name) ? ' chip--group' : '');
+    b.innerHTML = `<span>${escapeHtml(requirementLabel(name))}</span><span class="chip-x" aria-hidden="true">×</span>`;
     b.title = 'คลิกเพื่อเอาออก';
     b.addEventListener('click', ()=>{
       removeAbility(name);
@@ -60,39 +68,106 @@
   });
 }
 
+  // Group tab currently open under the search box ('' = none)
+  let activeGroup = '';
+
+  function matchesQuery(name, q){
+    if (!q) return true;
+    const keywords = window._abilityKeywords?.get(name) || [];
+    return normalizeSearchText(name).includes(q) || keywords.some(k => k.includes(q) || q.includes(k));
+  }
+
+  /** Whole-group chips to offer: the open tab's group, or groups whose name matches the search. */
+  function groupChoices(q, group){
+    return abilityGroupList().filter(g => g.pickable &&
+      (group ? g.group === group : (q && normalizeSearchText(g.group).includes(q))));
+  }
+
+  function makeGroupChip(g, isSel, disabled, title){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip chip--group' + (isSel ? ' is-selected' : '') + (disabled ? ' is-disabled' : '');
+    b.textContent = `🗂 ${g.group} ทุกแบบ (${g.count})`;
+    b.title = title;
+    if (disabled) b.setAttribute('aria-disabled','true');
+    return b;
+  }
+
   function renderAll(){
     const wrap = document.getElementById('chipAll');
     const allWrap = document.getElementById('chipAllWrap');
+    const title = document.getElementById('chipAllTitle');
     if (!wrap) return;
     const q = normalizeSearchText(document.getElementById('chipSearch')?.value || '');
-    // แสดง "ทั้งหมด" เฉพาะตอนมีคำค้นหา
+    // Typing searches every skill; the group tabs (and an open tab) step aside meanwhile.
+    const group = q ? '' : activeGroup;
+    const tabs = document.getElementById('chipGroupTabsWrap');
+    if (tabs) tabs.hidden = !!q;
+    const open = !!(q || group);
     if (allWrap){
-      if (q) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden','');
+      if (open) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden','');
     }
+    if (title) title.textContent = group ? `กลุ่ม ${activeGroup} — คลิกเพื่อเพิ่ม/เอาออก` : 'ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก';
     wrap.innerHTML = '';
-    if (!q) return;
+    if (!open) return;
     const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
     const atMax = window._chipSelected.length >= max;
-    ALL_ABILITIES.forEach(name => {
-      const normalizedName = normalizeSearchText(name);
-      const keywords = window._abilityKeywords?.get(name) || [];
 
-      const nameMatch = normalizedName.includes(q);
-      const kwMatch = keywords.some(k => k.includes(q) || q.includes(k));
+    groupChoices(q, group).forEach(g => {
+      const req = groupRequirement(g.group);
+      const isSel = window._chipSelected.includes(req);
+      const disabled = !isSel && atMax;
+      const b = makeGroupChip(g, isSel, disabled, isSel ? 'คลิกเพื่อเอาออก' : (disabled ? 'ครบ ' + max + ' ความสามารถแล้ว' : `เลือกทั้งกลุ่ม: สกิลไหนในกลุ่ม ${g.group} ก็ได้ (นับ 1 ช่อง)`));
+      b.addEventListener('click', ()=>{
+        if (b.classList.contains('is-disabled')) return;
+        if (isSel) removeAbility(req); else addAbility(req);
+        refreshChips();
+        notify();
+      });
+      wrap.appendChild(b);
+    });
 
-      if (!nameMatch && !kwMatch) return;
+    const names = group ? ALL_ABILITIES.filter(n => abilityOf(n)?.group === group) : ALL_ABILITIES;
+    names.forEach(name => {
+      if (!matchesQuery(name, q)) return;
       const isSel = window._chipSelected.includes(name);
+      const coveredBy = !isSel && window._chipSelected.find(r => isGroupRequirement(r) && requirementsOverlap(r, name));
+      const disabled = !isSel && (atMax || !!coveredBy);
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'chip' + (isSel ? ' is-selected' : '') + ((!isSel && atMax) ? ' is-disabled' : '');
+      b.className = 'chip' + (isSel ? ' is-selected' : '') + (disabled ? ' is-disabled' : '') + (coveredBy ? ' is-covered' : '');
       b.textContent = name;
-      b.title = isSel ? 'คลิกเพื่อเอาออก' : (atMax ? 'ครบ ' + max + ' ความสามารถแล้ว' : 'คลิกเพื่อเพิ่ม');
-      if (!isSel && atMax) b.setAttribute('aria-disabled','true');
+      b.title = isSel ? 'คลิกเพื่อเอาออก' : coveredBy ? `รวมอยู่ใน ${requirementLabel(coveredBy)} แล้ว` : (atMax ? 'ครบ ' + max + ' ความสามารถแล้ว' : 'คลิกเพื่อเพิ่ม');
+      if (disabled) b.setAttribute('aria-disabled','true');
       b.addEventListener('click', ()=>{
         if (b.classList.contains('is-disabled')) return;
         if (isSel) removeAbility(name); else addAbility(name);
         refreshChips();
         notify();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  /** Row of group tabs under the search box; clicking one lists that group's skills. */
+  function renderGroupTabs(){
+    const wrap = document.getElementById('chipGroupTabs');
+    if (!wrap) return;
+    const groups = abilityGroupList();
+    if (activeGroup && !groups.some(g => g.group === activeGroup)) activeGroup = '';
+    wrap.innerHTML = '';
+    wrap.hidden = groups.length < 2;
+    groups.forEach(g => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip-group-tab' + (g.group === activeGroup ? ' active' : '');
+      b.dataset.group = g.group;
+      b.setAttribute('aria-pressed', g.group === activeGroup ? 'true' : 'false');
+      b.textContent = `${g.group} (${g.count})`;
+      b.addEventListener('click', ()=>{
+        activeGroup = activeGroup === g.group ? '' : g.group;
+        renderGroupTabs();
+        renderAll();
       });
       wrap.appendChild(b);
     });
@@ -107,13 +182,14 @@
     setAbilityList(ALL_ABILITIES);
   }
 
+  renderGroupTabs();
   refreshChips();
 };
   window.refreshChipPicker = refreshChips;
 
   // expose setChipState for applyStateFromURL
   window.setChipState = function(arr){
-    window._chipSelected = Array.from(arr || []).slice(0, (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14);
+    window._chipSelected = mergeRequirements(Array.from(arr || [])).slice(0, (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14);
     refreshChips();
     notify();
   };
@@ -130,7 +206,12 @@
 
   function addUnwanted(name){
     if(window._chipUnwanted.includes(name)) return false;
-    if(window._chipSelected.includes(name)) return false; // cannot overlap
+    const wanted = window._chipSelected.find(r => requirementsOverlap(r, name));
+    if(wanted){ toast(`ซ้ำกับสกิลที่ต้องการ: ${requirementLabel(wanted)}`); return false; } // cannot overlap
+    const coveredBy = window._chipUnwanted.find(r => isGroupRequirement(r) && requirementsOverlap(r, name));
+    if(coveredBy){ toast(`"${name}" อยู่ใน ${requirementLabel(coveredBy)} แล้ว`); return false; }
+    // D5 + D7: a whole unwanted group absorbs its skills listed one by one
+    window._chipUnwanted = isGroupRequirement(name) ? window._chipUnwanted.filter(u => !requirementsOverlap(name, u)) : window._chipUnwanted;
     window._chipUnwanted.push(name);
     return true;
   }
@@ -165,8 +246,8 @@
   window._chipUnwanted.forEach(name=>{
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'chip is-unwanted chip-entering';
-    b.innerHTML = `<span>${escapeHtml(name)}</span><span class="chip-x" aria-hidden="true">×</span>`;
+    b.className = 'chip is-unwanted chip-entering' + (isGroupRequirement(name) ? ' chip--group' : '');
+    b.innerHTML = `<span>${escapeHtml(requirementLabel(name))}</span><span class="chip-x" aria-hidden="true">×</span>`;
     b.title = 'คลิกเพื่อเอาออก';
     b.addEventListener('click', ()=>{
       removeUnwanted(name);
@@ -184,20 +265,30 @@
     if(allWrap){ if(q) allWrap.removeAttribute('hidden'); else allWrap.setAttribute('hidden',''); }
     wrap.innerHTML='';
     if(!q) return;
-    ALL_ABILITIES.forEach(name=>{
-      const normalizedName = normalizeSearchText(name);
-const keywords = window._abilityKeywords?.get(name) || [];
-const nameMatch = normalizedName.includes(q);
-const kwMatch = keywords.some(k => k.includes(q) || q.includes(k));
-
-if(!nameMatch && !kwMatch) return;
-      if(window._chipSelected.includes(name)) return; // skip already-wanted
-      const isSel=window._chipUnwanted.includes(name);
-      const b=document.createElement('button');
-      b.type='button'; b.className='chip'+(isSel?' is-unwanted':'');
-      b.textContent=name;
-      b.title=isSel?'คลิกเพื่อเอาออก':'คลิกเพื่อเพิ่มในรายการไม่ต้องการ';
+    const overlapsWanted = (req)=> window._chipSelected.some(r => requirementsOverlap(r, req));
+    abilityGroupList().filter(g => g.pickable && normalizeSearchText(g.group).includes(q)).forEach(g=>{
+      const req = groupRequirement(g.group);
+      if(overlapsWanted(req)) return; // a wanted skill is in this group
+      const isSel = window._chipUnwanted.includes(req);
+      const b = makeGroupChip(g, false, false, isSel ? 'คลิกเพื่อเอาออก' : `ไม่ต้องการทุกสกิลในกลุ่ม ${g.group}`);
+      if(isSel) b.classList.add('is-unwanted');
       b.addEventListener('click',()=>{
+        if(isSel) removeUnwanted(req); else addUnwanted(req);
+        refreshUnwantedChips();
+      });
+      wrap.appendChild(b);
+    });
+    ALL_ABILITIES.forEach(name=>{
+      if(!matchesQuery(name, q)) return;
+      if(overlapsWanted(name)) return; // skip already-wanted
+      const isSel=window._chipUnwanted.includes(name);
+      const coveredBy = !isSel && window._chipUnwanted.find(r => isGroupRequirement(r) && requirementsOverlap(r, name));
+      const b=document.createElement('button');
+      b.type='button'; b.className='chip'+(isSel?' is-unwanted':'')+(coveredBy?' is-disabled is-covered':'');
+      b.textContent=name;
+      b.title=isSel?'คลิกเพื่อเอาออก':coveredBy?`รวมอยู่ใน ${requirementLabel(coveredBy)} แล้ว`:'คลิกเพื่อเพิ่มในรายการไม่ต้องการ';
+      b.addEventListener('click',()=>{
+        if(coveredBy) return;
         if(isSel) removeUnwanted(name); else addUnwanted(name);
         refreshUnwantedChips();
       });
@@ -207,7 +298,7 @@ if(!nameMatch && !kwMatch) return;
   function refreshUnwantedChips(){ renderUnwantedSelected(); renderUnwantedAll(); }
   window.refreshUnwantedChips = refreshUnwantedChips;
   window.setUnwantedState = function(arr){
-    window._chipUnwanted = Array.from(arr||[]).filter(n=>!window._chipSelected.includes(n));
+    window._chipUnwanted = mergeRequirements(Array.from(arr||[])).filter(n=>!window._chipSelected.some(r=>requirementsOverlap(r, n)));
     refreshUnwantedChips();
   };
 

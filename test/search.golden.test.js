@@ -49,6 +49,10 @@ const SCENARIOS = {
   'char-moses': { selected: [S.bomb, S.tollFree, S.drone, S.superShield, S.invite], char: 'โมเสส' },
   'char-scorpion': { selected: [S.superShield, S.antiHazard, S.plan3, S.dice, S.jail, S.bomb], char: 'สกอร์เปียน' },
   'char-sasha-dark': { selected: [S.antiJail, S.drone, S.invite, S.dice], char: 'ชาช่า', jewelTypes: ['dark'] },
+  // Whole-group requirements ('กลุ่ม:<group>' = any skill of that group, one slot).
+  'group-wanted': { selected: ['กลุ่ม:โล่', 'กลุ่ม:ยกเว้นค่าผ่านทาง', S.jail, S.drone, S.invite] },
+  'group-unwanted': { selected: [S.drone, S.superShield, S.invite, S.dice], unwanted: ['กลุ่ม:ผลัก / เนรเทศ', 'กลุ่ม:ขังฟองสบู่'] },
+  'group-char': { selected: ['กลุ่ม:โล่', S.bomb, S.tollFree, S.drone], char: 'โมเสส' },
 };
 
 test('search results match golden master', async (t) => {

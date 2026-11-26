@@ -652,7 +652,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
 
   function abilityExists(name){
     try{
-      return Array.isArray(_abilityList) && _abilityList.length ? _abilityList.includes(name) : true;
+      return requirementExists(name);
     }catch(e){
       return true;
     }

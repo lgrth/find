@@ -1,7 +1,7 @@
 /* ===== Filter state — the one place that knows what a "filter" is =====
  *
- *   { selected: string[],  // wanted skills (max MAX_SELECTS)
- *     unwanted: string[],  // unwanted skills
+ *   { selected: string[],  // wanted requirements (max MAX_SELECTS): skill names or 'กลุ่ม:<group>'
+ *     unwanted: string[],  // unwanted requirements (same form)
  *     char:     string,    // character name, '' = none
  *     jewelTypes: string[],  // subset of 'dark' | 'white' | 'other'; [] = every pendant
  *     topK:     string }   // '3'–'50' (stored as string, as in saved presets)
@@ -85,6 +85,62 @@ function setJewelTypesUI(types){
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
     b.classList.toggle('active', on);
   });
+}
+
+/* ---- ability groups (from the Abilities tab) ----
+ * A whole group is picked as the requirement string 'กลุ่ม:<group>' (see search-core.js).
+ * D5: a group and one of its own skills are never kept side by side — the group wins. */
+
+/** Skills of `group` that some pendant actually has. */
+function groupMembers(group){
+  const names = (typeof _abilityList !== 'undefined' && _abilityList.length) ? _abilityList : [...abilities.keys()];
+  return names.filter(n => abilityOf(n)?.group === group);
+}
+
+/** Groups for the group tabs: biggest first, "อื่น ๆ" last. */
+function abilityGroupList(){
+  const counts = new Map();
+  const names = (typeof _abilityList !== 'undefined' && _abilityList.length) ? _abilityList : [...abilities.keys()];
+  names.forEach(n => { const g = abilityOf(n)?.group; if(g) counts.set(g, (counts.get(g) || 0) + 1); });
+  return [...counts.entries()]
+    .map(([group, count]) => ({ group, count, pickable: count >= 2 && group !== OTHER_GROUP }))
+    .sort((a, b) => (a.group === OTHER_GROUP) - (b.group === OTHER_GROUP) || b.count - a.count || a.group.localeCompare(b.group, 'th'));
+}
+
+/** Shown text of a requirement: a skill name, or "🗂 โล่ (ทุกแบบ)". */
+function requirementLabel(req){
+  return isGroupRequirement(req) ? `🗂 ${groupOfRequirement(req)} (ทุกแบบ)` : String(req);
+}
+
+/** A group requirement counts only when its group still has skills (unknown groups from old links are dropped). */
+function requirementExists(req){
+  if(isGroupRequirement(req)) return !abilities.size || groupMembers(groupOfRequirement(req)).length >= 2;
+  return (typeof _abilityList === 'undefined' || !_abilityList.length) ? true : _abilityList.includes(req);
+}
+
+/** true when some skill satisfies both requirements. */
+function requirementsOverlap(a, b){
+  if(a === b) return true;
+  const ga = groupOfRequirement(a), gb = groupOfRequirement(b);
+  if(ga && gb) return false;               // a skill belongs to one group only
+  if(ga) return abilityOf(b)?.group === ga;
+  if(gb) return abilityOf(a)?.group === gb;
+  return false;
+}
+
+/** Drop duplicates, unknown groups and skills already covered by a chosen group (D5). */
+function mergeRequirements(list){
+  const out = [];
+  (list || []).forEach(req => {
+    if(typeof req !== 'string' || !req || out.includes(req)) return;
+    if(isGroupRequirement(req) && !requirementExists(req)) return;
+    if(out.some(o => isGroupRequirement(o) && requirementsOverlap(o, req))) return;   // covered by a group
+    if(isGroupRequirement(req)){
+      for(let i = out.length - 1; i >= 0; i--) if(requirementsOverlap(req, out[i])) out.splice(i, 1);
+    }
+    out.push(req);
+  });
+  return out;
 }
 
 /* ---- character select (TomSelect or native <select>) ---- */

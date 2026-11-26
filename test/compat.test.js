@@ -227,3 +227,58 @@ test('result tooltip shows the max stack from the Abilities tab', async () => {
     assert.doesNotMatch(tips, /บัตรเชิญ: \d+% · สูงสุด/);
   });
 });
+
+const GROUP_SEL = ['กลุ่ม:โล่', 'โดรนก๊อปปี้', 'บัตรเชิญ', 'คุมเต๋า'];
+
+test('whole-group requirements survive share links and saved presets', async () => {
+  const url = await withApp({ search: packed({ sn: GROUP_SEL, un: ['กลุ่ม:หลุมดำ'] }) }, async ({ page }) => {
+    assert.deepEqual((await readForm(page)).selected, GROUP_SEL);
+    assert.deepEqual((await readForm(page)).unwanted, ['กลุ่ม:หลุมดำ']);
+    return page.evaluate(() => buildShareURL());
+  });
+  const state = JSON.parse(LZString.decompressFromEncodedURIComponent(new URL(url).searchParams.get('d')));
+  assert.deepEqual(state.sn, GROUP_SEL);
+  await withApp({ search: new URL(url).search }, async ({ page }) => {
+    assert.deepEqual((await readForm(page)).selected, GROUP_SEL);
+  });
+
+  const store = { version: 1, presets: [{ id: 'fav_g', name: 'กลุ่ม', createdAt: '2026-01-01T00:00:00.000Z',
+    state: { selected: [...GROUP_SEL, 'กลุ่ม:ไม่มีจริง'], unwanted: [], topK: '10', char: '' } }] };
+  await withApp({ localStorage: { lgr_filter_favorites_v1: JSON.stringify(store) } }, async ({ page }) => {
+    await page.evaluate(() => document.getElementById('favoriteBtn').click());
+    await page.locator('#favList .fav-item button', { hasText: 'ใช้ Filter นี้' }).first().click();
+    assert.deepEqual((await readForm(page)).selected, GROUP_SEL, 'unknown group is skipped');
+  });
+});
+
+test('group tab: pick a whole group, its single skills merge into it (D5)', async () => {
+  await withApp({}, async ({ page }) => {
+    await page.evaluate(() => window.setChipState(['โล่ซูเปอร์', 'ขังคุก']));
+    await page.evaluate(() => window.setUnwantedState(['โล่ขาว', 'ผลัก']));
+    await page.click('#chipGroupTabs .chip-group-tab[data-group="โล่"]');
+    assert.match(await page.textContent('#chipAllTitle'), /กลุ่ม โล่/);
+    await page.click('#chipAll .chip--group');
+    const form = await readForm(page);
+    assert.deepEqual(form.selected, ['ขังคุก', 'กลุ่ม:โล่']);
+    assert.deepEqual(form.unwanted, ['ผลัก'], 'an unwanted shield cannot stay next to "any shield"');
+    assert.match(await page.textContent('#toastMessage'), /รวม 1 สกิล/);
+    assert.deepEqual(await page.$$eval('#chipSelected .chip', (b) => b.map((x) => x.textContent)), ['ขังคุก×', '🗂 โล่ (ทุกแบบ)×']);
+    // its skills now show as covered and cannot be added again
+    assert.equal(await page.locator('#chipAll .chip.is-covered').count(), 2);
+    // typing hides the tabs and searches everything, group names included
+    await page.fill('#chipSearch', 'ยกเว้น');
+    assert.equal(await page.isHidden('#chipGroupTabsWrap'), true);
+    assert.match(await page.textContent('#chipAll .chip--group'), /ยกเว้นค่าผ่านทาง ทุกแบบ/);
+  });
+});
+
+test('result card treats every skill of a wanted group as wanted', async () => {
+  await withApp({}, async ({ page }) => {
+    await page.evaluate(() => { window.setChipState(['กลุ่ม:โล่', 'โดรนก๊อปปี้', 'บัตรเชิญ', 'คุมเต๋า', 'กลุ่ม:ไดเมนชั่น']); return window.calculate(); });
+    await page.waitForSelector('#result .result-card');
+    const tips = await page.$$eval('#result .result-card:first-child .jewel-column', (els) => els.map((e) => e.dataset.tooltip).join('\n'));
+    assert.match(tips, /✅ โล่(ซูเปอร์|ขาว)/);
+    const missing = await page.$$eval('#result .row-miss', (els) => els.map((e) => e.textContent).join(' '));
+    assert.doesNotMatch(missing, /กลุ่ม:/, 'missing groups are shown by label, not by token');
+  });
+});

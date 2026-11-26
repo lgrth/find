@@ -96,3 +96,17 @@ test('stack_key: pendants whose skills share a stack key never pair (โล่�
   const link = { id: 'L', substats: [{ name: 'โล่ขาว', value: 50 }] };
   assert.ok(core.compatibleWith(link, nonLink, abilityOf).every((j) => !hasShield(j.id)));
 });
+
+test('group requirement: one bit for any skill of the group, scored by its best skill', () => {
+  const abilityOf = (n) => ({ A1: { group: 'A' }, A2: { group: 'A' }, B: { group: 'B' } })[n];
+  const j = { id: 'x', substats: [{ name: 'A1', value: 30 }, { name: 'A2', value: 80 }, { name: 'B', value: 10 }, { name: 'U', value: 5 }] };
+  const c = core.jewelToCandidate(j, ['กลุ่ม:A', 'Q'], ['U'], abilityOf);
+  assert.equal(c.mask, 0b01);
+  assert.equal(c.score, 80, 'best skill of the group only (E4)');
+  assert.deepEqual(c.otherNames, ['B', 'U']);
+  assert.equal(c.unwantedCount, 1);
+
+  const u = core.jewelToCandidate(j, ['Q'], ['กลุ่ม:A'], abilityOf);
+  assert.equal(u.unwantedCount, 2, 'an unwanted group counts each of its skills');
+  assert.equal(u.extraCount, 2);
+});

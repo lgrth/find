@@ -1330,7 +1330,7 @@ updateInventoryResultFiltersVisibility();
     const ownership = computeResultOwnership(r);
     const jewelCols = group.map(j=>{
       const tooltip = j.substats.map(s=>{
-        const icon = desired.includes(s.name)?'✅':'✨';
+        const icon = matchesAnyRequirement(desired, s.name, abilityOf)?'✅':'✨';
         const maxStack = abilityOf(s.name)?.maxStack;
         return `${icon} ${s.name}: ${s.value}%${maxStack ? ` · สูงสุด ${maxStack} ขั้น` : ''}`;
       }).join('\n');
@@ -1342,12 +1342,14 @@ updateInventoryResultFiltersVisibility();
       return `<div class="${cls}" data-tooltip="${escapeHtmlAttr(tooltip)}">${badge}<span class="jewel-name">${escapeHtmlText(j.id)}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
-    const notList = desired.filter((_,idx)=> r.notIdx.includes(idx));
+    const notList = desired.filter((_,idx)=> r.notIdx.includes(idx)).map(requirementLabel);
     const allNames = new Set(); group.filter(Boolean).forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
     // แยก extra ออกจาก unwanted — recalculate ใน render เพื่อให้ทั้ง normal และ fixed-link path ถูกต้อง
-    const unwantedSet = new Set(Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
-    const extra = [...allNames].filter(nm => !desired.includes(nm) && !unwantedSet.has(nm));
-    const extraUnwanted = [...allNames].filter(nm => !desired.includes(nm) && unwantedSet.has(nm));
+    const unwantedReqs = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
+    const isWanted = (nm)=> matchesAnyRequirement(desired, nm, abilityOf);
+    const isUnwanted = (nm)=> matchesAnyRequirement(unwantedReqs, nm, abilityOf);
+    const extra = [...allNames].filter(nm => !isWanted(nm) && !isUnwanted(nm));
+    const extraUnwanted = [...allNames].filter(nm => !isWanted(nm) && isUnwanted(nm));
     const effectiveUnwantedCount = extraUnwanted.length;
     const matchedCount = desired.length - notList.length;
 
