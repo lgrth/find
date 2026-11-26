@@ -22,11 +22,15 @@
 |------|---------|
 | `index.html` | โครง HTML + meta/SEO |
 | `css/app.css` | สไตล์ทั้งหมด |
-| `js/main.js` | โหลดข้อมูลชีต, สร้าง candidate, Web Worker ค้นหา, แสดงผล |
+| `js/data-model.js` | แปลงตารางชีต → ข้อมูลจี้ `{ id, prefix, type, allowedChars, substats }` + ตรวจแถวที่ผิด |
+| `js/search-core.js` | ตรรกะค้นหาเซ็ต (pure function ใช้ร่วมกันทั้งหน้าเว็บ, worker และเทสต์) |
+| `js/search-worker.js` | Web Worker ที่รันการค้นหา |
+| `js/main.js` | โหลดข้อมูล, `calculate()` (รวมการล็อกจี้ [ลิงก์]), แสดงผล |
+| `js/filter-state.js` | **state ของ Filter ที่เดียว**: อ่าน/ใส่ฟอร์ม, ทำความสะอาด, สรุป, แปลงเป็นลิงก์แชร์ |
 | `js/share.js` | ลิงก์แชร์ / QR / อ่าน state จาก URL |
 | `js/saved-data.js` | เซ็ตจี้ที่บันทึก, Filter ที่บันทึก, นำเข้า/ส่งออก |
 | `js/chip-picker.js` | เลือกสกิลที่ต้องการ / ไม่ต้องการ |
-| `js/char-link.js`, `js/char-select.js` | เลือกตัวละคร + ล็อกจี้ [ลิงก์] |
+| `js/char-select.js` | รายชื่อตัวละคร (จากชีตตัวละคร) |
 | `js/tutorial.js`, `js/feedback.js`, `js/persist-form.js`, `js/ui/*` | UI เสริม |
 | `manifest.json` | PWA manifest |
 | `fonts/` | ฟอนต์ LINE Seed Sans TH |
@@ -36,7 +40,8 @@
 — **ลำดับของ `<script>` มีผล** อย่าสลับโดยไม่จำเป็น
 
 ## รันในเครื่อง
-เพราะเป็น static site ล้วน เปิดผ่าน HTTP server ธรรมดาก็พอ (ข้อมูลโหลดจาก Google Sheets):
+เพราะเป็น static site ล้วน เปิดผ่าน HTTP server ธรรมดาก็พอ (ข้อมูลโหลดจาก Google Sheets)
+— ต้องเปิดผ่าน HTTP เท่านั้น เปิดไฟล์ตรง ๆ (`file://`) Web Worker จะไม่ทำงาน:
 
 ```bash
 python3 -m http.server 8080
@@ -55,8 +60,9 @@ npm test
 
 | ไฟล์ | ตรวจอะไร |
 |------|---------|
-| `test/search.golden.test.js` | ผลค้นหา 16 สถานการณ์ต้องตรงกับ `test/golden/search-results.json` ทุกตัว |
+| `test/search.golden.test.js` | ผลค้นหา 16 สถานการณ์ต้องตรงกับ `test/golden/search-results.json` ทุกตัว + กฎล็อกจี้ [ลิงก์] |
 | `test/compat.test.js` | ลิงก์แชร์รูปแบบเก่า/ใหม่, Filter ที่บันทึก, คลังจี้, ไฟล์นำเข้า ยังใช้ได้ |
+| `test/search-core.test.js`, `test/data-model.test.js` | unit test ของตรรกะค้นหาและการแปลงชีต (รันใน Node ล้วน) |
 | `test/smoke.test.js` | คลิกเลือกสกิล → ค้นหา → มีการ์ดผลลัพธ์ |
 
 - อัปเดตข้อมูล fixture จากชีตจริง: `node scripts/update-fixtures.js`

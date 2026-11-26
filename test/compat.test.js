@@ -131,3 +131,32 @@ test('import file v1 is normalised the same way', async () => {
     key: 'x|y', names: ['x', 'y'], rank: 2, matchedCount: 0, missingCount: 0, extraCount: 0, totalValue: 120,
   });
 });
+
+test('legacy (non-compressed) share URL builder still writes the old parameters', async () => {
+  await withApp({ search: packed({ sn: SEL, un: UNW, k: '20', m: 1, c: CHAR }) }, async ({ page }) => {
+    const url = await page.evaluate(() => buildLegacyShareURL(new URL(location.origin + location.pathname), 'k1', readFilterState(), ['b', 'a']));
+    const p = new URL(url).searchParams;
+    const idx = await page.evaluate((n) => n.map((x) => _abilityList.indexOf(x)).join(','), SEL);
+    assert.equal(p.get('s'), idx);
+    assert.equal(p.get('k'), '20');
+    assert.equal(p.get('d'), '1');
+    assert.equal(p.get('char'), CHAR);
+    assert.equal(p.get('r'), 'k1');
+    assert.equal(p.get('rn'), 'a||b');
+  });
+});
+
+test('saving the current filter stores the same preset shape', async () => {
+  await withApp({ search: packed({ sn: SEL, un: UNW, k: '20', m: 1, c: CHAR }) }, async ({ page }) => {
+    await page.evaluate(() => document.getElementById('favoriteBtn').click());
+    await page.click('#favSaveCurrent');
+    await page.fill('#favSavePanel input', 'ชุดทดสอบ');
+    await page.click('#favConfirmSave');
+    const store = await page.evaluate(() => JSON.parse(localStorage.getItem('lgr_filter_favorites_v1')));
+    assert.equal(store.presets.length, 1);
+    assert.equal(store.presets[0].name, 'ชุดทดสอบ');
+    assert.deepEqual(store.presets[0].state, { selected: SEL, unwanted: UNW, char: CHAR, darkOnly: true, topK: '20' });
+    const meta = await page.locator('#favList .fav-item__meta').first().textContent();
+    assert.equal(meta, '4 สกิลที่ต้องการ • 2 สกิลที่ไม่ต้องการ • โมเสส • [ดาร์ค] เท่านั้น • 20 เซ็ต');
+  });
+});

@@ -593,71 +593,6 @@ function escapeHtmlAttr(s){
   return escapeHtmlText(s).replace(/\n/g, '&#10;');
 }
 
-// Trim ID ตั้งแต่ต้น — รองรับกรณีที่ GViz ส่ง column id เป็น "A","B"... แทน label
-function normalizeByHeaders(rows){
-  // ตรวจล่วงหน้าว่า key ของคอลัมน์แรกคืออะไร (สำหรับ fallback)
-  const firstRowKeys = rows.length ? Object.keys(rows[0]) : [];
-  const firstKey = firstRowKeys[0] || null;
-
-  return rows.map((r,i)=>{
-    // 1) ลองหาคอลัมน์ id จากชื่อที่รู้จัก
-    const namedCandidates = ["ID","Id","id","ชื่อ","ชื่อจี้","Name","NAME","name",
-                             "Jewel","JewelName","JewelID","Pendant","PendantID","A","B"];
-    let rawId = null;
-    for (const k of namedCandidates){
-      const v = r[k];
-      if (v != null && String(v).trim() !== ''){ rawId = String(v).trim(); break; }
-    }
-    // 2) Fallback: ใช้คอลัมน์แรกของแถว (ไม่ว่าชื่อ key จะเป็นอะไร)
-    if (!rawId && firstKey){
-      const v = r[firstKey];
-      if (v != null) rawId = String(v).trim();
-    }
-    // 3) ถ้า rawId เป็นตัวเลขล้วน → ค่านั้นไม่ใช่ชื่อ ให้สแกนทุก value หาชื่อจริง
-    if (!rawId || /^\d+(\.\d+)?$/.test(rawId)){
-      const nameVal = Object.values(r).find(v => {
-        const s = String(v ?? '').trim();
-        return s.length > 1 && !/^\d+(\.\d+)?$/.test(s);
-      });
-      rawId = nameVal ? String(nameVal).trim() : null;
-    }
-    const id = rawId || `Jewel${i+1}`;
-
-    // parse substats (ลอง key หลายรูปแบบ)
-    const subK  = ["Substat1","Substat2","Substat3","Substat4","Substat5",
-                   "substat1","substat2","substat3","substat4","substat5",
-                   "C","D","E","F","G"];
-    const valK  = ["Value1","Value2","Value3","Value4","Value5",
-                   "value1","value2","value3","value4","value5",
-                   "H","I","J","K","L"];
-    const substats=[];
-    // ลอง key แบบ Substat1/Value1 ก่อน
-    for (let s=1; s<=5; s++){
-      const sk = `Substat${s}`, vk = `Value${s}`;
-      if (r[sk] != null && String(r[sk]).trim()){
-        substats.push({name:String(r[sk]).trim(), value: toNumber(r[vk])});
-      }
-    }
-    // ถ้าไม่ได้เลย ลอง GViz single-letter keys (C=Substat1, D=Value1, E=Substat2, ...)
-    if (substats.length === 0 && firstRowKeys.length > 2){
-      // รูปแบบ: col0=ID, col1=Substat1, col2=Value1, col3=Substat2, col4=Value2, ...
-      for (let s=0; s<5; s++){
-        const sk = firstRowKeys[1 + s*2];
-        const vk = firstRowKeys[2 + s*2];
-        if (!sk) break;
-        const sv = r[sk]; const vv = r[vk];
-        if (sv != null && String(sv).trim()){
-          substats.push({name:String(sv).trim(), value: toNumber(vv)});
-        }
-      }
-    }
-    const jewel = { id, substats };
-    // จี้ [ลิงก์]: ตัวละครที่ใช้ได้ (คอลัมน์ AllowedChars)
-    if (isLinkId(id)) jewel.allowedChars = String(r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").trim();
-    return jewel;
-  }).filter(j=>j.substats.length>0);
-}
-
 function fetchGVizJSONP(){
   const MAX_ATTEMPTS = 3;
   const attempt = (n)=> _fetchGVizJSONPOnce().catch(err=>{
@@ -678,17 +613,8 @@ function _fetchGVizJSONPOnce(){
       setResponse: (payload)=>{
         try{
           if(!payload || !payload.table) throw new Error('GViz payload ว่าง');
-          const table = payload.table;
-          const cols = (table.cols||[]).map(c=> (c.label||c.id||'').toString().trim());
-          const rows = (table.rows||[]).map(r=>{
-            const obj={};
-            cols.forEach((label,idx)=>{
-              const cell = r.c[idx];
-              obj[label] = cell ? (cell.v ?? cell.f ?? '') : '';
-            });
-            return obj;
-          });
-          const data = normalizeByHeaders(rows);
+          const { jewels: data, problems } = parseSheetTable(payload.table);
+          if(problems.length) console.warn(`[sheet] พบ ${problems.length} จุดที่ควรตรวจในชีต:\n` + problems.join('\n'));
           done = true;
           resolve(data);
         }catch(err){
@@ -714,19 +640,13 @@ function _fetchGVizJSONPOnce(){
   });
 }
 
-// prefix checker
-function isDarkId(id){
-  return typeof id === 'string' && id.trim().startsWith(DARK_PREFIX);
-}
-
 function isLinkId(id){
   return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX);
 }
 
 function computeJewelPool(){
-  const useDarkOnly = !!darkOnly?.checked;
-  if(useDarkOnly){
-    return jewels.filter(j => isDarkId(j.id));
+  if(readFilterState().darkOnly){
+    return jewels.filter(j => j.type === 'dark');
   }
   return jewels.slice();
 }
@@ -970,16 +890,6 @@ let _lastDataLoadedAt = null;
 let _currentResultSnapshots = new Map();
 let _pinnedResults = new Map();
 
-function getCurrentFilterSnapshot(){
-  return {
-    selected: (typeof getDesired === 'function') ? getDesired() : [],
-    unwanted: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [],
-    char: (typeof getCharSelectValue === 'function') ? getCharSelectValue() : '',
-    darkOnly: !!darkOnly?.checked,
-    topK: topKInput?.value ? String(topKInput.value) : String(DEFAULT_TOPK)
-  };
-}
-
 function createResultSnapshot({rank, result, group, notList, extra, extraUnwanted, total, matchedCount}){
   const names = group.map(j=>j?.id).filter(Boolean);
   return {
@@ -991,7 +901,7 @@ function createResultSnapshot({rank, result, group, notList, extra, extraUnwante
     missing: notList.slice(),
     extra: extra.slice(),
     unwanted: extraUnwanted.slice(),
-    filter: getCurrentFilterSnapshot(),
+    filter: readFilterState(),
     createdAt: new Date().toISOString()
   };
 }
@@ -1372,7 +1282,7 @@ function renderResults(best, options){
       {
         selected_skill_count: desired.length,
         unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0,
-        dark_only: !!(document.getElementById('darkOnly')?.checked),
+        dark_only: readFilterState().darkOnly,
         has_character: !!getCharSelectValue()
       }
     );
@@ -1610,7 +1520,7 @@ syncInventoryResultFilterUI();
   const unwantedAllWrap = document.getElementById('chipUnwantedAllWrap');
   if (unwantedAllWrap) unwantedAllWrap.hidden = true;
   if (typeof window.refreshUnwantedChips === 'function') window.refreshUnwantedChips();
-  if (darkOnly) darkOnly.checked = false;
+  applyFilterState({ darkOnly: false });
 
   if (topKInput){
     topKInput.value = String(DEFAULT_TOPK);

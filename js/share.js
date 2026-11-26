@@ -16,26 +16,6 @@ function setAbilityList(arr){
 
 const SHARE_STATE_VERSION = 2;
 
-function getCharSelectValue(){
-  const el = document.getElementById('charSelect');
-  if (!el) return '';
-  if (el.tomselect) return (el.tomselect.getValue() || '').trim();
-  return (el.value || '').trim();
-}
-
-function setCharSelectValue(value){
-  const el = document.getElementById('charSelect');
-  if (!el || !value) return;
-  if (el.tomselect){
-    if (!el.tomselect.options[value]){
-      el.tomselect.addOption({value, text:value});
-      el.tomselect.refreshOptions(false);
-    }
-    el.tomselect.setValue(value, true);
-  }
-  else el.value = value;
-}
-
 function toAbilityIndices(list){
   if (!_abilityList.length || !Array.isArray(list)) return [];
   return list
@@ -62,8 +42,9 @@ function makeResultKey(names){
 }
 
 function buildLegacyShareURL(url, resultKey='', filterState=null, resultNames=[]){
+  const f = filterState || readFilterState();
   const params = url.searchParams;
-  const desired = Array.isArray(filterState?.selected) ? filterState.selected : getDesired();
+  const desired = Array.isArray(f.selected) ? f.selected : [];
 
   if (_abilityList.length){
     const indices = toAbilityIndices(desired);
@@ -72,19 +53,17 @@ function buildLegacyShareURL(url, resultKey='', filterState=null, resultNames=[]
     desired.forEach(v => params.append('sel', v));
   }
 
-  const topKValue = filterState?.topK != null ? String(filterState.topK) : (topKInput?.value ? String(topKInput.value) : '');
+  const topKValue = f.topK != null ? String(f.topK) : '';
   if (topKValue && topKValue !== '10') params.set('k', topKValue);
-  const darkValue = filterState ? !!filterState.darkOnly : !!darkOnly?.checked;
-  if (darkValue) params.set('d', '1');
+  if (f.darkOnly) params.set('d', '1');
 
-  const unwantedSels = Array.isArray(filterState?.unwanted) ? filterState.unwanted : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
+  const unwantedSels = Array.isArray(f.unwanted) ? f.unwanted : [];
   if (_abilityList.length && unwantedSels.length){
     const uIdx = toAbilityIndices(unwantedSels);
     if (uIdx.length) params.set('u', uIdx.join(','));
   }
 
-  const charVal = filterState?.char != null ? String(filterState.char) : getCharSelectValue();
-  if (charVal) params.set('char', charVal);
+  if (f.char) params.set('char', String(f.char));
 
   if (resultKey) params.set('r', resultKey);
   const targetNames = canonicalResultNames(resultNames);
@@ -97,54 +76,10 @@ function buildShareURL(resultKey='', filterState=null, resultNames=[]){
   const url = new URL(location.href);
   url.search = '';
 
-  const desired = Array.isArray(filterState?.selected)
-    ? filterState.selected
-    : getDesired();
-
-  const unwanted = Array.isArray(filterState?.unwanted)
-    ? filterState.unwanted
-    : (Array.isArray(window._chipUnwanted) ? window._chipUnwanted : []);
-
-  const charVal = filterState?.char != null
-    ? String(filterState.char)
-    : getCharSelectValue();
-
-  const cleanDesired = sanitizeStringArray(desired, MAX_SELECTS, 120);
-  const cleanUnwanted = sanitizeStringArray(unwanted, MAX_SELECTS, 120);
-
-  const desiredIdx = toAbilityIndices(cleanDesired);
-  const unwantedIdx = toAbilityIndices(cleanUnwanted);
-
-  const topKValue = String(clampNumber(
-    filterState?.topK != null ? filterState.topK : topKInput?.value,
-    3,
-    50,
-    10
-  ));
-
-  const darkValue = (filterState ? !!filterState.darkOnly : !!darkOnly?.checked) ? 1 : 0;
-  const cleanChar = sanitizePlainString(charVal || '', 120);
+  const state = filterStateToShareParams(filterState || readFilterState());
   const cleanResultKey = sanitizePlainString(resultKey || '', 260);
   const cleanResultNames = canonicalResultNames(resultNames).slice(0, 4);
-
-  const state = {};
-
-  if (desiredIdx.length) state.s = desiredIdx;
-  if (unwantedIdx.length) state.u = unwantedIdx;
-
-  // Store skill NAMES too, as the authoritative source. The positional indices
-  // above shift whenever the sheet gains or drops a skill, which would silently
-  // decode old links to the wrong skills; names survive re-ordering.
-  if (cleanDesired.length) state.sn = cleanDesired;
-  if (cleanUnwanted.length) state.un = cleanUnwanted;
-
-  // ไม่ต้องเก็บ topK ถ้าเป็นค่า default 10
-  if (topKValue && topKValue !== '10') state.k = topKValue;
-
-  if (darkValue) state.m = 1;
-  if (cleanChar) state.c = cleanChar;
   if (cleanResultKey) state.r = cleanResultKey;
-
   // เก็บชื่อจี้เฉพาะตอนแชร์เซ็ตจี้เท่านั้น
   if (cleanResultKey && cleanResultNames.length) state.t = cleanResultNames;
 
@@ -186,27 +121,15 @@ function parseCompressedStateFromURL(){
     const parsed = JSON.parse(json);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
 
-    // Names are authoritative; positional indices are only a fallback for older
-    // links that predate name storage.
-    const nameSels = sanitizeStringArray(Array.isArray(parsed.sn) ? parsed.sn.slice(0, MAX_SELECTS) : [], MAX_SELECTS, 120);
-const nameUnwanted = sanitizeStringArray(Array.isArray(parsed.un) ? parsed.un.slice(0, MAX_SELECTS) : [], MAX_SELECTS, 120);
-const idxSels = fromAbilityIndices(Array.isArray(parsed.s) ? parsed.s.slice(0, MAX_SELECTS) : []);
-const idxUnwanted = fromAbilityIndices(Array.isArray(parsed.u) ? parsed.u.slice(0, MAX_SELECTS) : []);
-
-const resultKey = parsed.r != null ? sanitizePlainString(parsed.r, 260) : '';
-
-return {
-  sels: nameSels.length ? nameSels : idxSels,
-  unwanted: nameUnwanted.length ? nameUnwanted : idxUnwanted,
-  k: parsed.k != null ? String(clampNumber(parsed.k, 3, 50, 10)) : '',
-  dark: parsed.m === 1 ? '1' : '',
-  // Auto-run only when a specific result set was shared; a plain filter link
-  // just fills the form and lets the user press search themselves.
-  auto: resultKey ? '1' : '',
-  char: parsed.c != null ? sanitizePlainString(parsed.c, 120) : '',
-  resultKey: resultKey,
-  resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
-};
+    const resultKey = parsed.r != null ? sanitizePlainString(parsed.r, 260) : '';
+    return {
+      filter: shareParamsToFilterState(parsed),
+      // Auto-run only when a specific result set was shared; a plain filter link
+      // just fills the form and lets the user press search themselves.
+      auto: resultKey ? '1' : '',
+      resultKey: resultKey,
+      resultNames: Array.isArray(parsed.t) ? canonicalResultNames(parsed.t).slice(0, 4) : []
+    };
   }catch(err){
     console.warn('Compressed share URL parse failed, fallback to legacy params.', err);
     return null;
@@ -234,12 +157,14 @@ function parseLegacyStateFromURL(){
     : [];
 
   return {
-    sels: sanitizeStringArray(sels, MAX_SELECTS, 120),
-    unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
-    k: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
-    dark: (params.get('d') || params.get('dark')) === '1' ? '1' : '',
+    filter: {
+      selected: sanitizeStringArray(sels, MAX_SELECTS, 120),
+      unwanted: sanitizeStringArray(unwanted, MAX_SELECTS, 120),
+      topK: params.get('k') ? String(clampNumber(params.get('k'), 3, 50, 10)) : '',
+      darkOnly: (params.get('d') || params.get('dark')) === '1',
+      char: sanitizePlainString(params.get('char') || '', 120)
+    },
     auto: params.get('r') ? '1' : '',
-    char: sanitizePlainString(params.get('char') || '', 120),
     resultKey: sanitizePlainString(params.get('r') || '', 260),
     resultNames: params.get('rn') ? canonicalResultNames(params.get('rn').split('||')).slice(0, 4) : []
   };
@@ -252,33 +177,24 @@ async function applyStateFromURL(){
     return;
   }
   const state = parseCompressedStateFromURL() || parseLegacyStateFromURL();
+  const f = state.filter;
   _urlStateApplied = true;
 
-  if (darkOnly) darkOnly.checked = (state.dark === '1');
-  if (topKInput && state.k) topKInput.value = state.k;
-
-  const validSels = (state.sels || [])
-    .map(s => (s || '').trim())
-    .filter(Boolean);
-
-  if (typeof window.setChipState === 'function'){
-    window.setChipState(validSels);
-  }
-
-  if (Array.isArray(state.unwanted) && typeof window.setUnwantedState === 'function'){
-    window.setUnwantedState(state.unwanted);
-  }
-
-  if (state.char){
-    setCharSelectValue(state.char);
-  }
+  // darkOnly is always taken from the link; topK and character only when present.
+  applyFilterState({
+    darkOnly: f.darkOnly,
+    selected: f.selected,
+    unwanted: f.unwanted,
+    ...(f.topK ? { topK: f.topK } : {}),
+    ...(f.char ? { char: f.char } : {})
+  });
   _pendingHighlightResultKey = state.resultKey || '';
   _pendingHighlightResultNames = canonicalResultNames(state.resultNames || []);
 
   updateCalcAvailability();
 
   if (state.auto === '1' && getDesired().length >= MIN_SELECTS){
-    if(state.char){
+    if(f.char){
       let guard = 0;
       while(!window.__charSheetReady && guard < 40){
         await new Promise(r => setTimeout(r, 100));

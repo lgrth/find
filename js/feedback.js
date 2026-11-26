@@ -32,16 +32,13 @@ const FEEDBACK_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwR1Y0RUrv-
 
     function getPageContext(){
       try{
-        const desired = (typeof getDesired === 'function') ? getDesired() : [];
-        const topKEl  = document.getElementById('topK');
-        const topK    = topKEl && topKEl.value ? Number(topKEl.value) : '';
-        const dark    = !!(document.getElementById('darkOnly') && document.getElementById('darkOnly').checked);
+        const f = readFilterState();
         return {
           pageURL: location.href,
           userAgent: navigator.userAgent,
-          selectedAbilities: desired.join(', '),
-          topK: topK,
-          darkOnly: dark
+          selectedAbilities: f.selected.join(', '),
+          topK: f.topK ? Number(f.topK) : '',
+          darkOnly: f.darkOnly
         };
       }catch(_){
         return { pageURL: location.href, userAgent: navigator.userAgent };

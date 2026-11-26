@@ -27,33 +27,10 @@ const MAX_IMPORT_FILE_SIZE = 200 * 1024; // 200KB
 const MAX_IMPORT_INVENTORY_ITEMS = 1500;
 const MAX_IMPORT_FAVORITES = 150;
 const MAX_IMPORT_RESULT_SETS = 150;
-const MAX_SAFE_STRING_LENGTH = 180;
 const MAX_SHARE_PACKED_LENGTH = 2500;
 const MAX_SHARE_JSON_LENGTH = 12000;
 
 let pendingImportPayload = null;
-
-function clampNumber(value, min, max, fallback){
-  const n = Number(value);
-  if(!Number.isFinite(n)) return fallback;
-  return Math.max(min, Math.min(max, Math.floor(n)));
-}
-
-function sanitizePlainString(value, maxLen = MAX_SAFE_STRING_LENGTH){
-  return String(value ?? '')
-    .replace(/[\u0000-\u001F\u007F]/g, '')
-    .trim()
-    .slice(0, maxLen);
-}
-
-function sanitizeStringArray(list, maxItems = 100, maxLen = MAX_SAFE_STRING_LENGTH){
-  if(!Array.isArray(list)) return [];
-  return Array.from(new Set(
-    list
-      .map(v => sanitizePlainString(v, maxLen))
-      .filter(Boolean)
-  )).slice(0, maxItems);
-}
 
 function sanitizeIsoDateString(value){
   const text = sanitizePlainString(value, 40);
@@ -128,37 +105,21 @@ function cryptoRandomId(prefix = 'id'){
 function normalizeFavoritePreset(item){
   const src = sanitizePlainObject(item);
   const state = sanitizePlainObject(src.state);
-
-  const selected = sanitizeStringArray(
-    Array.isArray(src.selected) ? src.selected : state.selected,
-    MAX_SELECTS,
-    120
-  );
-
-  const unwanted = sanitizeStringArray(
-    Array.isArray(src.unwanted) ? src.unwanted : state.unwanted,
-    MAX_SELECTS,
-    120
-  );
-
-  const topK = clampNumber(src.topK ?? state.topK, 3, 50, 10);
+  // Older presets kept the fields at the top level, newer ones under .state.
+  const filter = normalizeFilterState({
+    selected: Array.isArray(src.selected) ? src.selected : state.selected,
+    unwanted: Array.isArray(src.unwanted) ? src.unwanted : state.unwanted,
+    topK: src.topK ?? state.topK,
+    darkOnly: src.darkOnly ?? state.darkOnly,
+    char: src.char ?? state.char ?? ''
+  });
 
   return {
     id: sanitizePlainString(src.id || cryptoRandomId('fav'), 80),
     name: sanitizePlainString(src.name || 'Filter ที่บันทึกไว้', 80),
     createdAt: sanitizeIsoDateString(src.createdAt) || new Date().toISOString(),
-    selected,
-    unwanted,
-    topK,
-    darkOnly: !!(src.darkOnly ?? state.darkOnly),
-    char: sanitizePlainString(src.char ?? state.char ?? '', 120),
-    state: {
-      selected,
-      unwanted,
-      topK,
-      darkOnly: !!(src.darkOnly ?? state.darkOnly),
-      char: sanitizePlainString(src.char ?? state.char ?? '', 120)
-    }
+    ...filter,
+    state: { ...filter }
   };
 }
 
@@ -679,36 +640,6 @@ function renderSavedResultSets(){
 window.writeFavoriteStoreForTransfer = writeStore;
 window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
 
-  function getCurrentFavoriteState(){
-    return {
-      selected: (typeof getDesired === 'function') ? getDesired() : [],
-      unwanted: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [],
-      char: (typeof getCharSelectValue === 'function') ? getCharSelectValue() : '',
-      darkOnly: !!darkOnly?.checked,
-      topK: topKInput?.value ? String(topKInput.value) : String(DEFAULT_TOPK)
-    };
-  }
-
-  function hasMeaningfulFilter(state){
-    return !!(
-      state.selected.length ||
-      state.unwanted.length ||
-      state.char ||
-      state.darkOnly ||
-      String(state.topK || '') !== String(DEFAULT_TOPK)
-    );
-  }
-
-  function summarizeState(state){
-    return [
-      `${(state.selected || []).length} สกิลที่ต้องการ`,
-      `${(state.unwanted || []).length} สกิลที่ไม่ต้องการ`,
-      state.char ? state.char : 'ไม่เลือกตัวละคร',
-      state.darkOnly ? '[ดาร์ค] เท่านั้น' : 'ทุกจี้',
-      `${state.topK || DEFAULT_TOPK} เซ็ต`
-    ].join(' • ');
-  }
-
   function createFavButton(label, variant, onClick){
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -724,11 +655,6 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
     }catch(e){
       return true;
     }
-  }
-
-  function syncTopKPreset(val){
-    if(topKInput) topKInput.value = String(val || DEFAULT_TOPK);
-    document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(topKInput?.value || DEFAULT_TOPK)));
   }
 
   function charExists(charName){
@@ -828,7 +754,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
 
       const meta = document.createElement('div');
       meta.className = 'fav-item__meta';
-      meta.textContent = summarizeState(preset.state || {});
+      meta.textContent = summarizeFilterState(preset.state || {});
 
       const actions = document.createElement('div');
       actions.className = 'fav-actions';
@@ -872,7 +798,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
     editingPresetId = presetId;
     const store = readStore();
     const preset = presetId ? store.presets.find(p=>p.id===presetId) : null;
-    const state = preset ? preset.state : getCurrentFavoriteState();
+    const state = preset ? preset.state : readFilterState();
 
     if(!preset && !hasMeaningfulFilter(state)){
       showToast('ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
@@ -880,7 +806,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
     }
 
     input.value = preset ? preset.name : '';
-    summary.textContent = 'สรุป: ' + summarizeState(state);
+    summary.textContent = 'สรุป: ' + summarizeFilterState(state);
     saveBtn.textContent = preset ? 'บันทึกชื่อ' : 'บันทึก';
     panel.classList.add('show');
     setTimeout(()=> input.focus(), 0);
@@ -942,7 +868,7 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
     return;
   }
 
-  const state = getCurrentFavoriteState();
+  const state = readFilterState();
   if(!hasMeaningfulFilter(state)){
     showToast('ยังไม่มี Filter ให้บันทึก', 2800, 'warn');
     return;
@@ -997,25 +923,15 @@ window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
       return ok;
     }).filter(name=>!validSelected.includes(name));
 
-    if(typeof window.setChipState === 'function') window.setChipState(validSelected);
-    if(typeof window.setUnwantedState === 'function') window.setUnwantedState(validUnwanted);
-    if(darkOnly) darkOnly.checked = !!state.darkOnly;
-    syncTopKPreset(state.topK || DEFAULT_TOPK);
-
     const char = (state.char || '').trim();
-    let missingChar = '';
-    if(char && typeof setCharSelectValue === 'function' && charExists(char)){
-      setCharSelectValue(char);
-    }else if(char){
-      missingChar = char;
-      const el = document.getElementById('charSelect');
-      if(el?.tomselect) el.tomselect.clear(true);
-      else if(el) el.value = '';
-    }else if(!char){
-      const el = document.getElementById('charSelect');
-      if(el?.tomselect) el.tomselect.clear(true);
-      else if(el) el.value = '';
-    }
+    const missingChar = (char && !charExists(char)) ? char : '';
+    applyFilterState({
+      selected: validSelected,
+      unwanted: validUnwanted,
+      darkOnly: !!state.darkOnly,
+      topK: state.topK || DEFAULT_TOPK,
+      char: missingChar ? '' : char
+    });
 
     if(typeof updateCharPreview === 'function') updateCharPreview();
     if(typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
