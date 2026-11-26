@@ -177,9 +177,9 @@ test('new share link with several pendant types (ty bits)', async () => {
 test('type buttons toggle independently, show counts and filter the search', async () => {
   await withApp({}, async ({ page }) => {
     const btn = (t) => page.locator(`#jewelTypeFilter .jewel-type[data-type="${t}"]`);
-    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '(447)');
+    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '(443)');
     assert.equal(await btn('white').locator('.jewel-type__count').textContent(), '(15)');
-    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '(569)');
+    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '(573)');
     await btn('white').click();
     await btn('other').click();
     assert.deepEqual((await readForm(page)).jewelTypes, ['white', 'other']);
