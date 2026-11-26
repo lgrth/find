@@ -251,24 +251,35 @@ test('whole-group requirements survive share links and saved presets', async () 
   });
 });
 
-test('group tab: pick a whole group, its single skills merge into it (D5)', async () => {
+test('browse by group: pick a whole group, its single skills merge into it (D5)', async () => {
   await withApp({}, async ({ page }) => {
     await page.evaluate(() => window.setChipState(['โล่ซูเปอร์', 'ขังคุก']));
     await page.evaluate(() => window.setUnwantedState(['โล่ขาว', 'ผลัก']));
-    await page.click('#chipGroupTabs .chip-group-tab[data-group="โล่"]');
-    assert.match(await page.textContent('#chipAllTitle'), /กลุ่ม โล่/);
-    await page.click('#chipAll .chip--group');
+    assert.equal(await page.isHidden('#chipGroupList'), true, 'folded by default');
+    await page.click('#chipGroupToggle');
+    assert.match(await page.textContent('#chipGroupList .chip-group-row[data-group="โล่"]'), /● 1/);
+    await page.click('#chipGroupList .chip-group-row[data-group="โล่"]');
+    await page.click('#chipGroupList .chip-group-all[data-group="โล่"]');
     const form = await readForm(page);
     assert.deepEqual(form.selected, ['ขังคุก', 'กลุ่ม:โล่']);
     assert.deepEqual(form.unwanted, ['ผลัก'], 'an unwanted shield cannot stay next to "any shield"');
     assert.match(await page.textContent('#toastMessage'), /รวม 1 สกิล/);
     assert.deepEqual(await page.$$eval('#chipSelected .chip', (b) => b.map((x) => x.textContent)), ['ขังคุก×', '🗂 โล่ (ทุกแบบ)×']);
-    // its skills now show as covered and cannot be added again
-    assert.equal(await page.locator('#chipAll .chip.is-covered').count(), 2);
-    // typing hides the tabs and searches everything, group names included
+    assert.match(await page.textContent('#chipGroupList .chip-group-row[data-group="โล่"]'), /● ทุกแบบ/);
+    assert.equal(await page.locator('#chipGroupList .chip.is-covered').count(), 2, 'its skills are covered');
+    // opening another group folds the first one
+    await page.click('#chipGroupList .chip-group-row[data-group="ลูกเต๋า"]');
+    assert.equal(await page.locator('#chipGroupList .chip-group-panel').count(), 1);
+    // typing hides the group list and shows results under group headings
     await page.fill('#chipSearch', 'ยกเว้น');
-    assert.equal(await page.isHidden('#chipGroupTabsWrap'), true);
-    assert.match(await page.textContent('#chipAll .chip--group'), /ยกเว้นค่าผ่านทาง ทุกแบบ/);
+    assert.equal(await page.isHidden('#chipGroupBrowse'), true);
+    const heads = await page.$$eval('#chipAll .chip-group-head__title', (h) => h.map((x) => x.textContent));
+    assert.ok(heads.includes('ยกเว้นค่าผ่านทาง · 4'), heads.join(' | '));
+    assert.equal(await page.locator('#chipAll .chip-group-all[data-group="ยกเว้นค่าผ่านทาง"]').count(), 1);
+    // unwanted search: same headings, no "ทุกแบบ" for a group that is wanted
+    await page.click('#chipUnwantedHeader');
+    await page.fill('#chipUnwantedSearch', 'โล่');
+    assert.equal(await page.locator('#chipUnwantedAll .chip-group-all[data-group="โล่"]').count(), 0);
   });
 });
 
