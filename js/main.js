@@ -1331,7 +1331,8 @@ updateInventoryResultFiltersVisibility();
     const jewelCols = group.map(j=>{
       const tooltip = j.substats.map(s=>{
         const icon = desired.includes(s.name)?'✅':'✨';
-        return `${icon} ${s.name}: ${s.value}%`;
+        const maxStack = abilityOf(s.name)?.maxStack;
+        return `${icon} ${s.name}: ${s.value}%${maxStack ? ` · สูงสุด ${maxStack} ขั้น` : ''}`;
       }).join('\n');
       const isLink = isLinkId(j.id);
       const isOwned = ownership.ownedIds.includes(j.id);

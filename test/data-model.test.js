@@ -60,7 +60,8 @@ test('reports duplicate IDs, missing IDs and link pendants without AllowedChars'
   assert.match(problems[2], /AllowedChars/);
 });
 
-const { parseAbilitiesTable, parseTriggersTable, finalizeAbilities, abilityScore } = require('../js/data-model.js');
+const { parseAbilitiesTable, parseTriggersTable, finalizeAbilities } = require('../js/data-model.js');
+const { abilityScore } = require('../js/search-core.js');
 const tbl = (labels, rows) => ({ cols: labels.map((label) => ({ label })), rows: rows.map((r) => ({ c: r.map(cell) })) });
 const AB = ['name', 'group', 'variant', 'trigger', 'stack_key', 'unit', 'max_value', 'max_stack', 'keywords', 'review'];
 

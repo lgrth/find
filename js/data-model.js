@@ -189,13 +189,7 @@ function finalizeAbilities(abilities, jewels, triggers = []){
   return problems;
 }
 
-/** Score of one skill value: % of the skill's max, capped at 100 (chance skills: equal to the value). */
-function abilityScore(value, ability){
-  if(!ability || !(ability.maxValue > 0)) return value;
-  return Math.min(value, ability.maxValue) * 100 / ability.maxValue;
-}
-
 if (typeof module === 'object' && module.exports){
   module.exports = { PENDANT_TYPES, OTHER_GROUP, pendantPrefix, pendantType, parseSheetTable, parseNumber,
-    parseAbilitiesTable, parseTriggersTable, finalizeAbilities, abilityScore };
+    parseAbilitiesTable, parseTriggersTable, finalizeAbilities };
 }

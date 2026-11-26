@@ -216,3 +216,14 @@ test('Abilities tab is loaded and its keywords are searchable', async () => {
     assert.deepEqual(errors, []);
   });
 });
+
+test('result tooltip shows the max stack from the Abilities tab', async () => {
+  await withApp({}, async ({ page }) => {
+    await page.evaluate(() => { abilities.get('โล่ซูเปอร์').maxStack = 3; });
+    await page.evaluate(() => { window.setChipState(['โล่ซูเปอร์', 'โดรนก๊อปปี้', 'บัตรเชิญ', 'คุมเต๋า']); return window.calculate(); });
+    await page.waitForSelector('#result .result-card');
+    const tips = await page.$$eval('#result .jewel-column', (els) => els.map((e) => e.dataset.tooltip).join('\n'));
+    assert.match(tips, /โล่ซูเปอร์: \d+% · สูงสุด 3 ขั้น/);
+    assert.doesNotMatch(tips, /บัตรเชิญ: \d+% · สูงสุด/);
+  });
+});

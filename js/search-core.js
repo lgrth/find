@@ -28,6 +28,17 @@ const noAbilities = ()=> undefined;
 const stackKeyOf = (name, abilityOf)=> abilityOf(name)?.stackKey || name;
 
 /**
+ * Score of one skill value = % of that skill's max_value, capped at 100.
+ * Chance skills (max 100) keep their value; amount skills such as
+ * เพิ่มค่าผ่านทาง (up to 250) no longer outweigh everything else.
+ * Without ability data the raw value is used.
+ */
+function abilityScore(value, ability){
+  if(!ability || !(ability.maxValue > 0)) return value;
+  return Math.min(value, ability.maxValue) * 100 / ability.maxValue;
+}
+
+/**
  * Describe one pendant relative to the wanted skills: bit i of `mask` = has desired[i].
  * `stackKeys`: two pendants sharing any key may not be in the same set
  * (a skill's stack_key, or its name when it has none).
@@ -38,7 +49,7 @@ function jewelToCandidate(j, desired, unwanted=[], abilityOf=noAbilities){
   let mask=0, score=0, otherNames=[], unwantedCount=0, extraCount=0;
   for(const s of j.substats){
     const idx=bitIndex.get(s.name);
-    if(idx!==undefined){ mask|=(1<<idx); score+=toNumber(s.value); }
+    if(idx!==undefined){ mask|=(1<<idx); score+=abilityScore(toNumber(s.value), abilityOf(s.name)); }
     else{
       otherNames.push(s.name);
       if(unwantedSet.has(s.name)) unwantedCount++;
@@ -201,5 +212,5 @@ function searchCombos({ desired, cand, topK, fixed = null, onProgress = null }){
 }
 
 if (typeof module === 'object' && module.exports){
-  module.exports = { SPEED_CFG, toNumber, popcount, compareCandidates, jewelToCandidate, buildCandidates, buildFillerCandidates, compatibleWith, searchCombos };
+  module.exports = { SPEED_CFG, toNumber, popcount, abilityScore, compareCandidates, jewelToCandidate, buildCandidates, buildFillerCandidates, compatibleWith, searchCombos };
 }
