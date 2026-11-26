@@ -20,10 +20,20 @@
 
 | ไฟล์ | หน้าที่ |
 |------|---------|
-| `index.html` | ทั้งหน้าเว็บ (HTML + CSS + JS) |
+| `index.html` | โครง HTML + meta/SEO |
+| `css/app.css` | สไตล์ทั้งหมด |
+| `js/main.js` | โหลดข้อมูลชีต, สร้าง candidate, Web Worker ค้นหา, แสดงผล |
+| `js/share.js` | ลิงก์แชร์ / QR / อ่าน state จาก URL |
+| `js/saved-data.js` | เซ็ตจี้ที่บันทึก, Filter ที่บันทึก, นำเข้า/ส่งออก |
+| `js/chip-picker.js` | เลือกสกิลที่ต้องการ / ไม่ต้องการ |
+| `js/char-link.js`, `js/char-select.js` | เลือกตัวละคร + ล็อกจี้ [ลิงก์] |
+| `js/tutorial.js`, `js/feedback.js`, `js/persist-form.js`, `js/ui/*` | UI เสริม |
 | `manifest.json` | PWA manifest |
 | `fonts/` | ฟอนต์ LINE Seed Sans TH |
 | `sitemap.xml`, `robots.txt` | SEO |
+
+ไฟล์ JS เป็น classic script (ไม่ใช่ ES module) โหลดตามลำดับใน `index.html` และใช้ตัวแปร global ร่วมกัน
+— **ลำดับของ `<script>` มีผล** อย่าสลับโดยไม่จำเป็น
 
 ## รันในเครื่อง
 เพราะเป็น static site ล้วน เปิดผ่าน HTTP server ธรรมดาก็พอ (ข้อมูลโหลดจาก Google Sheets):
