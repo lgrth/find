@@ -6,11 +6,12 @@ const MAX_SELECTS = 14;
 const MIN_SELECTS = 4;
 const DEFAULT_TOPK = 10;
 const DARK_PREFIX = "[ดาร์ค]";
+const LINK_PREFIX = "[ลิงก์]";
 
 let jewels = [];
 let jewelPool = [];
 let tomSelects = [];
-let worker = null; // ← จะสร้างหลัง DOMContentLoaded
+let worker = null; // Web Worker ของการค้นหาครั้งล่าสุด (สร้างใหม่ทุกครั้ง)
 
 const overlay = document.getElementById('overlay');
 const progressText = document.getElementById('progressText');
@@ -583,16 +584,6 @@ function getDesired(){
 
 // compat stubs — ไม่มี TomSelect DOM แล้ว
 function getSelectValueAt(i){ return (window._chipSelected || [])[i] || ''; }
-function hideSelectAt(){ /* no-op */ }
-function showSelectAt(){ /* no-op */ }
-function ensureMobileCascade(){ /* no-op */ }
-
-function toNumber(val){
-  if(typeof val === 'number') return val;
-  const s = String(val ?? '').replace(/[, ]+/g,'').replace('%','');
-  const n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
-}
 
 function escapeHtmlText(s){
   return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -660,7 +651,10 @@ function normalizeByHeaders(rows){
         }
       }
     }
-    return { id, substats };
+    const jewel = { id, substats };
+    // จี้ [ลิงก์]: ตัวละครที่ใช้ได้ (คอลัมน์ AllowedChars)
+    if (isLinkId(id)) jewel.allowedChars = String(r["AllowedChars"] ?? r["AllowedChar"] ?? r["Allowed"] ?? "").trim();
+    return jewel;
   }).filter(j=>j.substats.length>0);
 }
 
@@ -726,9 +720,8 @@ function isDarkId(id){
 }
 
 function isLinkId(id){
-  return typeof id === 'string' && id.trim().startsWith('[ลิงก์]');
+  return typeof id === 'string' && id.trim().startsWith(LINK_PREFIX);
 }
-window.isLinkId = isLinkId;
 
 function computeJewelPool(){
   const useDarkOnly = !!darkOnly?.checked;
@@ -738,194 +731,17 @@ function computeJewelPool(){
   return jewels.slice();
 }
 
-const SPEED_CFG = { CANDIDATE_LIMIT: 120, FIXED_LINK_LIMIT: 200, PER_MASK: 6 };
-const _popcount = x => { let c=0; while(x){c+=x&1;x>>>=1;} return c; };
-function compareCandidates(a,b){
-  return (_popcount(b.mask)-_popcount(a.mask)) ||
-         ((a.unwantedCount||0)-(b.unwantedCount||0)) ||
-         ((b.extraCount||0)-(a.extraCount||0)) ||
-         (b.score-a.score);
-}
 
-function jewelToCandidate(j, desired, unwanted=[]){
-  const bitIndex = new Map(desired.map((n,i)=>[n,i]));
-  const unwantedSet = new Set(unwanted);
-  let mask=0, score=0, otherNames=[], unwantedCount=0, extraCount=0;
-  for(const s of j.substats){
-    const idx=bitIndex.get(s.name);
-    if(idx!==undefined){ mask|=(1<<idx); score+=toNumber(s.value); }
-    else{
-      otherNames.push(s.name);
-      if(unwantedSet.has(s.name)) unwantedCount++;
-      else extraCount++;
-    }
-  }
-  return { id:j.id, mask, score, otherNames, unwantedCount, extraCount, allNames: j.substats.map(s=>s.name) };
-}
-
-function buildCandidates(desired, sourceJewels, unwanted=[], limit=SPEED_CFG.CANDIDATE_LIMIT){
-  const all = sourceJewels.map(j=>{
-    return jewelToCandidate(j, desired, unwanted);
-  }).filter(m=>m.mask!==0)
-    .sort(compareCandidates);
-
-  // Collapse near-duplicate jewels that cover the exact same desired-skill mask:
-  // keep only the few best representatives per mask. `all` is already sorted by
-  // compareCandidates — (popcount desc, unwanted asc, extra desc, score desc) —
-  // and within a single mask popcount is constant, so the first PER_MASK entries
-  // seen for each mask are precisely its best representatives. This shrinks the
-  // pool from ~800 to ~150 with no observed change to the top-K results, turning
-  // the worker's O(n^4) search from minutes into well under a second.
-  const perMask = SPEED_CFG.PER_MASK || 6;
-  const maskSeen = new Map();
-  const pruned = [];
-  for(const c of all){
-    const seen = maskSeen.get(c.mask) || 0;
-    if(seen >= perMask) continue;
-    maskSeen.set(c.mask, seen + 1);
-    pruned.push(c);
-  }
-
-  // Guarantee at least one candidate per desired-skill bit before truncation
-  const guaranteedIds = new Set();
-  const guaranteed = [];
-  for(let bit=0; bit<desired.length; bit++){
-    const bitMask = 1<<bit;
-    const best = pruned.find(c=>(c.mask&bitMask)!==0);
-    if(best && !guaranteedIds.has(best.id)){ guaranteedIds.add(best.id); guaranteed.push(best); }
-  }
-  const slots = Math.max(0, limit - guaranteed.length);
-  const rest = pruned.filter(c=>!guaranteedIds.has(c.id)).slice(0, slots);
-  // re-sort หลัง merge เพื่อให้ suffixOr pruning ทำงานถูกต้อง
-  return [...guaranteed, ...rest].sort(compareCandidates);
-}
-
-// Unified worker code builder — single source of truth for both 3-combo and 4-combo paths
-function buildWorkerCode(mode){
-  const is3 = mode === '3combo';
-  return `
-self.onmessage = function(e){
-  var desired = e.data.desired;
-  var cand    = e.data.cand;
-  var topK    = e.data.topK;
-  ${is3 ? 'var fixed = e.data.fixed;' : ''}
-  var n = cand.length;
-  var desiredMaskAll = (1 << desired.length) - 1;
-  // Progress is driven by the outermost loop index so it advances monotonically
-  // to ~100% regardless of how many inner branches get pruned (the old
-  // done/totalCombos ratio undercounted every pruned branch and never reached 100).
-  var outerN = ${is3 ? '(n-2)' : '(n-3)'};
-  function emitOuter(a){ self.postMessage({type:'progress', p: outerN>0 ? Math.min(99, Math.round(a/outerN*100)) : 99}); }
-
-  // sort: fewer missing → fewer unwanted → more extras → higher value
-  function cmp(a,b){
-    return (a.notMiss-b.notMiss)||(a.unwantedCount-b.unwantedCount)||(b.extraCount-a.extraCount)||(b.totalValue-a.totalValue);
-  }
-  // binary-insert keeps best[] sorted in O(topK) per insert
-  var best = [];
-  function pushTop(item){
-    var lo=0,hi=best.length;
-    while(lo<hi){ var mid=(lo+hi)>>1; if(cmp(item,best[mid])<0) hi=mid; else lo=mid+1; }
-    best.splice(lo,0,item);
-    if(best.length>topK) best.pop();
-  }
-
-  // build result object from an array of charm objects
-  function makeResult(charms){
-    var mask=0,tv=0,uw=0,ids=[],extraSeen={},extraCount=0;
-    for(var i=0;i<charms.length;i++){
-      var ch=charms[i];
-      mask|=ch.mask; tv+=ch.score; uw+=(ch.unwantedCount||0); ids.push(ch.id);
-      for(var k=0;k<ch.otherNames.length;k++){
-        var nm=ch.otherNames[k]; if(!extraSeen[nm]){ extraSeen[nm]=1; extraCount++; }
-      }
-    }
-    var notMask=desiredMaskAll&(~mask),notMiss=0,notIdx=[];
-    for(var i=0;i<desired.length;i++){ if((notMask>>i)&1){notMiss++;notIdx.push(i);} }
-    return {ids:ids,notMiss:notMiss,notIdx:notIdx,totalValue:tv,extraCount:extraCount,unwantedCount:uw};
-  }
-
-  // precompute name-sets for duplicate-skill detection
-  ${is3 ? 'var fixedSet=new Set(fixed.allNames);' : ''}
-  var namesets=cand.map(function(c){ return new Set(c.allNames); });
-
-  ${!is3 ? `
-  // suffixOr pruning for 4-combo
-  function popcount(x){ var c=0; while(x){c+=x&1;x>>>=1;} return c; }
-  var suffixOr=new Array(n+1); suffixOr[n]=0;
-  for(var i=n-1;i>=0;i--) suffixOr[i]=suffixOr[i+1]|cand[i].mask;
-  ` : ''}
-
-  ${is3 ? `
-  for(var a=0;a<n-2;a++){
-    emitOuter(a);
-    var sA=namesets[a],skip=false;
-    for(var _nm of sA){ if(fixedSet.has(_nm)){skip=true;break;} } if(skip) continue;
-    for(var b=a+1;b<n-1;b++){
-      var sB=namesets[b]; skip=false;
-      for(var _nm of sB){ if(fixedSet.has(_nm)||sA.has(_nm)){skip=true;break;} } if(skip) continue;
-      for(var c=b+1;c<n;c++){
-        var sC=namesets[c]; skip=false;
-        for(var _nm of sC){ if(fixedSet.has(_nm)||sA.has(_nm)||sB.has(_nm)){skip=true;break;} }
-        if(skip){ continue; }
-        pushTop(makeResult([fixed,cand[a],cand[b],cand[c]]));
-      }
-    }
-  }
-  ` : `
-  for(var a=0;a<n-3;a++){
-    emitOuter(a);
-    if(best.length===topK){
-      if(popcount(desiredMaskAll&(~(cand[a].mask|suffixOr[a+1])))>best[best.length-1].notMiss) continue;
-    }
-    var sA=namesets[a];
-    for(var b=a+1;b<n-2;b++){
-      var sB=namesets[b],skip=false;
-      for(var _nm of sB){ if(sA.has(_nm)){skip=true;break;} } if(skip) continue;
-      var maskAB=cand[a].mask|cand[b].mask;
-      if(best.length===topK){
-        if(popcount(desiredMaskAll&(~(maskAB|suffixOr[b+1])))>best[best.length-1].notMiss) continue;
-      }
-      for(var c=b+1;c<n-1;c++){
-        var sC=namesets[c]; skip=false;
-        for(var _nm of sC){ if(sA.has(_nm)||sB.has(_nm)){skip=true;break;} } if(skip) continue;
-        var maskABC=maskAB|cand[c].mask;
-        if(best.length===topK){
-          if(popcount(desiredMaskAll&(~(maskABC|suffixOr[c+1])))>best[best.length-1].notMiss) continue;
-        }
-        for(var d=c+1;d<n;d++){
-          var sD=namesets[d]; skip=false;
-          for(var _nm of sD){ if(sA.has(_nm)||sB.has(_nm)||sC.has(_nm)){skip=true;break;} }
-          if(skip){ continue; }
-          pushTop(makeResult([cand[a],cand[b],cand[c],cand[d]]));
-        }
-      }
-    }
-  }
-  `}
-
-  self.postMessage({type:'result',best:best});
-};
-  `;
-}
-window.buildWorkerCode = buildWorkerCode;
-
-let _workerBlobUrl = null;
-let _4comboWorkerCode = null;
 let _activeCalcRun = 0;
-let _fixedWorker = null;
-let _fixedWorkerBlobUrl = null;
 
-function cleanupFixedWorker(){
-  if(_fixedWorker){ _fixedWorker.terminate(); _fixedWorker = null; }
-  if(_fixedWorkerBlobUrl){ URL.revokeObjectURL(_fixedWorkerBlobUrl); _fixedWorkerBlobUrl = null; }
+function stopWorker(){
+  if(worker){ worker.terminate(); worker = null; }
 }
 
+/** Start a new search run: stops any running worker so late results are ignored. */
 function beginCalcRun(){
   _activeCalcRun++;
-  cleanupFixedWorker();
-  if(worker){ worker.terminate(); worker = null; }
-  if(_workerBlobUrl){ URL.revokeObjectURL(_workerBlobUrl); _workerBlobUrl = null; }
+  stopWorker();
   return _activeCalcRun;
 }
 
@@ -935,39 +751,36 @@ function finishCalcWithError(message){
   showErrorBanner(message);
 }
 
-function recreateWorker(){
-  if(worker){ worker.terminate(); worker = null; }
-  if(_workerBlobUrl){ URL.revokeObjectURL(_workerBlobUrl); _workerBlobUrl = null; }
-  if(!_4comboWorkerCode) _4comboWorkerCode = buildWorkerCode('4combo');
-  _workerBlobUrl = URL.createObjectURL(new Blob([_4comboWorkerCode],{type:'application/javascript'}));
-  worker = new Worker(_workerBlobUrl);
-  const runId = _activeCalcRun;
+/** Run the combination search (js/search-worker.js) and render the result. */
+function startSearchWorker(job, runId){
+  worker = new Worker('js/search-worker.js');
   worker.onmessage = (e)=>{
     if(runId !== _activeCalcRun) return;
-    const msg=e.data;
-    if(msg.type==='progress'){
-  __updateCalcETAFromProgress(msg.p);
-    }else if(msg.type==='result'){
+    const msg = e.data;
+    if(msg.type === 'progress'){
+      __updateCalcETAFromProgress(msg.p);
+    }else if(msg.type === 'result'){
       try{
-        if (typeof __completeCalcProgress === 'function'){
-      __completeCalcProgress();
-    }
-      renderResults(msg.best);
-      setTimeout(()=>hideLoading(), 180);
+        __completeCalcProgress();
+        renderResults(msg.best);
+        setTimeout(()=>hideLoading(), 180);
       }catch(err){
         console.error('renderResults error:', err);
         showErrorBanner('เกิดข้อผิดพลาดในการแสดงผลลัพธ์: ' + (err?.message || err));
       }finally{
         hideCalcOverlay();
         hideLoading();
+        stopWorker();
       }
     }
   };
   worker.onerror = (err)=>{
     if(runId !== _activeCalcRun) return;
     console.error('worker error:', err);
+    stopWorker();
     finishCalcWithError('เกิดข้อผิดพลาดระหว่างคำนวณ: ' + (err?.message || 'ไม่ทราบสาเหตุ'));
   };
+  worker.postMessage(job);
 }
 
 function scrollToResultSection(){
@@ -986,6 +799,25 @@ function scrollToResultSection(){
 
 
 /* ====== คำนวณ ====== */
+
+/** จี้ [ลิงก์] ของตัวละคร: ดูคอลัมน์ AllowedChars ในชีตหลักก่อน แล้วค่อยใช้ชีตตัวละคร */
+function findLinkJewelForChar(charName){
+  if(!charName) return null;
+  const byColumn = jewels.find(j => isLinkId(j.id) && String(j.allowedChars || '').trim() === charName);
+  if(byColumn) return byColumn;
+  const linkId = window.__charToLinkId?.[charName];
+  return linkId ? (jewels.find(j => j.id === linkId) || null) : null;
+}
+
+function readTopK(){
+  let topK = parseInt((topKInput?.value || '').trim(),10);
+  if(isNaN(topK)) topK = DEFAULT_TOPK;
+  if(topK < 3) topK = 3;
+  if(topK > 50) topK = 50;
+  if(topKInput) topKInput.value = String(topK);
+  return topK;
+}
+
 async function calculate(){
   const runId = beginCalcRun();
   const desired = getDesired();
@@ -997,7 +829,7 @@ async function calculate(){
   scrollToResultSection();
 
   try{
-    clearPinnedResults()
+    clearPinnedResults();
     if (!jewels || jewels.length === 0){
       showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
       startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
@@ -1007,45 +839,49 @@ async function calculate(){
     if(runId !== _activeCalcRun) return;
 
     jewelPool = computeJewelPool();
-
-    // ข้อ 1: ไม่เลือกตัวละคร → ตัดจี้ [ลิงก์] ทั้งหมดออกจาก pool
-    {
-      const _charEl = document.getElementById('charSelect');
-      const _charVal = _charEl ? ((_charEl.tomselect ? _charEl.tomselect.getValue() : _charEl.value) || '').trim() : '';
-      if (!_charVal) {
-        jewelPool = jewelPool.filter(j => !isLinkId(j.id));
-      }
-    }
-
-    if(jewelPool.length < 4){
-      const filterMsg = darkOnly.checked ? `ภายใต้การกรองชื่อขึ้นต้น "${DARK_PREFIX}"` : '';
-      showToast(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`, 3500, 'warn');
-      return;
-    }
-
-    let topK = parseInt((topKInput?.value || '').trim(),10);
-    if(isNaN(topK)) topK = DEFAULT_TOPK;
-    if(topK < 3) topK = 3;
-    if(topK > 50) topK = 50;
-    if(topKInput) topKInput.value = String(topK);
-
     const unwanted = Array.isArray(window._chipUnwanted) ? window._chipUnwanted.slice() : [];
-    const cand = buildCandidates(desired, jewelPool, unwanted);
-    if(cand.length<4){
-      showToast("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้", 3500, 'warn');
-      return;
+    const charName = getCharSelectValue();
+    let job;
+
+    if(charName){
+      // เลือกตัวละคร → ล็อกจี้ [ลิงก์] ของตัวละครนั้น 1 ช่อง แล้วหาอีก 3 ช่องจากจี้ที่ไม่ใช่ [ลิงก์]
+      const fixedLink = findLinkJewelForChar(charName);
+      if(!fixedLink){
+        showToast(`ไม่พบจี้ [ลิงก์] สำหรับตัวละคร: ${charName}`, 3500, 'warn');
+        return;
+      }
+      const others = compatibleWith(fixedLink, jewelPool.filter(j => !isLinkId(j.id)));
+      const cand = buildCandidates(desired, others, unwanted, SPEED_CFG.FIXED_LINK_LIMIT)
+        .concat(buildFillerCandidates(desired, others, unwanted));
+      if(cand.length < 3){
+        showToast('จี้ที่ใช้คำนวณ (นอกจากจี้ลิงก์) มีไม่พอ 3 ชิ้น', 3500, 'warn');
+        return;
+      }
+      job = { desired, cand, fixed: jewelToCandidate(fixedLink, desired, unwanted) };
+    }else{
+      // ไม่เลือกตัวละคร → ตัดจี้ [ลิงก์] ทั้งหมดออก
+      jewelPool = jewelPool.filter(j => !isLinkId(j.id));
+      if(jewelPool.length < 4){
+        const filterMsg = darkOnly.checked ? `ภายใต้การกรองชื่อขึ้นต้น "${DARK_PREFIX}"` : '';
+        showToast(`จี้ที่ใช้คำนวณมีไม่พอ 4 ชิ้น ${filterMsg ? '('+filterMsg+')' : ''}`, 3500, 'warn');
+        return;
+      }
+      const cand = buildCandidates(desired, jewelPool, unwanted);
+      if(cand.length < 4){
+        showToast("จี้ที่เข้าข่ายน้อยเกินไปสำหรับเงื่อนไขที่ตั้งไว้", 3500, 'warn');
+        return;
+      }
+      job = { desired, cand };
     }
 
+    const topK = readTopK();
     if(resultTitle) resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
     document.getElementById('result').innerHTML = '';
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     __resetCalcETA();
     __startCalcCountdown(5);
 
-    // ยกเลิก Worker เก่าแล้วสร้างใหม่ทุกครั้ง เพื่อป้องกันผลลัพธ์ค้างจากการค้นหาก่อนหน้า
-    recreateWorker();
-    if(runId !== _activeCalcRun) return;
-    worker.postMessage({ desired, cand, topK, unwanted });
+    startSearchWorker({ ...job, topK }, runId);
     window._hasSearchedResults = true;
   }catch(err){
     hideLoading();
@@ -1102,7 +938,7 @@ function showCalcOverlay(msg){
 }
 function cancelCalculation(){
   // Stop any running worker and invalidate late results, then reset the view.
-  if(typeof beginCalcRun === 'function') beginCalcRun();
+  beginCalcRun();
   hideCalcOverlay();
   hideLoading();
   restoreEmptyState();
@@ -1751,7 +1587,7 @@ function resetAll(){
   unwanted_skill_count: Array.isArray(window._chipUnwanted) ? window._chipUnwanted.length : 0
 });
   // stop any in-flight search so a late worker result can't repaint the page
-  if(typeof beginCalcRun === 'function') beginCalcRun();
+  beginCalcRun();
   hideCalcOverlay();
   window._hasSearchedResults = false;
 window._inventoryResultFilterMode = 'all';
@@ -1811,7 +1647,6 @@ syncInventoryResultFilterUI();
 }
 
 /* แตะเพื่อแสดง tooltip ใน Toast บนอุปกรณ์สัมผัส */
-function enableTouchTooltips(){ /* mobile toast disabled by request */ }
 
 darkOnly?.addEventListener('change', ()=>{
   invalidateResultsForCriteriaChange();
@@ -1907,14 +1742,6 @@ const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort
     await makeTomSelects([]);
   }
 
-  // สร้าง worker ครั้งแรก (recreateWorker จะสร้างใหม่ก่อนทุกการคำนวณ)
-  recreateWorker();
-
-  enableTouchTooltips();
-  ensureMobileCascade();
-
-  window.addEventListener('resize', ensureMobileCascade);
-  window.matchMedia && window.matchMedia('(max-width: 768px)').addEventListener?.('change', ensureMobileCascade);
 
   updateCalcAvailability();
 });

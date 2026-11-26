@@ -28,8 +28,6 @@
 });
   })();
 
-  window.applySkillFilter = function(){}; // no-op (feature removed)
-
   // ---- Character preview ----
   function updateCharPreview(){
     const cp = document.getElementById('charPreview');
@@ -42,13 +40,7 @@
       cp.classList.remove('show');
       return;
     }
-    let linkId = '';
-    if (window.__charToLinkId && window.__charToLinkId[name]){
-      linkId = window.__charToLinkId[name];
-    } else if (Array.isArray(window.jewels)){
-      const j = window.jewels.find(j => isLinkId(j.id) && String(j.allowedChars||j.AllowedChars||'').trim() === name);
-      if (j) linkId = j.id;
-    }
+    const linkId = findLinkJewelForChar(name)?.id || window.__charToLinkId?.[name] || '';
     if (nameEl) nameEl.textContent = name;
     if (jewelEl) jewelEl.textContent = linkId || 'ตัวละครนี้ไม่มีจี้ลิงก์';
     cp.classList.add('show');

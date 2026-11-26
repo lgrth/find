@@ -10,6 +10,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { openApp, runSearch, closeEnv } = require('./helpers/app');
+const { loadJewels } = require('./helpers/fixture-jewels');
 
 const GOLDEN = path.join(__dirname, 'golden', 'search-results.json');
 
@@ -58,6 +59,18 @@ test('search results match golden master', async (t) => {
     await closeEnv();
   }
   assert.deepEqual(errors, [], 'page threw errors');
+
+  // Rule (independent of the golden file): with a character selected, every set
+  // starts with that character's own [ลิงก์] pendant and has no other [ลิงก์].
+  const linkOf = new Map(loadJewels().filter((j) => j.allowedChars).map((j) => [j.allowedChars, j.id]));
+  for (const [name, { scenario, output }] of Object.entries(actual)) {
+    if (!scenario.char) continue;
+    assert.ok(output.results && output.results.length > 0, `${name}: no results`);
+    for (const r of output.results) {
+      assert.equal(r.ids[0], linkOf.get(scenario.char), `${name}: locked pendant`);
+      assert.ok(r.ids.slice(1).every((id) => !id.startsWith('[ลิงก์]')), `${name}: extra [ลิงก์]`);
+    }
+  }
 
   if (process.env.UPDATE_GOLDEN === '1' || !fs.existsSync(GOLDEN)) {
     fs.mkdirSync(path.dirname(GOLDEN), { recursive: true });

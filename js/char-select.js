@@ -1,8 +1,6 @@
 /* === v2.0: Character select — ดึงจาก gid=513976173 ของ SHEET_ID เดิม === */
 (function(){
-  const CHAR_SHEET_ID = _dk('7110d54204f1927075b0c4e391d643a56455a58020e782a1061137d3315791a0112255a05166e383e61286a5','k9x#mP2w');
   const CHAR_GID      = "513976173";
-  const LINK_PREFIX   = "[ลิงก์]";
   const norm = s => (s == null ? "" : String(s)).trim();
 
   // เติมรายชื่อลง charSelect (รองรับทั้ง TomSelect และ native <select>)
@@ -104,7 +102,7 @@
 
   function loadCharGViz(){
     const tqx = encodeURIComponent('out:json;responseHandler:__CharGViz_v2');
-    const src  = `https://docs.google.com/spreadsheets/d/${CHAR_SHEET_ID}/gviz/tq?gid=${CHAR_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
+    const src  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${CHAR_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
     const s = document.createElement('script');
     s.src = src;
     s.async = true;
