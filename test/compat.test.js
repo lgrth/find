@@ -200,3 +200,19 @@ test('saved preset summary names the selected types', async () => {
     assert.equal(meta, '4 สกิลที่ต้องการ • 0 สกิลที่ไม่ต้องการ • ไม่เลือกตัวละคร • [ดาร์ค] + [ไวท์] เท่านั้น • 10 เซ็ต');
   });
 });
+
+test('Abilities tab is loaded and its keywords are searchable', async () => {
+  await withApp({}, async ({ page, errors }) => {
+    const info = await page.evaluate(() => ({
+      size: abilities.size,
+      shield: abilities.get('โล่ซูเปอร์'),
+      kw: window._abilityKeywords.get('โล่ซูเปอร์'),
+    }));
+    assert.equal(info.size, 142);
+    assert.equal(info.shield.stackKey, 'โล่');
+    assert.ok(info.kw.includes('โล่ไฮเปอร์'));
+    await page.fill('#chipSearch', 'โล่ไฮเปอร์');
+    assert.ok(await page.locator('#chipAll button.chip', { hasText: 'โล่ซูเปอร์' }).count() > 0);
+    assert.deepEqual(errors, []);
+  });
+});

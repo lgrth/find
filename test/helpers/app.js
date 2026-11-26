@@ -45,6 +45,8 @@ const SHEETS = {
   main: loadFixture('sheet-main.json'),
   '850304016': loadFixture('sheet-keywords.json'),
   '513976173': loadFixture('sheet-chars.json'),
+  'sheet:Abilities': loadFixture('sheet-abilities.json'),
+  'sheet:Triggers': loadFixture('sheet-triggers.json'),
 };
 
 async function installRoutes(context) {
@@ -53,7 +55,8 @@ async function installRoutes(context) {
     const tqx = u.searchParams.get('tqx') || '';
     const m = tqx.match(/responseHandler:([\w$]+)/);
     const handler = m ? m[1] : 'google.visualization.Query.setResponse';
-    const body = SHEETS[u.searchParams.get('gid') || 'main'] || '{"table":{"cols":[],"rows":[]}}';
+    const key = u.searchParams.get('sheet') ? 'sheet:' + u.searchParams.get('sheet') : (u.searchParams.get('gid') || 'main');
+    const body = SHEETS[key] || '{"table":{"cols":[],"rows":[]}}';
     route.fulfill({ contentType: 'application/javascript', body: `/*O_o*/\n${handler}(${body});` });
   });
   await context.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\//, (route) => {

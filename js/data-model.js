@@ -92,6 +92,110 @@ function parseSheetTable(table){
   return { jewels, problems };
 }
 
+/* ===== Abilities tab: one row per skill =====
+ * name | group | variant | trigger | stack_key | unit | max_value | max_stack | keywords
+ * (extra columns such as pendants / review are ignored)
+ *
+ * Ability object:
+ *   { name, group ('อื่น ๆ' when blank), variant, trigger,
+ *     stackKey   — skills with the same key may not share a set (blank → name),
+ *     unit       — 'chance' (%, max 100) | 'amount' (can exceed 100),
+ *     maxValue   — divisor for the score (blank → 100 for chance, highest value in the sheet for amount),
+ *     maxStack   — number | null (display only),
+ *     keywords   — string[] (search aliases) }
+ */
+const OTHER_GROUP = 'อื่น ๆ';
+const ABILITY_UNITS = ['chance', 'amount'];
+
+function splitList(text){
+  return String(text ?? '').split(/[,，\n]/).map(s => s.trim()).filter(Boolean);
+}
+
+/** Rows of a header-labelled GViz table as objects keyed by lower-case label. */
+function tableRecords(table){
+  const labels = (table?.cols || []).map(c => String(c?.label || '').trim().toLowerCase());
+  return (table?.rows || []).map(row => {
+    const rec = {};
+    labels.forEach((l, i)=>{ if(l){ const c = row?.c?.[i]; rec[l] = c ? (c.v ?? c.f ?? '') : ''; } });
+    return rec;
+  });
+}
+
+/** @returns {{ abilities: Map<string, object>, problems: string[] }} */
+function parseAbilitiesTable(table){
+  const abilities = new Map();
+  const problems = [];
+  tableRecords(table).forEach((r, i)=>{
+    const name = String(r.name ?? '').trim();
+    if(!name) return;
+    const row = i + 2;
+    if(abilities.has(name)) problems.push(`Abilities แถว ${row}: ชื่อซ้ำ "${name}"`);
+    let unit = String(r.unit ?? '').trim().toLowerCase() || 'chance';
+    if(!ABILITY_UNITS.includes(unit)){ problems.push(`Abilities แถว ${row}: unit "${r.unit}" ไม่รู้จัก (ใช้ chance / amount)`); unit = 'chance'; }
+    const maxRaw = String(r.max_value ?? '').trim();
+    const maxValue = maxRaw ? parseNumber(maxRaw) : null;
+    if(maxRaw && !(maxValue > 0)) problems.push(`Abilities แถว ${row}: max_value "${maxRaw}" ไม่ใช่ตัวเลขที่มากกว่า 0`);
+    const stackRaw = String(r.max_stack ?? '').trim();
+    const maxStack = stackRaw ? parseNumber(stackRaw) : null;
+    abilities.set(name, {
+      name,
+      group: String(r.group ?? '').trim() || OTHER_GROUP,
+      variant: String(r.variant ?? '').trim(),
+      trigger: String(r.trigger ?? '').trim(),
+      stackKey: String(r.stack_key ?? '').trim() || name,
+      unit,
+      maxValue: maxValue > 0 ? maxValue : null,   // filled in by finalizeAbilities()
+      maxStack: maxStack > 0 ? maxStack : null,
+      keywords: splitList(r.keywords)
+    });
+  });
+  return { abilities, problems };
+}
+
+/** Triggers tab (optional): trigger | order | note → ordered list of trigger names. */
+function parseTriggersTable(table){
+  return tableRecords(table)
+    .map((r, i) => ({ trigger: String(r.trigger ?? '').trim(), order: r.order === '' || r.order == null ? Infinity : parseNumber(r.order), i }))
+    .filter(t => t.trigger)
+    .sort((a, b) => (a.order - b.order) || (a.i - b.i))
+    .map(t => t.trigger);
+}
+
+/**
+ * Fill defaults that depend on the pendants and cross-check both tabs.
+ * Every skill used by a pendant gets an Ability (a default one if the tab lacks it).
+ * @returns {string[]} problems
+ */
+function finalizeAbilities(abilities, jewels, triggers = []){
+  const problems = [];
+  const highest = new Map();
+  jewels.forEach(j => j.substats.forEach(s => highest.set(s.name, Math.max(highest.get(s.name) ?? -Infinity, s.value))));
+
+  const missing = [...highest.keys()].filter(n => !abilities.has(n));
+  if(abilities.size && missing.length) problems.push(`Abilities: ไม่มีแถวของ ${missing.length} สกิล (ใช้กลุ่ม "${OTHER_GROUP}"): ${missing.join(', ')}`);
+  missing.forEach(name => abilities.set(name, {
+    name, group: OTHER_GROUP, variant: '', trigger: '', stackKey: name, unit: 'chance', maxValue: null, maxStack: null, keywords: []
+  }));
+
+  const knownTriggers = new Set(triggers);
+  abilities.forEach(a => {
+    const top = highest.get(a.name);
+    if(top === undefined){ problems.push(`Abilities: "${a.name}" ไม่มีจี้ใช้`); }
+    if(a.maxValue == null) a.maxValue = a.unit === 'amount' ? Math.max(top ?? 0, 100) : 100;
+    if(a.unit === 'chance' && top > 100) problems.push(`"${a.name}" เป็นโอกาส (chance) แต่มีค่า ${top} > 100`);
+    if(top === 0) problems.push(`"${a.name}" มีค่า 0 ในแท็บจี้`);
+    if(a.trigger && knownTriggers.size && !knownTriggers.has(a.trigger)) problems.push(`"${a.name}": trigger "${a.trigger}" ไม่อยู่ในแท็บ Triggers`);
+  });
+  return problems;
+}
+
+/** Score of one skill value: % of the skill's max, capped at 100 (chance skills: equal to the value). */
+function abilityScore(value, ability){
+  if(!ability || !(ability.maxValue > 0)) return value;
+  return Math.min(value, ability.maxValue) * 100 / ability.maxValue;
+}
+
 if (typeof module === 'object' && module.exports){
-  module.exports = { PENDANT_TYPES, pendantPrefix, pendantType, parseSheetTable, parseNumber };
+  module.exports = { PENDANT_TYPES, OTHER_GROUP, pendantPrefix, pendantType, parseSheetTable, parseNumber,
+    parseAbilitiesTable, parseTriggersTable, finalizeAbilities, abilityScore };
 }

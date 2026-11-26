@@ -8,6 +8,8 @@ const DEFAULT_TOPK = 10;
 const LINK_PREFIX = "[ลิงก์]";
 
 let jewels = [];
+let abilities = new Map();   // ชื่อสกิล → ข้อมูลจากแท็บ Abilities (ดู js/data-model.js)
+let abilityTriggers = [];    // รายการการแสดงผลจากแท็บ Triggers (เรียงตาม order)
 let jewelPool = [];
 let tomSelects = [];
 let worker = null; // Web Worker ของการค้นหาครั้งล่าสุด (สร้างใหม่ทุกครั้ง)
@@ -1590,6 +1592,50 @@ function normalizeSearchText(value){
     .trim();
 }
 
+/**
+ * Load one extra tab of the sheet by name (e.g. 'Abilities') or gid via GViz JSONP.
+ * Resolves to the GViz table, or null when the tab is missing / empty / unreachable.
+ */
+function fetchSheetTab({ sheet, gid }, timeoutMs = 8000){
+  return new Promise((resolve)=>{
+    const cbName = '__SheetTab_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    let sc = null;
+    const finish = (table)=>{ clearTimeout(timer); delete window[cbName]; sc?.remove(); resolve(table); };
+    const timer = setTimeout(()=> finish(null), timeoutMs);
+    window[cbName] = (resp)=> finish(resp && resp.status !== 'error' && resp.table?.rows?.length ? resp.table : null);
+    const which = sheet ? `sheet=${encodeURIComponent(sheet)}` : `gid=${encodeURIComponent(gid)}`;
+    const tqx = encodeURIComponent(`out:json;responseHandler:${cbName}`);
+    sc = document.createElement('script');
+    sc.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?${which}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
+    sc.onerror = ()=> finish(null);
+    document.head.appendChild(sc);
+  });
+}
+
+/** Abilities + Triggers tabs → `abilities`, `abilityTriggers`. Missing tabs just leave defaults. */
+async function loadAbilityData(){
+  const [abilityTable, triggerTable] = await Promise.all([
+    fetchSheetTab({ sheet: 'Abilities' }),
+    fetchSheetTab({ sheet: 'Triggers' })
+  ]);
+  const parsed = abilityTable ? parseAbilitiesTable(abilityTable) : { abilities: new Map(), problems: [] };
+  abilityTriggers = triggerTable ? parseTriggersTable(triggerTable) : [];
+  const problems = parsed.problems.concat(finalizeAbilities(parsed.abilities, jewels, abilityTriggers));
+  abilities = parsed.abilities;
+  if(!abilityTable) console.warn('[sheet] โหลดแท็บ Abilities ไม่ได้ — ใช้ค่าเริ่มต้นของทุกสกิล');
+  if(problems.length) console.warn(`[sheet] Abilities: พบ ${problems.length} จุดที่ควรตรวจ:\n` + problems.join('\n'));
+}
+
+/** Merge search keywords from the Abilities tab into the Keywords-tab map (both stay supported). */
+function mergeAbilityKeywords(map){
+  abilities.forEach(a => {
+    const kws = a.keywords.map(normalizeSearchText).filter(Boolean);
+    if(!kws.length) return;
+    map.set(a.name, Array.from(new Set([...(map.get(a.name) || []), ...kws])));
+  });
+  return map;
+}
+
 let _keywordFailed = false;
 function fetchKeywordSheet(){
   if (!KEYWORD_GID) return Promise.resolve(new Map());
@@ -1634,13 +1680,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
     jewels = await fetchGVizJSONP();
 
-try{
-  window._abilityKeywords = await fetchKeywordSheet();
-}catch(e){
-  console.warn('Keyword sheet load failed:', e);
-  window._abilityKeywords = new Map();
-  _keywordFailed = true;
-}
+const [keywordMap] = await Promise.all([
+  fetchKeywordSheet().catch(e => { console.warn('Keyword sheet load failed:', e); _keywordFailed = true; return new Map(); }),
+  loadAbilityData()
+]);
+window._abilityKeywords = mergeAbilityKeywords(keywordMap);
 
 stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
 
