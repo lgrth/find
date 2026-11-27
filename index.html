@@ -103,7 +103,8 @@
 <link rel="preconnect" href="https://docs.google.com">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=202611270602">
+<link rel="stylesheet" href="css/app.css?v=202611270708">
+<link rel="stylesheet" href="css/compact.css?v=202611270708">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
@@ -171,7 +172,7 @@
             <strong>ระบุสกิลที่ไม่ต้องการ</strong>
             <span class="tutorial-opt">  [ไม่จำเป็น]</span>
           </div>
-          <span class="tutorial-sub">กด ▼ แสดง ที่หัวข้อ "🚫 สกิลที่ไม่ต้องการ" ค้นหาและเลือกสกิลที่ไม่อยากได้ ระบบจะจัดอันดับเซ็ตที่หลีกเลี่ยงสกิลเหล่านั้นก่อน</span>
+          <span class="tutorial-sub">แตะแถว "สกิลที่ไม่ต้องการ" แล้วค้นหาสกิลที่ไม่อยากได้ ระบบจะจัดอันดับเซ็ตที่หลีกเลี่ยงสกิลเหล่านั้นก่อน</span>
         </div>
       </li>
       <li style="border-left-color:#7c3aed">
@@ -209,10 +210,10 @@
         <div>
           <div class="tutorial-step-head">
             <span class="tutorial-step-num" style="background:#3b82f6">4</span>
-            <strong>เลือกจำนวนเซ็ต แล้วกด "ค้นหาเซ็ตจี้"</strong>
+            <strong>กด "ค้นหาเซ็ตจี้"</strong>
             <span class="tutorial-required">จำเป็น</span>
           </div>
-          <span class="tutorial-sub">ระบบจะหาเซ็ต 4 จี้ที่ตรงกับสกิลของคุณมากที่สุด จัดอันดับให้อัตโนมัติ</span>
+          <span class="tutorial-sub">ระบบจะหาเซ็ต 4 จี้ที่ตรงกับสกิลของคุณมากที่สุด จัดอันดับให้อัตโนมัติ (เปลี่ยนจำนวนเซ็ตได้ที่ "แสดง Top 10" เหนือผลลัพธ์)</span>
         </div>
       </li>
       <li style="border-left-color:#f59e0b">
@@ -235,7 +236,7 @@
         </div>
       </li>
     </ol>
-    <p class="tutorial-tip">💡 Tip: แตะที่ชื่อจี้ในผลลัพธ์เพื่อดูความสามารถเต็มของแต่ละจี้</p>
+    <p class="tutorial-tip">💡 Tip: แตะชื่อจี้ในผลลัพธ์เพื่อดูว่าจี้นั้นให้สกิลอะไร · กด "⇄ อีก N แบบ" เพื่อสลับเซ็ตที่คล้ายกัน</p>
     <button id="tutorialClose" type="button" class="btn btn--primary tutorial-sheet__close">เข้าใจแล้ว</button>
   </div>
 </div>
@@ -296,6 +297,7 @@
     <h1 class="brand-title" id="brandTitle" role="button" tabindex="0" aria-label="กลับหน้าหลัก">ค้นหาเซ็ตจี้เกมเศรษฐี</h1>
   </div>
   <div class="header-actions" style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+    <span id="dataStatus" class="data-status" role="status" aria-live="polite" title="กำลังโหลดข้อมูลจี้"><span class="data-status__dot" aria-hidden="true"></span><span class="data-status__label">กำลังโหลด</span></span>
     <button id="menuBtn" class="menu-btn" type="button" aria-label="เมนู" aria-expanded="false" aria-controls="headerMenu" title="เมนู"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6.75A1.25 1.25 0 0 1 5.25 5.5h13.5a1.25 1.25 0 1 1 0 2.5H5.25A1.25 1.25 0 0 1 4 6.75Zm0 5.25a1.25 1.25 0 0 1 1.25-1.25h13.5a1.25 1.25 0 1 1 0 2.5H5.25A1.25 1.25 0 0 1 4 12Zm0 5.25A1.25 1.25 0 0 1 5.25 16h13.5a1.25 1.25 0 1 1 0 2.5H5.25A1.25 1.25 0 0 1 4 17.25Z"/></svg></button>
     <div class="visually-hidden" aria-hidden="true">
       <button id="favoriteBtn" class="favorite-btn" type="button" aria-label="Filter ค้นหาที่บันทึกไว้" title="⭐️ Filter ค้นหาที่บันทึกไว้">★</button>
@@ -344,7 +346,13 @@
       <svg style="width: 24px; height: 24px;" fill="currentColor" class="bi bi-brightness-low-fill" viewBox="0 0 16 16">
   <path d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0M8.5 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m0 11a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m5-5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m-11 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m9.743-4.036a.5.5 0 1 1-.707-.707.5.5 0 0 1 .707.707m-7.779 7.779a.5.5 0 1 1-.707-.707.5.5 0 0 1 .707.707m7.072 0a.5.5 0 1 1 .707-.707.5.5 0 0 1-.707.707M3.757 4.464a.5.5 0 1 1 .707-.707.5.5 0 0 1-.707.707"/>
 </svg></span>
-      <span class="header-menu__text"><span class="header-menu__label" id="menuThemeLabel">เปลี่ยนธีม</span><span class="header-menu__hint">สลับโหมดสว่าง / มืด</span></span></span></button></div></div>
+      <span class="header-menu__text"><span class="header-menu__label" id="menuThemeLabel">เปลี่ยนธีม</span><span class="header-menu__hint">สลับโหมดสว่าง / มืด</span></span></span></button>
+<button type="button" id="menuFeedbackBtn" class="header-menu__item" role="menuitem"><span class="header-menu__item-main"><span class="header-menu__icon" aria-hidden="true">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+  <span class="header-menu__text"><span class="header-menu__label">ส่งความคิดเห็น</span><span class="header-menu__hint">แจ้งปัญหาหรือเสนอไอเดียเกี่ยวกับเว็บนี้</span></span></span></button>
+<button type="button" id="menuDonateBtn" class="header-menu__item" role="menuitem"><span class="header-menu__item-main"><span class="header-menu__icon" aria-hidden="true">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg></span>
+  <span class="header-menu__text"><span class="header-menu__label">สนับสนุนผู้พัฒนา</span><span class="header-menu__hint">เลี้ยงกาแฟผ่าน TrueMoney</span></span></span></button></div></div>
 
 <div id="overlay" class="overlay" aria-hidden="true" aria-busy="false">
   <div class="loader">
@@ -366,29 +374,40 @@
 
 <main>
   <section>
+    <!-- Mobile: after a search the form folds into this one-line summary -->
+    <div id="filterSummary" class="filter-summary" hidden>
+      <svg class="filter-summary__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
+      <div id="filterSummaryChips" class="filter-summary__chips"></div>
+      <button type="button" id="filterSummaryEdit" class="filter-summary__edit" aria-expanded="false" aria-controls="filterPanelBody">แก้ไข
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div id="filterPanelBody" class="filter-panel__body">
     <h2 class="head-with-counter" style="margin-top:4px">
-      <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 25 สกิล)</span>
-      <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" aria-label="จำนวนที่เลือก">
+      <span>สกิลที่ต้องการ</span>
+      <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" aria-label="จำนวนสกิลที่เลือก (สูงสุด 25)">
         <span class="sel-progress__track"><span class="sel-progress__fill"></span></span>
         <span class="sel-progress__label">0/25</span>
       </span>
     </h2>
     <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
       <div class="chip-selected-row">
-        <div class="chip-selected-title">✅ สกิลที่ต้องการ</div>
         <div id="minHint" class="hint hint--error"></div>
         <div id="chipSelected" class="chip-list chip-list--selected is-hidden" aria-live="polite"></div>
         <div id="chipConflict" class="chip-conflict" role="alert" hidden></div>
       </div>
       <div class="chip-search-wrap">
-        <label for="chipSearch" class="chip-search-label">➕ เพิ่มสกิลที่ต้องการ</label>
+        <label for="chipSearch" class="visually-hidden">เพิ่มสกิลที่ต้องการ</label>
         <div id="chipSearchBox" class="chip-search-box">
-          <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ..." autocomplete="off" autocorrect="off" spellcheck="false">
+          <svg class="chip-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="chipSearch" class="chip-search" type="text" placeholder="พิมพ์ชื่อสกิล…" autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
         </div>
         <div id="chipGroupBrowse" class="chip-group-browse" hidden>
-          <button id="chipGroupToggle" type="button" class="chip-group-toggle" aria-expanded="false" aria-controls="chipGroupList">
-            <span>📂 เลือกจากกลุ่ม <span class="chip-group-toggle__count"></span></span><span class="chip-group-toggle__arrow" aria-hidden="true">▼</span>
+          <button id="chipGroupToggle" type="button" class="chip-group-toggle" aria-expanded="false" aria-controls="chipGroupList" title="เลือกทั้งกลุ่ม เช่น โล่ แบบไหนก็ได้ (นับเป็น 1 สกิล)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+            <span>กลุ่ม<span class="chip-group-toggle__count visually-hidden"></span></span>
           </button>
           <div id="chipGroupList" class="chip-group-list" hidden></div>
         </div>
@@ -400,15 +419,22 @@
 
       <div class="chip-unwanted-section">
         <div class="chip-unwanted-header" id="chipUnwantedHeader">
-          <span class="chip-unwanted-title">🚫 สกิลที่ไม่ต้องการ</span>
-          <button class="chip-unwanted-toggle" id="chipUnwantedToggle" type="button" aria-expanded="false">▼ แสดง</button>
+          <span class="chip-unwanted-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>
+            สกิลที่ไม่ต้องการ
+          </span>
+          <span id="chipUnwantedCount" class="chip-unwanted-count">0</span>
+          <button class="chip-unwanted-toggle" id="chipUnwantedToggle" type="button" aria-expanded="false" aria-controls="chipUnwantedBody" aria-label="แสดงหรือซ่อนสกิลที่ไม่ต้องการ">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
         </div>
         <div class="chip-unwanted-body" id="chipUnwantedBody">
           <div id="chipUnwanted" class="chip-list chip-list--unwanted is-hidden" aria-live="polite"></div>
           <div class="chip-search-wrap" style="margin-top:6px">
-            <label for="chipUnwantedSearch" class="chip-search-label chip-search-label--danger">➕ เพิ่มสกิลที่ไม่ต้องการ</label>
+            <label for="chipUnwantedSearch" class="visually-hidden">เพิ่มสกิลที่ไม่ต้องการ</label>
             <div class="chip-search-box">
-              <input id="chipUnwantedSearch" class="chip-unwanted-search" type="text" placeholder="🔍 ค้นหาสกิลที่ไม่ต้องการ..." autocomplete="off" autocorrect="off" spellcheck="false">
+              <svg class="chip-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="chipUnwantedSearch" class="chip-unwanted-search" type="text" placeholder="พิมพ์ชื่อสกิลที่ไม่อยากได้…" autocomplete="off" autocorrect="off" spellcheck="false">
               <button id="chipUnwantedSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
             </div>
           </div>
@@ -417,74 +443,85 @@
             <div id="chipUnwantedAll" class="chip-results__body"></div>
           </div>
         </div>
-        <div class="chip-unwanted-hint">ⓘ กดปุ่ม <strong>▼ แสดง</strong> เพื่อระบุสกิลที่ไม่ต้องการในเซ็ต</div>
       </div>
 
     </div>
-
-    <div class="section-divider" aria-hidden="true" style="margin-top:16px;"><div class="section-divider__line"></div></div>
 
     <!-- ตัวละคร -->
-    <div class="row-two-col" id="charRow">
-      <div class="col">
-        <label for="charSelect"><strong><span class="head-icon">👤</span>ตัวละคร</strong></label>
-        <select id="charSelect" style="min-height:44px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px">
-          <option value=""></option>
-        </select>
-        <div class="input-help">ⓘ เมื่อเลือกตัวละคร ระบบจะล็อก 1 ใน 4 จี้ให้เป็นจี้ <span class="badge-link">[ลิงก์]</span> สำหรับตัวละครนั้น</div>
-        <div id="charPreview" class="char-preview" aria-live="polite">
-          <span class="cp-icon">🔒</span>
-          <div><div>จี้ลิงก์ที่จะล็อก: <span class="cp-jewel"></span></div></div>
-        </div>
+    <div class="filter-field" id="charRow">
+      <label for="charSelect" class="filter-label">ตัวละคร
+        <span class="info-dot" tabindex="0" role="img" aria-label="เลือกตัวละครแล้วระบบจะล็อกจี้ [ลิงก์] ของตัวละครนั้นให้ 1 ใน 4 ชิ้น" title="เลือกตัวละครแล้วระบบจะล็อกจี้ [ลิงก์] ของตัวละครนั้นให้ 1 ใน 4 ชิ้น">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        </span>
+      </label>
+      <select id="charSelect">
+        <option value=""></option>
+      </select>
+      <div id="charPreview" class="char-preview" aria-live="polite">
+        <span class="cp-icon">🔒</span>
+        <div><div>จี้ลิงก์ที่จะล็อก: <span class="cp-jewel"></span></div></div>
       </div>
     </div>
 
-    <div class="section-divider" aria-hidden="true"><div class="section-divider__line"></div></div>
-
-    <!-- จำนวนเซ็ต + ประเภทจี้ -->
-    <div class="row-two-col">
-      <div class="col">
-        <label><strong>จำนวนเซ็ตที่ต้องการ:</strong></label>
-        <div class="topk-wrap">
-          <div class="topk-presets" role="group" aria-label="เลือกจำนวนเซ็ต">
-            <button type="button" class="topk-preset" data-val="5">5</button>
-            <button type="button" class="topk-preset" data-val="10">10</button>
-            <button type="button" class="topk-preset" data-val="20">20</button>
-            <button type="button" class="topk-preset" data-val="30">30</button>
-            <button type="button" class="topk-preset" data-val="40">40</button>
-            <button type="button" class="topk-preset" data-val="50">50</button>
-          </div>
-        </div>
-        <input id="topK" class="simple" type="number" min="3" max="50" value="10" style="display:none">
-      </div>
-      <div class="col">
-        <label><strong>ประเภทจี้:</strong> <span class="jewel-types__hint">เลือกได้หลายอัน · ไม่เลือก = ทุกจี้</span></label>
-        <div id="jewelTypeFilter" class="jewel-types" role="group" aria-label="กรองประเภทจี้ (เลือกได้หลายอัน)">
-          <button type="button" class="jewel-type" data-type="dark" aria-pressed="false" title="จี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค] <span class="jewel-type__count"></span></button>
-          <button type="button" class="jewel-type" data-type="white" aria-pressed="false" title="จี้ที่ชื่อขึ้นต้นด้วย [ไวท์]">[ไวท์] <span class="jewel-type__count"></span></button>
-          <button type="button" class="jewel-type" data-type="other" aria-pressed="false" title="จี้ที่ไม่มีคำนำหน้า หรือมีคำนำหน้าอื่น เช่น [ลิมิเต็ดเอดิชั่น] (ไม่รวม [ลิงก์])">อื่น ๆ <span class="jewel-type__count"></span></button>
-        </div>
+    <!-- ประเภทจี้ -->
+    <div class="filter-field">
+      <span class="filter-label" id="jewelTypeLabel">ประเภทจี้</span>
+      <div id="jewelTypeFilter" class="jewel-types" role="group" aria-labelledby="jewelTypeLabel">
+        <button type="button" class="jewel-type-all" id="jewelTypeAll" aria-pressed="true" title="ใช้จี้ทุกประเภท">ทั้งหมด</button>
+        <button type="button" class="jewel-type" data-type="dark" aria-pressed="false" title="จี้ที่ชื่อขึ้นต้นด้วย [ดาร์ค]">[ดาร์ค] <span class="jewel-type__count"></span></button>
+        <button type="button" class="jewel-type" data-type="white" aria-pressed="false" title="จี้ที่ชื่อขึ้นต้นด้วย [ไวท์]">[ไวท์] <span class="jewel-type__count"></span></button>
+        <button type="button" class="jewel-type" data-type="other" aria-pressed="false" title="จี้ที่ไม่มีคำนำหน้า หรือมีคำนำหน้าอื่น เช่น [ลิมิเต็ดเอดิชั่น] (ไม่รวม [ลิงก์])">อื่น ๆ <span class="jewel-type__count"></span></button>
       </div>
     </div>
 
     <div class="row-actions">
-      <button id="calcBtn" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-      <button id="shareBtn" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
-      <button id="resetBtn" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
+      <button id="calcBtn" class="btn btn--primary" onclick="calculate()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>ค้นหาเซ็ตจี้</span>
+      </button>
+      <button id="shareBtn" type="button" class="btn-icon" disabled aria-label="แชร์ให้เพื่อน" title="แชร์ให้เพื่อน">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      </button>
+      <button id="resetBtn" type="button" class="btn-icon btn-icon--muted" onclick="resetAll()" aria-label="รีเซ็ตตัวกรอง" title="รีเซ็ตตัวกรอง">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
     </div>
+    </div><!-- /filterPanelBody -->
 
     <!-- Sticky CTA (mobile/tablet only) -->
     <div class="cta-bar" aria-label="ตัวเลือกด่วน">
-      <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">ค้นหาเซ็ตจี้</button>
-      <button id="shareBtn2" type="button" class="btn btn--secondary" disabled>แชร์ให้เพื่อน</button>
-      <button id="resetBtn2" class="btn btn--ghost-reset" onclick="resetAll()">รีเซ็ต</button>
+      <button id="calcBtn2" class="btn btn--primary" onclick="calculate()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>ค้นหาเซ็ตจี้</span>
+      </button>
+      <button id="shareBtn2" type="button" class="btn-icon" disabled aria-label="แชร์ให้เพื่อน" title="แชร์ให้เพื่อน">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      </button>
+      <button id="resetBtn2" type="button" class="btn-icon btn-icon--muted" onclick="resetAll()" aria-label="รีเซ็ตตัวกรอง" title="รีเซ็ตตัวกรอง">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
 </div>
 
   </section>
 
   <section style="position:relative">
-    <h2 id="resultTitle"><span class="head-icon">💎</span>เซ็ตจี้ที่ดีที่สุด</h2>
-    <p id="tooltipHint" class="hint-text"></p>
+    <div class="result-head">
+      <h2 id="resultTitle">เซ็ตจี้ที่ดีที่สุด</h2>
+      <span id="resultMeta" class="result-meta" aria-live="polite"></span>
+      <span id="resultScoreNote" class="result-score-note" hidden></span>
+      <label class="topk-select" for="topKSelect">แสดง
+        <select id="topKSelect" aria-label="จำนวนเซ็ตที่ต้องการ">
+          <option value="5">Top 5</option>
+          <option value="10" selected>Top 10</option>
+          <option value="20">Top 20</option>
+          <option value="30">Top 30</option>
+          <option value="40">Top 40</option>
+          <option value="50">Top 50</option>
+        </select>
+      </label>
+      <input id="topK" type="number" min="3" max="50" value="10" hidden>
+    </div>
+    <div id="resultCommon" class="result-common" hidden></div>
     <div class="result-utility-row">
       <div id="inventoryResultFilters" class="inventory-result-filters" aria-label="กรองผลลัพธ์ตามคลังจี้" hidden>
         <button type="button" class="inventory-result-filter active" data-filter="all">ทั้งหมด</button>
@@ -495,24 +532,16 @@
     </div>
     <div id="result" class="grid-results">
       <div class="empty-state" id="resultEmptyState">
-        <div class="empty-state__icon">✨</div>
         <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
-        <div class="empty-state__msg">เลือกความสามารถอย่างน้อย 4 อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
-        
+        <div class="empty-state__msg">เลือกสกิลที่ต้องการอย่างน้อย 4 สกิล แล้วกด "ค้นหาเซ็ตจี้"</div>
       </div>
     </div>
 
-    <div id="donateResultCard" class="donate-card donate-card--result" hidden>
-  <div class="donate-card__icon" aria-hidden="true">☕</div>
-  <div class="donate-card__content">
-    <div class="donate-card__title">ถ้าเว็บนี้ช่วยคุณได้</div>
-    <div class="donate-card__text">สนับสนุนค่ากาแฟผู้พัฒนาได้ผ่าน TrueMoney</div>
-    <!-- <div class="donate-card__note">ไม่บังคับ และไม่มีผลต่อการใช้งานเว็บ</div> -->
-  </div>
-  <div class="donate-card__actions">
-    <button type="button" id="donateResultBtn" class="btn btn--primary donate-card__btn">สนับสนุน</button>
-  </div>
-</div>
+    <div id="donateResultCard" class="donate-strip" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#e2557a" aria-hidden="true"><path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg>
+      <span class="donate-strip__text">ชอบเว็บนี้? เลี้ยงกาแฟผู้พัฒนาได้ผ่าน TrueMoney</span>
+      <button type="button" id="donateResultBtn" class="donate-strip__btn">สนับสนุน</button>
+    </div>
 
     <div id="resultLocalOverlay" class="overlay" style="position:absolute;display:none;align-items: flex-start;padding-top:50px" aria-hidden="true">
       <div class="loader">
@@ -715,28 +744,27 @@
 </div>
 </main>
 
-<script src="js/sheet-cache.js?v=202611270602"></script>
-<script src="js/search-core.js?v=202611270602"></script>
-<script src="js/data-model.js?v=202611270602"></script>
-<script src="js/filter-state.js?v=202611270602"></script>
-<script src="js/main.js?v=202611270602"></script>
+<script src="js/sheet-cache.js?v=202611270708"></script>
+<script src="js/search-core.js?v=202611270708"></script>
+<script src="js/data-model.js?v=202611270708"></script>
+<script src="js/filter-state.js?v=202611270708"></script>
+<script src="js/result-view.js?v=202611270708"></script>
+<script src="js/main.js?v=202611270708"></script>
 
-<script src="js/share.js?v=202611270602"></script>
+<script src="js/share.js?v=202611270708"></script>
 
-<script src="js/saved-data.js?v=202611270602"></script>
+<script src="js/saved-data.js?v=202611270708"></script>
 
 
-<script src="js/ui/topk-validation.js?v=202611270602"></script>
-<script src="js/ui/header-offset.js?v=202611270602"></script>
+<script src="js/ui/header-offset.js?v=202611270708"></script>
 
-<script src="js/ui/jewel-tooltip.js?v=202611270602"></script>
-<script src="js/ui/tooltip-hint.js?v=202611270602"></script>
+<script src="js/ui/jewel-tooltip.js?v=202611270708"></script>
 
 
 
 
 <!-- === Feedback Widget (isolated; fb-*) === -->
-<button id="fbBtn" class="fb-fab" type="button" aria-label="ส่งความคิดเห็น">Feedback</button>
+<button id="fbBtn" class="fb-fab" type="button" aria-label="ส่งความคิดเห็น" hidden>Feedback</button>
 
 <div id="fbModal" class="fb-modal" aria-hidden="true">
   <div class="fb-modal__backdrop" data-fb-close></div>
@@ -801,47 +829,30 @@
 
 
 
-<script src="js/feedback.js?v=202611270602"></script>
+<script src="js/feedback.js?v=202611270708"></script>
 
 
 
 
 
-<script src="js/chip-picker.js?v=202611270602"></script>
+<script src="js/chip-picker.js?v=202611270708"></script>
 
-<script src="js/ui/shortcuts.js?v=202611270602"></script>
+<script src="js/ui/shortcuts.js?v=202611270708"></script>
 
-<script src="js/ui/menus-modals.js?v=202611270602"></script>
-<script src="js/tutorial.js?v=202611270602"></script>
+<script src="js/ui/menus-modals.js?v=202611270708"></script>
+<script src="js/tutorial.js?v=202611270708"></script>
 
 
 
-<script src="js/persist-form.js?v=202611270602"></script>
-<script src="js/char-select.js?v=202611270602"></script>
+<script src="js/persist-form.js?v=202611270708"></script>
+<script src="js/char-select.js?v=202611270708"></script>
 
-<div id="donateStickyBar" class="donate-sticky" hidden aria-hidden="true">
-  <div class="donate-sticky__inner">
-    <div class="donate-sticky__copy">
-      <span class="donate-sticky__label">💖 ร่วมสนับสนุนผู้พัฒนาได้ผ่าน TrueMoney </span>
-    </div>
-    <button type="button" id="donateStickyBtn" class="donate-sticky__link">
-      เปิด QR สนับสนุน
-    </button>
-  </div>
-</div>
 <footer class="site-footer">
-  <div class="donate-footer">
-    <div class="donate-footer__inner">
-      <div class="donate-footer__copy">
-        <div class="donate-footer__text">💖 ถ้าเว็บนี้มีประโยชน์ สนับสนุนผู้พัฒนาผ่าน TrueMoney เลย</div>
-      </div>
-      <button type="button" id="donateFooterBtn" class="donate-footer__link">เปิด QR สนับสนุน</button>
-    </div>
-  </div>
 <details class="site-footer__details">
     <summary>เกี่ยวกับเว็บ</summary>
     <div class="site-footer__meta">
       <strong>Get Rich Pendant Finder</strong> — เว็บช่วยค้นหาและจัดเซ็ตจี้เกมเศรษฐี เลือกสกิลที่ต้องการ เลือกตัวละคร ระบุสกิลที่ไม่ต้องการ บันทึกคลังจี้ และแชร์เซ็ตจี้ให้เพื่อนได้ ข้อมูลที่บันทึกไว้จะอยู่เฉพาะบนอุปกรณ์และเบราว์เซอร์นี้
+      <button type="button" id="donateFooterBtn" class="site-footer__donate">สนับสนุนผู้พัฒนา</button>
   </details>
 </footer>
 </body>
