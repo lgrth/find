@@ -89,7 +89,9 @@ test('desktop: amount ideas change the button, QR sits in the card, paying opens
     assert.match(await page.textContent('#donateModalHint'), /99 ฿/);
     await page.click('#donateClose');
     assert.match(await page.textContent('#toastMessage'), /ขอบคุณ/);
-    assert.equal(await cardVisible(page), false, 'hidden after supporting');
+    assert.equal(await cardVisible(page), true, 'still shown after supporting');
+    await search(page);
+    assert.equal(await cardVisible(page), true, 'no long snooze after supporting');
     assert.deepEqual(errors, []);
   } finally {
     await context.close();

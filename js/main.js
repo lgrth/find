@@ -1265,12 +1265,11 @@ function closeDonateModal(){
 
 /* ====== Support card under the results ======
  * Shown from the 2nd search on, or right after the user copies / saves / shares a set.
- * "ไว้คราวหน้า" hides it for 15 minutes; after the user opens the QR it stays hidden for 30 days.
+ * "ไว้คราวหน้า" hides it for 15 minutes; pressing the support button does not hide it.
  * Everything is kept in this browser only.                                              */
 const DONATE_STORE_KEY = 'donateCard_v1';
 const DONATE_MIN_SEARCHES = 2;
 const DONATE_SNOOZE_MS = 15 * 60 * 1000;
-const DONATE_AFTER_SUPPORT_MS = 30 * 24 * 60 * 60 * 1000;
 let _donateValueMoment = false;   // copied / saved / shared a set in this visit
 
 function readDonateStore(){
@@ -1360,7 +1359,6 @@ function initDonateCard(){
   document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
     const pick = selectedDonateTreat();
     trackEvent('donate_cta_click', { placement: 'result_card', amount: Number(pick.amount) || 0 });
-    snoozeDonateCard(DONATE_AFTER_SUPPORT_MS, 'support');
     // phones: straight to the app when we can; otherwise the QR window
     const os = getMobileOS();
     if((os === 'android' || os === 'ios') && window.matchMedia('(max-width: 767px)').matches){
