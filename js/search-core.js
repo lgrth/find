@@ -55,6 +55,29 @@ function abilityScore(value, ability){
   return Math.min(value, ability.maxValue) * 100 / ability.maxValue;
 }
 
+/* ---- Value used for the score of one skill on one pendant (NoteN conditions, see data-model.js) ----
+ *   📉 decay: drops once by `decay` after a few turns → use the value after the drop (game length is ignored)
+ *   📈 grow:  +`grow` every turn it does not trigger, back to the start when it does, capped at 100
+ *            → its long-run trigger rate: 100 / (average turns between triggers)
+ *   🔒 limit: no effect on the score (shown only)
+ * Only for chance skills; amount skills keep their value.                                  */
+function growAverage(start, grow){
+  let stillWaiting = 1, turns = 0;
+  for(let k = 0; stillWaiting > 1e-12 && k < 10000; k++){
+    turns += stillWaiting;
+    stillWaiting *= 1 - Math.min(100, Math.max(0, start + k * grow)) / 100;
+  }
+  return turns > 0 ? 100 / turns : 0;
+}
+
+function effectiveValue(s, ability){
+  const v = toNumber(s.value);
+  if(ability?.unit === 'amount') return v;
+  if(s.decay != null) return Math.max(0, v - s.decay);
+  if(s.grow > 0) return growAverage(v, s.grow);
+  return v;
+}
+
 /**
  * Describe one pendant relative to the wanted skills: bit i of `mask` = has desired[i].
  * `stackKeys`: two pendants sharing any key may not be in the same set
@@ -66,7 +89,7 @@ function jewelToCandidate(j, desired, unwanted=[], abilityOf=noAbilities){
   desired.forEach((req, i)=>{
     let best = -Infinity;
     for(const s of j.substats){
-      if(requirementMatches(req, s.name, abilityOf)) best = Math.max(best, abilityScore(toNumber(s.value), abilityOf(s.name)));
+      if(requirementMatches(req, s.name, abilityOf)) best = Math.max(best, abilityScore(effectiveValue(s, abilityOf(s.name)), abilityOf(s.name)));
     }
     if(best > -Infinity){ mask |= (1<<i); score += best; }
   });
@@ -232,6 +255,6 @@ function searchCombos({ desired, cand, topK, fixed = null, onProgress = null }){
 }
 
 if (typeof module === 'object' && module.exports){
-  module.exports = { SPEED_CFG, GROUP_PREFIX, isGroupRequirement, groupOfRequirement, groupRequirement,
+  module.exports = { SPEED_CFG, growAverage, effectiveValue, GROUP_PREFIX, isGroupRequirement, groupOfRequirement, groupRequirement,
     requirementMatches, matchesAnyRequirement, toNumber, popcount, abilityScore, compareCandidates, jewelToCandidate, buildCandidates, buildFillerCandidates, compatibleWith, searchCombos };
 }

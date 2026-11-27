@@ -110,3 +110,34 @@ test('group requirement: one bit for any skill of the group, scored by its best 
   assert.equal(u.unwantedCount, 2, 'an unwanted group counts each of its skills');
   assert.equal(u.extraCount, 2);
 });
+
+test('growAverage: long-run trigger rate of "+x% เมื่อไม่แสดงผล"', () => {
+  const r = (a, g) => Math.round(core.growAverage(a, g) * 10) / 10;
+  assert.equal(r(45, 5), 49.4);   // ขังคุก 45% +5 (แกนบลัดกักขังโกสต์)
+  assert.equal(r(10, 5), 22.1);
+  assert.equal(r(30, 5), 36.9);
+  assert.equal(r(60, 5), 62.7);
+  assert.equal(r(45, 0), 45);
+  assert.equal(r(100, 5), 100);
+  assert.equal(r(0, 50), 40);     // 0% → 50% → 100%: fires after 2 or 3 turns, 2.5 on average
+});
+
+test('effectiveValue: decay uses the value after the drop, limit changes nothing, amount skills untouched', () => {
+  assert.equal(core.effectiveValue({ value: 80, decay: 50, decayAfter: 2 }), 30);   // แปลน 3 หลัง
+  assert.equal(core.effectiveValue({ value: 40, decay: 50, decayAfter: 2 }), 0);
+  assert.equal(core.effectiveValue({ value: 95, limit: 1 }), 95);
+  assert.equal(core.effectiveValue({ value: 50 }), 50);
+  assert.equal(core.effectiveValue({ value: 50, decay: 10, grow: 5 }), 40, 'both → decay only');
+  assert.equal(core.effectiveValue({ value: 120, decay: 50 }, { unit: 'amount' }), 120);
+});
+
+test('a decaying skill scores lower and can lose the tie-break', () => {
+  const A = { id: 'A', substats: [{ name: 'X', value: 80, decay: 50, decayAfter: 2 }] };
+  const B = { id: 'B', substats: [{ name: 'X', value: 60 }] };
+  const C = { id: 'C', substats: [{ name: 'X', value: 45, grow: 5 }] };
+  assert.equal(core.jewelToCandidate(A, ['X']).score, 30);
+  assert.equal(core.jewelToCandidate(B, ['X']).score, 60);
+  assert.equal(Math.round(core.jewelToCandidate(C, ['X']).score * 10) / 10, 49.4);
+  const order = core.buildCandidates(['X'], [A, B, C], [], 10).map((c) => c.id);
+  assert.deepEqual(order, ['B', 'C', 'A']);
+});
