@@ -4,6 +4,7 @@
   "description": "Get Rich Pendant Finder — static site + test suite",
   "scripts": {
     "test": "node --test --test-concurrency=1 test/*.test.js",
+    "bump-assets": "node scripts/bump-assets.js",
     "test:update-golden": "UPDATE_GOLDEN=1 node --test --test-concurrency=1 test/*.test.js"
   },
   "devDependencies": {

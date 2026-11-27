@@ -52,6 +52,14 @@ python3 -m http.server 8080
 # แล้วเปิด http://localhost:8080/
 ```
 
+## ก่อน merge การแก้ `js/` หรือ `css/`
+ไฟล์ JS/CSS ใน `index.html` มี `?v=<เวอร์ชัน>` ต่อท้าย เพื่อให้เบราว์เซอร์โหลดไฟล์ใหม่ทันทีหลัง deploy
+(ไม่อย่างนั้นบางเครื่องจะยังใช้ไฟล์เก่าจาก cache) — แก้ไฟล์แล้วให้รัน
+
+```bash
+npm run bump-assets
+```
+
 ## ทดสอบ (Tests)
 ชุดทดสอบใช้ Node 22 + Playwright (Chromium) และ mock ทุกอย่างที่ต่อเน็ต
 (Google Sheets ใช้ snapshot ใน `test/fixtures/`, ไลบรารี CDN ใช้จาก `node_modules`)
