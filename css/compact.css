@@ -310,12 +310,48 @@ html[data-theme="dark"] .skill-action-menu{background:#111827;border-color:#3341
 .quick-start svg{color:var(--c-text-2);flex:none}
 
 /* ---------- Donate: one quiet strip under the results ---------- */
-.donate-strip{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ef;border:1px solid #f6e2c6;font-size:13px;color:#6b3d10}
-.donate-strip[hidden]{display:none}
-.donate-strip__text{flex:1}
-.donate-strip__btn{border:0;background:none;padding:6px 4px;font:inherit;font-weight:700;color:#6b3d10;text-decoration:underline;cursor:pointer}
-html[data-theme="dark"] .donate-strip{background:#2c1f0e;border-color:#6b4a20;color:#fbd3a5}
-html[data-theme="dark"] .donate-strip__btn{color:#fbd3a5}
+/* support card under the results: story + amount ideas (A) and the QR right in the card on wide screens (B) */
+.donate-card2{display:flex;gap:16px;align-items:center;margin-top:10px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#fff8ef 0%,#fff1df 100%);border:1px solid #f6dcb8;color:#5a3410}
+.donate-card2[hidden]{display:none}
+.donate-card2__body{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.donate-card2__head{display:flex;gap:12px;align-items:flex-start}
+.donate-card2__cup{width:44px;height:44px;flex:none;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 6px rgba(138,74,18,.12)}
+.donate-card2__title{margin:0;font-size:16px;font-weight:700;color:#4a2a0c}
+.donate-card2__text{margin:2px 0 0;font-size:13px;line-height:1.5;color:#6b3d10}
+.donate-card2__amounts{display:flex;gap:8px}
+.donate-amt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;border-radius:12px;border:1.5px solid #f0d3ad;background:#fff;color:#5a3410;font:inherit;cursor:pointer}
+.donate-amt:hover{border-color:#e3a866}
+.donate-amt.is-on{border-color:#d9822b;background:#fff4e6;box-shadow:0 0 0 3px #fde3c4}
+.donate-amt:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.donate-amt__e{font-size:20px;line-height:1.15}
+.donate-amt__t{font-size:12px;font-weight:700}
+.donate-amt__s{font-size:11px;color:#8a5a2a}
+.donate-card2__actions{display:flex;gap:8px}
+.donate-card2__pay{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border:0;border-radius:12px;background:#c2570c;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.donate-card2__pay:hover{background:#a8480a}
+.donate-card2__pay:focus-visible,.donate-card2__save:focus-visible,.donate-card2__later:focus-visible,.donate-card2__qr-btn:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.donate-card2__save{display:none;align-items:center;justify-content:center;min-height:44px;padding:0 14px;border-radius:12px;background:#fff;border:1px solid #f0d3ad;color:#6b3d10;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap}
+.donate-card2__foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.donate-card2__trust{font-size:11.5px;color:#8a5a2a}
+.donate-card2__later{border:0;background:none;min-height:32px;padding:0 6px;font:inherit;font-size:12.5px;color:#8a5a2a;text-decoration:underline;cursor:pointer}
+.donate-card2__qr{flex:none;margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;line-height:1.35;text-align:center;color:#8a5a2a}
+.donate-card2__qr-btn{padding:6px;border:1px solid #f0d3ad;border-radius:12px;background:#fff;cursor:zoom-in;line-height:0}
+.donate-card2__qr-btn img{width:132px;height:132px;object-fit:contain;border-radius:6px}
+/* phones: no QR in the card (scanning your own screen does not work) — open the app or save the QR instead */
+@media (max-width:767px){
+  .donate-card2{padding:14px}
+  .donate-card2__qr{display:none}
+  .donate-card2__save{display:inline-flex}
+  .donate-card2__pay{font-size:14px}
+}
+html[data-theme="dark"] .donate-card2{background:linear-gradient(135deg,#2c1f0e 0%,#3a2710 100%);border-color:#6b4a20;color:#fbd3a5}
+html[data-theme="dark"] .donate-card2__title{color:#ffe3bf}
+html[data-theme="dark"] .donate-card2__text,html[data-theme="dark"] .donate-card2__trust,html[data-theme="dark"] .donate-card2__later,html[data-theme="dark"] .donate-card2__qr{color:#f3c48c}
+html[data-theme="dark"] .donate-card2__cup,html[data-theme="dark"] .donate-amt,html[data-theme="dark"] .donate-card2__save{background:#1f160a;border-color:#6b4a20;color:#fbd3a5}
+html[data-theme="dark"] .donate-amt__s{color:#e0b27c}
+html[data-theme="dark"] .donate-amt.is-on{background:#4a2c12;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25)}
+.donate-modal__hint{margin:6px 0 0;font-size:13px;font-weight:700;color:#c2570c}
+html[data-theme="dark"] .donate-modal__hint{color:#fbbf72}
 .site-footer__donate{display:inline-block;margin-left:6px;border:0;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer}
 
 /* ---------- Mobile ---------- */
@@ -335,3 +371,4 @@ html[data-theme="dark"] .donate-strip__btn{color:#fbd3a5}
 /* the sideways-scrolling extras line must never widen the page */
 main > section, #result, .grid-results, .result-card, .result-card .row-ability{min-width:0;max-width:100%}
 html[data-theme="dark"] .result-card .extra-skill.is-menu-open{background:#3b5bdb;color:#fff}
+@media (max-width:430px){ .donate-card2__via{display:none} .donate-amt__e{font-size:18px} }

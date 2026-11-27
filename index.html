@@ -103,8 +103,8 @@
 <link rel="preconnect" href="https://docs.google.com">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=202611270716">
-<link rel="stylesheet" href="css/compact.css?v=202611270716">
+<link rel="stylesheet" href="css/app.css?v=202611270726">
+<link rel="stylesheet" href="css/compact.css?v=202611270726">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
@@ -537,11 +537,40 @@
       </div>
     </div>
 
-    <div id="donateResultCard" class="donate-strip" hidden>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#e2557a" aria-hidden="true"><path d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg>
-      <span class="donate-strip__text">ชอบเว็บนี้? เลี้ยงกาแฟผู้พัฒนาได้ผ่าน TrueMoney</span>
-      <button type="button" id="donateResultBtn" class="donate-strip__btn">สนับสนุน</button>
-    </div>
+    <!-- Support card: shown from the 2nd search, or right after copying / saving / sharing a set -->
+    <section id="donateResultCard" class="donate-card2" hidden aria-labelledby="donateCardTitle">
+      <div class="donate-card2__body">
+        <div class="donate-card2__head">
+          <span class="donate-card2__cup" aria-hidden="true">☕</span>
+          <div>
+            <h3 id="donateCardTitle" class="donate-card2__title">เจอเซ็ตที่ใช่แล้วใช่ไหม?</h3>
+            <p class="donate-card2__text">ถ้าเว็บนี้ช่วยประหยัดเวลาจัดเซ็ตจี้ให้คุณ เลี้ยงกาแฟผู้พัฒนาสักแก้วเป็นกำลังใจได้นะ</p>
+          </div>
+        </div>
+        <div class="donate-card2__amounts" role="radiogroup" aria-label="ไอเดียยอดสนับสนุน (ใส่ยอดเองตอนโอน)">
+          <button type="button" class="donate-amt" role="radio" aria-checked="false" data-treat="กาแฟ" data-amount="29"><span class="donate-amt__e" aria-hidden="true">☕</span><span class="donate-amt__t">กาแฟ</span><span class="donate-amt__s">~29 ฿</span></button>
+          <button type="button" class="donate-amt is-on" role="radio" aria-checked="true" data-treat="ชานม" data-amount="59"><span class="donate-amt__e" aria-hidden="true">🧋</span><span class="donate-amt__t">ชานม</span><span class="donate-amt__s">~59 ฿</span></button>
+          <button type="button" class="donate-amt" role="radio" aria-checked="false" data-treat="ข้าวหนึ่งมื้อ" data-amount="99"><span class="donate-amt__e" aria-hidden="true">🍜</span><span class="donate-amt__t">ข้าวหนึ่งมื้อ</span><span class="donate-amt__s">~99 ฿</span></button>
+        </div>
+        <div class="donate-card2__actions">
+          <button type="button" id="donateResultBtn" class="donate-card2__pay">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+            <span><span id="donateResultBtnLabel">เลี้ยงชานม</span><span class="donate-card2__via"> ผ่าน TrueMoney</span></span>
+          </button>
+          <a id="donateCardSaveQr" class="donate-card2__save" href="donate.jpg" download="donate-qr.jpg">บันทึก QR</a>
+        </div>
+        <div class="donate-card2__foot">
+          <span class="donate-card2__trust">🔒 สแกน QR ไม่ต้องสมัคร · 💛 ไม่มีผลต่อการใช้งาน</span>
+          <button type="button" id="donateLaterBtn" class="donate-card2__later">ไว้คราวหน้า</button>
+        </div>
+      </div>
+      <figure class="donate-card2__qr">
+        <button type="button" id="donateCardQrBtn" class="donate-card2__qr-btn" aria-label="ขยาย QR สนับสนุน">
+          <img src="donate.jpg" alt="QR Code สำหรับสนับสนุนผ่าน TrueMoney" loading="lazy" width="132" height="132">
+        </button>
+        <figcaption>สแกนด้วยแอป TrueMoney<br>หรือแอปธนาคาร</figcaption>
+      </figure>
+    </section>
 
     <div id="resultLocalOverlay" class="overlay" style="position:absolute;display:none;align-items: flex-start;padding-top:50px" aria-hidden="true">
       <div class="loader">
@@ -570,6 +599,7 @@
     <div class="donate-modal__head">
       <h3 id="donateTitle" class="donate-modal__title">สนับสนุนผู้พัฒนา</h3>
       <p class="donate-modal__subtitle">ถ้าเว็บนี้ช่วยคุณได้ สามารถสนับสนุนผ่าน TrueMoney ได้ตามสะดวก</p>
+      <p id="donateModalHint" class="donate-modal__hint" hidden></p>
     </div>
 
     <div class="donate-modal__qr-wrap">
@@ -744,21 +774,21 @@
 </div>
 </main>
 
-<script src="js/sheet-cache.js?v=202611270716"></script>
-<script src="js/search-core.js?v=202611270716"></script>
-<script src="js/data-model.js?v=202611270716"></script>
-<script src="js/filter-state.js?v=202611270716"></script>
-<script src="js/result-view.js?v=202611270716"></script>
-<script src="js/main.js?v=202611270716"></script>
+<script src="js/sheet-cache.js?v=202611270726"></script>
+<script src="js/search-core.js?v=202611270726"></script>
+<script src="js/data-model.js?v=202611270726"></script>
+<script src="js/filter-state.js?v=202611270726"></script>
+<script src="js/result-view.js?v=202611270726"></script>
+<script src="js/main.js?v=202611270726"></script>
 
-<script src="js/share.js?v=202611270716"></script>
+<script src="js/share.js?v=202611270726"></script>
 
-<script src="js/saved-data.js?v=202611270716"></script>
+<script src="js/saved-data.js?v=202611270726"></script>
 
 
-<script src="js/ui/header-offset.js?v=202611270716"></script>
+<script src="js/ui/header-offset.js?v=202611270726"></script>
 
-<script src="js/ui/jewel-tooltip.js?v=202611270716"></script>
+<script src="js/ui/jewel-tooltip.js?v=202611270726"></script>
 
 
 
@@ -829,23 +859,23 @@
 
 
 
-<script src="js/feedback.js?v=202611270716"></script>
+<script src="js/feedback.js?v=202611270726"></script>
 
 
 
 
 
-<script src="js/chip-picker.js?v=202611270716"></script>
+<script src="js/chip-picker.js?v=202611270726"></script>
 
-<script src="js/ui/shortcuts.js?v=202611270716"></script>
+<script src="js/ui/shortcuts.js?v=202611270726"></script>
 
-<script src="js/ui/menus-modals.js?v=202611270716"></script>
-<script src="js/tutorial.js?v=202611270716"></script>
+<script src="js/ui/menus-modals.js?v=202611270726"></script>
+<script src="js/tutorial.js?v=202611270726"></script>
 
 
 
-<script src="js/persist-form.js?v=202611270716"></script>
-<script src="js/char-select.js?v=202611270716"></script>
+<script src="js/persist-form.js?v=202611270726"></script>
+<script src="js/char-select.js?v=202611270726"></script>
 
 <footer class="site-footer">
 <details class="site-footer__details">

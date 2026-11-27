@@ -1231,9 +1231,16 @@ function trackEvent(eventName, params = {}) {
   gtag('event', eventName, params);
 }
 
-function openDonateModal(source = 'unknown'){
+let _donateModalOpenedFromCard = false;
+function openDonateModal(source = 'unknown', { treat = '', amount = '' } = {}){
   const modal = document.getElementById('donateModal');
   if(!modal) return;
+  const hint = document.getElementById('donateModalHint');
+  if(hint){
+    hint.hidden = !amount;
+    hint.textContent = amount ? `${treat ? treat + ' ' : ''}~${amount} ฿ (ใส่ยอดเองตอนโอน ยอดเท่าไหร่ก็ได้)` : '';
+  }
+  _donateModalOpenedFromCard = source === 'result_card';
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
@@ -1248,15 +1255,49 @@ function closeDonateModal(){
   const modal = document.getElementById('donateModal');
   if(!modal) return;
 
+  const wasOpen = modal.classList.contains('show');
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden', 'true');
   syncBodyScrollLock();
+  if(wasOpen && _donateModalOpenedFromCard) showToast('💛 ขอบคุณที่ช่วยให้เว็บนี้ไปต่อนะ!', 2800, 'success');
+  _donateModalOpenedFromCard = false;
 }
 
-function showDonateCard(){
+/* ====== Support card under the results ======
+ * Shown from the 2nd search on, or right after the user copies / saves / shares a set.
+ * "ไว้คราวหน้า" hides it for 15 minutes; after the user opens the QR it stays hidden for 30 days.
+ * Everything is kept in this browser only.                                              */
+const DONATE_STORE_KEY = 'donateCard_v1';
+const DONATE_MIN_SEARCHES = 2;
+const DONATE_SNOOZE_MS = 15 * 60 * 1000;
+const DONATE_AFTER_SUPPORT_MS = 30 * 24 * 60 * 60 * 1000;
+let _donateValueMoment = false;   // copied / saved / shared a set in this visit
+
+function readDonateStore(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(DONATE_STORE_KEY) || '{}');
+    return { searches: Number(raw.searches) || 0, hiddenUntil: Number(raw.hiddenUntil) || 0 };
+  }catch(_){ return { searches: 0, hiddenUntil: 0 }; }
+}
+function writeDonateStore(patch){
+  const next = { ...readDonateStore(), ...patch };
+  try{ localStorage.setItem(DONATE_STORE_KEY, JSON.stringify(next)); }catch(_){}
+  return next;
+}
+function donateCardAllowed(store = readDonateStore()){
+  if(store.hiddenUntil > Date.now()) return false;
+  return _donateValueMoment || store.searches >= DONATE_MIN_SEARCHES;
+}
+function hasResultCards(){ return !!document.querySelector('#result .result-card'); }
+
+/** Called after each search that shows results (countSearch=false for re-renders). */
+function showDonateCard({ countSearch = false } = {}){
   const el = document.getElementById('donateResultCard');
   if(!el) return;
-  el.hidden = false;
+  const store = countSearch ? writeDonateStore({ searches: readDonateStore().searches + 1 }) : readDonateStore();
+  const show = hasResultCards() && donateCardAllowed(store);
+  if(show && el.hidden) trackEvent('donate_card_view', { searches: store.searches, value_moment: _donateValueMoment });
+  el.hidden = !show;
 }
 
 function hideDonateCard(){
@@ -1265,16 +1306,91 @@ function hideDonateCard(){
   el.hidden = true;
 }
 
+/** The user got something out of a result: good moment to ask. */
+function noteDonateValueMoment(){
+  _donateValueMoment = true;
+  showDonateCard();
+}
+
+function snoozeDonateCard(ms, reason){
+  writeDonateStore({ hiddenUntil: Date.now() + ms });
+  const el = document.getElementById('donateResultCard');
+  if(el && !el.hidden){
+    if(reason === 'later'){
+      // move focus somewhere sensible before the card disappears
+      document.getElementById('resultTitle')?.focus?.({ preventScroll: true });
+    }
+    el.hidden = true;
+  }
+}
+
+function selectedDonateTreat(){
+  const on = document.querySelector('#donateResultCard .donate-amt.is-on');
+  return { treat: on?.dataset.treat || '', amount: on?.dataset.amount || '' };
+}
+
+function selectDonateAmount(btn){
+  document.querySelectorAll('#donateResultCard .donate-amt').forEach(b=>{
+    const on = b === btn;
+    b.classList.toggle('is-on', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  const label = document.getElementById('donateResultBtnLabel');
+  if(label) label.textContent = `เลี้ยง${btn.dataset.treat || 'กาแฟ'}`;
+}
+
+function initDonateCard(){
+  const card = document.getElementById('donateResultCard');
+  if(!card) return;
+  const amounts = [...card.querySelectorAll('.donate-amt')];
+  amounts.forEach((b, i)=>{
+    b.addEventListener('click', ()=> selectDonateAmount(b));
+    b.addEventListener('keydown', (e)=>{
+      const step = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+      if(!step) return;
+      e.preventDefault();
+      const next = amounts[(i + step + amounts.length) % amounts.length];
+      selectDonateAmount(next); next.focus();
+    });
+  });
+  // roving tabindex for the radio group
+  const syncTab = ()=> amounts.forEach(b => b.tabIndex = b.classList.contains('is-on') ? 0 : -1);
+  syncTab(); card.addEventListener('click', syncTab);
+
+  document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
+    const pick = selectedDonateTreat();
+    trackEvent('donate_cta_click', { placement: 'result_card', amount: Number(pick.amount) || 0 });
+    snoozeDonateCard(DONATE_AFTER_SUPPORT_MS, 'support');
+    // phones: straight to the app when we can; otherwise the QR window
+    const os = getMobileOS();
+    if((os === 'android' || os === 'ios') && window.matchMedia('(max-width: 767px)').matches){
+      openTrueMoneyApp(os, 'result_card');
+      _donateModalOpenedFromCard = false;
+      showToast('💛 ขอบคุณที่ช่วยให้เว็บนี้ไปต่อนะ!', 2800, 'success');
+      return;
+    }
+    openDonateModal('result_card', pick);
+  });
+  document.getElementById('donateCardQrBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_cta_click', { placement: 'result_card_qr' });
+    openDonateModal('result_card', selectedDonateTreat());
+  });
+  document.getElementById('donateCardSaveQr')?.addEventListener('click', ()=>{
+    trackEvent('donate_qr_download_click', { placement: 'result_card' });
+  });
+  document.getElementById('donateLaterBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_card_later', {});
+    snoozeDonateCard(DONATE_SNOOZE_MS, 'later');
+    showToast('โอเค ไว้คราวหน้านะ', 1800, 'info');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   hideDonateCard();
+  initDonateCard();
 });
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_cta_click', { placement: 'result_card' });
-    openDonateModal('result_card');
-  });
-
   document.getElementById('donateFooterBtn')?.addEventListener('click', ()=>{
     trackEvent('donate_cta_click', { placement: 'footer' });
     openDonateModal('footer');
@@ -1314,40 +1430,41 @@ function initDonateOpenAppButton(){
 
   btn.addEventListener('click', (e)=>{
     e.preventDefault();
-
-    trackEvent('donate_open_app_click', {
-      placement: 'modal',
-      os
-    });
-
-    const FALLBACK_ANDROID = 'https://play.google.com/store/apps/details?id=th.co.truemoney.wallet';
-    const FALLBACK_IOS = 'https://apps.apple.com/th/app/truemoney-wallet/id663885752';
-
-    /**
-     * IMPORTANT:
-     * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
-     * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
-     */
-    const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
-    const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
-
-    const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
-    const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
-
-    if(!deepLink){
-      window.location.href = fallbackUrl;
-      return;
-    }
-
-    const start = Date.now();
-    window.location.href = deepLink;
-
-    setTimeout(()=>{
-  if(Date.now() - start < 1800){
-    window.location.href = fallbackUrl;
-  }
-}, 1200);
+    openTrueMoneyApp(os, 'modal');
   });
+}
+
+/** Open the TrueMoney app (deep link), falling back to the app store. */
+function openTrueMoneyApp(os, placement){
+  trackEvent('donate_open_app_click', { placement, os });
+
+  const FALLBACK_ANDROID = 'https://play.google.com/store/apps/details?id=th.co.truemoney.wallet';
+  const FALLBACK_IOS = 'https://apps.apple.com/th/app/truemoney-wallet/id663885752';
+
+  /**
+   * IMPORTANT:
+   * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
+   * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
+   */
+  const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+  const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+
+  const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
+  const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
+
+  if(!deepLink){
+    window.location.href = fallbackUrl;
+    return;
+  }
+
+  const start = Date.now();
+  window.location.href = deepLink;
+
+  setTimeout(()=>{
+    if(Date.now() - start < 1800){
+      window.location.href = fallbackUrl;
+    }
+  }, 1200);
 }
 
 
@@ -1688,6 +1805,7 @@ function onResultCardClick(e){
     }
     if(action === 'share-result') shareResultSnapshot(snapshot);
     if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
+    noteDonateValueMoment();
   }
 }
 document.getElementById('result')?.addEventListener('click', onResultCardClick);
@@ -1828,7 +1946,7 @@ function renderResults(best, options){
   }
 
   document.dispatchEvent(new CustomEvent('guidedSearchCompleted'));
-  showDonateCard();
+  showDonateCard({ countSearch: !options.skipTracking });
   if(!options.skipTracking) rememberRecentSearch();
   collapseFilterPanelForResults();
 
