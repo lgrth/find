@@ -1025,7 +1025,7 @@ function restoreEmptyState(){
   const container = document.getElementById('result');
   if (!container) return;
   container.innerHTML = emptyStateHTML();
-  _openDetailCard = null;
+  _openDetailCard = null; _openPickerCard = null;
   clearResultHeader();
   syncPickedSkillHighlight();
   hideDonateCard();
@@ -1544,6 +1544,7 @@ function substatBadges(s){
  * matching picked skills in the filter panel. Card state lives in _cardControllers.   */
 const _cardControllers = new WeakMap();
 let _openDetailCard = null;
+let _openPickerCard = null;
 
 const RESULT_MENU_HTML = `
   <button type="button" data-action="copy-names"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg><span>คัดลอกชื่อจี้</span></button>
@@ -1600,7 +1601,7 @@ function jewelTileHTML(j, item, ctx, opts){
   const tagHTML = tag ? ` <span class="jn-tag">${escapeHtmlText(tag)}</span>` : '';
   const lock = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + escapeHtmlText(charLabel) : 'ตัวละคร'}</span>` : '';
   const swap = opts.variantCount
-    ? `<button type="button" class="jewel-swap" data-action="swap" title="สลับจี้ชิ้นนี้ ดูเซ็ตคล้ายกัน" aria-label="สลับจี้ชิ้นนี้ ดูเซ็ตคล้ายกันอีก ${opts.variantCount} แบบ">${SWAP_ICON}<span class="swap-long">อีก ${opts.variantCount} แบบ</span><span class="swap-short" aria-hidden="true">+${opts.variantCount}</span></button>`
+    ? `<button type="button" class="jewel-swap" data-action="swap" aria-expanded="${opts.pickerOpen ? 'true' : 'false'}" title="ดูจี้ที่ใช้แทนชิ้นนี้ได้" aria-label="เลือกจี้ที่ใช้แทนชิ้นนี้ได้ อีก ${opts.variantCount} แบบ">${SWAP_ICON}<span class="swap-long">อีก ${opts.variantCount} แบบ</span><span class="swap-short" aria-hidden="true">+${opts.variantCount}</span></button>`
     : '';
   return `<div class="${cls}" data-tooltip="${escapeHtmlAttr(jewelTooltipText(j, ctx))}" data-jewel-id="${escapeHtmlAttr(j.id)}">`
     + `<button type="button" class="jewel-main" data-action="jewel" aria-expanded="${opts.open ? 'true' : 'false'}" aria-label="${escapeHtmlAttr(j.id)} — ดูสกิลของจี้นี้">`
@@ -1626,6 +1627,47 @@ function jewelDetailHTML(j, ctx){
   </div>`;
 }
 
+/**
+ * The pendant that differs between the sets of a card, one row per set (rank order):
+ * name, the wanted skills it gives (with %), extra skills won / lost against the shown set,
+ * owned / link badges and the score when the sets do not all score the same.
+ */
+function variantPickerHTML(ctl, ctx){
+  const { group, state } = ctl;
+  const current = group.members[state.active];
+  const base = group.base || [];
+  const currentExtra = new Set(current.extra);
+  const scoresDiffer = !allEqual(group.members.map(m => m.total));
+  const rows = group.members.map((m, idx)=>{
+    const id = m.ids.find(x => !base.includes(x)) || '';
+    const j = m.group.find(x => x.id === id);
+    const { prefix, base: name, tag } = splitJewelName(id);
+    const isOn = idx === state.active;
+    const wanted = j ? j.substats.filter(sb => ctx.isWanted(sb.name)) : [];
+    const gained = isOn ? [] : m.extra.filter(n => !currentExtra.has(n));
+    const lost = isOn ? [] : current.extra.filter(n => !m.extra.includes(n));
+    const owned = m.ownership.ownedIds.includes(id);
+    const link = isLinkId(id);
+    const facts = [
+      ...wanted.map(sb => `<span class="vp-want">✓ ${escapeHtmlText(sb.name)} <b>${escapeHtmlText(sb.value)}%</b></span>`),
+      ...gained.map(n => `<span class="vp-gain" title="ได้สกิลนี้เพิ่ม เมื่อเทียบกับเซ็ตที่แสดงอยู่">+ ${escapeHtmlText(n)}</span>`),
+      ...lost.map(n => `<span class="vp-lose" title="เสียสกิลนี้ เมื่อเทียบกับเซ็ตที่แสดงอยู่">− ${escapeHtmlText(n)}</span>`)
+    ].join('');
+    return `<li><button type="button" class="vp-option${isOn ? ' is-on' : ''}" data-action="pick" data-index="${idx}" aria-pressed="${isOn ? 'true' : 'false'}">`
+      + `<span class="vp-top"><span class="vp-check" aria-hidden="true">${isOn ? '✓' : ''}</span><span class="vp-rank">#${m.rank}</span>`
+      + `<span class="vp-name">${prefix ? `<span class="jn-pre jn-pre--${jewelPrefixKind(prefix)}">[${escapeHtmlText(prefix)}]</span> ` : ''}${escapeHtmlText(name)}${tag ? ` <span class="jn-tag">${escapeHtmlText(tag)}</span>` : ''}</span>`
+      + (owned ? '<span class="vp-badge vp-badge--owned">มีแล้ว</span>' : '')
+      + (link ? '<span class="vp-badge vp-badge--link">🔒 เฉพาะตัวละคร</span>' : '')
+      + (scoresDiffer ? `<span class="vp-score" title="คะแนนความเทพ">★ ${escapeHtmlText(m.total)}</span>` : '')
+      + `</span>${facts ? `<span class="vp-facts">${facts}</span>` : ''}</button></li>`;
+  }).join('');
+  return `<div class="variant-picker">
+    <div class="variant-picker__head"><span>เลือกจี้ชิ้นที่ต่างกัน · ${group.members.length} แบบ</span>
+      <button type="button" class="variant-picker__close" data-action="close-picker" aria-label="ปิดรายการ">×</button></div>
+    <ul class="variant-picker__list">${rows}</ul>
+  </div>`;
+}
+
 function cardInnerHTML(ctl, ctx){
   const { group, state } = ctl;
   const item = group.members[state.active];
@@ -1645,7 +1687,8 @@ function cardInnerHTML(ctl, ctx){
   const tiles = item.group.map(j => jewelTileHTML(j, item, ctx, {
     common: ctx.common.has(j.id),
     variantCount: (variants && group.base && !group.base.includes(j.id)) ? variants : 0,
-    open: j.id === state.openJewel
+    open: j.id === state.openJewel,
+    pickerOpen: !!state.picker
   })).join('');
 
   const chips = (list, cls)=> list.map(n=>`<span class="skill-chip ${cls}">${escapeHtmlText(n)}</span>`).join('');
@@ -1673,6 +1716,7 @@ function cardInnerHTML(ctl, ctx){
       </div>
     </div>
     <div class="jewel-columns">${tiles}</div>
+    ${state.picker && variants ? variantPickerHTML(ctl, ctx) : ''}
     ${openJewel ? jewelDetailHTML(openJewel, ctx) : ''}
     ${missHTML}${unwantedHTML}${extraHTML}`;
 }
@@ -1740,6 +1784,19 @@ function closeOpenJewelDetail(){
   syncPickedSkillHighlight();
 }
 
+function closeOpenVariantPicker(){
+  const card = _openPickerCard;
+  _openPickerCard = null;
+  const ctl = card && _cardControllers.get(card);
+  if(ctl && ctl.state.picker){ ctl.state.picker = false; paintResultCard(card); }
+}
+document.getElementById('result')?.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Escape' || !_openPickerCard || !_openPickerCard.contains(e.target)) return;
+  const card = _openPickerCard;
+  closeOpenVariantPicker();
+  card.querySelector('.jewel-swap')?.focus();
+});
+
 function onResultCardClick(e){
   const card = e.target.closest('.result-card');
   const ctl = card && _cardControllers.get(card);
@@ -1751,23 +1808,39 @@ function onResultCardClick(e){
 
   if(action === 'swap'){
     e.stopPropagation();
-    const swappedId = actEl.closest('.jewel-column')?.dataset.jewelId;
-    if(_openDetailCard === card) _openDetailCard = null;
-    ctl.state.openJewel = '';
-    ctl.state.active = (ctl.state.active + 1) % ctl.group.members.length;
+    const opening = !ctl.state.picker;
+    if(opening) closeOpenVariantPicker();
+    if(_openDetailCard === card){ _openDetailCard = null; ctl.state.openJewel = ''; syncPickedSkillHighlight(); }
+    ctl.state.picker = opening;
+    _openPickerCard = opening ? card : null;
     paintResultCard(card);
-    syncPickedSkillHighlight();
-    // keep focus on the swap button of the slot that changed
-    const next = ctl.group.members[ctl.state.active];
-    const newId = next.ids.find(id => !(ctl.group.base || []).includes(id)) || swappedId;
-    card.querySelector(`.jewel-column[data-jewel-id="${CSS.escape(newId || '')}"] .jewel-swap`)?.focus();
-    trackEvent('swap_result_variant', { result_rank: next.rank, group_size: ctl.group.members.length });
+    (opening ? card.querySelector('.vp-option.is-on') : card.querySelector('.jewel-swap'))?.focus();
+    if(opening) trackEvent('open_result_variants', { result_rank: item.rank, group_size: ctl.group.members.length });
+    return;
+  }
+  if(action === 'pick'){
+    const idx = Number(actEl.dataset.index);
+    if(Number.isInteger(idx) && idx >= 0 && idx < ctl.group.members.length){
+      const changed = idx !== ctl.state.active;
+      ctl.state.active = idx;
+      ctl.state.picker = false;
+      _openPickerCard = null;
+      paintResultCard(card);
+      card.querySelector('.jewel-swap')?.focus();
+      if(changed) trackEvent('swap_result_variant', { result_rank: ctl.group.members[idx].rank, group_size: ctl.group.members.length });
+    }
+    return;
+  }
+  if(action === 'close-picker'){
+    closeOpenVariantPicker();
+    card.querySelector('.jewel-swap')?.focus();
     return;
   }
   if(action === 'jewel'){
     const id = actEl.closest('.jewel-column')?.dataset.jewelId || '';
     const opening = ctl.state.openJewel !== id;
     if(_openDetailCard && _openDetailCard !== card) closeOpenJewelDetail();
+    if(opening) closeOpenVariantPicker();
     ctl.state.openJewel = opening ? id : '';
     _openDetailCard = opening ? card : null;
     paintResultCard(card);
@@ -1849,7 +1922,7 @@ function renderResults(best, options){
   best = filterResultsByInventory(sourceResults);
   const container=document.getElementById('result'); container.innerHTML='';
   _currentResultSnapshots.clear();
-  _openDetailCard = null;
+  _openDetailCard = null; _openPickerCard = null;
   const desired = getDesired()||[];
   const topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10) || DEFAULT_TOPK;
   const shownCount = Math.min(best.length, topK);
@@ -1916,7 +1989,7 @@ function renderResults(best, options){
     const targetIdx = group.members.findIndex(m => isSharedResultTarget(m.snapshot));
     const ctl = {
       group, ctx,
-      state: { active: Math.max(0, targetIdx), openJewel: '' },
+      state: { active: Math.max(0, targetIdx), openJewel: '', picker: false },
       highlightKey: targetIdx >= 0 ? group.members[targetIdx].snapshot.key : ''
     };
     _cardControllers.set(card, ctl);
