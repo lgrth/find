@@ -1377,7 +1377,11 @@ updateInventoryResultFiltersVisibility();
       return `<div class="${cls}" data-tooltip="${escapeHtmlAttr(tooltip)}">${badge}<span class="jewel-name">${escapeHtmlText(j.id)}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
     }).filter(Boolean).join('');
 
-    const notList = desired.filter((_,idx)=> r.notIdx.includes(idx)).map(requirementLabel);
+    // ไม่นับเป็น "หายไป" ถ้าเซ็ตนี้ได้สกิลอื่นที่เลือกไว้ซึ่งเป็น variant เดียวกันแล้ว
+    const variantOfReq = (req)=> isGroupRequirement(req) ? '' : (abilityOf(req)?.variant || '');
+    const matchedVariants = new Set(desired.filter((_,idx)=> !r.notIdx.includes(idx)).map(variantOfReq).filter(Boolean));
+    const missingReqs = desired.filter((_,idx)=> r.notIdx.includes(idx));
+    const notList = missingReqs.filter(req => !matchedVariants.has(variantOfReq(req))).map(requirementLabel);
     const allNames = new Set(); group.filter(Boolean).forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
     // แยก extra ออกจาก unwanted — recalculate ใน render เพื่อให้ทั้ง normal และ fixed-link path ถูกต้อง
     const unwantedReqs = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
@@ -1386,7 +1390,7 @@ updateInventoryResultFiltersVisibility();
     const extra = [...allNames].filter(nm => !isWanted(nm) && !isUnwanted(nm));
     const extraUnwanted = [...allNames].filter(nm => !isWanted(nm) && isUnwanted(nm));
     const effectiveUnwantedCount = extraUnwanted.length;
-    const matchedCount = desired.length - notList.length;
+    const matchedCount = desired.length - missingReqs.length;
 
     const notBadge = notList.length > 0 ? `<span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 หายไป ${notList.length}</span>` : '';
     const warnBadge = effectiveUnwantedCount > 0 ? `<span class="badge badge--warn" title="เซ็ตนี้มีสกิลที่ไม่ต้องการ ${effectiveUnwantedCount} รายการ">⚠️ ไม่ต้องการ ${effectiveUnwantedCount}</span>` : '';
