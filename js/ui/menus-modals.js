@@ -32,6 +32,8 @@ window.closeTransferModal = closeTransferModal;
     document.getElementById('menuTransferBtn')?.addEventListener('click',()=>{closeHeaderMenu();openTransferModal();});
     document.getElementById('menuTutorialBtn')?.addEventListener('click',()=>{ closeHeaderMenu(); document.getElementById('helpBtn')?.click(); });
     document.getElementById('menuThemeBtn')?.addEventListener('click',()=>{ document.getElementById('themeToggle')?.click(); closeHeaderMenu(); });
+    document.getElementById('menuFeedbackBtn')?.addEventListener('click',()=>{ closeHeaderMenu(); document.getElementById('fbBtn')?.click(); });
+    document.getElementById('menuDonateBtn')?.addEventListener('click',()=>{ closeHeaderMenu(); if(typeof openDonateModal === 'function') openDonateModal('header_menu'); });
     document.getElementById('inventoryClose')?.addEventListener('click', closeInventoryModal);
     document.getElementById('inventoryModal')?.addEventListener('click',(e)=>{ if(e.target?.id==='inventoryModal') closeInventoryModal(); });
     document.getElementById('inventorySelectAll')?.addEventListener('click',()=>{

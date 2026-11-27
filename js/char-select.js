@@ -100,8 +100,14 @@
     if(typeof updateCalcAvailability === 'function') updateCalcAvailability();
   };
 
+  // Fresh data from the sheet: keep a copy for the next visit, then fill the list
+  window.__CharGViz_fresh = function(resp){
+    if (resp && resp.table && typeof writeSheetCache === 'function') writeSheetCache('chars', resp.table);
+    window.__CharGViz_v2(resp);
+  };
+
   function loadCharGViz(){
-    const tqx = encodeURIComponent('out:json;responseHandler:__CharGViz_v2');
+    const tqx = encodeURIComponent('out:json;responseHandler:__CharGViz_fresh');
     const src  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${CHAR_GID}&headers=1&tqx=${tqx}&rand=${Date.now()}`;
     const s = document.createElement('script');
     s.src = src;
@@ -115,6 +121,9 @@
     // pre-init TomSelect บน charSelect (ก่อนมีข้อมูล) เพื่อให้ UI พร้อม
     const el = document.getElementById('charSelect');
     if (el) await initTomSelectOnChar(el);
+    // Refresh: show the saved character list at once; the sheet still loads below
+    const cached = typeof readSheetCache === 'function' ? readSheetCache('chars') : null;
+    if (cached) window.__CharGViz_v2({ table: cached });
     loadCharGViz();
   });
 })();

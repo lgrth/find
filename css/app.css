@@ -1060,11 +1060,12 @@ html[data-theme="dark"] .sel-progress__label{color:var(--text)}
 .chip-group-row__mark{color:var(--primary);font-size:12px;font-weight:600}
 .chip-group-row__arrow{color:#94a3b8}
 .chip-group-panel{background:var(--surface-2, #f8fafc);border-radius:var(--radius-md);padding:var(--space-2);margin:var(--space-1) 0 var(--space-2)}
-.chip-group-section + .chip-group-section{margin-top:var(--space-3)}
-.chip-group-head{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);margin-bottom:var(--space-1)}
+.chip-group-head{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)}
 .chip-group-head--panel{justify-content:flex-end}
-.chip-group-head__title{font-size:12px;font-weight:600;color:#64748b}
-.chip-group-all{flex:0 0 auto;padding:2px var(--space-3);border:1px dashed #93c5fd;border-radius:var(--radius-pill);background:none;color:var(--primary);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;min-height:28px;white-space:nowrap}
+.chip-group-head__title{display:inline-flex;align-items:center;gap:var(--space-2);min-width:0;font-size:13px;font-weight:700;color:#475569}
+.chip-group-head__name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-group-head__count{flex:0 0 auto;min-width:20px;padding:1px 7px;border-radius:var(--radius-pill);background:var(--secondary-soft-2);color:#64748b;font-size:11px;font-weight:600;line-height:18px;text-align:center}
+.chip-group-all{flex:0 0 auto;padding:3px var(--space-4);border:1px solid #bfdbfe;border-radius:var(--radius-pill);background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;min-height:28px;white-space:nowrap;transition:.12s}
 .chip-group-all:hover{background:var(--primary-soft)}
 .chip-group-all.is-selected{background:var(--primary);color:#fff;border:1px solid var(--primary-2)}
 .chip-group-all.is-unwanted{background:#dc2626;color:#fff;border:1px solid #b91c1c}
@@ -2008,7 +2009,7 @@ html[data-theme="dark"] .badge--warn{background:#4c0519;color:#fecaca;border-col
   opacity:0;
 }
 .chip-unwanted-body.open{
-  max-height:600px;
+  max-height:1400px;
   opacity:1;
 }
 
@@ -3188,3 +3189,54 @@ html[data-theme="dark"] .fb-input{
 .fb-confirm__btn--ghost:hover{ background:var(--secondary-soft-2); }
 .fb-confirm__btn--primary{ background:var(--primary); color:#fff; }
 .fb-confirm__btn--primary:hover{ background:var(--primary-2); }
+
+/* ===== Skill search results: one card, one section per group ===== */
+.chip-search-label{display:block;font-size:12px;font-weight:600;color:#64748b;margin-bottom:var(--space-2)}
+.chip-search-label--danger{color:#b45353}
+.chip-results{margin-top:var(--space-3);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden}
+.chip-results[hidden]{display:none}
+.chip-results__title{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:var(--space-1) var(--space-3);padding:var(--space-3) var(--space-5);border-bottom:1px solid var(--border);background:var(--surface-muted);font-size:12px;font-weight:700;color:#475569}
+.chip-results__hint{font-weight:400;color:#94a3b8}
+.chip-results__body{max-height:360px;overflow-y:auto;overscroll-behavior:contain}
+.chip-results .chip-group-section{padding:var(--space-4) var(--space-5) var(--space-5)}
+.chip-results .chip-group-section + .chip-group-section{border-top:1px solid var(--border)}
+.chip-results .chip-group-empty{padding:var(--space-6) var(--space-5);text-align:center}
+.chip-list--results{min-height:0;gap:var(--space-2)}
+.chip-results--danger .chip-results__title{color:#b91c1c}
+.chip-results--danger .chip-group-all:not(.is-unwanted){border-color:#fecaca;background:#fff5f5;color:#b91c1c}
+.chip-results--danger .chip-group-all:not(.is-unwanted):hover{background:#fee2e2}
+.chip .chip-warn{font-size:13px;line-height:1}
+.chip.is-clash{border-color:#fbbf24;background:#fffbeb;color:#92400e}
+.chip.is-clash:hover{background:#fef3c7;border-color:#f59e0b}
+.chip.is-selected.is-conflict{background:#d97706;border-color:#b45309;box-shadow:0 0 0 2px #fde68a}
+.chip.is-selected.is-conflict:hover{background:#b45309}
+
+/* conflict warning under the picked skills */
+.chip-conflict{margin-top:var(--space-3);padding:var(--space-4) var(--space-5);border:1px solid #fcd34d;border-left:4px solid #f59e0b;border-radius:var(--radius-md);background:#fffbeb;color:#78350f;font-size:13px}
+.chip-conflict[hidden]{display:none}
+.chip-conflict__head{display:flex;align-items:flex-start;gap:var(--space-2);font-weight:700;margin-bottom:var(--space-2)}
+.chip-conflict__row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2) var(--space-3);padding:var(--space-2) 0}
+.chip-conflict__row + .chip-conflict__row{border-top:1px dashed #fcd34d}
+.chip-conflict__vs{color:#a16207;font-weight:400}
+.chip-conflict__actions{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.chip-conflict__remove{padding:4px var(--space-4);min-height:30px;border:1px solid #f59e0b;border-radius:var(--radius-pill);background:#fff;color:#92400e;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:.12s}
+.chip-conflict__remove:hover{background:#f59e0b;color:#fff}
+.chip-conflict__remove:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+
+html[data-theme="dark"] .chip-search-label{color:#94a3b8}
+html[data-theme="dark"] .chip-search-label--danger{color:#f0a3a3}
+html[data-theme="dark"] .chip-results{background:#172033;border-color:var(--border-strong)}
+html[data-theme="dark"] .chip-results__title{background:#1e293b;border-color:var(--border-strong);color:#cbd5e1}
+html[data-theme="dark"] .chip-results__hint{color:#64748b}
+html[data-theme="dark"] .chip-results .chip-group-section + .chip-group-section{border-color:var(--border)}
+html[data-theme="dark"] .chip-group-head__title{color:#cbd5e1}
+html[data-theme="dark"] .chip-group-head__count{background:#334155;color:#cbd5e1}
+html[data-theme="dark"] .chip-group-all{background:transparent}
+html[data-theme="dark"] .chip-results--danger .chip-results__title{color:#fca5a5}
+html[data-theme="dark"] .chip-results--danger .chip-group-all:not(.is-unwanted){background:transparent;border-color:#7f1d1d;color:#fca5a5}
+html[data-theme="dark"] .chip.is-clash{background:#3b2a0a;border-color:#a16207;color:#fcd34d}
+html[data-theme="dark"] .chip-conflict{background:#2a1f0a;border-color:#854d0e;border-left-color:#f59e0b;color:#fde68a}
+html[data-theme="dark"] .chip-conflict__remove{background:transparent;color:#fcd34d;border-color:#a16207}
+html[data-theme="dark"] .chip-conflict__remove:hover{background:#f59e0b;color:#1e293b}
+html[data-theme="dark"] .chip.is-selected.is-conflict{background:#b45309;border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.35)}
+html[data-theme="dark"] .chip.is-selected.is-conflict:hover{background:#d97706}

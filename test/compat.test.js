@@ -177,10 +177,13 @@ test('new share link with several pendant types (ty bits)', async () => {
 test('type buttons toggle independently, show counts and filter the search', async () => {
   await withApp({}, async ({ page }) => {
     const btn = (t) => page.locator(`#jewelTypeFilter .jewel-type[data-type="${t}"]`);
-    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '(443)');
-    assert.equal(await btn('white').locator('.jewel-type__count').textContent(), '(15)');
-    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '(573)');
+    const all = page.locator('#jewelTypeAll');
+    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '443');
+    assert.equal(await btn('white').locator('.jewel-type__count').textContent(), '15');
+    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '573');
+    assert.equal(await all.getAttribute('aria-pressed'), 'true', '"ทั้งหมด" is on while nothing is picked');
     await btn('white').click();
+    assert.equal(await all.getAttribute('aria-pressed'), 'false');
     await btn('other').click();
     assert.deepEqual((await readForm(page)).jewelTypes, ['white', 'other']);
     assert.equal(await btn('white').getAttribute('aria-pressed'), 'true');
@@ -188,6 +191,9 @@ test('type buttons toggle independently, show counts and filter the search', asy
     assert.deepEqual((await readForm(page)).jewelTypes, ['other']);
     const types = await page.evaluate(() => [...new Set(computeJewelPool().map((j) => j.type))]);
     assert.deepEqual(types, ['other']);
+    await all.click();
+    assert.deepEqual((await readForm(page)).jewelTypes, []);
+    assert.equal(await all.getAttribute('aria-pressed'), 'true');
   });
 });
 
@@ -273,7 +279,8 @@ test('browse by group: pick a whole group, its single skills merge into it (D5)'
     // typing hides the group list and shows results under group headings
     await page.fill('#chipSearch', 'ยกเว้น');
     assert.equal(await page.isHidden('#chipGroupBrowse'), true);
-    const heads = await page.$$eval('#chipAll .chip-group-head__title', (h) => h.map((x) => x.textContent));
+    const heads = await page.$$eval('#chipAll .chip-group-head__title', (h) => h.map((x) =>
+      x.querySelector('.chip-group-head__name').textContent + ' · ' + (x.querySelector('.chip-group-head__count')?.textContent || '')));
     assert.ok(heads.includes('ยกเว้นค่าผ่านทาง · 4'), heads.join(' | '));
     assert.equal(await page.locator('#chipAll .chip-group-all[data-group="ยกเว้นค่าผ่านทาง"]').count(), 1);
     // unwanted search: same headings, no "ทุกแบบ" for a group that is wanted
@@ -291,6 +298,36 @@ test('result card treats every skill of a wanted group as wanted', async () => {
     assert.match(tips, /✅ โล่(ซูเปอร์|ขาว)/);
     const missing = await page.$$eval('#result .row-miss', (els) => els.map((e) => e.textContent).join(' '));
     assert.doesNotMatch(missing, /กลุ่ม:/, 'missing groups are shown by label, not by token');
+  });
+});
+
+test('up to 25 wanted skills; a 26th is refused', async () => {
+  await withApp({}, async ({ page }) => {
+    const n = await page.evaluate(() => {
+      window.setChipState(_abilityList.slice(0, 30));
+      return window._chipSelected.length;
+    });
+    assert.equal(n, 25);
+    assert.match(await page.textContent('#selectedProgress'), /25\/25/);
+  });
+});
+
+test('skills sharing a stack_key are flagged as a conflict with remove buttons', async () => {
+  await withApp({}, async ({ page }) => {
+    await page.evaluate(() => window.setChipState(['โล่ขาว', 'ยิงระเบิด']));
+    assert.equal(await page.isHidden('#chipConflict'), true);
+    await page.fill('#chipSearch', 'โล่ซูเปอร์');
+    const hint = page.locator('#chipAll .chip.is-clash', { hasText: 'โล่ซูเปอร์' });
+    assert.equal(await hint.count(), 1, 'search result warns before picking');
+    await hint.click();
+    assert.match(await page.textContent('#toastMessage'), /ใส่ในเซ็ตเดียวกับ/);
+    assert.equal(await page.isVisible('#chipConflict'), true);
+    assert.equal(await page.locator('#chipSelected .chip.is-conflict').count(), 2);
+    await page.click('#chipConflict .chip-conflict__remove >> text=เอา โล่ขาว ออก');
+    assert.deepEqual(await page.evaluate(() => window._chipSelected), ['ยิงระเบิด', 'โล่ซูเปอร์']);
+    assert.equal(await page.isHidden('#chipConflict'), true);
+    // a whole group never conflicts with one of its own skills' siblings
+    assert.deepEqual(await page.evaluate(() => findRequirementConflicts(['กลุ่ม:โล่', 'ยิงระเบิด'])), []);
   });
 });
 

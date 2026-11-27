@@ -638,6 +638,7 @@ function renderSavedResultSets(){
     }
   }
   window.readFavoriteStoreForTransfer = readStore;
+  window.readFavoritePresets = ()=> readStore().presets.map(normalizeFavoritePreset);
 window.writeFavoriteStoreForTransfer = writeStore;
 window.FAVORITE_STORAGE_KEY_FOR_TRANSFER = STORAGE_KEY;
 

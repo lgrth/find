@@ -1,7 +1,7 @@
 /* Web Worker: runs the combination search off the main thread.
  * Message in:  { desired, cand, topK, fixed? }
  * Messages out: { type:'progress', p } … then { type:'result', best } */
-importScripts('search-core.js');
+importScripts('search-core.js' + self.location.search);   // same ?v= as the worker itself
 
 self.onmessage = function(e){
   const d = e.data;

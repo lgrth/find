@@ -16,7 +16,7 @@
   function toast(msg){ if (typeof showToast === 'function') showToast(msg, 2800, 'warn'); }
 
   function addAbility(name){
-    const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
+    const max = (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 25;
     if (window._chipSelected.includes(name)) return false;
     const coveredBy = window._chipSelected.find(r => isGroupRequirement(r) && requirementsOverlap(r, name));
     if (coveredBy){ toast(`"${name}" อยู่ใน ${requirementLabel(coveredBy)} ที่เลือกไว้แล้ว`); return false; }
@@ -29,6 +29,8 @@
     const unwanted = window._chipUnwanted.filter(u => !requirementsOverlap(u, name));
     if (unwanted.length !== window._chipUnwanted.length){ window._chipUnwanted = unwanted; refreshUnwantedChips(); }
     if (merged) toast(`รวม ${merged} สกิลเป็น "${requirementLabel(name)}" แล้ว`);
+    const clash = next.find(r => r !== name && requirementsConflict(r, name));
+    if (clash) toast(`⚠️ "${requirementLabel(name)}" ใส่ในเซ็ตเดียวกับ "${requirementLabel(clash)}" ไม่ได้ — เอาออกอย่างใดอย่างหนึ่ง`);
     return true;
   }
 
@@ -44,6 +46,9 @@
   if (!wrap) return;
 
   wrap.innerHTML = '';
+  const conflicts = findRequirementConflicts(window._chipSelected);
+  renderConflicts(conflicts);
+  const clashing = new Set(conflicts.flat());
 
   if (!window._chipSelected.length){
     wrap.classList.add('is-hidden');
@@ -55,9 +60,12 @@
   window._chipSelected.forEach(name => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'chip is-selected chip-entering' + (isGroupRequirement(name) ? ' chip--group' : '');
-    b.innerHTML = `<span>${escapeHtml(requirementLabel(name))}</span><span class="chip-x" aria-hidden="true">×</span>`;
-    b.title = 'คลิกเพื่อเอาออก';
+    const clash = clashing.has(name);
+    b.className = 'chip is-selected chip-entering' + (isGroupRequirement(name) ? ' chip--group' : '') + (clash ? ' is-conflict' : '');
+    b.dataset.req = name;
+    b.innerHTML = (clash ? '<span class="chip-warn" aria-hidden="true">⚠</span>' : '')
+      + `<span>${escapeHtml(requirementLabel(name))}</span><span class="chip-x" aria-hidden="true">×</span>`;
+    b.title = clash ? 'ใส่ในเซ็ตเดียวกับสกิลอื่นที่เลือกไม่ได้ — คลิกเพื่อเอาออก' : 'คลิกเพื่อเอาออก';
     b.addEventListener('click', ()=>{
       removeAbility(name);
       refreshChips();
@@ -68,13 +76,45 @@
   });
 }
 
+  /** Warning box under the picked skills: one row per pair that can't share a set. */
+  function renderConflicts(pairs){
+    const box = document.getElementById('chipConflict');
+    if (!box) return;
+    box.innerHTML = '';
+    box.hidden = !pairs.length;
+    if (!pairs.length) return;
+    const head = document.createElement('div');
+    head.className = 'chip-conflict__head';
+    head.innerHTML = '<span aria-hidden="true">⚠️</span><span>มีสกิลที่ใส่ในเซ็ตเดียวกันไม่ได้ — เอาออกอย่างใดอย่างหนึ่ง</span>';
+    box.appendChild(head);
+    pairs.forEach(([a, b]) => {
+      const row = document.createElement('div');
+      row.className = 'chip-conflict__row';
+      const text = document.createElement('div');
+      text.className = 'chip-conflict__pair';
+      text.innerHTML = `<strong>${escapeHtml(requirementLabel(a))}</strong> <span class="chip-conflict__vs">กับ</span> <strong>${escapeHtml(requirementLabel(b))}</strong>`;
+      const actions = document.createElement('div');
+      actions.className = 'chip-conflict__actions';
+      [a, b].forEach(req => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chip-conflict__remove';
+        btn.textContent = `เอา ${requirementLabel(req)} ออก`;
+        btn.addEventListener('click', ()=>{ removeAbility(req); refreshChips(); notify(); });
+        actions.appendChild(btn);
+      });
+      row.append(text, actions);
+      box.appendChild(row);
+    });
+  }
+
   function matchesQuery(name, q){
     if (!q) return true;
     const keywords = window._abilityKeywords?.get(name) || [];
     return normalizeSearchText(name).includes(q) || keywords.some(k => k.includes(q) || q.includes(k));
   }
 
-  const maxSelects = ()=> (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14;
+  const maxSelects = ()=> (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 25;
 
   /* ---- one skill chip / one "+ ทุกแบบ" button, for the wanted or the unwanted list ---- */
 
@@ -84,11 +124,17 @@
     const isSel = window._chipSelected.includes(name);
     const coveredBy = !isSel && window._chipSelected.find(r => isGroupRequirement(r) && requirementsOverlap(r, name));
     const disabled = !isSel && (atMax || !!coveredBy);
+    const clash = !isSel && !disabled && window._chipSelected.find(r => requirementsConflict(r, name));
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'chip' + (isSel ? ' is-selected' : '') + (disabled ? ' is-disabled' : '') + (coveredBy ? ' is-covered' : '');
-    b.textContent = name;
-    b.title = isSel ? 'คลิกเพื่อเอาออก' : coveredBy ? `รวมอยู่ใน ${requirementLabel(coveredBy)} แล้ว` : (atMax ? 'ครบ ' + max + ' ความสามารถแล้ว' : 'คลิกเพื่อเพิ่ม');
+    b.className = 'chip' + (isSel ? ' is-selected' : '') + (disabled ? ' is-disabled' : '') + (coveredBy ? ' is-covered' : '') + (clash ? ' is-clash' : '');
+    if (clash){
+      b.innerHTML = `<span class="chip-warn" aria-hidden="true">⚠</span><span>${escapeHtml(name)}</span>`;
+    } else b.textContent = name;
+    b.title = isSel ? 'คลิกเพื่อเอาออก' : coveredBy ? `รวมอยู่ใน ${requirementLabel(coveredBy)} แล้ว`
+      : atMax ? 'ครบ ' + max + ' ความสามารถแล้ว'
+      : clash ? `ใส่ในเซ็ตเดียวกับ "${requirementLabel(clash)}" ไม่ได้`
+      : 'คลิกเพื่อเพิ่ม';
     if (disabled) b.setAttribute('aria-disabled','true');
     b.addEventListener('click', ()=>{
       if (disabled) return;
@@ -166,17 +212,28 @@
       head.className = 'chip-group-head';
       const title = document.createElement('span');
       title.className = 'chip-group-head__title';
-      title.textContent = g.group === OTHER_GROUP ? g.group : `${g.group} · ${g.count}`;
+      const nameEl = document.createElement('span');
+      nameEl.className = 'chip-group-head__name';
+      nameEl.textContent = g.group;
+      title.appendChild(nameEl);
+      if (g.group !== OTHER_GROUP){
+        const count = document.createElement('span');
+        count.className = 'chip-group-head__count';
+        count.textContent = g.count;
+        count.title = `กลุ่มนี้มี ${g.count} สกิล`;
+        title.appendChild(count);
+      }
       head.appendChild(title);
       if (allBtn) head.appendChild(allBtn);
       const list = document.createElement('div');
-      list.className = 'chip-list chip-list--all';
+      list.className = 'chip-list chip-list--results';
       chips.forEach(c => list.appendChild(c));
       sec.append(head, list);
       wrap.appendChild(sec);
       shown += chips.length + (allBtn ? 1 : 0);
     });
     if (!shown) wrap.innerHTML = '<div class="chip-group-empty">ไม่พบสกิลที่ตรงกับคำค้น</div>';
+    return shown;
   }
 
   function renderAll(){
@@ -205,8 +262,8 @@
     const groups = abilityGroupList();
     if (openGroup && !groups.some(g => g.group === openGroup)) openGroup = '';
     toggle.setAttribute('aria-expanded', browserOpen ? 'true' : 'false');
-    toggle.querySelector('.chip-group-toggle__count').textContent = `(${groups.length} กลุ่ม)`;
-    toggle.querySelector('.chip-group-toggle__arrow').textContent = browserOpen ? '▲' : '▼';
+    const count = toggle.querySelector('.chip-group-toggle__count');
+    if (count) count.textContent = ` (${groups.length} กลุ่ม)`;
     list.hidden = !browserOpen;
     list.innerHTML = '';
     if (!browserOpen) return;
@@ -255,7 +312,7 @@
 
   // expose setChipState for applyStateFromURL
   window.setChipState = function(arr){
-    window._chipSelected = mergeRequirements(Array.from(arr || [])).slice(0, (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 14);
+    window._chipSelected = mergeRequirements(Array.from(arr || [])).slice(0, (typeof MAX_SELECTS !== 'undefined') ? MAX_SELECTS : 25);
     refreshChips();
     notify();
   };
@@ -293,13 +350,18 @@
     if(!body || !btn) return;
     body.classList.toggle('open', !!isOpen);
     btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    btn.textContent = isOpen ? '▲ ซ่อน' : '▼ แสดง';
+    document.getElementById('chipUnwantedHeader')?.classList.toggle('is-open', !!isOpen);
   }
   function renderUnwantedSelected(){
   const wrap = document.getElementById('chipUnwanted');
   if(!wrap) return;
 
   wrap.innerHTML = '';
+  const countEl = document.getElementById('chipUnwantedCount');
+  if(countEl){
+    countEl.textContent = String(window._chipUnwanted.length);
+    countEl.classList.toggle('has-items', window._chipUnwanted.length > 0);
+  }
 
   if(!window._chipUnwanted.length){
     wrap.classList.add('is-hidden');
@@ -341,19 +403,11 @@
 
   document.addEventListener('DOMContentLoaded', ()=>{
 
-  // === topK preset buttons ===
-  (function(){
-    const topKHidden = document.getElementById('topK');
-    const topKHelp = document.getElementById('topKHelp');
-    function setTopK(val){
-      if(topKHidden){ topKHidden.value = val; topKHidden.classList.remove('is-invalid'); }
-      document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
-      if(topKHelp) topKHelp.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
-      if (typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
-    }
-    document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
-    if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); }
-  })();
+  // === topK: picker in the results header; with results on screen it searches again ===
+  document.getElementById('topKSelect')?.addEventListener('change', (e)=>{
+    setTopKValue(e.target.value);
+    if(document.querySelector('#result .result-card') && typeof calculate === 'function') calculate();
+  });
 
   document.getElementById('chipGroupToggle')?.addEventListener('click', ()=>{
     browserOpen = !browserOpen;
@@ -421,8 +475,8 @@
       const btn=document.getElementById('chipUnwantedToggle');
       if(!body||!btn) return;
       const open=body.classList.toggle('open');
-      btn.textContent=open?'▲ ซ่อน':'▼ แสดง';
       btn.setAttribute('aria-expanded',String(open));
+      document.getElementById('chipUnwantedHeader')?.classList.toggle('is-open', open);
     });
   });
 })();

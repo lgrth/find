@@ -85,6 +85,29 @@ function setJewelTypesUI(types){
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
     b.classList.toggle('active', on);
   });
+  const all = document.getElementById('jewelTypeAll');
+  if(all){
+    const on = set.size === 0;
+    all.setAttribute('aria-pressed', on ? 'true' : 'false');
+    all.classList.toggle('active', on);
+  }
+}
+
+/* ---- topK: hidden #topK holds the value, #topKSelect in the results header shows it ---- */
+function setTopKValue(val){
+  const v = String(clampNumber(val, 3, 50, DEFAULT_TOPK));
+  if(topKInput) topKInput.value = v;
+  const sel = document.getElementById('topKSelect');
+  if(sel){
+    if(!Array.from(sel.options).some(o => o.value === v)){
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = `Top ${v}`;
+      const after = Array.from(sel.options).find(o => Number(o.value) > Number(v));
+      sel.insertBefore(opt, after || null);
+    }
+    sel.value = v;
+  }
+  return v;
 }
 
 /* ---- ability groups (from the Abilities tab) ----
@@ -126,6 +149,34 @@ function requirementsOverlap(a, b){
   if(ga) return abilityOf(b)?.group === ga;
   if(gb) return abilityOf(a)?.group === gb;
   return false;
+}
+
+/* ---- conflicts: wanted skills that can never share a set ----
+ * Two pendants in a set may not share a stack_key (Abilities tab), so e.g. โล่ขาว and
+ * โล่ซูเปอร์ (both stack_key "โล่") can't both be in one set. A group requirement
+ * conflicts only when none of its skills could sit next to the other requirement. */
+
+function requirementSkills(req){
+  return isGroupRequirement(req) ? groupMembers(groupOfRequirement(req)) : [req];
+}
+
+/** true when no skill of `a` can be in the same set as any skill of `b`. */
+function requirementsConflict(a, b){
+  if(a === b || requirementsOverlap(a, b)) return false;
+  const key = (n)=> abilityOf(n)?.stackKey || n;
+  const sa = requirementSkills(a), sb = requirementSkills(b);
+  if(!sa.length || !sb.length) return false;
+  return sa.every(x => sb.every(y => key(x) === key(y)));
+}
+
+/** Every conflicting pair in `list`, in list order: [[a, b], …]. */
+function findRequirementConflicts(list){
+  const pairs = [];
+  const l = list || [];
+  for(let i = 0; i < l.length; i++)
+    for(let j = i + 1; j < l.length; j++)
+      if(requirementsConflict(l[i], l[j])) pairs.push([l[i], l[j]]);
+  return pairs;
 }
 
 /** Drop duplicates, unknown groups and skills already covered by a chosen group (D5). */
@@ -190,10 +241,7 @@ function applyFilterState(partial){
   if('selected' in p) window.setChipState(p.selected || []);
   if('unwanted' in p) window.setUnwantedState(p.unwanted || []);
   if('jewelTypes' in p) setJewelTypesUI(p.jewelTypes);
-  if('topK' in p){
-    if(topKInput) topKInput.value = String(p.topK || DEFAULT_TOPK);
-    document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(topKInput?.value || DEFAULT_TOPK)));
-  }
+  if('topK' in p) setTopKValue(p.topK || DEFAULT_TOPK);
   if('char' in p){
     if(p.char) setCharSelectValue(p.char); else clearCharSelect();
   }

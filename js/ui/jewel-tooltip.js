@@ -1,11 +1,17 @@
+/* Hover tooltip for a pendant in the result cards (mouse only).
+ * Tap / click / keyboard open the inline skill list instead (see renderResults in main.js). */
 (function(){
   const tip = document.createElement('div');
   tip.className = 'jewel-tooltip';
+  tip.setAttribute('aria-hidden', 'true');
   document.body.appendChild(tip);
+
+  const canHover = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : { matches: true };
+  const SEL = '.jewel-column[data-tooltip]';
 
   function showTip(el){
     const txt = el.getAttribute('data-tooltip');
-    if(!txt) return;
+    if(!txt || el.classList.contains('is-open')) return;
     tip.textContent = txt;
     tip.classList.add('show');
     positionTip(el);
@@ -16,71 +22,25 @@
     const r = el.getBoundingClientRect();
     const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const tipRect = tip.getBoundingClientRect();
-    let cx = r.left + r.width/2;
-    let x = Math.min(Math.max(cx, 8 + tipRect.width/2), vw - 8 - tipRect.width/2);
-    let yAbove = r.top - tipRect.height - 8;
-    let y = yAbove >= 8 ? yAbove : (r.bottom + 8);
+    const cx = r.left + r.width/2;
+    const x = Math.min(Math.max(cx, 8 + tipRect.width/2), vw - 8 - tipRect.width/2);
+    const yAbove = r.top - tipRect.height - 8;
+    const y = yAbove >= 8 ? yAbove : (r.bottom + 8);
     tip.style.left = x + 'px';
     tip.style.top = y + 'px';
   }
 
-  // Event delegation — ผูก listener ครั้งเดียวบน document แทน per-element
-  // แก้ปัญหา listener สะสมทุกครั้งที่ renderResults() สร้างการ์ดใหม่
-
-  // Mouse
+  // Event delegation — one listener on document, cards are re-rendered often
   document.addEventListener('mouseover', e=>{
-    const el=e.target.closest('.jewel-column[data-tooltip]');
+    if(!canHover.matches) return;
+    const el = e.target.closest(SEL);
     if(el) showTip(el);
   });
   document.addEventListener('mouseout', e=>{
-    const el=e.target.closest('.jewel-column[data-tooltip]');
+    const el = e.target.closest(SEL);
     if(el && !el.contains(e.relatedTarget)) hideTip();
   });
-  document.addEventListener('mousemove', e=>{
-    if(!tip.classList.contains('show')) return;
-    const el=e.target.closest('.jewel-column[data-tooltip]');
-    if(el) positionTip(el);
-  });
-
-  // Touch — long-press delegation (state รวมไว้ที่ module level)
-  const LONG_PRESS_MS=450, MOVE_TOL=10;
-  let lpTimer=null, longPressed=false, didMove=false, startX=0, startY=0, activeEl=null;
-  function clearLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
-
-  document.addEventListener('touchstart', e=>{
-    const el=e.target.closest('.jewel-column[data-tooltip]');
-    if(!el||e.touches.length!==1) return;
-    const t=e.touches[0];
-    activeEl=el; startX=t.clientX; startY=t.clientY;
-    longPressed=false; didMove=false; clearLP();
-    lpTimer=setTimeout(()=>{ longPressed=true; showTip(el); positionTip(el); },LONG_PRESS_MS);
-  },{passive:true});
-
-  document.addEventListener('touchmove', e=>{
-    if(!activeEl) return;
-    const t=e.touches[0];
-    if(Math.abs(t.clientX-startX)>MOVE_TOL||Math.abs(t.clientY-startY)>MOVE_TOL){ didMove=true; clearLP(); }
-  },{passive:true});
-
-  document.addEventListener('touchend', ()=>{
-    if(!activeEl) return;
-    const el=activeEl; activeEl=null; clearLP();
-    if(longPressed){ setTimeout(hideTip,1800); }
-    else if(!didMove){
-      if(tip.classList.contains('show')) hideTip();
-      else { showTip(el); positionTip(el); setTimeout(hideTip,2500); }
-    }
-  },{passive:true});
-
-  document.addEventListener('touchcancel',()=>{ clearLP(); hideTip(); activeEl=null; },{passive:true});
-
-  // Keyboard
-  document.addEventListener('focusin', e=>{
-    const el=e.target.closest('.jewel-column[data-tooltip]');
-    if(el){ if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0'); showTip(el); }
-  });
-  document.addEventListener('focusout', e=>{
-    if(e.target.closest('.jewel-column[data-tooltip]')) hideTip();
-  });
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') hideTip(); });
+  document.addEventListener('click', e=>{ if(e.target.closest(SEL)) hideTip(); });
+  document.addEventListener('scroll', hideTip, { passive: true });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') hideTip(); });
 })();
