@@ -593,7 +593,22 @@ function escapeHtmlAttr(s){
   return escapeHtmlText(s).replace(/\n/g, '&#10;');
 }
 
-function fetchGVizJSONP(){
+/** Parse the pendant tab and log rows that need fixing. */
+function jewelsFromTable(table){
+  const { jewels: data, problems } = parseSheetTable(table);
+  if(problems.length) console.warn(`[sheet] พบ ${problems.length} จุดที่ควรตรวจในชีต:\n` + problems.join('\n'));
+  return data;
+}
+
+/** Pendants, parsed (also refreshes the cached copy). */
+async function fetchGVizJSONP(){
+  const table = await fetchMainTable();
+  writeSheetCache('main', table);
+  return jewelsFromTable(table);
+}
+
+/** The raw GViz table of the pendant tab, retried with back-off. */
+function fetchMainTable(){
   const MAX_ATTEMPTS = 3;
   const attempt = (n)=> _fetchGVizJSONPOnce().catch(err=>{
     if(n >= MAX_ATTEMPTS) throw err;
@@ -613,10 +628,8 @@ function _fetchGVizJSONPOnce(){
       setResponse: (payload)=>{
         try{
           if(!payload || !payload.table) throw new Error('GViz payload ว่าง');
-          const { jewels: data, problems } = parseSheetTable(payload.table);
-          if(problems.length) console.warn(`[sheet] พบ ${problems.length} จุดที่ควรตรวจในชีต:\n` + problems.join('\n'));
           done = true;
-          resolve(data);
+          resolve(payload.table);
         }catch(err){
           done = true;
           reject(err);
@@ -1616,12 +1629,8 @@ function fetchSheetTab({ sheet, gid }, timeoutMs = 8000){
   });
 }
 
-/** Abilities + Triggers tabs → `abilities`, `abilityTriggers`. Missing tabs just leave defaults. */
-async function loadAbilityData(){
-  const [abilityTable, triggerTable] = await Promise.all([
-    fetchSheetTab({ sheet: 'Abilities' }),
-    fetchSheetTab({ sheet: 'Triggers' })
-  ]);
+/** Abilities + Triggers tables → `abilities`, `abilityTriggers` (needs `jewels`). Missing tabs just leave defaults. */
+function applyAbilityTables(abilityTable, triggerTable){
   const parsed = abilityTable ? parseAbilitiesTable(abilityTable) : { abilities: new Map(), problems: [] };
   abilityTriggers = triggerTable ? parseTriggersTable(triggerTable) : [];
   const problems = parsed.problems.concat(finalizeAbilities(parsed.abilities, jewels, abilityTriggers));
@@ -1640,19 +1649,88 @@ function abilityKeywordMap(){
   return map;
 }
 
+/* ---- loading the sheet: cached copy first, network in the background ---- */
+
+/** Every tab the search needs, fetched in parallel. Abilities / Triggers are null when unreachable. */
+async function fetchAllSheetTables(){
+  const [main, abilityTable, triggerTable] = await Promise.all([
+    fetchMainTable(),
+    fetchSheetTab({ sheet: 'Abilities' }),
+    fetchSheetTab({ sheet: 'Triggers' })
+  ]);
+  return { main, abilityTable, triggerTable };
+}
+
+function readCachedSheetTables(){
+  return { main: readSheetCache('main'), abilityTable: readSheetCache('abilities'), triggerTable: readSheetCache('triggers') };
+}
+
+/** Save to the cache; true when anything differs from the saved copy. */
+function saveSheetTables(t){
+  const changed = [
+    writeSheetCache('main', t.main),
+    t.abilityTable ? writeSheetCache('abilities', t.abilityTable) : false,
+    t.triggerTable ? writeSheetCache('triggers', t.triggerTable) : false
+  ];
+  return changed.some(Boolean);
+}
+
+/** Tables → `jewels`, `abilities`, keywords, type counts. Returns the sorted skill names. */
+function applySheetTables(t, { requireRows = false } = {}){
+  const nextJewels = jewelsFromTable(t.main);
+  if(requireRows && !nextJewels.length) throw new Error('ไม่พบข้อมูลจี้ในชีต');
+  jewels = nextJewels;
+  applyAbilityTables(t.abilityTable, t.triggerTable);
+  window._abilityKeywords = abilityKeywordMap();
+  renderJewelTypeCounts();
+  return [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
+}
+
+/** Fetch the sheet again after starting from the cache; swap the data in only when it changed. */
+async function refreshSheetDataInBackground(cached){
+  let fresh;
+  try{ fresh = await fetchAllSheetTables(); }
+  catch(err){ console.warn('[sheet] อัปเดตข้อมูลเบื้องหลังไม่สำเร็จ — ใช้ข้อมูลที่บันทึกไว้', err); return; }
+  fresh.abilityTable = fresh.abilityTable || cached.abilityTable;
+  fresh.triggerTable = fresh.triggerTable || cached.triggerTable;
+  if(!saveSheetTables(fresh)) return;   // same as what is on screen
+  try{
+    const substats = applySheetTables(fresh, { requireRows: true });
+    window.buildChipPicker(substats);   // keeps the current picks
+    const keepSel = window._chipSelected.filter(requirementExists);
+    if(keepSel.length !== window._chipSelected.length) window.setChipState(keepSel);
+    const keepUnw = window._chipUnwanted.filter(requirementExists);
+    if(keepUnw.length !== window._chipUnwanted.length) window.setUnwantedState(keepUnw);
+    updateCalcAvailability();
+    showToast('อัปเดตข้อมูลจี้ล่าสุดจากชีตแล้ว', 2500);
+  }catch(err){ console.warn('[sheet] ใช้ข้อมูลใหม่ไม่ได้', err); }
+}
+
 document.addEventListener('DOMContentLoaded', async ()=>{
+  // Refresh: build the page from the saved copy at once, then check the sheet quietly.
+  const cached = readCachedSheetTables();
+  if(cached.main){
+    try{
+      const substats = applySheetTables(cached, { requireRows: true });
+      await makeTomSelects(substats);
+      bindShareButtons();
+      applyStateFromURL();
+      updateCalcAvailability();
+      refreshSheetDataInBackground(cached);
+      return;
+    }catch(err){
+      console.warn('[sheet] ข้อมูลที่บันทึกไว้ใช้ไม่ได้ — โหลดใหม่จากชีต', err);
+    }
+  }
+
   try{
     showLoading('กำลังโหลดข้อมูลอัปเดตล่าสุด');
     startProgressSimulation(5, 92, 'กำลังโหลดข้อมูลอัปเดตล่าสุด...');
-    jewels = await fetchGVizJSONP();
+    const tables = await fetchAllSheetTables();
+    const substats = applySheetTables(tables);
+    saveSheetTables(tables);
 
-await loadAbilityData();
-window._abilityKeywords = abilityKeywordMap();
-
-stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
-
-renderJewelTypeCounts();
-const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort();
+    stopProgressSimulation(true, 'โหลดข้อมูลสำเร็จ');
 
     setProgress(100, 'กำลังเตรียมตัวเลือก...');
     await makeTomSelects(substats);
@@ -1664,7 +1742,7 @@ const substats = [...new Set(jewels.flatMap(j=>j.substats.map(s=>s.name)))].sort
     }, 180);
 
     bindShareButtons();       // ผูกอีเวนต์ปุ่มแชร์
-    applyStateFromURL(); 
+    applyStateFromURL();
 
   }catch(err){
     stopProgressSimulation(false);

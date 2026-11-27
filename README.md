@@ -26,6 +26,7 @@
 | `index.html` | โครง HTML + meta/SEO |
 | `css/app.css` | สไตล์ทั้งหมด |
 | `js/data-model.js` | แปลงตารางชีต → ข้อมูลจี้ `{ id, prefix, type, allowedChars, substats }` + ตรวจแถวที่ผิด |
+| `js/sheet-cache.js` | เก็บข้อมูลชีตล่าสุดใน `localStorage` — ตอน refresh แสดงจากสำเนานี้ทันที แล้วโหลดชีตใหม่เบื้องหลัง (อัปเดตเมื่อข้อมูลเปลี่ยน) |
 | `js/search-core.js` | ตรรกะค้นหาเซ็ต (pure function ใช้ร่วมกันทั้งหน้าเว็บ, worker และเทสต์) |
 | `js/search-worker.js` | Web Worker ที่รันการค้นหา |
 | `js/main.js` | โหลดข้อมูล, `calculate()` (รวมการล็อกจี้ [ลิงก์]), แสดงผล |
