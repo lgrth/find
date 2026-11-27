@@ -2,7 +2,7 @@ const _dk=(e,k)=>{const h=e.split('').reverse().join('');let r='';for(let i=0;i<
 const SHEET_ID = _dk('7110d54204f1927075b0c4e391d643a56455a58020e782a1061137d3315791a0112255a05166e383e61286a5','k9x#mP2w');
 const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
-const MAX_SELECTS = 14;
+const MAX_SELECTS = 25;
 const MIN_SELECTS = 4;
 const DEFAULT_TOPK = 10;
 const LINK_PREFIX = "[ลิงก์]";

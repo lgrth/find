@@ -364,10 +364,10 @@
 <main>
   <section>
     <h2 class="head-with-counter" style="margin-top:4px">
-      <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 14 สกิล)</span>
-      <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="14" aria-valuenow="0" aria-label="จำนวนที่เลือก">
+      <span><span class="head-icon">🎯</span>เลือกความสามารถ (สูงสุด 25 สกิล)</span>
+      <span id="selectedProgress" class="sel-progress" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" aria-label="จำนวนที่เลือก">
         <span class="sel-progress__track"><span class="sel-progress__fill"></span></span>
-        <span class="sel-progress__label">0/14</span>
+        <span class="sel-progress__label">0/25</span>
       </span>
     </h2>
     <div id="chipPicker" class="chip-picker" aria-label="เลือกความสามารถแบบ chip">
@@ -375,9 +375,10 @@
         <div class="chip-selected-title">✅ สกิลที่ต้องการ</div>
         <div id="minHint" class="hint hint--error"></div>
         <div id="chipSelected" class="chip-list chip-list--selected is-hidden" aria-live="polite"></div>
+        <div id="chipConflict" class="chip-conflict" role="alert" hidden></div>
       </div>
       <div class="chip-search-wrap">
-        <div style="font-size:12px;font-weight:600;color:#7889a0;margin-bottom:4px">➕ เพิ่มสกิลที่ต้องการ</div>
+        <label for="chipSearch" class="chip-search-label">➕ เพิ่มสกิลที่ต้องการ</label>
         <div id="chipSearchBox" class="chip-search-box">
           <input id="chipSearch" class="chip-search" type="text" placeholder="🔍 ค้นหาสกิลที่ต้องการ..." autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="chipSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
@@ -389,9 +390,9 @@
           <div id="chipGroupList" class="chip-group-list" hidden></div>
         </div>
       </div>
-      <div id="chipAllWrap" class="chip-all-wrap" hidden>
-        <div class="chip-unwanted-results-title" style="color: #7da0ca;">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
-        <div id="chipAll" class="chip-list chip-list--all"></div>
+      <div id="chipAllWrap" class="chip-results" hidden>
+        <div class="chip-results__title">ผลการค้นหา <span class="chip-results__hint">แตะเพื่อเพิ่ม / แตะซ้ำเพื่อเอาออก</span></div>
+        <div id="chipAll" class="chip-results__body"></div>
       </div>
 
       <div class="chip-unwanted-section">
@@ -402,15 +403,15 @@
         <div class="chip-unwanted-body" id="chipUnwantedBody">
           <div id="chipUnwanted" class="chip-list chip-list--unwanted is-hidden" aria-live="polite"></div>
           <div class="chip-search-wrap" style="margin-top:6px">
-            <div style="font-size:12px;font-weight:600;color:#a07474;margin-bottom:4px">➕ เพิ่มสกิลที่ไม่ต้องการ</div>
+            <label for="chipUnwantedSearch" class="chip-search-label chip-search-label--danger">➕ เพิ่มสกิลที่ไม่ต้องการ</label>
             <div class="chip-search-box">
               <input id="chipUnwantedSearch" class="chip-unwanted-search" type="text" placeholder="🔍 ค้นหาสกิลที่ไม่ต้องการ..." autocomplete="off" autocorrect="off" spellcheck="false">
               <button id="chipUnwantedSearchClear" class="chip-search-clear" aria-label="ล้างการค้นหา" hidden>✕</button>
             </div>
           </div>
-          <div id="chipUnwantedAllWrap" hidden>
-            <div class="chip-unwanted-results-title">ผลการค้นหา — คลิกเพื่อเพิ่ม/เอาออก</div>
-            <div id="chipUnwantedAll" class="chip-list chip-list--all"></div>
+          <div id="chipUnwantedAllWrap" class="chip-results chip-results--danger" hidden>
+            <div class="chip-results__title">ผลการค้นหา <span class="chip-results__hint">แตะเพื่อเพิ่ม / แตะซ้ำเพื่อเอาออก</span></div>
+            <div id="chipUnwantedAll" class="chip-results__body"></div>
           </div>
         </div>
         <div class="chip-unwanted-hint">ⓘ กดปุ่ม <strong>▼ แสดง</strong> เพื่อระบุสกิลที่ไม่ต้องการในเซ็ต</div>

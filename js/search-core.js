@@ -30,7 +30,7 @@ const stackKeyOf = (name, abilityOf)=> abilityOf(name)?.stackKey || name;
 /* ---- Requirements: what the user picked as "wanted" / "unwanted" ----
  * A requirement is a string: either one skill name, or a whole group written as
  * GROUP_PREFIX + group name (e.g. 'กลุ่ม:โล่' = any shield). Keeping it a string
- * lets saved filters, share links and the 14-item quota treat both alike.      */
+ * lets saved filters, share links and the MAX_SELECTS quota treat both alike.      */
 const GROUP_PREFIX = 'กลุ่ม:';
 const isGroupRequirement = (req)=> typeof req === 'string' && req.startsWith(GROUP_PREFIX);
 const groupOfRequirement = (req)=> isGroupRequirement(req) ? req.slice(GROUP_PREFIX.length) : '';

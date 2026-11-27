@@ -128,6 +128,34 @@ function requirementsOverlap(a, b){
   return false;
 }
 
+/* ---- conflicts: wanted skills that can never share a set ----
+ * Two pendants in a set may not share a stack_key (Abilities tab), so e.g. โล่ขาว and
+ * โล่ซูเปอร์ (both stack_key "โล่") can't both be in one set. A group requirement
+ * conflicts only when none of its skills could sit next to the other requirement. */
+
+function requirementSkills(req){
+  return isGroupRequirement(req) ? groupMembers(groupOfRequirement(req)) : [req];
+}
+
+/** true when no skill of `a` can be in the same set as any skill of `b`. */
+function requirementsConflict(a, b){
+  if(a === b || requirementsOverlap(a, b)) return false;
+  const key = (n)=> abilityOf(n)?.stackKey || n;
+  const sa = requirementSkills(a), sb = requirementSkills(b);
+  if(!sa.length || !sb.length) return false;
+  return sa.every(x => sb.every(y => key(x) === key(y)));
+}
+
+/** Every conflicting pair in `list`, in list order: [[a, b], …]. */
+function findRequirementConflicts(list){
+  const pairs = [];
+  const l = list || [];
+  for(let i = 0; i < l.length; i++)
+    for(let j = i + 1; j < l.length; j++)
+      if(requirementsConflict(l[i], l[j])) pairs.push([l[i], l[j]]);
+  return pairs;
+}
+
 /** Drop duplicates, unknown groups and skills already covered by a chosen group (D5). */
 function mergeRequirements(list){
   const out = [];
