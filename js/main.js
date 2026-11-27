@@ -1,3 +1,6 @@
+/* Version query of this deploy ("?v=…" on the <script> tags in index.html), reused for the worker
+ * so a new deploy never runs with an old cached copy. */
+const ASSET_QUERY = (document.currentScript?.src.match(/\?v=[^&#]+/) || [''])[0];
 const _dk=(e,k)=>{const h=e.split('').reverse().join('');let r='';for(let i=0;i<h.length;i+=2)r+=String.fromCharCode(parseInt(h.slice(i,i+2),16)^k.charCodeAt((i/2)%k.length));return r;};
 const SHEET_ID = _dk('7110d54204f1927075b0c4e391d643a56455a58020e782a1061137d3315791a0112255a05166e383e61286a5','k9x#mP2w');
 // gid=0: the pendant tab itself, not "whichever tab is first" (tabs can be reordered).
@@ -690,7 +693,7 @@ function finishCalcWithError(message){
 
 /** Run the combination search (js/search-worker.js) and render the result. */
 function startSearchWorker(job, runId){
-  worker = new Worker('js/search-worker.js');
+  worker = new Worker('js/search-worker.js' + ASSET_QUERY);
   worker.onmessage = (e)=>{
     if(runId !== _activeCalcRun) return;
     const msg = e.data;
