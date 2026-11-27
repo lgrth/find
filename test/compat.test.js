@@ -293,3 +293,24 @@ test('result card treats every skill of a wanted group as wanted', async () => {
     assert.doesNotMatch(missing, /กลุ่ม:/, 'missing groups are shown by label, not by token');
   });
 });
+
+test('result tooltip shows 📈 / 📉 / 🔒 from the Note columns', async () => {
+  await withApp({}, async ({ page }) => {
+    const tip = await page.evaluate(() => {
+      const id = '[ไวท์] เรดมอนสเตอร์พิโรธ';
+      const j = jewels.find((x) => x.id === id);
+      Object.assign(j.substats.find((s) => s.name === 'แปลน 3 หลัง'), { note: 'หลัง 2 เทิร์น ลดลง -50%', decay: 50, decayAfter: 2 });
+      Object.assign(j.substats.find((s) => s.name === 'กันวิคตอรี่'), { note: 'จำกัด 1 ครั้ง', limit: 1 });
+      Object.assign(j.substats.find((s) => s.name === 'ป้องกันเอฟเฟคอันตราย'), { note: '+5% เมื่อไม่แสดงผล', grow: 5 });
+      window.setChipState(['แปลน 3 หลัง', 'กันวิคตอรี่', 'ป้องกันเอฟเฟคอันตราย', 'ขังคุก']);
+      renderResults([{ ids: [id], notMiss: 1, notIdx: [3], totalValue: 0, extraCount: 0, unwantedCount: 0 }], { skipTracking: true });
+      return document.querySelector('#result .jewel-column').dataset.tooltip;
+    });
+    assert.equal(tip, [
+      '✅ แปลน 3 หลัง: 80% · 📉 −50% หลัง 2 เทิร์น',
+      '✨ ป้องกันบังคับย้ายและดักจับ: 70%',
+      '✅ ป้องกันเอฟเฟคอันตราย: 65% · 📈 +5% เมื่อไม่แสดงผล',
+      '✅ กันวิคตอรี่: 95% · 🔒 จำกัด 1 ครั้ง',
+    ].join('\n'));
+  });
+});

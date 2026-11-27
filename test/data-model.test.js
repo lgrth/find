@@ -113,3 +113,31 @@ test('abilityScore: chance skills keep their value, amounts become % of max', ()
   assert.equal(abilityScore(300, { maxValue: 250 }), 100, 'capped');
   assert.equal(abilityScore(42, undefined), 42, 'no ability data → raw value');
 });
+
+const { parseNote, parseSheetTable: parseTab } = require('../js/data-model.js');
+
+test('parseNote reads the game wording', () => {
+  assert.deepEqual(parseNote('+5% เมื่อไม่แสดงผล'), { unknown: [], grow: 5 });
+  assert.deepEqual(parseNote('หลัง 2 เทิร์น ลดลง -50%'), { unknown: [], decayAfter: 2, decay: 50 });
+  assert.deepEqual(parseNote('จำกัด 2 ครั้ง'), { unknown: [], limit: 2 });
+  assert.deepEqual(parseNote('(2 ครั้ง)'), { unknown: [], limit: 2 });
+  assert.deepEqual(parseNote('จำกัด 1 ครั้ง, +5% เมื่อไม่แสดงผล'), { unknown: [], limit: 1, grow: 5 });
+  assert.deepEqual(parseNote('อะไรสักอย่าง'), { unknown: ['อะไรสักอย่าง'] });
+});
+
+test('Note columns next to each Value are attached to that skill', () => {
+  const labels = ['ID', 'AllowedChars', 'Substat1', 'Value1', 'Note1', 'Substat2', 'Value2', 'Note2', 'Substat3', 'Value3', 'Note3'];
+  const { jewels, problems } = parseTab(tbl(labels, [
+    ['[ไวท์] แกนบลัดกักขังโกสต์', '', 'ขังคุก', 45, '+5% เมื่อไม่แสดงผล', 'เดินไดเมนชั่น', 60, '', 'ป้องกันบังคับย้ายและดักจับ', 90, '2 ครั้ง'],
+    ['จี้ทดสอบ', '', 'ผลัก', 50, 'ข้อความแปลก', '', '', 'จำกัด 1 ครั้ง', '', '', ''],
+  ]));
+  assert.deepEqual(jewels[0].substats, [
+    { name: 'ขังคุก', value: 45, note: '+5% เมื่อไม่แสดงผล', grow: 5 },
+    { name: 'เดินไดเมนชั่น', value: 60 },
+    { name: 'ป้องกันบังคับย้ายและดักจับ', value: 90, note: '2 ครั้ง', limit: 2 },
+  ]);
+  assert.deepEqual(jewels[1].substats, [{ name: 'ผลัก', value: 50, note: 'ข้อความแปลก' }]);
+  assert.equal(problems.length, 2, problems.join('\n'));   // unreadable note + note without skill
+  assert.match(problems.join('\n'), /อ่านไม่ออก: "ข้อความแปลก"/);
+  assert.match(problems.join('\n'), /Note2 "จำกัด 1 ครั้ง" แต่ไม่มี Substat2/);
+});
