@@ -76,20 +76,38 @@ test('tapping a pendant lists its skills and highlights the picked ones', async 
   }
 });
 
-test('extra skills: first 5 shown, "+N อื่น ๆ" shows the rest, tap opens the add / skip menu', async () => {
+test('extra skills: all on one sideways-scrolling line, tap opens the floating add / skip bubble', async () => {
   const { page, context, errors } = await openApp();
   try {
+    await page.setViewportSize({ width: 390, height: 844 });
     await searchAndRender(page, { selected: SIX, topK: 10 });
     const card = page.locator('#result .result-card').first();
     const total = await card.locator('.extra-skill').count();
-    if (total > 5) {
-      assert.equal(await card.locator('.extra-skill:visible').count(), 5);
-      await card.locator('.extra-more').click();
-      assert.equal(await card.locator('.extra-skill:visible').count(), total);
+    assert.ok(total > 0);
+    assert.equal(await card.locator('.extra-more').count(), 0, 'no "+N อื่น ๆ" button any more');
+    // one line: every chip shares the same top, and the line scrolls instead of widening the page
+    const tops = await card.locator('.extra-skill').evaluateAll((els) => [...new Set(els.map((e) => e.offsetTop))]);
+    assert.equal(tops.length, 1);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+    const scroller = card.locator('.extra-scroll');
+    if (await scroller.evaluate((el) => el.scrollWidth > el.clientWidth)) {
+      assert.match(await scroller.getAttribute('class'), /has-more-right/);
     }
-    const skill = await card.locator('.extra-skill').first().getAttribute('data-skill');
-    await card.locator('.extra-skill').first().click();
-    await page.locator('#skillActionMenu.show').waitFor();
+
+    const chip = card.locator('.extra-skill').last();
+    const skill = await chip.getAttribute('data-skill');
+    await chip.click();
+    const menu = page.locator('#skillActionMenu.show');
+    await menu.waitFor();
+    assert.equal(await page.textContent('#skillActionMenu .skill-action-menu__title'), skill);
+    // floats next to the chip, fully on screen
+    const [m, c] = await Promise.all([menu.boundingBox(), chip.boundingBox()]);
+    assert.ok(m.x >= 0 && m.x + m.width <= 390, 'bubble inside the viewport');
+    assert.ok(Math.abs((m.y + m.height) - c.y) < 20 || Math.abs(m.y - (c.y + c.height)) < 20, 'bubble sits right above or below the chip');
+    // tapping the same chip again closes it
+    await chip.click();
+    assert.equal(await page.locator('#skillActionMenu.show').count(), 0);
+    await chip.click();
     await page.locator('#skillActionMenu [data-skill-action="want"]').click();
     assert.ok((await page.evaluate(() => window._chipSelected)).includes(skill));
     assert.deepEqual(errors, []);

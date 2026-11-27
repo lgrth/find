@@ -345,48 +345,81 @@ function hideQRModal(){
 }
 
 let _activeSkillActionName = '';
+let _skillActionSource = null;
+/* Floating bubble next to an extra-skill chip: "add to wanted" / "skip this skill". */
 function getSkillActionMenu(){
   let menu = document.getElementById('skillActionMenu');
   if(menu) return menu;
   menu = document.createElement('div');
   menu.id = 'skillActionMenu';
   menu.className = 'skill-action-menu';
+  menu.setAttribute('role', 'dialog');
+  menu.setAttribute('aria-label', 'ตัวเลือกสกิล');
   menu.innerHTML = `
     <div class="skill-action-menu__title"></div>
-    <button type="button" data-skill-action="want"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/></svg>
-      <span>เพิ่มเป็นสกิลที่ต้องการ</span></button>
-    <button type="button" data-skill-action="unwant"><svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>
-      <span>ไม่เอาสกิลนี้ (สกิลที่ไม่ต้องการ)</span></button>`;
+    <div class="skill-action-menu__actions">
+      <button type="button" class="sam-btn sam-btn--want" data-skill-action="want"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2"/></svg><span>ต้องการ</span></button>
+      <button type="button" class="sam-btn sam-btn--unwant" data-skill-action="unwant"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1M2.5 8a5.5 5.5 0 0 1 8.86-4.36l-7.72 7.72A5.47 5.47 0 0 1 2.5 8m2.14 4.36 7.72-7.72A5.5 5.5 0 0 1 4.64 12.36"/></svg><span>ไม่เอา</span></button>
+    </div>
+    <span class="skill-action-menu__arrow" aria-hidden="true"></span>`;
   menu.addEventListener('click', (e)=>{
-  const btn = e.target.closest('[data-skill-action]');
-  if(!btn || !menu.contains(btn) || !_activeSkillActionName) return;
-  applySkillAction(_activeSkillActionName, btn.dataset.skillAction);
+    const btn = e.target.closest('[data-skill-action]');
+    if(!btn || !menu.contains(btn) || !_activeSkillActionName) return;
+    applySkillAction(_activeSkillActionName, btn.dataset.skillAction);
+  });
+  menu.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){ const src = _skillActionSource; hideSkillActionMenu(); src?.focus(); }
   });
   document.body.appendChild(menu);
   return menu;
 }
 
+function placeSkillActionMenu(){
+  const menu = document.getElementById('skillActionMenu');
+  const src = _skillActionSource;
+  if(!menu || !src || !src.isConnected) return;
+  const rect = src.getBoundingClientRect();
+  const m = menu.getBoundingClientRect();
+  const gap = 10;
+  const headerH = document.querySelector('header')?.getBoundingClientRect().height || 0;
+  const ctaTop = (()=>{ const c = document.querySelector('.cta-bar'); if(!c) return window.innerHeight; const r = c.getBoundingClientRect(); return (r.height && getComputedStyle(c).position === 'fixed') ? r.top : window.innerHeight; })();
+  // above the chip when there is room, otherwise below it
+  const above = rect.top - m.height - gap >= headerH + 8 || rect.bottom + m.height + gap > ctaTop - 8;
+  const top = above ? rect.top - m.height - gap : rect.bottom + gap;
+  const left = Math.min(window.innerWidth - m.width - 8, Math.max(8, rect.left + rect.width / 2 - m.width / 2));
+  menu.style.left = Math.round(left) + 'px';
+  menu.style.top = Math.round(top) + 'px';
+  menu.classList.toggle('is-below', !above);
+  const arrowX = Math.min(m.width - 16, Math.max(16, rect.left + rect.width / 2 - left));
+  menu.style.setProperty('--arrow-x', Math.round(arrowX) + 'px');
+}
+
 function showSkillActionMenu(skillName, sourceEl){
   const menu = getSkillActionMenu();
+  const reopen = _activeSkillActionName === skillName && _skillActionSource === sourceEl && menu.classList.contains('show');
+  hideSkillActionMenu();
+  if(reopen) return;   // second tap on the same chip closes it
   _activeSkillActionName = skillName;
+  _skillActionSource = sourceEl;
   menu.querySelector('.skill-action-menu__title').textContent = skillName;
-  document.querySelectorAll('.extra-skill.is-menu-open').forEach(el=>el.classList.remove('is-menu-open'));
   sourceEl.classList.add('is-menu-open');
-  const rect = sourceEl.getBoundingClientRect();
+  sourceEl.setAttribute('aria-expanded', 'true');
+  // keep the chip visible inside its sideways-scrolling line
+  sourceEl.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
   menu.classList.add('show');
-  const menuRect = menu.getBoundingClientRect();
-  const left = Math.min(window.innerWidth - menuRect.width - 8, Math.max(8, rect.left));
-  const top = Math.min(window.innerHeight - menuRect.height - 8, rect.bottom + 6);
-  menu.style.left = left + 'px';
-  menu.style.top = top + 'px';
+  placeSkillActionMenu();
+  menu.querySelector('.sam-btn')?.focus({ preventScroll: true });
 }
 
 function hideSkillActionMenu(){
   const menu = document.getElementById('skillActionMenu');
   if(menu) menu.classList.remove('show');
-  document.querySelectorAll('.extra-skill.is-menu-open').forEach(el=>el.classList.remove('is-menu-open'));
+  document.querySelectorAll('.extra-skill.is-menu-open').forEach(el=>{ el.classList.remove('is-menu-open'); el.removeAttribute('aria-expanded'); });
   _activeSkillActionName = '';
+  _skillActionSource = null;
 }
+window.addEventListener('scroll', ()=>{ if(_skillActionSource) placeSkillActionMenu(); }, { passive: true });
+window.addEventListener('resize', ()=>{ if(_skillActionSource) hideSkillActionMenu(); });
 
 function applySkillAction(skillName, action){
   if(action === 'want'){

@@ -222,20 +222,25 @@ html[data-theme="dark"] .result-card .jewel-column.jewel-link{background:#2c1f0e
 .jewel-swap:focus-visible{outline:var(--focus-ring);outline-offset:1px}
 html[data-theme="dark"] .jewel-swap{background:#2a4180;color:#dbe5ff}
 
-.jewel-detail{padding:8px 10px;border-radius:8px;background:#f3fbf5;border:1px solid #cdeed6}
+/* pendant details: name + one chip per skill, wrapping (usually one or two lines) */
+.jewel-detail{position:relative;padding:5px 34px 5px 8px;border-radius:8px;background:#f3fbf5;border:1px solid #cdeed6}
 html[data-theme="dark"] .jewel-detail{background:#0b2a17;border-color:#166534}
-.jewel-detail__head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--c-hl-ink)}
-.jewel-detail__close{width:30px;height:30px;border:0;border-radius:6px;background:transparent;color:inherit;font-size:18px;cursor:pointer}
-.jewel-detail__close:hover{background:rgba(0,0,0,.06)}
-.jewel-detail__list{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
-.jd-item{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;font-size:12.5px;color:var(--c-text)}
-.jd-icon{width:16px;text-align:center;font-weight:700}
-.jd-item--want .jd-icon,.jd-item--want .jd-name{color:var(--c-ok-ink);font-weight:700}
+.jewel-detail__list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.jd-title{font-size:12.5px;font-weight:700;color:var(--c-hl-ink);margin-right:2px}
+.jd-item{display:inline-flex;align-items:baseline;gap:3px;min-height:24px;padding:2px 7px;border-radius:6px;font-size:12px;line-height:1.35;background:#fff;color:var(--c-text);border:1px solid var(--c-line)}
+html[data-theme="dark"] .jd-item{background:#111827}
+.jd-icon{font-weight:700}
+.jd-item--want{background:var(--c-hl-bg);border-color:transparent}
+.jd-item--want .jd-icon,.jd-item--want .jd-name{color:var(--c-hl-ink);font-weight:700}
+.jd-item--unwant{background:var(--c-miss-bg);border-color:transparent}
 .jd-item--unwant .jd-icon,.jd-item--unwant .jd-name{color:var(--c-miss-ink);font-weight:700}
 .jd-item--extra .jd-icon{color:var(--c-accent-ink)}
-.jd-val{color:var(--c-text-2)}
-.jd-note{flex-basis:100%;padding-left:22px;font-size:11.5px;color:var(--c-text-2)}
-.jewel-detail__legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:11px;color:var(--c-text-2)}
+.jd-val{color:var(--c-text-2);font-size:11.5px}
+.jd-note{font-size:11px;color:var(--c-text-2)}
+.jd-note::before{content:'· '}
+.jewel-detail__close{position:absolute;top:2px;right:2px;width:30px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--c-hl-ink);font-size:18px;line-height:1;cursor:pointer}
+.jewel-detail__close:hover{background:rgba(0,0,0,.06)}
+.jewel-detail__close:focus-visible{outline:var(--focus-ring)}
 
 .result-card .row-ability{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0;padding:0;font-size:12px;background:none !important;border:0 !important}
 .row-ability__label{font-size:12px;font-weight:700;margin-right:2px}
@@ -245,18 +250,46 @@ html[data-theme="dark"] .jewel-detail{background:#0b2a17;border-color:#166534}
 .skill-chip,.extra-skill{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:6px;font-size:12px;line-height:1.3}
 .skill-chip--miss{background:var(--c-miss-bg);color:var(--c-miss-ink)}
 .skill-chip--warn{background:var(--c-warn-bg);color:var(--c-warn-ink)}
-.extra-skill{border:0;background:var(--c-muted-bg);color:var(--c-text);font:inherit;font-size:12px;cursor:pointer;text-decoration:none}
+
+/* "ได้สกิลเพิ่ม": every chip on one line that slides sideways, with faded edges while more is hidden */
+.result-card .row-ability.row-extra{flex-wrap:nowrap}
+.row-extra .row-ability__label{flex:none}
+.extra-scroll{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--c-line) transparent;padding:2px 0 4px;--fade-l:0px;--fade-r:0px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--fade-l),#000 calc(100% - var(--fade-r)),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 var(--fade-l),#000 calc(100% - var(--fade-r)),transparent 100%)}
+.extra-scroll.has-more-left{--fade-l:24px}
+.extra-scroll.has-more-right{--fade-r:32px}
+.extra-scroll:focus{outline:none}
+.extra-scroll::-webkit-scrollbar{height:4px}
+.extra-scroll::-webkit-scrollbar-thumb{background:var(--c-line);border-radius:4px}
+@media (hover:none){ .extra-scroll{scrollbar-width:none} .extra-scroll::-webkit-scrollbar{display:none} }
+.extra-skill{flex:none;white-space:nowrap;scroll-snap-align:start;border:0;background:var(--c-muted-bg);color:var(--c-text);font:inherit;font-size:12px;cursor:pointer;text-decoration:none}
 .extra-skill:hover{background:#e3e9f3}
 html[data-theme="dark"] .extra-skill:hover{background:#334155}
-.extra-skill.is-overflow{display:none}
 .extra-skill.is-hl{background:var(--c-hl-bg);color:var(--c-hl-ink);font-weight:700}
 .extra-skill.is-menu-open{background:#1e3a8a;color:#fff}
-.extra-skill:focus-visible,.extra-more:focus-visible{outline:var(--focus-ring);outline-offset:1px}
-.extra-more{min-height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:var(--c-accent);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
-.extra-more:hover{background:var(--c-accent-soft)}
+.extra-skill:focus-visible{outline:var(--focus-ring);outline-offset:-2px}
 
-/* the "add / don't want" menu for a skill chip */
-.skill-action-menu__title{font-weight:700;color:var(--c-text)}
+/* floating "add / skip" bubble for an extra-skill chip */
+.skill-action-menu{position:fixed;z-index:4000;display:none;min-width:0;padding:6px;border-radius:12px;border:1px solid var(--c-line);background:var(--surface,#fff);box-shadow:0 10px 28px rgba(15,23,42,.18),0 2px 6px rgba(15,23,42,.08)}
+.skill-action-menu.show{display:block;animation:sam-in .14s ease-out}
+@keyframes sam-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.skill-action-menu.is-below.show{animation-name:sam-in-below}
+@keyframes sam-in-below{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.skill-action-menu.show{animation:none}}
+.skill-action-menu__title{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px 5px;margin:0;border:0;font-size:12px;font-weight:700;color:var(--c-text-2)}
+.skill-action-menu__actions{display:flex;gap:6px}
+.skill-action-menu .sam-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;width:auto;min-height:36px;padding:0 12px;border:0;border-radius:8px;font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
+.skill-action-menu .sam-btn--want{background:var(--c-ok-bg);color:var(--c-ok-ink)}
+.skill-action-menu .sam-btn--want:hover{background:#cdeed6}
+.skill-action-menu .sam-btn--unwant{background:var(--c-miss-bg);color:var(--c-miss-ink)}
+.skill-action-menu .sam-btn--unwant:hover{background:#f9d5d5}
+html[data-theme="dark"] .skill-action-menu .sam-btn--want:hover{background:#166534}
+html[data-theme="dark"] .skill-action-menu .sam-btn--unwant:hover{background:#5b1a20}
+.skill-action-menu .sam-btn:focus-visible{outline:var(--focus-ring);outline-offset:1px}
+.skill-action-menu__arrow{position:absolute;left:calc(var(--arrow-x,50%) - 6px);bottom:-7px;width:12px;height:12px;background:inherit;border-right:1px solid var(--c-line);border-bottom:1px solid var(--c-line);transform:rotate(45deg)}
+.skill-action-menu.is-below .skill-action-menu__arrow{bottom:auto;top:-7px;transform:rotate(225deg)}
+html[data-theme="dark"] .skill-action-menu{background:#111827;border-color:#334155}
 
 /* ---------- Empty state + quick starts ---------- */
 .empty-state{padding:24px 12px;text-align:center}
@@ -298,3 +331,7 @@ html[data-theme="dark"] .donate-strip__btn{color:#fbd3a5}
 @media (max-width:380px){
   .result-card .jewel-columns{grid-template-columns:1fr}
 }
+
+/* the sideways-scrolling extras line must never widen the page */
+main > section, #result, .grid-results, .result-card, .result-card .row-ability{min-width:0;max-width:100%}
+html[data-theme="dark"] .result-card .extra-skill.is-menu-open{background:#3b5bdb;color:#fff}

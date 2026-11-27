@@ -1425,7 +1425,6 @@ function substatBadges(s){
  * Results that differ by one pendant share a card; the pendant that changes gets a
  * "⇄ อีก N แบบ" button. Tapping a pendant opens its skills inline and highlights the
  * matching picked skills in the filter panel. Card state lives in _cardControllers.   */
-const EXTRA_VISIBLE = 5;
 const _cardControllers = new WeakMap();
 let _openDetailCard = null;
 
@@ -1491,20 +1490,22 @@ function jewelTileHTML(j, item, ctx, opts){
     + `${lock}<span class="jewel-name">${pre}<span class="jn-base">${escapeHtmlText(base)}</span>${tagHTML}</span></button>${swap}</div>`;
 }
 
+/** One wrapping row, a chip per skill (the open tile above is outlined in the same green) (✓ wanted / + extra / ! unwanted). */
 function jewelDetailHTML(j, ctx){
-  const rows = j.substats.map(s=>{
+  const kinds = { want: ['✓', 'สกิลที่ต้องการ'], unwant: ['!', 'สกิลที่ไม่ต้องการ'], extra: ['+', 'ได้สกิลเพิ่ม'] };
+  const items = j.substats.map(s=>{
     const kind = ctx.isWanted(s.name) ? 'want' : (ctx.isUnwanted(s.name) ? 'unwant' : 'extra');
-    const icon = kind === 'want' ? '✓' : (kind === 'unwant' ? '!' : '+');
+    const [icon, label] = kinds[kind];
     const note = substatBadges(s).join(' · ');
-    return `<li class="jd-item jd-item--${kind}"><span class="jd-icon" aria-hidden="true">${icon}</span>`
-      + `<span class="jd-name">${escapeHtmlText(s.name)}</span><span class="jd-val">${escapeHtmlText(s.value)}%</span>`
-      + (note ? `<span class="jd-note">${escapeHtmlText(note)}</span>` : '') + `</li>`;
+    return `<li class="jd-item jd-item--${kind}" title="${escapeHtmlAttr(label + (note ? ' · ' + note : ''))}">`
+      + `<span class="jd-icon" aria-hidden="true">${icon}</span><span class="jd-name">${escapeHtmlText(s.name)}</span>`
+      + `<span class="jd-val">${escapeHtmlText(s.value)}%</span>`
+      + (note ? `<span class="jd-note">${escapeHtmlText(note)}</span>` : '')
+      + `<span class="visually-hidden"> (${label})</span></li>`;
   }).join('');
   return `<div class="jewel-detail">
-    <div class="jewel-detail__head"><span><strong>${escapeHtmlText(splitJewelName(j.id).base)}</strong> ให้สกิล:</span>
-      <button type="button" class="jewel-detail__close" data-action="close-detail" aria-label="ปิดรายละเอียดจี้">×</button></div>
-    <ul class="jewel-detail__list">${rows}</ul>
-    <div class="jewel-detail__legend"><span class="jd-key jd-key--want">✓ ที่ต้องการ</span><span class="jd-key jd-key--extra">+ ได้เพิ่ม</span>${j.substats.some(s=>ctx.isUnwanted(s.name)) ? '<span class="jd-key jd-key--unwant">! ไม่ต้องการ</span>' : ''}</div>
+    <ul class="jewel-detail__list" aria-label="สกิลของ ${escapeHtmlAttr(j.id)}">${items}</ul>
+    <button type="button" class="jewel-detail__close" data-action="close-detail" aria-label="ปิดรายละเอียดจี้">×</button>
   </div>`;
 }
 
@@ -1535,14 +1536,11 @@ function cardInnerHTML(ctl, ctx){
     ? `<div class="row-ability row-miss"><span class="row-ability__label">หายไป:</span>${chips(item.notList, 'skill-chip--miss')}</div>` : '';
   const unwantedHTML = item.extraUnwanted.length
     ? `<div class="row-ability row-unwanted"><span class="row-ability__label">ไม่ต้องการ:</span>${chips(item.extraUnwanted, 'skill-chip--warn')}</div>` : '';
-  const showAll = state.extrasOpen || !!openJewel;
-  const extraList = item.extra.map((nm, idx)=>
-    `<button type="button" class="extra-skill${!showAll && idx >= EXTRA_VISIBLE ? ' is-overflow' : ''}${hlSkills.has(nm) ? ' is-hl' : ''}" data-skill="${escapeHtmlAttr(nm)}" title="กดเพื่อเพิ่มเป็นสกิลที่ต้องการ หรือไม่เอาสกิลนี้">${escapeHtmlText(nm)}</button>`).join('');
-  const hidden = item.extra.length - EXTRA_VISIBLE;
-  const moreBtn = (hidden > 0 && !openJewel)
-    ? `<button type="button" class="extra-more" data-action="more" aria-expanded="${state.extrasOpen ? 'true' : 'false'}">${state.extrasOpen ? 'ย่อ' : `+${hidden} อื่น ๆ`}</button>` : '';
+  // every extra skill on one line; the line scrolls sideways when it does not fit
+  const extraList = item.extra.map(nm=>
+    `<button type="button" class="extra-skill${hlSkills.has(nm) ? ' is-hl' : ''}" data-skill="${escapeHtmlAttr(nm)}" title="กดเพื่อเพิ่มเป็นสกิลที่ต้องการ หรือไม่เอาสกิลนี้">${escapeHtmlText(nm)}</button>`).join('');
   const extraHTML = item.extra.length
-    ? `<div class="row-ability row-extra"><span class="row-ability__label">ได้สกิลเพิ่ม:</span>${extraList}${moreBtn}</div>` : '';
+    ? `<div class="row-ability row-extra"><span class="row-ability__label">ได้สกิลเพิ่ม:</span><div class="extra-scroll" tabindex="-1">${extraList}</div></div>` : '';
 
   const pinned = _pinnedResults.has(item.snapshot.key);
   return `
@@ -1571,6 +1569,33 @@ function paintResultCard(card){
   card.classList.toggle('result-card--grouped', ctl.group.members.length > 1);
   card.classList.toggle('result-card--highlight', ctl.highlightKey === item.snapshot.key);
   card.innerHTML = cardInnerHTML(ctl, ctl.ctx);
+  const scroller = card.querySelector('.extra-scroll');
+  if(scroller){
+    // bring the highlighted skills of the open pendant into view, then mark the faded edges
+    const hl = scroller.querySelector('.extra-skill.is-hl');
+    if(hl) scroller.scrollLeft = Math.max(0, hl.offsetLeft - scroller.offsetLeft - 24);
+    scroller.addEventListener('scroll', ()=>{ updateExtraScrollEdges(scroller); followSkillActionMenu(scroller); }, { passive: true });
+    updateExtraScrollEdges(scroller);
+  }
+}
+
+/** Fade the left / right edge of the extra-skill line while more chips are hidden there. */
+function updateExtraScrollEdges(el){
+  const max = el.scrollWidth - el.clientWidth;
+  el.classList.toggle('has-more-left', el.scrollLeft > 2);
+  el.classList.toggle('has-more-right', max - el.scrollLeft > 2);
+}
+function updateAllExtraScrollEdges(){
+  document.querySelectorAll('#result .extra-scroll').forEach(updateExtraScrollEdges);
+}
+window.addEventListener('resize', ()=>{ clearTimeout(updateAllExtraScrollEdges._t); updateAllExtraScrollEdges._t = setTimeout(updateAllExtraScrollEdges, 120); });
+/** The add / skip bubble follows its chip while the line scrolls, and closes once the chip leaves the line. */
+function followSkillActionMenu(scroller){
+  const chip = scroller.querySelector('.extra-skill.is-menu-open');
+  if(!chip || typeof placeSkillActionMenu !== 'function') return;
+  const c = chip.getBoundingClientRect(), s = scroller.getBoundingClientRect();
+  if(c.right < s.left + 8 || c.left > s.right - 8) hideSkillActionMenu();
+  else placeSkillActionMenu();
 }
 
 function repaintAllResultCards(){
@@ -1638,12 +1663,6 @@ function onResultCardClick(e){
     const id = ctl.state.openJewel;
     closeOpenJewelDetail();
     card.querySelector(`.jewel-column[data-jewel-id="${CSS.escape(id)}"] .jewel-main`)?.focus();
-    return;
-  }
-  if(action === 'more'){
-    ctl.state.extrasOpen = !ctl.state.extrasOpen;
-    paintResultCard(card);
-    card.querySelector('.extra-more')?.focus();
     return;
   }
   if(action === 'pin'){
@@ -1779,7 +1798,7 @@ function renderResults(best, options){
     const targetIdx = group.members.findIndex(m => isSharedResultTarget(m.snapshot));
     const ctl = {
       group, ctx,
-      state: { active: Math.max(0, targetIdx), openJewel: '', extrasOpen: false },
+      state: { active: Math.max(0, targetIdx), openJewel: '' },
       highlightKey: targetIdx >= 0 ? group.members[targetIdx].snapshot.key : ''
     };
     _cardControllers.set(card, ctl);
@@ -1787,6 +1806,7 @@ function renderResults(best, options){
     if(targetIdx >= 0 && !highlightedCard) highlightedCard = card;
     container.appendChild(card);
   });
+  updateAllExtraScrollEdges();
   syncPickedSkillHighlight();
 
   if(_pendingHighlightResultKey || _pendingHighlightResultNames.length){
