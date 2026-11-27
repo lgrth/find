@@ -15,7 +15,7 @@ async function searchAndRender(page, scenario) {
   return out.results;
 }
 
-test('similar sets share a card and the swap button walks through them', async () => {
+test('similar sets share a card and the picker lists every set to choose from', async () => {
   const { page, context, errors } = await openApp();
   try {
     const results = await searchAndRender(page, { selected: SIX, topK: 10 });
@@ -24,27 +24,42 @@ test('similar sets share a card and the swap button walks through them', async (
     assert.ok(cardCount < results.length, `${cardCount} cards for ${results.length} results`);
     assert.match(await page.textContent('#resultMeta'), new RegExp(`รวมเหลือ ${cardCount} แบบ`));
 
-    // every result is still reachable: the ranks over all cards and variants are 1..N
+    // every result is still reachable: picking each option over all cards gives ranks 1..N
     const seen = await page.evaluate(() => {
       const ranks = [];
       document.querySelectorAll('#result .result-card').forEach((card) => {
-        const start = card.dataset.rank;
-        do {
+        if (!card.querySelector('.jewel-swap')) { ranks.push(Number(card.dataset.rank)); return; }
+        card.querySelector('.jewel-swap').click();
+        const n = card.querySelectorAll('.vp-option').length;
+        for (let i = 0; i < n; i++) {
+          if (!card.querySelector('.variant-picker')) card.querySelector('.jewel-swap').click();
+          card.querySelectorAll('.vp-option')[i].click();
           ranks.push(Number(card.dataset.rank));
-          const swap = card.querySelector('.jewel-swap');
-          if (!swap) break;
-          swap.click();
-        } while (card.dataset.rank !== start);
+        }
       });
       return ranks.sort((a, b) => a - b);
     });
     assert.deepEqual(seen, results.map((_, i) => i + 1));
 
-    // swapping changes the set (key) and the rank shown
+    // the picker lists every set of the card; choosing one shows it and closes the list
     const grouped = page.locator('#result .result-card--grouped').first();
-    const before = await grouped.getAttribute('data-key');
     await grouped.locator('.jewel-swap').click();
+    const options = grouped.locator('.vp-option');
+    assert.equal(await options.count(), Number((await grouped.locator('.swap-short').textContent()).replace('+', '')) + 1);
+    assert.equal(await grouped.locator('.vp-option.is-on').count(), 1);
+    assert.equal(await grouped.locator('.jewel-swap').getAttribute('aria-expanded'), 'true');
+    // each other option names what it gives and what changes
+    assert.ok(await grouped.locator('.vp-option').nth(1).locator('.vp-want').count() > 0);
+    const before = await grouped.getAttribute('data-key');
+    const target = await grouped.locator('.vp-option:not(.is-on)').first().locator('.vp-rank').textContent();
+    await grouped.locator('.vp-option:not(.is-on)').first().click();
     assert.notEqual(await grouped.getAttribute('data-key'), before);
+    assert.equal(`#${await grouped.getAttribute('data-rank')}`, target);
+    assert.equal(await grouped.locator('.variant-picker').count(), 0);
+    // Esc closes it
+    await grouped.locator('.jewel-swap').click();
+    await page.keyboard.press('Escape');
+    assert.equal(await grouped.locator('.variant-picker').count(), 0);
     assert.deepEqual(errors, []);
   } finally {
     await context.close();
