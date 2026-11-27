@@ -177,10 +177,13 @@ test('new share link with several pendant types (ty bits)', async () => {
 test('type buttons toggle independently, show counts and filter the search', async () => {
   await withApp({}, async ({ page }) => {
     const btn = (t) => page.locator(`#jewelTypeFilter .jewel-type[data-type="${t}"]`);
-    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '(443)');
-    assert.equal(await btn('white').locator('.jewel-type__count').textContent(), '(15)');
-    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '(573)');
+    const all = page.locator('#jewelTypeAll');
+    assert.equal(await btn('dark').locator('.jewel-type__count').textContent(), '443');
+    assert.equal(await btn('white').locator('.jewel-type__count').textContent(), '15');
+    assert.equal(await btn('other').locator('.jewel-type__count').textContent(), '573');
+    assert.equal(await all.getAttribute('aria-pressed'), 'true', '"ทั้งหมด" is on while nothing is picked');
     await btn('white').click();
+    assert.equal(await all.getAttribute('aria-pressed'), 'false');
     await btn('other').click();
     assert.deepEqual((await readForm(page)).jewelTypes, ['white', 'other']);
     assert.equal(await btn('white').getAttribute('aria-pressed'), 'true');
@@ -188,6 +191,9 @@ test('type buttons toggle independently, show counts and filter the search', asy
     assert.deepEqual((await readForm(page)).jewelTypes, ['other']);
     const types = await page.evaluate(() => [...new Set(computeJewelPool().map((j) => j.type))]);
     assert.deepEqual(types, ['other']);
+    await all.click();
+    assert.deepEqual((await readForm(page)).jewelTypes, []);
+    assert.equal(await all.getAttribute('aria-pressed'), 'true');
   });
 });
 

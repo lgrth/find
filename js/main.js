@@ -548,7 +548,7 @@ function updateCalcAvailability(){
     calcBtn2.disabled = true;
     minHint.classList.remove('hint--ok');
     minHint.classList.add('hint--error');
-    minHint.innerHTML = `<span class="dot"></span><span>เลือกอีก ${MIN_SELECTS - count} ความสามารถเพื่อเริ่มค้นหา (ขั้นต่ำ ${MIN_SELECTS} สกิล)</span>`;
+    minHint.innerHTML = `<span class="dot"></span><span>เลือกอีก ${MIN_SELECTS - count} สกิล (ขั้นต่ำ ${MIN_SELECTS})</span>`;
   }else if(waitingCharSheet){
     calcBtn.disabled = true;
     calcBtn2.disabled = true;
@@ -560,8 +560,9 @@ function updateCalcAvailability(){
     calcBtn2.disabled = false;
     minHint.classList.remove('hint--error');
     minHint.classList.add('hint--ok');
-    minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาเซ็ตจี้แล้ว</span>`;
+    minHint.innerHTML = `<span class="dot"></span><span>พร้อมค้นหาแล้ว</span>`;
   }
+  paintEmptyStateSlots();
   // ตัวนับ + progress bar
   if (selectedProgress){
     const pct = Math.min(100, Math.round((count / MAX_SELECTS) * 100));
@@ -819,7 +820,7 @@ async function calculate(){
     }
 
     const topK = readTopK();
-    if(resultTitle) resultTitle.textContent = `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
+    clearResultHeader();
     document.getElementById('result').innerHTML = '';
     showCalcOverlay('กำลังค้นหาเซ็ตจี้ที่ดีที่สุด...');
     __resetCalcETA();
@@ -834,25 +835,206 @@ async function calculate(){
   }
 }
 
+/* ====== Data status dot in the header (replaces the "loaded" toast) ====== */
+function setDataStatus(state, message){
+  const el = document.getElementById('dataStatus');
+  if(!el) return;
+  const labels = {
+    loading: ['กำลังโหลด', 'กำลังโหลดข้อมูลจี้'],
+    checking: ['ข้อมูลล่าสุด', 'แสดงข้อมูลที่บันทึกไว้ กำลังตรวจหาอัปเดต'],
+    ready: ['ข้อมูลล่าสุด', 'ข้อมูลจี้อัปเดตล่าสุดแล้ว'],
+    stale: ['ข้อมูลที่บันทึกไว้', 'เชื่อมต่อชีตไม่ได้ ใช้ข้อมูลที่บันทึกไว้ในเครื่อง'],
+    error: ['โหลดไม่สำเร็จ', 'โหลดข้อมูลจี้ไม่สำเร็จ']
+  };
+  const [label, title] = labels[state] || labels.ready;
+  el.dataset.state = state;
+  el.querySelector('.data-status__label').textContent = label;
+  el.title = message || title;
+  if(state === 'ready' && message){
+    el.classList.remove('is-pulse'); void el.offsetWidth; el.classList.add('is-pulse');
+  }
+}
+
+/* ====== Recent searches (this browser only) ====== */
+const RECENT_SEARCHES_KEY = 'recentSearches_v1';
+const RECENT_SEARCHES_MAX = 5;
+
+function readRecentSearches(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]');
+    return Array.isArray(raw) ? raw.map(x => ({ at: String(x?.at || ''), state: normalizeFilterState(x?.state) }))
+      .filter(x => x.state.selected.length) : [];
+  }catch(_){ return []; }
+}
+
+function rememberRecentSearch(){
+  try{
+    const state = normalizeFilterState(readFilterState());
+    if(!state.selected.length) return;
+    const sig = (st)=> JSON.stringify([st.selected.slice().sort(), st.unwanted.slice().sort(), st.char, st.jewelTypes]);
+    const list = readRecentSearches().filter(x => sig(x.state) !== sig(state));
+    list.unshift({ at: new Date().toISOString(), state });
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(list.slice(0, RECENT_SEARCHES_MAX)));
+  }catch(_){}
+}
+
+function timeAgoThai(iso){
+  const t = Date.parse(iso);
+  if(!t) return '';
+  const min = Math.round((Date.now() - t) / 60000);
+  if(min < 1) return 'เมื่อสักครู่';
+  if(min < 60) return `${min} นาทีก่อน`;
+  const hr = Math.round(min / 60);
+  if(hr < 24) return `${hr} ชั่วโมงก่อน`;
+  const day = Math.round(hr / 24);
+  return day === 1 ? 'เมื่อวาน' : `${day} วันก่อน`;
+}
+
+function quickStartMeta(state){
+  return [
+    `${state.selected.length} สกิล`,
+    state.char || 'ทุกตัวละคร',
+    isAllJewelTypes(state.jewelTypes) ? 'ทุกจี้' : jewelTypesLabel(state.jewelTypes)
+  ].join(' · ');
+}
+
+function quickStartSkills(state){
+  const labels = state.selected.map(requirementLabel);
+  return labels.slice(0, 3).join(' · ') + (labels.length > 3 ? ` +${labels.length - 3}` : '');
+}
+
+/** Result area before any search: recent searches and saved filters, one tap to search again. */
+function emptyStateHTML(){
+  const recents = readRecentSearches().slice(0, 3);
+  const presets = (typeof window.readFavoritePresets === 'function' ? window.readFavoritePresets() : [])
+    .filter(p => p.selected.length).slice(0, 4);
+  const row = (kind, idx, title, meta)=> `
+    <button type="button" class="quick-start" data-quick="${kind}" data-index="${idx}">
+      <span class="quick-start__text"><span class="quick-start__title">${escapeHtmlText(title)}</span><span class="quick-start__meta">${escapeHtmlText(meta)}</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </button>`;
+  const recentHTML = recents.length ? `
+    <div class="quick-starts">
+      <div class="quick-starts__title">ค้นหาล่าสุด</div>
+      ${recents.map((r, i)=> row('recent', i, quickStartSkills(r.state), [quickStartMeta(r.state), timeAgoThai(r.at)].filter(Boolean).join(' · '))).join('')}
+    </div>` : '';
+  const presetHTML = presets.length ? `
+    <div class="quick-starts">
+      <div class="quick-starts__title">Filter ที่บันทึกไว้</div>
+      ${presets.map((p, i)=> row('preset', i, p.name, `${quickStartSkills(p)} · ${quickStartMeta(p)}`)).join('')}
+    </div>` : '';
+  return `
+    <div class="empty-state" id="resultEmptyState">
+      <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
+      <div class="empty-state__msg">เลือกสกิลที่ต้องการอย่างน้อย ${MIN_SELECTS} สกิล แล้วกด "ค้นหาเซ็ตจี้"</div>
+      <div class="empty-state__slots" aria-hidden="true">${'<span></span>'.repeat(MIN_SELECTS)}</div>
+    </div>
+    ${recentHTML}${presetHTML}`;
+}
+
+function paintEmptyStateSlots(){
+  const count = getDesired().length;
+  document.querySelectorAll('#resultEmptyState .empty-state__slots span').forEach((el, i)=> el.classList.toggle('on', i < count));
+}
+
+/** Fill the form from a recent search / saved filter, then search right away. */
+function runQuickStart(kind, index){
+  const list = kind === 'recent'
+    ? readRecentSearches().map(r => r.state)
+    : (typeof window.readFavoritePresets === 'function' ? window.readFavoritePresets() : []);
+  const state = list[index];
+  if(!state) return;
+  const exists = (n)=>{ try{ return requirementExists(n); }catch(_){ return true; } };
+  const selected = state.selected.filter(exists);
+  applyFilterState({
+    selected,
+    unwanted: state.unwanted.filter(exists).filter(n => !selected.includes(n)),
+    jewelTypes: state.jewelTypes,
+    topK: state.topK,
+    char: state.char
+  });
+  if(typeof updateCharPreview === 'function') updateCharPreview();
+  updateCalcAvailability();
+  trackEvent('quick_start_search', { source: kind, selected_skill_count: selected.length });
+  if(selected.length >= MIN_SELECTS) calculate();
+  else showToast(`สกิลบางอย่างไม่มีในข้อมูลล่าสุดแล้ว เลือกเพิ่มให้ครบ ${MIN_SELECTS} สกิล`, 3500, 'warn');
+}
+
+document.getElementById('result')?.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.quick-start');
+  if(btn) runQuickStart(btn.dataset.quick, Number(btn.dataset.index));
+});
+
+/* ====== Mobile: fold the filter panel into a summary once results are on screen ====== */
+const MOBILE_QUERY = window.matchMedia ? window.matchMedia('(max-width: 768px)') : { matches: false };
+
+function renderFilterSummary(){
+  const box = document.getElementById('filterSummaryChips');
+  if(!box) return;
+  const st = readFilterState();
+  const chips = [
+    `<b>${st.selected.length}</b> สกิล`,
+    st.unwanted.length ? `ไม่เอา <b>${st.unwanted.length}</b>` : '',
+    escapeHtmlText(st.char || 'ทุกตัวละคร'),
+    escapeHtmlText(isAllJewelTypes(st.jewelTypes) ? 'ทุกจี้' : jewelTypesLabel(st.jewelTypes))
+  ].filter(Boolean);
+  box.innerHTML = chips.map(c => `<span class="filter-summary__chip">${c}</span>`).join('');
+}
+
+function setFilterPanelCollapsed(collapsed){
+  const section = document.getElementById('filterSummary')?.closest('section');
+  const summary = document.getElementById('filterSummary');
+  const edit = document.getElementById('filterSummaryEdit');
+  if(!section || !summary) return;
+  section.classList.toggle('is-collapsed', !!collapsed);
+  summary.hidden = !section.classList.contains('has-summary');
+  if(edit){
+    edit.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    edit.firstChild.textContent = collapsed ? 'แก้ไข ' : 'ย่อ ';
+  }
+}
+
+function collapseFilterPanelForResults(){
+  const section = document.getElementById('filterSummary')?.closest('section');
+  if(!section || !MOBILE_QUERY.matches) return;
+  renderFilterSummary();
+  section.classList.add('has-summary');
+  setFilterPanelCollapsed(true);
+}
+
+function expandFilterPanel(){
+  const section = document.getElementById('filterSummary')?.closest('section');
+  if(!section) return;
+  section.classList.remove('has-summary');
+  setFilterPanelCollapsed(false);
+}
+
+document.getElementById('filterSummaryEdit')?.addEventListener('click', ()=>{
+  const section = document.getElementById('filterSummary')?.closest('section');
+  const collapsed = !section?.classList.contains('is-collapsed');
+  setFilterPanelCollapsed(collapsed);
+  if(!collapsed){
+    renderFilterSummary();
+    const headerHeight = document.querySelector('header')?.offsetHeight || 50;
+    window.scrollTo({ top: section.getBoundingClientRect().top + window.scrollY - headerHeight - 8, behavior: 'smooth' });
+  }
+});
+MOBILE_QUERY.addEventListener?.('change', (e)=>{ if(!e.matches) expandFilterPanel(); });
+
 function restoreEmptyState(){
   const container = document.getElementById('result');
   if (!container) return;
-  container.innerHTML = `
-    <div class="empty-state" id="resultEmptyState">
-      <div class="empty-state__icon">✨</div>
-      <div class="empty-state__title">ยังไม่มีผลลัพธ์</div>
-      <div class="empty-state__msg">เลือกความสามารถอย่างน้อย ${MIN_SELECTS} อย่าง แล้วกด "ค้นหาเซ็ตจี้"</div>
-
-    </div>`;
+  container.innerHTML = emptyStateHTML();
+  _openDetailCard = null;
+  clearResultHeader();
+  syncPickedSkillHighlight();
   hideDonateCard();
-  hideDonateSticky();
 }
 
 function invalidateResultsForCriteriaChange(){
   restoreEmptyState();
   hideDonateCard();
-  hideDonateSticky();
-  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  expandFilterPanel();
   ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=true; });
   _currentResultSnapshots.clear();
   _pinnedResults.clear();
@@ -886,7 +1068,6 @@ function cancelCalculation(){
   hideCalcOverlay();
   hideLoading();
   restoreEmptyState();
-  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
   ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=true; });
   if(typeof showToast === 'function') showToast('ยกเลิกการค้นหาแล้ว', 2000, 'info');
 }
@@ -1008,11 +1189,7 @@ function renderCompareTray(){
   tray.querySelectorAll('.compare-remove').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       _pinnedResults.delete(btn.dataset.key || '');
-      document.querySelectorAll('.pin-result-btn.is-active').forEach(pin=>{
-        const card = pin.closest('.result-card');
-        const names = Array.from(card?.querySelectorAll('.jewel-name') || []).map(el=>el.textContent.trim()).filter(Boolean);
-        if(names.join('|') === btn.dataset.key) pin.classList.remove('is-active');
-      });
+      repaintAllResultCards();
       renderCompareTray();
     });
   });
@@ -1054,9 +1231,16 @@ function trackEvent(eventName, params = {}) {
   gtag('event', eventName, params);
 }
 
-function openDonateModal(source = 'unknown'){
+let _donateModalOpenedFromCard = false;
+function openDonateModal(source = 'unknown', { treat = '', amount = '' } = {}){
   const modal = document.getElementById('donateModal');
   if(!modal) return;
+  const hint = document.getElementById('donateModalHint');
+  if(hint){
+    hint.hidden = !amount;
+    hint.textContent = amount ? `${treat ? treat + ' ' : ''}~${amount} ฿ (ใส่ยอดเองตอนโอน ยอดเท่าไหร่ก็ได้)` : '';
+  }
+  _donateModalOpenedFromCard = source === 'result_card';
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
@@ -1071,15 +1255,49 @@ function closeDonateModal(){
   const modal = document.getElementById('donateModal');
   if(!modal) return;
 
+  const wasOpen = modal.classList.contains('show');
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden', 'true');
   syncBodyScrollLock();
+  if(wasOpen && _donateModalOpenedFromCard) showToast('💛 ขอบคุณที่ช่วยให้เว็บนี้ไปต่อนะ!', 2800, 'success');
+  _donateModalOpenedFromCard = false;
 }
 
-function showDonateCard(){
+/* ====== Support card under the results ======
+ * Shown from the 2nd search on, or right after the user copies / saves / shares a set.
+ * "ไว้คราวหน้า" hides it for 15 minutes; after the user opens the QR it stays hidden for 30 days.
+ * Everything is kept in this browser only.                                              */
+const DONATE_STORE_KEY = 'donateCard_v1';
+const DONATE_MIN_SEARCHES = 2;
+const DONATE_SNOOZE_MS = 15 * 60 * 1000;
+const DONATE_AFTER_SUPPORT_MS = 30 * 24 * 60 * 60 * 1000;
+let _donateValueMoment = false;   // copied / saved / shared a set in this visit
+
+function readDonateStore(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(DONATE_STORE_KEY) || '{}');
+    return { searches: Number(raw.searches) || 0, hiddenUntil: Number(raw.hiddenUntil) || 0 };
+  }catch(_){ return { searches: 0, hiddenUntil: 0 }; }
+}
+function writeDonateStore(patch){
+  const next = { ...readDonateStore(), ...patch };
+  try{ localStorage.setItem(DONATE_STORE_KEY, JSON.stringify(next)); }catch(_){}
+  return next;
+}
+function donateCardAllowed(store = readDonateStore()){
+  if(store.hiddenUntil > Date.now()) return false;
+  return _donateValueMoment || store.searches >= DONATE_MIN_SEARCHES;
+}
+function hasResultCards(){ return !!document.querySelector('#result .result-card'); }
+
+/** Called after each search that shows results (countSearch=false for re-renders). */
+function showDonateCard({ countSearch = false } = {}){
   const el = document.getElementById('donateResultCard');
   if(!el) return;
-  el.hidden = false;
+  const store = countSearch ? writeDonateStore({ searches: readDonateStore().searches + 1 }) : readDonateStore();
+  const show = hasResultCards() && donateCardAllowed(store);
+  if(show && el.hidden) trackEvent('donate_card_view', { searches: store.searches, value_moment: _donateValueMoment });
+  el.hidden = !show;
 }
 
 function hideDonateCard(){
@@ -1088,62 +1306,94 @@ function hideDonateCard(){
   el.hidden = true;
 }
 
-let donateStickyTimer = null;
-function showDonateSticky(){
-  const el = document.getElementById('donateStickyBar');
-  if(!el) return;
-
-  if(donateStickyTimer){
-    clearTimeout(donateStickyTimer);
-    donateStickyTimer = null;
-  }
-
-  el.hidden = false;
-  el.setAttribute('aria-hidden', 'false');
-
-  requestAnimationFrame(()=> el.classList.add('show'));
-
-  donateStickyTimer = setTimeout(()=>{
-    hideDonateSticky();
-  }, 5000);
+/** The user got something out of a result: good moment to ask. */
+function noteDonateValueMoment(){
+  _donateValueMoment = true;
+  showDonateCard();
 }
 
-function hideDonateSticky(){
-  const el = document.getElementById('donateStickyBar');
-  if(!el) return;
-
-  if(donateStickyTimer){
-    clearTimeout(donateStickyTimer);
-    donateStickyTimer = null;
+function snoozeDonateCard(ms, reason){
+  writeDonateStore({ hiddenUntil: Date.now() + ms });
+  const el = document.getElementById('donateResultCard');
+  if(el && !el.hidden){
+    if(reason === 'later'){
+      // move focus somewhere sensible before the card disappears
+      document.getElementById('resultTitle')?.focus?.({ preventScroll: true });
+    }
+    el.hidden = true;
   }
+}
 
-  el.classList.remove('show');
-  el.setAttribute('aria-hidden', 'true');
+function selectedDonateTreat(){
+  const on = document.querySelector('#donateResultCard .donate-amt.is-on');
+  return { treat: on?.dataset.treat || '', amount: on?.dataset.amount || '' };
+}
 
-  setTimeout(()=>{
-    if(!el.classList.contains('show')) el.hidden = true;
-  }, 280);
+function selectDonateAmount(btn){
+  document.querySelectorAll('#donateResultCard .donate-amt').forEach(b=>{
+    const on = b === btn;
+    b.classList.toggle('is-on', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  const label = document.getElementById('donateResultBtnLabel');
+  if(label) label.textContent = `เลี้ยง${btn.dataset.treat || 'กาแฟ'}`;
+}
+
+function initDonateCard(){
+  const card = document.getElementById('donateResultCard');
+  if(!card) return;
+  const amounts = [...card.querySelectorAll('.donate-amt')];
+  amounts.forEach((b, i)=>{
+    b.addEventListener('click', ()=> selectDonateAmount(b));
+    b.addEventListener('keydown', (e)=>{
+      const step = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+      if(!step) return;
+      e.preventDefault();
+      const next = amounts[(i + step + amounts.length) % amounts.length];
+      selectDonateAmount(next); next.focus();
+    });
+  });
+  // roving tabindex for the radio group
+  const syncTab = ()=> amounts.forEach(b => b.tabIndex = b.classList.contains('is-on') ? 0 : -1);
+  syncTab(); card.addEventListener('click', syncTab);
+
+  document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
+    const pick = selectedDonateTreat();
+    trackEvent('donate_cta_click', { placement: 'result_card', amount: Number(pick.amount) || 0 });
+    snoozeDonateCard(DONATE_AFTER_SUPPORT_MS, 'support');
+    // phones: straight to the app when we can; otherwise the QR window
+    const os = getMobileOS();
+    if((os === 'android' || os === 'ios') && window.matchMedia('(max-width: 767px)').matches){
+      openTrueMoneyApp(os, 'result_card');
+      _donateModalOpenedFromCard = false;
+      showToast('💛 ขอบคุณที่ช่วยให้เว็บนี้ไปต่อนะ!', 2800, 'success');
+      return;
+    }
+    openDonateModal('result_card', pick);
+  });
+  document.getElementById('donateCardQrBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_cta_click', { placement: 'result_card_qr' });
+    openDonateModal('result_card', selectedDonateTreat());
+  });
+  document.getElementById('donateCardSaveQr')?.addEventListener('click', ()=>{
+    trackEvent('donate_qr_download_click', { placement: 'result_card' });
+  });
+  document.getElementById('donateLaterBtn')?.addEventListener('click', ()=>{
+    trackEvent('donate_card_later', {});
+    snoozeDonateCard(DONATE_SNOOZE_MS, 'later');
+    showToast('โอเค ไว้คราวหน้านะ', 1800, 'info');
+  });
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
   hideDonateCard();
-  hideDonateSticky();
+  initDonateCard();
 });
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  document.getElementById('donateResultBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_cta_click', { placement: 'result_card' });
-    openDonateModal('result_card');
-  });
-
   document.getElementById('donateFooterBtn')?.addEventListener('click', ()=>{
     trackEvent('donate_cta_click', { placement: 'footer' });
     openDonateModal('footer');
-  });
-
-  document.getElementById('donateStickyBtn')?.addEventListener('click', ()=>{
-    trackEvent('donate_cta_click', { placement: 'sticky_footer' });
-    openDonateModal('sticky_footer');
   });
 
   document.getElementById('donateClose')?.addEventListener('click', closeDonateModal);
@@ -1180,40 +1430,41 @@ function initDonateOpenAppButton(){
 
   btn.addEventListener('click', (e)=>{
     e.preventDefault();
-
-    trackEvent('donate_open_app_click', {
-      placement: 'modal',
-      os
-    });
-
-    const FALLBACK_ANDROID = 'https://play.google.com/store/apps/details?id=th.co.truemoney.wallet';
-    const FALLBACK_IOS = 'https://apps.apple.com/th/app/truemoney-wallet/id663885752';
-
-    /**
-     * IMPORTANT:
-     * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
-     * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
-     */
-    const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
-    const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
-
-    const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
-    const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
-
-    if(!deepLink){
-      window.location.href = fallbackUrl;
-      return;
-    }
-
-    const start = Date.now();
-    window.location.href = deepLink;
-
-    setTimeout(()=>{
-  if(Date.now() - start < 1800){
-    window.location.href = fallbackUrl;
-  }
-}, 1200);
+    openTrueMoneyApp(os, 'modal');
   });
+}
+
+/** Open the TrueMoney app (deep link), falling back to the app store. */
+function openTrueMoneyApp(os, placement){
+  trackEvent('donate_open_app_click', { placement, os });
+
+  const FALLBACK_ANDROID = 'https://play.google.com/store/apps/details?id=th.co.truemoney.wallet';
+  const FALLBACK_IOS = 'https://apps.apple.com/th/app/truemoney-wallet/id663885752';
+
+  /**
+   * IMPORTANT:
+   * แทนค่า DEEP_LINK_* ด้วย official deep link / universal link ของ TrueMoney
+   * ถ้ายังไม่มี ให้ fallback ไป store อย่างเดียว
+   */
+  const DEEP_LINK_ANDROID = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+  const DEEP_LINK_IOS = 'https://tmn.app.link/?deeplink=ascendmoney://wallet.truemoney.co.th/app/';
+
+  const fallbackUrl = os === 'android' ? FALLBACK_ANDROID : FALLBACK_IOS;
+  const deepLink = os === 'android' ? DEEP_LINK_ANDROID : DEEP_LINK_IOS;
+
+  if(!deepLink){
+    window.location.href = fallbackUrl;
+    return;
+  }
+
+  const start = Date.now();
+  window.location.href = deepLink;
+
+  setTimeout(()=>{
+    if(Date.now() - start < 1800){
+      window.location.href = fallbackUrl;
+    }
+  }, 1200);
 }
 
 
@@ -1270,24 +1521,7 @@ function isSharedResultTarget(snapshot){
   return !!(_pendingHighlightResultKey && snapshot.key === _pendingHighlightResultKey);
 }
 
-function updateExtraOverflowToggles(root=document){
-  root.querySelectorAll('.row-extra--collapsible').forEach(row=>{
-    const text = row.querySelector('.extra-text');
-    if(!text) return;
-
-    row.classList.remove('is-overflowing','expanded');
-    row.setAttribute('aria-expanded','false');
-
-    const lineHeight = parseFloat(getComputedStyle(text).lineHeight) || 18;
-    const maxHeight = lineHeight + 1;
-    const fullHeight = text.scrollHeight;
-    if(fullHeight > maxHeight){
-      row.classList.add('is-overflowing');
-    }
-  });
-}
-
-/** Labels after a skill in the pendant tooltip: 📈 / 📉 / 🔒 from its Note, unreadable Note text as is, max stack. */
+/** Labels after a skill in the pendant details: 📈 / 📉 / 🔒 from its Note, unreadable Note text as is, max stack. */
 function substatBadges(s){
   const fmt = (n)=> String(+Number(n).toFixed(2));
   const out = [];
@@ -1304,6 +1538,310 @@ function substatBadges(s){
   return out;
 }
 
+/* ====== Result cards (compact) ======
+ * Results that differ by one pendant share a card; the pendant that changes gets a
+ * "⇄ อีก N แบบ" button. Tapping a pendant opens its skills inline and highlights the
+ * matching picked skills in the filter panel. Card state lives in _cardControllers.   */
+const _cardControllers = new WeakMap();
+let _openDetailCard = null;
+
+const RESULT_MENU_HTML = `
+  <button type="button" data-action="copy-names"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg><span>คัดลอกชื่อจี้</span></button>
+  <button type="button" data-action="share-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg><span>แชร์เซ็ตนี้</span></button>
+  <button type="button" data-action="save-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg><span>บันทึกเซ็ตนี้</span></button>`;
+const PIN_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a6 6 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707s.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a6 6 0 0 1 1.013.16l3.134-3.133a3 3 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146"/></svg>';
+const SWAP_ICON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>';
+
+/** Everything a card needs about one search result. */
+function describeResult(r, rank, ctx){
+  const { desired, jewelMap } = ctx;
+  const group = r.ids.map(id => jewelMap.get(id)).filter(Boolean);
+  const ownership = computeResultOwnership(r);
+
+  // ไม่นับเป็น "หายไป" ถ้าเซ็ตนี้ได้สกิลอื่นที่เลือกไว้ซึ่งเป็น variant เดียวกันแล้ว
+  const variantOfReq = (req)=> isGroupRequirement(req) ? '' : (abilityOf(req)?.variant || '');
+  const matchedVariants = new Set(desired.filter((_,idx)=> !r.notIdx.includes(idx)).map(variantOfReq).filter(Boolean));
+  const missingReqs = desired.filter((_,idx)=> r.notIdx.includes(idx));
+  const notList = missingReqs.filter(req => !matchedVariants.has(variantOfReq(req))).map(requirementLabel);
+  const allNames = new Set(); group.forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
+  // แยก extra ออกจาก unwanted — คำนวณใน render เพื่อให้ทั้ง normal และ fixed-link path ถูกต้อง
+  const extra = [...allNames].filter(nm => !ctx.isWanted(nm) && !ctx.isUnwanted(nm));
+  const extraUnwanted = [...allNames].filter(nm => !ctx.isWanted(nm) && ctx.isUnwanted(nm));
+  const matchedCount = desired.length - missingReqs.length;
+  const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
+  const snapshot = createResultSnapshot({ rank, result: r, group, notList, extra, extraUnwanted, total, matchedCount });
+  return {
+    rank, result: r, ids: r.ids.slice(), group, ownership, notList, extra, extraUnwanted, matchedCount, total, snapshot,
+    // only results that look the same at a glance are folded into one card
+    quality: `${matchedCount}|${notList.length}|${extraUnwanted.length}|${ownership.missingCount}`
+  };
+}
+
+function jewelTooltipText(j, ctx){
+  return j.substats.map(s=>{
+    const icon = ctx.isWanted(s.name) ? '✅' : '✨';
+    return `${icon} ${s.name}: ${s.value}%` + substatBadges(s).map(b => ` · ${b}`).join('');
+  }).join('\n');
+}
+
+function jewelTileHTML(j, item, ctx, opts){
+  const isLink = isLinkId(j.id);
+  const isOwned = item.ownership.ownedIds.includes(j.id);
+  const { prefix, base, tag } = splitJewelName(j.id);
+  const kind = jewelPrefixKind(prefix);
+  const cls = 'jewel-column'
+    + (isLink ? ' jewel-link' : '')
+    + (isOwned ? ' is-owned' : ' is-missing')
+    + (opts.common ? ' is-common' : '')
+    + (opts.variantCount ? ' is-variant' : '')
+    + (opts.open ? ' is-open' : '');
+  const charLabel = isLink ? (j.allowedChars || j.AllowedChars || '').toString().trim() : '';
+  const pre = prefix ? `<span class="jn-pre jn-pre--${kind}">[${escapeHtmlText(prefix)}]</span> ` : '';
+  const tagHTML = tag ? ` <span class="jn-tag">${escapeHtmlText(tag)}</span>` : '';
+  const lock = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + escapeHtmlText(charLabel) : 'ตัวละคร'}</span>` : '';
+  const swap = opts.variantCount
+    ? `<button type="button" class="jewel-swap" data-action="swap" title="สลับจี้ชิ้นนี้ ดูเซ็ตคล้ายกัน" aria-label="สลับจี้ชิ้นนี้ ดูเซ็ตคล้ายกันอีก ${opts.variantCount} แบบ">${SWAP_ICON}<span class="swap-long">อีก ${opts.variantCount} แบบ</span><span class="swap-short" aria-hidden="true">+${opts.variantCount}</span></button>`
+    : '';
+  return `<div class="${cls}" data-tooltip="${escapeHtmlAttr(jewelTooltipText(j, ctx))}" data-jewel-id="${escapeHtmlAttr(j.id)}">`
+    + `<button type="button" class="jewel-main" data-action="jewel" aria-expanded="${opts.open ? 'true' : 'false'}" aria-label="${escapeHtmlAttr(j.id)} — ดูสกิลของจี้นี้">`
+    + `${lock}<span class="jewel-name">${pre}<span class="jn-base">${escapeHtmlText(base)}</span>${tagHTML}</span></button>${swap}</div>`;
+}
+
+/** One wrapping row, a chip per skill (the open tile above is outlined in the same green) (✓ wanted / + extra / ! unwanted). */
+function jewelDetailHTML(j, ctx){
+  const kinds = { want: ['✓', 'สกิลที่ต้องการ'], unwant: ['!', 'สกิลที่ไม่ต้องการ'], extra: ['+', 'ได้สกิลเพิ่ม'] };
+  const items = j.substats.map(s=>{
+    const kind = ctx.isWanted(s.name) ? 'want' : (ctx.isUnwanted(s.name) ? 'unwant' : 'extra');
+    const [icon, label] = kinds[kind];
+    const note = substatBadges(s).join(' · ');
+    return `<li class="jd-item jd-item--${kind}" title="${escapeHtmlAttr(label + (note ? ' · ' + note : ''))}">`
+      + `<span class="jd-icon" aria-hidden="true">${icon}</span><span class="jd-name">${escapeHtmlText(s.name)}</span>`
+      + `<span class="jd-val">${escapeHtmlText(s.value)}%</span>`
+      + (note ? `<span class="jd-note">${escapeHtmlText(note)}</span>` : '')
+      + `<span class="visually-hidden"> (${label})</span></li>`;
+  }).join('');
+  return `<div class="jewel-detail">
+    <ul class="jewel-detail__list" aria-label="สกิลของ ${escapeHtmlAttr(j.id)}">${items}</ul>
+    <button type="button" class="jewel-detail__close" data-action="close-detail" aria-label="ปิดรายละเอียดจี้">×</button>
+  </div>`;
+}
+
+function cardInnerHTML(ctl, ctx){
+  const { group, state } = ctl;
+  const item = group.members[state.active];
+  const rank = item.rank;
+  const variants = group.members.length - 1;
+  const openJewel = item.group.find(j => j.id === state.openJewel) || null;
+  const hlSkills = new Set(openJewel ? openJewel.substats.map(s=>s.name) : []);
+
+  const badges = [
+    `<span class="badge badge--match" title="สกิลที่ต้องการที่เซ็ตนี้มี">✓ ตรง ${item.matchedCount}/${ctx.desired.length}</span>`,
+    item.notList.length ? `<span class="badge badge--not" title="สกิลที่ต้องการแต่เซ็ตนี้ไม่มี">หายไป ${item.notList.length}</span>` : '',
+    item.extraUnwanted.length ? `<span class="badge badge--warn" title="เซ็ตนี้มีสกิลที่ไม่ต้องการ">ไม่ต้องการ ${item.extraUnwanted.length}</span>` : '',
+    item.extra.length ? `<span class="badge badge--extra" title="สกิลอื่นที่ได้เพิ่มจากเซ็ตนี้">+${item.extra.length} สกิล</span>` : '',
+    ctx.sameScore ? '' : `<span class="badge badge--score" title="คะแนนความเทพ">★ ${escapeHtmlText(item.total)}</span>`
+  ].join('');
+
+  const tiles = item.group.map(j => jewelTileHTML(j, item, ctx, {
+    common: ctx.common.has(j.id),
+    variantCount: (variants && group.base && !group.base.includes(j.id)) ? variants : 0,
+    open: j.id === state.openJewel
+  })).join('');
+
+  const chips = (list, cls)=> list.map(n=>`<span class="skill-chip ${cls}">${escapeHtmlText(n)}</span>`).join('');
+  const missHTML = item.notList.length
+    ? `<div class="row-ability row-miss"><span class="row-ability__label">หายไป:</span>${chips(item.notList, 'skill-chip--miss')}</div>` : '';
+  const unwantedHTML = item.extraUnwanted.length
+    ? `<div class="row-ability row-unwanted"><span class="row-ability__label">ไม่ต้องการ:</span>${chips(item.extraUnwanted, 'skill-chip--warn')}</div>` : '';
+  // every extra skill on one line; the line scrolls sideways when it does not fit
+  const extraList = item.extra.map(nm=>
+    `<button type="button" class="extra-skill${hlSkills.has(nm) ? ' is-hl' : ''}" data-skill="${escapeHtmlAttr(nm)}" title="กดเพื่อเพิ่มเป็นสกิลที่ต้องการ หรือไม่เอาสกิลนี้">${escapeHtmlText(nm)}</button>`).join('');
+  const extraHTML = item.extra.length
+    ? `<div class="row-ability row-extra"><span class="row-ability__label">ได้สกิลเพิ่ม:</span><div class="extra-scroll" tabindex="-1">${extraList}</div></div>` : '';
+
+  const pinned = _pinnedResults.has(item.snapshot.key);
+  return `
+    <div class="card-head">
+      <h3 class="rank-pill${rank <= 3 ? ' rank-pill--' + rank : ''}" aria-label="อันดับ ${rank}">${rank}</h3>
+      <div class="badges" aria-label="สรุปความตรงใจ">${badges}</div>
+      <div class="card-actions">
+        <button type="button" class="result-icon-btn pin-result-btn${pinned ? ' is-active' : ''}" data-action="pin" title="ปักไว้เพื่อเทียบ" aria-label="ปักไว้เพื่อเทียบ" aria-pressed="${pinned ? 'true' : 'false'}">${PIN_ICON}</button>
+        <div class="result-action">
+          <button type="button" class="result-icon-btn result-menu-btn" data-action="menu" aria-label="ตัวเลือกเซ็ตนี้" title="ตัวเลือกเซ็ตนี้">⋯</button>
+          <div class="result-menu" role="menu">${RESULT_MENU_HTML}</div>
+        </div>
+      </div>
+    </div>
+    <div class="jewel-columns">${tiles}</div>
+    ${openJewel ? jewelDetailHTML(openJewel, ctx) : ''}
+    ${missHTML}${unwantedHTML}${extraHTML}`;
+}
+
+function paintResultCard(card){
+  const ctl = _cardControllers.get(card);
+  if(!ctl) return;
+  const item = ctl.group.members[ctl.state.active];
+  card.dataset.key = item.snapshot.key;
+  card.dataset.rank = String(item.rank);
+  card.classList.toggle('result-card--grouped', ctl.group.members.length > 1);
+  card.classList.toggle('result-card--highlight', ctl.highlightKey === item.snapshot.key);
+  card.innerHTML = cardInnerHTML(ctl, ctl.ctx);
+  const scroller = card.querySelector('.extra-scroll');
+  if(scroller){
+    // bring the highlighted skills of the open pendant into view, then mark the faded edges
+    const hl = scroller.querySelector('.extra-skill.is-hl');
+    if(hl) scroller.scrollLeft = Math.max(0, hl.offsetLeft - scroller.offsetLeft - 24);
+    scroller.addEventListener('scroll', ()=>{ updateExtraScrollEdges(scroller); followSkillActionMenu(scroller); }, { passive: true });
+    updateExtraScrollEdges(scroller);
+  }
+}
+
+/** Fade the left / right edge of the extra-skill line while more chips are hidden there. */
+function updateExtraScrollEdges(el){
+  const max = el.scrollWidth - el.clientWidth;
+  el.classList.toggle('has-more-left', el.scrollLeft > 2);
+  el.classList.toggle('has-more-right', max - el.scrollLeft > 2);
+}
+function updateAllExtraScrollEdges(){
+  document.querySelectorAll('#result .extra-scroll').forEach(updateExtraScrollEdges);
+}
+window.addEventListener('resize', ()=>{ clearTimeout(updateAllExtraScrollEdges._t); updateAllExtraScrollEdges._t = setTimeout(updateAllExtraScrollEdges, 120); });
+/** The add / skip bubble follows its chip while the line scrolls, and closes once the chip leaves the line. */
+function followSkillActionMenu(scroller){
+  const chip = scroller.querySelector('.extra-skill.is-menu-open');
+  if(!chip || typeof placeSkillActionMenu !== 'function') return;
+  const c = chip.getBoundingClientRect(), s = scroller.getBoundingClientRect();
+  if(c.right < s.left + 8 || c.left > s.right - 8) hideSkillActionMenu();
+  else placeSkillActionMenu();
+}
+
+function repaintAllResultCards(){
+  document.querySelectorAll('#result .result-card').forEach(paintResultCard);
+}
+
+/** Highlight the picked-skill chips that the open pendant provides. */
+function syncPickedSkillHighlight(){
+  const ctl = _openDetailCard && _cardControllers.get(_openDetailCard);
+  const item = ctl ? ctl.group.members[ctl.state.active] : null;
+  const jewel = item ? item.group.find(j => j.id === ctl.state.openJewel) : null;
+  const names = jewel ? jewel.substats.map(s=>s.name) : [];
+  document.querySelectorAll('#chipSelected .chip[data-req]').forEach(chip=>{
+    const req = chip.dataset.req;
+    chip.classList.toggle('is-hl', names.some(n => requirementMatches(req, n, abilityOf)));
+  });
+}
+
+function closeOpenJewelDetail(){
+  if(_openDetailCard){
+    const ctl = _cardControllers.get(_openDetailCard);
+    if(ctl){ ctl.state.openJewel = ''; paintResultCard(_openDetailCard); }
+  }
+  _openDetailCard = null;
+  syncPickedSkillHighlight();
+}
+
+function onResultCardClick(e){
+  const card = e.target.closest('.result-card');
+  const ctl = card && _cardControllers.get(card);
+  if(!ctl) return;
+  const actEl = e.target.closest('[data-action]');
+  if(!actEl || !card.contains(actEl)) return;
+  const action = actEl.dataset.action;
+  const item = ctl.group.members[ctl.state.active];
+
+  if(action === 'swap'){
+    e.stopPropagation();
+    const swappedId = actEl.closest('.jewel-column')?.dataset.jewelId;
+    if(_openDetailCard === card) _openDetailCard = null;
+    ctl.state.openJewel = '';
+    ctl.state.active = (ctl.state.active + 1) % ctl.group.members.length;
+    paintResultCard(card);
+    syncPickedSkillHighlight();
+    // keep focus on the swap button of the slot that changed
+    const next = ctl.group.members[ctl.state.active];
+    const newId = next.ids.find(id => !(ctl.group.base || []).includes(id)) || swappedId;
+    card.querySelector(`.jewel-column[data-jewel-id="${CSS.escape(newId || '')}"] .jewel-swap`)?.focus();
+    trackEvent('swap_result_variant', { result_rank: next.rank, group_size: ctl.group.members.length });
+    return;
+  }
+  if(action === 'jewel'){
+    const id = actEl.closest('.jewel-column')?.dataset.jewelId || '';
+    const opening = ctl.state.openJewel !== id;
+    if(_openDetailCard && _openDetailCard !== card) closeOpenJewelDetail();
+    ctl.state.openJewel = opening ? id : '';
+    _openDetailCard = opening ? card : null;
+    paintResultCard(card);
+    syncPickedSkillHighlight();
+    card.querySelector(`.jewel-column[data-jewel-id="${CSS.escape(id)}"] .jewel-main`)?.focus();
+    if(opening) trackEvent('open_jewel_detail', { result_rank: item.rank });
+    return;
+  }
+  if(action === 'close-detail'){
+    const id = ctl.state.openJewel;
+    closeOpenJewelDetail();
+    card.querySelector(`.jewel-column[data-jewel-id="${CSS.escape(id)}"] .jewel-main`)?.focus();
+    return;
+  }
+  if(action === 'pin'){
+    e.stopPropagation();
+    togglePinnedResult(item.snapshot, actEl);
+    actEl.setAttribute('aria-pressed', actEl.classList.contains('is-active') ? 'true' : 'false');
+    return;
+  }
+  if(action === 'menu'){
+    e.stopPropagation();
+    const wrap = actEl.closest('.result-action');
+    document.querySelectorAll('.result-action.open').forEach(el=>{ if(el !== wrap) el.classList.remove('open'); });
+    wrap?.classList.toggle('open');
+    return;
+  }
+  if(action === 'copy-names' || action === 'share-result' || action === 'save-result'){
+    e.stopPropagation();
+    actEl.closest('.result-action')?.classList.remove('open');
+    const snapshot = item.snapshot;
+    if(action === 'copy-names'){
+      trackEvent('copy_jewel_names', { result_rank: Number(snapshot.rank) || 0, jewel_count: snapshot.names.length });
+      copyText(snapshot.names.join(', '), 'คัดลอกชื่อจี้แล้ว');
+    }
+    if(action === 'share-result') shareResultSnapshot(snapshot);
+    if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
+    noteDonateValueMoment();
+  }
+}
+document.getElementById('result')?.addEventListener('click', onResultCardClick);
+
+/** Header above the cards: counts, the score note and the "every set has" banner. */
+function setResultHeader({ shownCount = 0, topK = DEFAULT_TOPK, cardCount = 0, sameScore = false, score = '', common = [] } = {}){
+  const meta = document.getElementById('resultMeta');
+  const scoreNote = document.getElementById('resultScoreNote');
+  const commonEl = document.getElementById('resultCommon');
+  if(meta){
+    let text = '';
+    if(shownCount){
+      text = shownCount < topK ? `พบ ${shownCount} จาก ${topK} เซ็ต` : `${shownCount} เซ็ต`;
+      if(cardCount && cardCount < shownCount) text += ` · รวมเหลือ ${cardCount} แบบ`;
+    }
+    meta.textContent = text;
+  }
+  if(scoreNote){
+    scoreNote.hidden = !(shownCount > 1 && sameScore);
+    scoreNote.textContent = `★ ทุกเซ็ตคะแนน ${score}`;
+    scoreNote.title = 'ทุกเซ็ตได้คะแนนความเทพเท่ากัน จึงไม่แสดงในแต่ละการ์ด';
+  }
+  if(commonEl){
+    commonEl.hidden = !common.length;
+    commonEl.innerHTML = common.length
+      ? `<span class="result-common__label">${common.length > 1 ? `ทุกเซ็ตมีจี้ ${common.length} ชิ้นนี้:` : 'ทุกเซ็ตมีจี้ชิ้นนี้:'}</span>`
+        + common.map(id=>{
+            const { prefix, base, tag } = splitJewelName(id);
+            return `<span class="result-common__item">${prefix ? `<span class="jn-pre jn-pre--${jewelPrefixKind(prefix)}">[${escapeHtmlText(prefix)}]</span> ` : ''}${escapeHtmlText(base)}${tag ? ` <span class="jn-tag">${escapeHtmlText(tag)}</span>` : ''}</span>`;
+          }).join('<span class="result-common__sep" aria-hidden="true">·</span>')
+        + `<span class="result-common__hint">ในการ์ดแสดงเป็นกรอบเส้นประ</span>`
+      : '';
+  }
+}
+function clearResultHeader(){ setResultHeader(); }
+
 function renderResults(best, options){
   options = options || {};
   const sourceResults = Array.isArray(best) ? best : [];
@@ -1311,6 +1849,7 @@ function renderResults(best, options){
   best = filterResultsByInventory(sourceResults);
   const container=document.getElementById('result'); container.innerHTML='';
   _currentResultSnapshots.clear();
+  _openDetailCard = null;
   const desired = getDesired()||[];
   const topK = parseInt((document.getElementById('topK')?.value || '').trim(), 10) || DEFAULT_TOPK;
   const shownCount = Math.min(best.length, topK);
@@ -1331,18 +1870,13 @@ function renderResults(best, options){
 
   ['shareBtn','shareBtn2'].forEach(id=>{ const b=document.getElementById(id); if(b) b.disabled=(shownCount === 0); });
   syncInventoryResultFilterUI();
-updateInventoryResultFiltersVisibility();
-
-  if(resultTitle){
-    resultTitle.textContent = shownCount < topK
-      ? `💎 เซ็ตจี้ที่ดีที่สุด (พบ ${shownCount} จาก ${topK} เซ็ต)`
-      : `💎 เซ็ตจี้ที่ดีที่สุด Top ${topK}`;
-  }
+  updateInventoryResultFiltersVisibility();
 
   if(shownCount === 0){
+    clearResultHeader();
+    syncPickedSkillHighlight();
     container.innerHTML = `
       <div class="empty-state" id="resultEmptyState">
-        <div class="empty-state__icon">✨</div>
         <div class="empty-state__title">ไม่พบเซ็ตที่ตรงเงื่อนไข</div>
         <div class="empty-state__msg">${window._inventoryResultFilterMode === 'buildable' ? 'ยังไม่มีเซ็ตที่ประกอบได้ครบจากคลังจี้ตอนนี้' : window._inventoryResultFilterMode === 'missing1' ? 'ยังไม่มีเซ็ตที่ขาดเพียง 1 ชิ้นจากคลังจี้ตอนนี้' : 'ลองลดจำนวนสกิลที่ไม่ต้องการ หรือปรับเงื่อนไขแล้วค้นหาใหม่'}</div>
       </div>
@@ -1350,7 +1884,22 @@ updateInventoryResultFiltersVisibility();
     return;
   }
 
-  const jewelMap = new Map((jewels || []).map(j=>[j.id,j]));
+  const unwantedReqs = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
+  const ctx = {
+    desired,
+    jewelMap: new Map((jewels || []).map(j=>[j.id,j])),
+    isWanted: (nm)=> matchesAnyRequirement(desired, nm, abilityOf),
+    isUnwanted: (nm)=> matchesAnyRequirement(unwantedReqs, nm, abilityOf)
+  };
+  const items = best.slice(0, topK).map((r, i)=> describeResult(r, i + 1, ctx));
+  items.forEach(item => _currentResultSnapshots.set(item.snapshot.key, item.snapshot));
+  ctx.sameScore = allEqual(items.map(it => it.total));
+  const common = commonIds(items.map(it => it.ids));
+  ctx.common = new Set(common);
+  const groups = groupSimilarResults(items);
+
+  setResultHeader({ shownCount, topK, cardCount: groups.length, sameScore: ctx.sameScore, score: items[0].total, common });
+
   if(shownCount < topK){
     container.insertAdjacentHTML('beforeend', createGuidanceHTML({
       title:`พบ ${shownCount} จาก ${topK} เซ็ต โปรดดูคำแนะนำด้านล่าง`,
@@ -1359,148 +1908,29 @@ updateInventoryResultFiltersVisibility();
     }));
   }
 
-  best.slice(0, topK).forEach((r,i)=>{
-    const card=document.createElement('div'); card.className=`result-card rank-${i+1}`; card.style.animationDelay=`${i*0.06}s`;
-    const group = r.ids.map(id => jewelMap.get(id)).filter(Boolean);
-
-    const ownership = computeResultOwnership(r);
-    const jewelCols = group.map(j=>{
-      const tooltip = j.substats.map(s=>{
-        const icon = matchesAnyRequirement(desired, s.name, abilityOf)?'✅':'✨';
-        return `${icon} ${s.name}: ${s.value}%` + substatBadges(s).map(b => ` · ${b}`).join('');
-      }).join('\n');
-      const isLink = isLinkId(j.id);
-      const isOwned = ownership.ownedIds.includes(j.id);
-      const cls = 'jewel-column' + (isLink ? ' jewel-link' : '') + (isOwned ? ' is-owned' : ' is-missing');
-      const charLabel = isLink ? (j.allowedChars || j.AllowedChars || '').toString().trim() : '';
-      const badge = isLink ? `<span class="jewel-lock-badge">🔒 เฉพาะ${charLabel ? ' ' + escapeHtmlText(charLabel) : 'ตัวละคร'} 🔒</span>` : '';
-      return `<div class="${cls}" data-tooltip="${escapeHtmlAttr(tooltip)}">${badge}<span class="jewel-name">${escapeHtmlText(j.id)}</span><span class="jewel-info" aria-hidden="true">ⓘ</span></div>`;
-    }).filter(Boolean).join('');
-
-    // ไม่นับเป็น "หายไป" ถ้าเซ็ตนี้ได้สกิลอื่นที่เลือกไว้ซึ่งเป็น variant เดียวกันแล้ว
-    const variantOfReq = (req)=> isGroupRequirement(req) ? '' : (abilityOf(req)?.variant || '');
-    const matchedVariants = new Set(desired.filter((_,idx)=> !r.notIdx.includes(idx)).map(variantOfReq).filter(Boolean));
-    const missingReqs = desired.filter((_,idx)=> r.notIdx.includes(idx));
-    const notList = missingReqs.filter(req => !matchedVariants.has(variantOfReq(req))).map(requirementLabel);
-    const allNames = new Set(); group.filter(Boolean).forEach(j=>j.substats.forEach(s=>allNames.add(s.name)));
-    // แยก extra ออกจาก unwanted — recalculate ใน render เพื่อให้ทั้ง normal และ fixed-link path ถูกต้อง
-    const unwantedReqs = Array.isArray(window._chipUnwanted) ? window._chipUnwanted : [];
-    const isWanted = (nm)=> matchesAnyRequirement(desired, nm, abilityOf);
-    const isUnwanted = (nm)=> matchesAnyRequirement(unwantedReqs, nm, abilityOf);
-    const extra = [...allNames].filter(nm => !isWanted(nm) && !isUnwanted(nm));
-    const extraUnwanted = [...allNames].filter(nm => !isWanted(nm) && isUnwanted(nm));
-    const effectiveUnwantedCount = extraUnwanted.length;
-    const matchedCount = desired.length - missingReqs.length;
-
-    const notBadge = notList.length > 0 ? `<span class="badge badge--not" title="จำนวนที่ยังไม่ตรงกับที่เลือก">🔴 หายไป ${notList.length}</span>` : '';
-    const warnBadge = effectiveUnwantedCount > 0 ? `<span class="badge badge--warn" title="เซ็ตนี้มีสกิลที่ไม่ต้องการ ${effectiveUnwantedCount} รายการ">⚠️ ไม่ต้องการ ${effectiveUnwantedCount}</span>` : '';
-    const badgesHTML = `
-      <div class="badges" aria-label="สรุปความตรงใจ">
-        <span class="badge badge--match" title="ความสามารถที่เลือกไว้ตรงครบ">✅ ตรงเป๊ะ ${matchedCount}</span>
-        ${notBadge}
-        ${warnBadge}
-        ${extra.length > 0 ? `<span class="badge badge--extra badge--extra-sm" title="ความสามารถที่ได้เพิ่มจากเซ็ตนี้">+${extra.length}</span>` : ''}
-      </div>`;
-
-    const total = (r.totalValue ?? 0).toFixed(2).replace(/\.00$/,'');
-    const extraSkillHTML = extra.map((nm, idx)=>`<button type="button" class="extra-skill" data-skill="${escapeHtmlAttr(nm)}">${escapeHtmlText(nm)}</button>${idx < extra.length - 1 ? ', ' : ''}`).join('');
-    const snapshot = createResultSnapshot({
-      rank: i + 1,
-      result: r,
-      group,
-      notList,
-      extra,
-      extraUnwanted,
-      total,
-      matchedCount
-    });
-    _currentResultSnapshots.set(snapshot.key, snapshot);
-    if(isSharedResultTarget(snapshot)){
-      card.classList.add('result-card--highlight');
-    }
-
-    const notMatchHTML = notList.length ? `<div class="row-ability row-miss"><strong class="row-ability__label">หายไป:</strong><span class="row-ability__text">${notList.map(escapeHtmlText).join(', ')}</span></div>` : '';
-    const extraHTML = extra.length ? `<div class="row-ability row-extra row-extra--collapsible"><div class="row-ability__head"><strong class="row-ability__label">ได้เพิ่ม:</strong><span class="row-ability__toggle" aria-hidden="true"></span></div><span class="row-ability__text extra-text">${extraSkillHTML}</span></div>` : '';
-    const unwantedHTML = extraUnwanted.length ? `<div class="row-ability row-miss"><strong class="row-ability__label">ไม่ต้องการ:</strong><span class="row-ability__text">${extraUnwanted.map(escapeHtmlText).join(', ')}</span></div>` : '';
-
-    const headerHTML = `
-  <div class="card-head">
-    <h3 aria-label="อันดับ ${i+1}"><span class="rank-full" aria-hidden="true">อันดับ ${i+1}</span><span class="rank-short" aria-hidden="true">#${i+1}</span></h3>
-    ${badgesHTML}
-  </div>
-`;
-
-card.innerHTML = `
-  ${headerHTML}
-  <div class="jewel-wrap"><div class="jewel-columns">${jewelCols}</div></div>
-  <div class="card-info">
-    ${notMatchHTML ? `<p>${notMatchHTML}</p>` : ''}
-    ${unwantedHTML ? `<p>${unwantedHTML}</p>` : ''}
-    ${extraHTML ? `<p>${extraHTML}</p>` : ''}
-    <p><strong>▸ คะแนนความเทพ = </strong> ${total} คะแนน</p>
-  </div>
-`;
-
-    const names = snapshot.names || [];
-    const pinBtn = document.createElement('button');
-    pinBtn.className = 'result-icon-btn pin-result-btn' + (_pinnedResults.has(snapshot.key) ? ' is-active' : '');
-    pinBtn.type = 'button';
-    pinBtn.title = 'ปักไว้เพื่อเทียบ';
-    pinBtn.setAttribute('aria-label','ปักไว้เพื่อเทียบ');
-    pinBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a6 6 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707s.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a6 6 0 0 1 1.013.16l3.134-3.133a3 3 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146"/></svg>';
-    pinBtn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      togglePinnedResult(snapshot, pinBtn);
-    });
-
-    const actionWrap = document.createElement('div');
-    actionWrap.className = 'result-action';
-    actionWrap.innerHTML = `
-      <button type="button" class="result-icon-btn result-menu-btn" aria-label="ตัวเลือกเซ็ตนี้" title="ตัวเลือกเซ็ตนี้">⋯</button>
-      <div class="result-menu" role="menu">
-        <button type="button" data-action="copy-names"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg><span>คัดลอกชื่อจี้</span></button>
-        <button type="button" data-action="share-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg><span>แชร์เซ็ตนี้</span></button>
-        <button type="button" data-action="save-result"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg><span>บันทึกเซ็ตนี้</span></button>
-      </div>`;
-    actionWrap.querySelector('.result-menu-btn')?.addEventListener('click', (e)=>{
-  e.stopPropagation();
-  document.querySelectorAll('.result-action.open').forEach(el=>{ if(el !== actionWrap) el.classList.remove('open'); });
-  actionWrap.classList.toggle('open');
-});
-
-actionWrap.querySelector('.result-menu')?.addEventListener('click', (e)=>{
-  const menu = e.currentTarget;
-  const btn = e.target.closest('[data-action]');
-  if(!btn || !menu.contains(btn)) return;
-
-  const action = btn.dataset.action;
-
-  e.stopPropagation();
-  actionWrap.classList.remove('open');
-
-if(action === 'copy-names'){
-  trackEvent('copy_jewel_names', {
-    result_rank: Number(snapshot.rank) || 0,
-    jewel_count: names.length
-  });
-  copyText(names.join(', '), 'คัดลอกชื่อจี้แล้ว');
-}
-  if(action === 'share-result') shareResultSnapshot(snapshot);
-  if(action === 'save-result' && typeof saveResultSetSnapshot === 'function') saveResultSetSnapshot(snapshot);
-});
-    const head = card.querySelector('.card-head');
-    const badgesEl = head?.querySelector('.badges');
-    if(badgesEl){ badgesEl.append(pinBtn, actionWrap); }
-    else if(head){ head.append(pinBtn, actionWrap); }
-    else { card.append(pinBtn, actionWrap); }
+  let highlightedCard = null;
+  groups.forEach((group, gi)=>{
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.style.animationDelay = `${Math.min(gi, 10) * 0.04}s`;
+    const targetIdx = group.members.findIndex(m => isSharedResultTarget(m.snapshot));
+    const ctl = {
+      group, ctx,
+      state: { active: Math.max(0, targetIdx), openJewel: '' },
+      highlightKey: targetIdx >= 0 ? group.members[targetIdx].snapshot.key : ''
+    };
+    _cardControllers.set(card, ctl);
+    paintResultCard(card);
+    if(targetIdx >= 0 && !highlightedCard) highlightedCard = card;
     container.appendChild(card);
   });
+  updateAllExtraScrollEdges();
+  syncPickedSkillHighlight();
 
   if(_pendingHighlightResultKey || _pendingHighlightResultNames.length){
-    const highlighted = container.querySelector('.result-card--highlight');
-    if(highlighted){
+    if(highlightedCard){
       setTimeout(()=>{
-        highlighted.scrollIntoView({behavior:'smooth', block:'center'});
+        highlightedCard.scrollIntoView({behavior:'smooth', block:'center'});
         showToast('เปิดเซ็ตจี้ที่แชร์ไว้แล้ว', 2400, 'success');
       }, 250);
     }else{
@@ -1510,18 +1940,15 @@ if(action === 'copy-names'){
     _pendingHighlightResultNames = [];
   }
 
-  updateExtraOverflowToggles(container);
-
   // ถ้า Reduce Motion เปิดอยู่ ให้แน่ใจว่าการ์ดมองเห็น
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     document.querySelectorAll('.result-card').forEach(el => el.style.opacity = '1');
   }
 
   document.dispatchEvent(new CustomEvent('guidedSearchCompleted'));
-
-  setTimeout(()=> updateExtraOverflowToggles(container), 0);
-  showDonateSticky();
-  showDonateCard();
+  showDonateCard({ countSearch: !options.skipTracking });
+  if(!options.skipTracking) rememberRecentSearch();
+  collapseFilterPanelForResults();
 
   // auto-scroll ไปยัง section ผลลัพธ์บนมือถือเท่านั้น
   if (window.innerWidth < 768){
@@ -1569,12 +1996,7 @@ syncInventoryResultFilterUI();
   if (typeof window.refreshUnwantedChips === 'function') window.refreshUnwantedChips();
   applyFilterState({ jewelTypes: [] });
 
-  if (topKInput){
-    topKInput.value = String(DEFAULT_TOPK);
-  }
-  document.querySelectorAll('.topk-preset').forEach(btn => {
-  btn.classList.remove('active');
-});
+  setTopKValue(DEFAULT_TOPK);
 
   // ล้าง chip search input
   const chipSearchEl = document.getElementById('chipSearch');
@@ -1586,7 +2008,7 @@ syncInventoryResultFilterUI();
 
   restoreEmptyState();
   hideDonateCard();
-  if(resultTitle) resultTitle.textContent = '💎 เซ็ตจี้ที่ดีที่สุด';
+  expandFilterPanel();
   _currentResultSnapshots.clear();
   clearPinnedResults();
 
@@ -1612,6 +2034,11 @@ jewelTypeButtons().forEach(btn => btn.addEventListener('click', ()=>{
   setJewelTypesUI(types.includes(t) ? types.filter(x => x !== t) : types.concat(t));
   invalidateResultsForCriteriaChange();
 }));
+document.getElementById('jewelTypeAll')?.addEventListener('click', ()=>{
+  if(!readJewelTypesUI().length) return;
+  setJewelTypesUI([]);
+  invalidateResultsForCriteriaChange();
+});
 
 /** จำนวนจี้ของแต่ละประเภท (ไม่นับ [ลิงก์]) บนปุ่ม */
 function renderJewelTypeCounts(){
@@ -1619,7 +2046,7 @@ function renderJewelTypeCounts(){
   jewels.forEach(j => { counts[j.type] = (counts[j.type] || 0) + 1; });
   jewelTypeButtons().forEach(b => {
     const el = b.querySelector('.jewel-type__count');
-    if(el) el.textContent = counts[b.dataset.type] ? `(${counts[b.dataset.type]})` : '';
+    if(el) el.textContent = counts[b.dataset.type] ? String(counts[b.dataset.type]) : '';
   });
 }
 
@@ -1716,10 +2143,14 @@ function applySheetTables(t, { requireRows = false } = {}){
 async function refreshSheetDataInBackground(cached){
   let fresh;
   try{ fresh = await fetchAllSheetTables(); }
-  catch(err){ console.warn('[sheet] อัปเดตข้อมูลเบื้องหลังไม่สำเร็จ — ใช้ข้อมูลที่บันทึกไว้', err); return; }
+  catch(err){
+    console.warn('[sheet] อัปเดตข้อมูลเบื้องหลังไม่สำเร็จ — ใช้ข้อมูลที่บันทึกไว้', err);
+    setDataStatus('stale');
+    return;
+  }
   fresh.abilityTable = fresh.abilityTable || cached.abilityTable;
   fresh.triggerTable = fresh.triggerTable || cached.triggerTable;
-  if(!saveSheetTables(fresh)) return;   // same as what is on screen
+  if(!saveSheetTables(fresh)){ setDataStatus('ready'); return; }   // same as what is on screen
   try{
     const substats = applySheetTables(fresh, { requireRows: true });
     window.buildChipPicker(substats);   // keeps the current picks
@@ -1728,11 +2159,12 @@ async function refreshSheetDataInBackground(cached){
     const keepUnw = window._chipUnwanted.filter(requirementExists);
     if(keepUnw.length !== window._chipUnwanted.length) window.setUnwantedState(keepUnw);
     updateCalcAvailability();
-    showToast('อัปเดตข้อมูลจี้ล่าสุดจากชีตแล้ว', 2500);
-  }catch(err){ console.warn('[sheet] ใช้ข้อมูลใหม่ไม่ได้', err); }
+    setDataStatus('ready', 'อัปเดตข้อมูลจี้ล่าสุดจากชีตแล้ว');
+  }catch(err){ console.warn('[sheet] ใช้ข้อมูลใหม่ไม่ได้', err); setDataStatus('stale'); }
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
+  restoreEmptyState();   // shows recent searches / saved filters
   // Refresh: build the page from the saved copy at once, then check the sheet quietly.
   const cached = readCachedSheetTables();
   if(cached.main){
@@ -1742,6 +2174,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       bindShareButtons();
       applyStateFromURL();
       updateCalcAvailability();
+      setDataStatus('checking');
       refreshSheetDataInBackground(cached);
       return;
     }catch(err){
@@ -1763,8 +2196,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
     setTimeout(()=>{
       hideLoading();
-      showToast(substats.length ? 'โหลดข้อมูลอัปเดตล่าสุดเรียบร้อย เริ่มจัดเซ็ตจี้กันเลย!' :
-                                 'โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+      if(substats.length){
+        setDataStatus('ready');
+        document.dispatchEvent(new CustomEvent('sheetLoadSuccessToastShown'));
+      }else{
+        setDataStatus('error', 'ยังไม่พบรายการความสามารถในชีต');
+        showToast('โหลดข้อมูลได้ แต่ยังไม่พบรายการความสามารถในชีต', 2500);
+      }
     }, 180);
 
     bindShareButtons();       // ผูกอีเวนต์ปุ่มแชร์
@@ -1774,6 +2212,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     stopProgressSimulation(false);
     hideLoading();
     console.warn('Fetch error:', err);
+    setDataStatus('error', 'โหลดข้อมูลไม่สำเร็จ');
     showErrorBanner('ไม่สามารถโหลดข้อมูลได้: ' + (err?.message || err) + ' — ตรวจสิทธิ์แชร์ชีตเป็น "Anyone with the link – Viewer" และหัวคอลัมน์ให้ถูกต้อง');
     await makeTomSelects([]);
   }

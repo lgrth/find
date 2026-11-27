@@ -42,7 +42,9 @@ test('refresh renders from the cache while the sheet is still loading, then swap
 
     release();
     await page.waitForFunction((n) => jewels.length === n - 1, firstCount, { timeout: 10000 });
-    assert.match(await page.textContent('#toastMessage'), /อัปเดตข้อมูลจี้ล่าสุด/);
+    // no toast any more: the status dot in the header says so
+    assert.equal(await page.getAttribute('#dataStatus', 'data-state'), 'ready');
+    assert.match(await page.getAttribute('#dataStatus', 'title'), /อัปเดตข้อมูลจี้ล่าสุด/);
     assert.deepEqual(errors, []);
   } finally {
     await context.close();

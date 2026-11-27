@@ -299,7 +299,7 @@ function hideHelpChoice(){
   return [
     {
       id: 'wanted',
-      eyebrow: 'Step 1/7 • จำเป็น',
+      eyebrow: 'Step 1/6 • จำเป็น',
       title: 'เลือกสกิลที่ต้องการอย่างน้อย 4 สกิล',
       desc: 'พิมพ์ค้นหาสกิลในช่องนี้ แล้วกดเลือกสกิลที่ต้องการจากผลลัพธ์ด้านล่าง (เช่น หมวก, ป้องกัน)',
       target: () => document.getElementById('chipSearchBox') || document.getElementById('chipSearch'),
@@ -311,9 +311,9 @@ function hideHelpChoice(){
     },
     {
       id: 'unwanted',
-      eyebrow: 'Step 2/7 • ไม่จำเป็น',
-      title: 'กดแสดงส่วน “สกิลที่ไม่ต้องการ”',
-      desc: 'ลองกดหัวข้อนี้เพื่อเปิด panel ก่อน คุณยังไม่จำเป็นต้องเลือกสกิลก็ได้ แค่ลองเปิดให้เห็นว่าฟีเจอร์นี้อยู่ตรงไหน',
+      eyebrow: 'Step 2/6 • ไม่จำเป็น',
+      title: 'แตะแถว “สกิลที่ไม่ต้องการ”',
+      desc: 'แตะแถวนี้เพื่อเปิดช่องค้นหาสกิลที่ไม่อยากได้ ยังไม่ต้องเลือกสกิลก็ได้ แค่ให้เห็นว่าฟีเจอร์นี้อยู่ตรงไหน',
       target: () => document.getElementById('chipUnwantedHeader'),
       ready: () => isUnwantedStepReady() || actionUnwantedOpenedDuringStep,
       statusWaiting: 'กำลังรอให้คุณกดเปิดหัวข้อนี้',
@@ -323,7 +323,7 @@ function hideHelpChoice(){
     },
     {
       id: 'character',
-      eyebrow: 'Step 3/7 • ไม่จำเป็น',
+      eyebrow: 'Step 3/6 • ไม่จำเป็น',
       title: 'ลองเลือกตัวละครได้จากตรงนี้',
       desc: 'ถ้าเลือกตัวละคร ระบบจะล็อกจี้ [ลิงก์] ให้อัตโนมัติ 1 ช่อง ขั้นตอนนี้ไม่บังคับ จะกดปุ่ม “ข้ามขั้นนี้” ก็ได้',
       target: () => document.querySelector('#charSelect + .ts-wrapper') || document.getElementById('charSelect'),
@@ -334,20 +334,8 @@ function hideHelpChoice(){
       nextLabel: 'ถัดไป'
     },
     {
-      id: 'topk',
-      eyebrow: 'Step 4/7 • จำเป็น',
-      title: 'เลือกจำนวนเซ็ตที่ต้องการ',
-      desc: 'ลองแตะปุ่มจำนวนเซ็ตสัก 1 อัน เช่น 10 หรือ 20 เพื่อให้คุ้นกับตำแหน่งการตั้งค่าจุดนี้',
-      target: () => document.querySelector('.topk-presets'),
-      ready: () => isTopKStepReady(),
-      statusWaiting: 'กำลังรอให้คุณกดเลือกจำนวนเซ็ต',
-      statusReady: `ตั้งจำนวนเซ็ตแล้ว (${getTopKValue() || '-'}) เซ็ต`,
-      optional: false,
-      nextLabel: 'ถัดไป'
-    },
-    {
       id: 'search',
-      eyebrow: 'Step 5/7 • จำเป็น',
+      eyebrow: 'Step 4/6 • จำเป็น',
       title: 'กดค้นหาเซ็ตจี้จริง',
       desc: 'ตอนนี้ลองกดปุ่มนี้ได้เลย ระบบจะเริ่มค้นหาเซ็ตจี้จากสิ่งที่คุณเลือกไว้ และจะไปขั้นถัดไปเมื่อผลลัพธ์ขึ้นแล้ว',
       target: () => getVisibleCalcButton(),
@@ -360,9 +348,9 @@ function hideHelpChoice(){
     },
     {
       id: 'result',
-      eyebrow: 'Step 6/7',
+      eyebrow: 'Step 5/6',
       title: 'ผลลัพธ์จะขึ้นตรงนี้',
-      desc: 'หลังค้นหาเสร็จ ระบบจะแสดงเซ็ตจี้ที่ดีที่สุดในส่วนนี้ ให้ดูอันดับ เซ็ตจี้ และข้อมูลสรุปของแต่ละชุดจากตรงนี้เป็นหลัก',
+      desc: 'เซ็ตที่ต่างกันแค่จี้ชิ้นเดียวจะรวมอยู่ในการ์ดเดียว กด “⇄ อีก N แบบ” เพื่อสลับ แตะชื่อจี้เพื่อดูว่าจี้นั้นให้สกิลอะไร และเปลี่ยนจำนวนเซ็ตได้ที่ “แสดง Top 10” มุมขวา',
       target: () => document.getElementById('resultTitle') || document.getElementById('result'),
       ready: () => true,
       statusWaiting: 'นี่คือพื้นที่แสดงผลลัพธ์หลักของเว็บ',
@@ -372,7 +360,7 @@ function hideHelpChoice(){
     },
     {
       id: 'menu',
-      eyebrow: 'Step 7/7',
+      eyebrow: 'Step 6/6',
       title: 'เมนูรวมเครื่องมือเพิ่มเติม',
       desc: 'กดปุ่มนี้เพื่อเปิดเมนู ซึ่งรวมคลังจี้ของฉัน, เซ็ตที่บันทึกไว้, วิธีใช้งาน และการเปลี่ยนธีม',
       target: () => document.getElementById('menuBtn'),
@@ -784,11 +772,6 @@ const bindCharacterStepInterval = setInterval(() => {
       onUnwantedPanelOpened();
     });
 
-    document.querySelectorAll('.topk-preset').forEach((btn)=>{
-      btn.addEventListener('click', ()=>{
-        onTopKPicked();
-      });
-    });
 
     getVisibleCalcButton()?.addEventListener('click', ()=>{
       onSearchClicked();

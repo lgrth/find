@@ -62,6 +62,7 @@
     b.type = 'button';
     const clash = clashing.has(name);
     b.className = 'chip is-selected chip-entering' + (isGroupRequirement(name) ? ' chip--group' : '') + (clash ? ' is-conflict' : '');
+    b.dataset.req = name;
     b.innerHTML = (clash ? '<span class="chip-warn" aria-hidden="true">⚠</span>' : '')
       + `<span>${escapeHtml(requirementLabel(name))}</span><span class="chip-x" aria-hidden="true">×</span>`;
     b.title = clash ? 'ใส่ในเซ็ตเดียวกับสกิลอื่นที่เลือกไม่ได้ — คลิกเพื่อเอาออก' : 'คลิกเพื่อเอาออก';
@@ -261,8 +262,8 @@
     const groups = abilityGroupList();
     if (openGroup && !groups.some(g => g.group === openGroup)) openGroup = '';
     toggle.setAttribute('aria-expanded', browserOpen ? 'true' : 'false');
-    toggle.querySelector('.chip-group-toggle__count').textContent = `(${groups.length} กลุ่ม)`;
-    toggle.querySelector('.chip-group-toggle__arrow').textContent = browserOpen ? '▲' : '▼';
+    const count = toggle.querySelector('.chip-group-toggle__count');
+    if (count) count.textContent = ` (${groups.length} กลุ่ม)`;
     list.hidden = !browserOpen;
     list.innerHTML = '';
     if (!browserOpen) return;
@@ -349,13 +350,18 @@
     if(!body || !btn) return;
     body.classList.toggle('open', !!isOpen);
     btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    btn.textContent = isOpen ? '▲ ซ่อน' : '▼ แสดง';
+    document.getElementById('chipUnwantedHeader')?.classList.toggle('is-open', !!isOpen);
   }
   function renderUnwantedSelected(){
   const wrap = document.getElementById('chipUnwanted');
   if(!wrap) return;
 
   wrap.innerHTML = '';
+  const countEl = document.getElementById('chipUnwantedCount');
+  if(countEl){
+    countEl.textContent = String(window._chipUnwanted.length);
+    countEl.classList.toggle('has-items', window._chipUnwanted.length > 0);
+  }
 
   if(!window._chipUnwanted.length){
     wrap.classList.add('is-hidden');
@@ -397,19 +403,11 @@
 
   document.addEventListener('DOMContentLoaded', ()=>{
 
-  // === topK preset buttons ===
-  (function(){
-    const topKHidden = document.getElementById('topK');
-    const topKHelp = document.getElementById('topKHelp');
-    function setTopK(val){
-      if(topKHidden){ topKHidden.value = val; topKHidden.classList.remove('is-invalid'); }
-      document.querySelectorAll('.topk-preset').forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
-      if(topKHelp) topKHelp.textContent = 'อยู่ในช่วง 3–50 พร้อมคำนวณ';
-      if (typeof invalidateResultsForCriteriaChange === 'function') invalidateResultsForCriteriaChange();
-    }
-    document.querySelectorAll('.topk-preset').forEach(btn => btn.addEventListener('click', () => setTopK(btn.dataset.val)));
-    if(topKHidden){ topKHidden.addEventListener('change', () => setTopK(topKHidden.value)); }
-  })();
+  // === topK: picker in the results header; with results on screen it searches again ===
+  document.getElementById('topKSelect')?.addEventListener('change', (e)=>{
+    setTopKValue(e.target.value);
+    if(document.querySelector('#result .result-card') && typeof calculate === 'function') calculate();
+  });
 
   document.getElementById('chipGroupToggle')?.addEventListener('click', ()=>{
     browserOpen = !browserOpen;
@@ -477,8 +475,8 @@
       const btn=document.getElementById('chipUnwantedToggle');
       if(!body||!btn) return;
       const open=body.classList.toggle('open');
-      btn.textContent=open?'▲ ซ่อน':'▼ แสดง';
       btn.setAttribute('aria-expanded',String(open));
+      document.getElementById('chipUnwantedHeader')?.classList.toggle('is-open', open);
     });
   });
 })();
