@@ -25,7 +25,7 @@ function findSheetId() {
 
 // file → query (gid=… or sheet=<tab name>)
 const TABS = {
-  'sheet-main.json': '',
+  'sheet-main.json': 'gid=0',
   'sheet-chars.json': 'gid=513976173',
   'sheet-abilities.json': 'sheet=Abilities',
   'sheet-triggers.json': 'sheet=Triggers',
@@ -34,7 +34,7 @@ const TABS = {
 (async () => {
   const id = findSheetId();
   for (const [file, q] of Object.entries(TABS)) {
-    const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json${q ? `&${q}&headers=1` : ''}`;
+    const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&headers=1&${q}`;
     const text = await (await fetch(url)).text();
     const payload = JSON.parse(text.slice(text.indexOf('(') + 1, text.lastIndexOf(')')));
     if (!payload.table) throw new Error(`${file}: no table in response`);

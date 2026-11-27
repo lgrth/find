@@ -1,6 +1,9 @@
 const _dk=(e,k)=>{const h=e.split('').reverse().join('');let r='';for(let i=0;i<h.length;i+=2)r+=String.fromCharCode(parseInt(h.slice(i,i+2),16)^k.charCodeAt((i/2)%k.length));return r;};
 const SHEET_ID = _dk('7110d54204f1927075b0c4e391d643a56455a58020e782a1061137d3315791a0112255a05166e383e61286a5','k9x#mP2w');
-const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+// gid=0: the pendant tab itself, not "whichever tab is first" (tabs can be reordered).
+// headers=1: row 1 is always the header (columns are found by name, so Note columns can sit anywhere).
+const PENDANT_GID = '0';
+const GVIZ_JSONP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${PENDANT_GID}&headers=1`;
 
 const MAX_SELECTS = 25;
 const MIN_SELECTS = 4;
@@ -1281,6 +1284,23 @@ function updateExtraOverflowToggles(root=document){
   });
 }
 
+/** Labels after a skill in the pendant tooltip: 📈 / 📉 / 🔒 from its Note, unreadable Note text as is, max stack. */
+function substatBadges(s){
+  const fmt = (n)=> String(+Number(n).toFixed(2));
+  const out = [];
+  if(s.decay != null) out.push(`📉 −${fmt(s.decay)}% หลัง ${fmt(s.decayAfter)} เทิร์น`);
+  else if(s.grow != null) out.push(`📈 +${fmt(s.grow)}% เมื่อไม่แสดงผล`);
+  if(s.limit != null) out.push(`🔒 จำกัด ${fmt(s.limit)} ครั้ง`);
+  if(s.note && s.grow == null && s.decay == null && s.limit == null) out.push(s.note);
+  else if(s.note){
+    const { unknown } = parseNote(s.note);
+    if(unknown.length) out.push(unknown.join(', '));
+  }
+  const maxStack = abilityOf(s.name)?.maxStack;
+  if(maxStack) out.push(`สูงสุด ${maxStack} ขั้น`);
+  return out;
+}
+
 function renderResults(best, options){
   options = options || {};
   const sourceResults = Array.isArray(best) ? best : [];
@@ -1344,8 +1364,7 @@ updateInventoryResultFiltersVisibility();
     const jewelCols = group.map(j=>{
       const tooltip = j.substats.map(s=>{
         const icon = matchesAnyRequirement(desired, s.name, abilityOf)?'✅':'✨';
-        const maxStack = abilityOf(s.name)?.maxStack;
-        return `${icon} ${s.name}: ${s.value}%${maxStack ? ` · สูงสุด ${maxStack} ขั้น` : ''}`;
+        return `${icon} ${s.name}: ${s.value}%` + substatBadges(s).map(b => ` · ${b}`).join('');
       }).join('\n');
       const isLink = isLinkId(j.id);
       const isOwned = ownership.ownedIds.includes(j.id);

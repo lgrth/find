@@ -30,7 +30,7 @@ test('refresh renders from the cache while the sheet is still loading, then swap
     const fewer = JSON.stringify({ table: { ...mainSheet.table, rows: mainSheet.table.rows.slice(0, -1) } });
     let release;
     const gate = new Promise((r) => { release = r; });
-    await context.route(/^https:\/\/docs\.google\.com\/.*gviz\/tq\?tqx=out:json&rand=/, async (route) => {
+    await context.route(/^https:\/\/docs\.google\.com\/.*gviz\/tq\?.*[?&]gid=0&/, async (route) => {
       await gate;
       const m = (new URL(route.request().url()).searchParams.get('tqx') || '').match(/responseHandler:([\w$]+)/);
       route.fulfill({ contentType: 'application/javascript', body: `${m ? m[1] : 'google.visualization.Query.setResponse'}(${fewer});` });
